@@ -18,13 +18,10 @@ namespace DFKI {
          */
         uint32_t min;
 
-        /** The step at which the range readings stop. Step zero is at the back of
-         * the device and turns counter-clockwise. There is \c resolution steps per
-         * turn 
-         *
-         * There are (max - min + 1) steps in \c ranges
+        /** How much readings there is in \c ranges. The end step is therefore
+         * (min + count - 1)
          */
-        uint32_t max;
+        uint32_t count;
 
         /** How much steps there is per turn
          */
