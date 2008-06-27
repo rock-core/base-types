@@ -1,7 +1,7 @@
 name 'dfki'
 
 toolkit do
-    load "base_types.h"
-    load "laser_readings.h"
+    load "dfki/base_types.h"
+    load "dfki/laser_readings.h"
 end
 

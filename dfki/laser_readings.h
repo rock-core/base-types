@@ -1,7 +1,9 @@
-#ifndef __LASER_READINGS_H__
-#define __LASER_READINGS_H__
+#ifndef DFKI_LASER_READINGS_H__
+#define DFKI_LASER_READINGS_H__
 
 #define DFKI_LASER_MAX_READINGS 768
+
+#include <dfki/base_types.h>
 
 namespace DFKI {
     struct LaserReadings {

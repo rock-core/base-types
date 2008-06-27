@@ -1,0 +1,10 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+includedir=${prefix}/include
+
+Name: dfkiTypes
+Version: 0.1
+Description: dfki Robotik common types
+Libs:
+Cflags: -I${includedir}
+
