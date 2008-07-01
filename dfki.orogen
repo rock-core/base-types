@@ -1,6 +1,8 @@
 name 'dfki'
+version '0.1'
 
 toolkit do
+    internal_dependency 'dfki-types', '0.1'
     load "dfki/base_types.h"
     load "dfki/laser_readings.h"
 end
