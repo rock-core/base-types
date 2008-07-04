@@ -1,7 +1,9 @@
 #ifndef DFKI_LASER_READINGS_H__
 #define DFKI_LASER_READINGS_H__
 
-#define DFKI_LASER_MAX_READINGS 768
+#ifndef __orogen
+#include <vector>
+#endif
 
 #include <dfki/base_types.h>
 
@@ -20,11 +22,6 @@ namespace DFKI {
          */
         uint32_t min;
 
-        /** How much readings there is in \c ranges. The end step is therefore
-         * (min + count - 1)
-         */
-        uint32_t count;
-
         /** How much steps there is per turn
          */
         uint32_t resolution;
@@ -37,7 +34,7 @@ namespace DFKI {
          *
          * There are (max - min + 1) ranges in this array
          */
-        uint32_t ranges[DFKI_LASER_MAX_READINGS];
+        std::vector<uint32_t> ranges;
     };
 }
 
