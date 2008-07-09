@@ -12,7 +12,7 @@ namespace DFKI {
         /** The timestamp of this reading. The timestamp is the time at which the
          * laser passed the zero step (i.e. the step at the back of the device
          */
-        Timestamp stamp;
+        Time stamp;
 
         /** The step at which the range readings start. Step zero is at the back of
          * the device and turns counter-clockwise. There is \c resolution steps per
