@@ -17,8 +17,6 @@ namespace DFKI {
         /** The step at which the range readings start. Step zero is at the back of
          * the device and turns counter-clockwise. There is \c resolution steps per
          * turn 
-         *
-         * There are (max - min + 1) steps
          */
         uint32_t min;
 
@@ -30,9 +28,7 @@ namespace DFKI {
          */
         uint32_t speed;
 
-        /** The ranges themselves
-         *
-         * There are (max - min + 1) ranges in this array
+        /** The ranges themselves: the distance to obstacles in millimeters
          */
         std::vector<uint32_t> ranges;
     };
