@@ -1,6 +1,11 @@
 #ifndef DFKI_BASE_TYPES_H__
 #define DFKI_BASE_TYPES_H__
 
+#ifndef __orogen
+#include <sys/time.h>
+#include <time.h>
+#endif
+
 namespace DFKI {
     struct Time {
         int seconds;
@@ -12,6 +17,12 @@ namespace DFKI {
 
         explicit Time(int seconds, int microseconds = 0)
             : seconds(seconds), microseconds(microseconds) {}
+
+        static Time now() {
+            timeval t;
+            gettimeofday(&t, 0);
+            return Time(t.tv_sec, t.tv_usec);
+        }
 
         bool operator < (Time const& ts) const
         { return seconds < ts.seconds || (seconds == ts.seconds && microseconds < ts.microseconds); }
