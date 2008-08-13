@@ -36,6 +36,36 @@ namespace DFKI {
         { return !(*this < ts); }
         bool operator <= (Time const& ts) const
         { return !(*this > ts); }
+        Time operator - (Time const& ts) const
+        {
+            Time result;
+            result.seconds      = seconds - ts.seconds;
+            result.microseconds = microseconds - ts.microseconds;
+            result.canonize();
+        }
+        Time operator + (Time const& ts) const
+        {
+            Time result;
+            result.seconds      = seconds + ts.seconds;
+            result.microseconds = microseconds + ts.microseconds;
+            result.canonize();
+        }
+
+        bool isNull() const { return seconds == 0 && microseconds == 0; }
+        timeval toTimeval() const
+        {
+            timeval tv = { seconds, microseconds };
+            return tv;
+        }
+
+    private:
+        void canonize()
+        {
+            int const UsecPerSec = 1000000;
+            int offset = microseconds / UsecPerSec;
+            seconds      += offset;
+            microseconds -= offset * UsecPerSec;
+        }
 #endif
     };
 }
