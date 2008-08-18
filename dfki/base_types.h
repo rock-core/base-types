@@ -42,6 +42,7 @@ namespace DFKI {
             result.seconds      = seconds - ts.seconds;
             result.microseconds = microseconds - ts.microseconds;
             result.canonize();
+            return result;
         }
         Time operator + (Time const& ts) const
         {
@@ -49,6 +50,7 @@ namespace DFKI {
             result.seconds      = seconds + ts.seconds;
             result.microseconds = microseconds + ts.microseconds;
             result.canonize();
+            return result;
         }
 
         bool isNull() const { return seconds == 0 && microseconds == 0; }
