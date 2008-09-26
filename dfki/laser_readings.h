@@ -31,6 +31,11 @@ namespace DFKI {
         /** The ranges themselves: the distance to obstacles in millimeters
          */
         std::vector<uint32_t> ranges;
+
+#ifndef __orogen
+        LaserReadings()
+            : min(0), resolution(0), speed(0) {}
+#endif
     };
 }
 
