@@ -60,6 +60,11 @@ namespace DFKI {
             return tv;
         }
 
+        double toSeconds() const
+        {
+            return static_cast<double>(seconds) + static_cast<double>(microseconds) / 1000000.0;
+        }
+
     private:
         void canonize()
         {
