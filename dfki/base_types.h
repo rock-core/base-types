@@ -73,6 +73,19 @@ namespace DFKI {
             return static_cast<double>(seconds) + static_cast<double>(microseconds) / 1000000.0;
         }
 
+        /** Returns this time as an integer number of milliseconds (thus dropping the microseconds) */
+        uint64_t toMilliseconds() const
+        {
+            return static_cast<uint64_t>(seconds) * 1000 + static_cast<uint64_t>(microseconds) / 1000;
+        }
+
+        /** Returns this time as an integer number of microseconds */
+        uint64_t toMicroseconds() const
+        {
+            return static_cast<uint64_t>(seconds) * 1000000 + static_cast<uint64_t>(microseconds);
+        }
+
+
     private:
         /** This method makes sure that the constraint on microseconds is met
          * (i.e. that microseconds is in [0, 1000000].
