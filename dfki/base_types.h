@@ -57,6 +57,21 @@ namespace DFKI {
             return result;
         }
 
+        Time operator / (int divider) const
+        {
+            Time result;
+	    uint64_t timeInMicroSec = this->toMicroseconds();
+	    
+	    timeInMicroSec /= divider;
+
+            int const UsecPerSec = 1000000;
+            int64_t offset = timeInMicroSec / UsecPerSec;
+            result.seconds = offset;
+            timeInMicroSec -= offset * UsecPerSec;
+	    result.microseconds = timeInMicroSec;	  
+            return result;
+        }
+
         /** True if this time is zero */
         bool isNull() const { return seconds == 0 && microseconds == 0; }
 
