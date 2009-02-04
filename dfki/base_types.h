@@ -112,7 +112,7 @@ namespace DFKI {
 	  int64_t micros = seconds * UsecPerSec;
 	  micros += microseconds;
 
-	  second = micros / UsecPerSec;
+	  seconds = micros / UsecPerSec;
 	  microseconds = micros % UsecPerSec;
         }
 #endif
