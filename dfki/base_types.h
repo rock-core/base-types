@@ -117,7 +117,6 @@ namespace DFKI {
 	    seconds--;
 	    microseconds += UsecPerSec;
 	  }
-	  
         }
 #endif
     };
