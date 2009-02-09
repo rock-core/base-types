@@ -109,11 +109,15 @@ namespace DFKI {
         void canonize()
         {
 	  int const UsecPerSec = 1000000;
-	  int64_t micros = seconds * UsecPerSec;
-	  micros += microseconds;
+	  int offset = microseconds / UsecPerSec;
+	  seconds      += offset;
+	  microseconds -= offset * UsecPerSec;
 
-	  second = micros / UsecPerSec;
-	  microseconds = micros % UsecPerSec;
+	  if(microseconds < 0) {
+	    seconds--;
+	    microseconds += UsecPerSec;
+	  }
+	  
         }
 #endif
     };
