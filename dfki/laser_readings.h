@@ -3,12 +3,17 @@
 
 #ifndef __orogen
 #include <vector>
+#include <boost/cstdint.hpp>
 #endif
 
 #include <dfki/base_types.h>
 
 namespace DFKI {
     struct LaserReadings {
+#ifndef __orogen
+        typedef boost::uint32_t uint32_t;
+#endif
+
         /** The timestamp of this reading. The timestamp is the time at which the
          * laser passed the zero step (i.e. the step at the back of the device
          */
