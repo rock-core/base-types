@@ -7,7 +7,7 @@ endif(COMMAND cmake_policy)
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}")
 IF (EXISTS "${CMAKE_SOURCE_DIR}/.orogen")
     SET (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/.orogen/config")
-    INCLUDE(OrocosComponent)
+    INCLUDE(dfkiBase)
 ENDIF (EXISTS "${CMAKE_SOURCE_DIR}/.orogen")
 
 CONFIGURE_FILE(dfki-types.pc.in dfki-types.pc @ONLY)
