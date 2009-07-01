@@ -8,7 +8,10 @@ toolkit do
 
     opaque_type "/Eigen/Quaterniond", "/DFKI/Quaternion",
         :includes => ["Eigen/Core", "Eigen/Geometry"]
+ 
+    opaque_type "/Eigen/Vector3d", "/DFKI/Vector3",
+        :includes => ["Eigen/Core", "Eigen/Geometry"]
     
-    load "dfki/orientation.h"
+    load "dfki/imu_readings.h"
 end
 
