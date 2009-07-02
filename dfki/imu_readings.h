@@ -10,7 +10,8 @@
 #include <dfki/base_types.h>
 
 namespace DFKI {
-
+    
+    /** opaque types for orogon */
     struct Quaternion {
         double x;
         double y;
@@ -24,31 +25,38 @@ namespace DFKI {
         double z;
     };
 
-    struct IMUReading {
-
-        /** Timestamp of the orientation reading */
+    struct OrientationReading {
+         /** Timestamp of the orientation reading */
         Time stamp;
         
         /** The orientation quaternion */
-        Eigen::Quaterniond orientation;
-
-        /** calibrated gyro readings */
-        Eigen::Vector3d gyro;
-
-        /** calibrated accelerometer readings */
-        Eigen::Vector3d accel;
-
-        /** calibrated magnetometer readings */
-        Eigen::Vector3d mag;
-
-#ifndef __orogen
-        IMUReading()
-            : orientation(Eigen::Quaterniond::Identity()), 
-            gyro(Eigen::Vector3d::Identity()), 
-            accel(Eigen::Vector3d::Identity()), 
-            mag(Eigen::Vector3d::Identity()) {}
-#endif
+        Eigen::Quaterniond value;
     };
+
+    struct AccelerometerReading {
+        /** Timestamp of the orientation reading */
+        Time stamp;
+  
+        /** calibrated accelerometer readings */
+        Eigen::Vector3d value;
+    };
+
+    struct AngularRateReading {
+        /** Timestamp of the orientation reading */
+        Time stamp;
+  
+        /** calibrated gyro reading*/
+        Eigen::Vector3d value;
+    };
+
+    struct MagnetometerReading {
+        /** Timestamp of the orientation reading */
+        Time stamp;
+  
+        /** calibrated magnetometer reading*/
+        Eigen::Vector3d value;
+    };
+
 }
 
 #endif
