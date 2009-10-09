@@ -9,22 +9,7 @@
 
 #include <dfki/base_types.h>
 
-namespace DFKI {
-    
-    /** opaque types for orogon */
-    struct Quaternion {
-        double x;
-        double y;
-        double z;
-        double w;
-    };
-
-    struct Vector3 {
-        double x;
-        double y;
-        double z;
-    };
-
+namespace DFKI {    
     struct OrientationReading {
          /** Timestamp of the orientation reading */
         Time stamp;

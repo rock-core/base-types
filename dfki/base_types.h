@@ -5,6 +5,9 @@
 #include <sys/time.h>
 #include <time.h>
 #include <stdint.h>
+
+#include <Eigen/Core>
+#include <Eigen/Geometry> 
 #endif
 
 namespace DFKI {
@@ -120,6 +123,147 @@ namespace DFKI {
         }
 #endif
     };
+
+
+    /**
+     * Wrapper class for Eigen to work around
+     * the alignment problem.
+     */ 
+    struct Matrix3 
+    {
+      double data[9];
+      
+
+    };
+    
+
+
+    /**
+     * Wrapper class for Eigen to work around
+     * the alignment problem.
+     */ 
+    struct Vector3 {
+      double data[3];
+#ifndef __orogen
+      Vector3() {
+	data[0] = 0;
+	data[1] = 0;
+	data[2] = 0;
+      };
+      
+      Vector3(Eigen::Vector3d vec) 
+      {
+	x() = vec.x();
+	y() = vec.y();
+	z() = vec.z();
+      }
+      
+      double &x() 
+      {
+	return data[0];
+      }
+
+      const double &x() const
+      {
+	return data[0];
+      }
+      
+      double &y() 
+      {
+	return data[1];
+      }
+
+      const double &y() const 
+      {
+	return data[1];
+      }
+
+      double &z() 
+      {
+	return data[2];
+      }
+
+      const double &z() const 
+      {
+	return data[2];
+      }
+
+      Eigen::Vector3d getEigenType() const {
+	return Eigen::Vector3d(x(), y(), z());
+      }
+#endif
+    };
+
+    /**
+     * Wrapper class for Eigen to work around
+     * the alignment problem.
+     */ 
+    struct Quaternion {
+      double data[4];
+#ifndef __orogen
+      Quaternion() {
+	data[0] = 0;
+	data[1] = 1;
+	data[2] = 2;
+	data[3] = 3;
+      };
+      
+      Quaternion(Eigen::Quaterniond &q) 
+      {
+	x() = q.x();
+	y() = q.y();
+	z() = q.z();
+	w() = q.w();
+      }
+      
+      double &x() 
+      {
+	return data[0];
+      }
+      
+      const double &x() const 
+      {
+	return data[0];
+      }
+      
+      double &y() 
+      {
+	return data[1];
+      }
+
+      const double &y() const 
+      {
+	return data[1];
+      }
+
+      double &z() 
+      {
+	return data[2];
+      }
+
+      const double &z() const 
+      {
+	return data[2];
+      }
+
+      double &w() 
+      {
+	return data[3];
+      }
+
+      const double &w() const 
+      {
+	return data[3];
+      }
+      
+      Eigen::Quaterniond getEigenType() const
+      {
+	return Eigen::Quaterniond(w(), x(), y(), z());
+      }
+#endif
+    };
+
+
 }
 
 #endif
