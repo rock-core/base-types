@@ -101,6 +101,11 @@ namespace DFKI {
             return static_cast<uint64_t>(seconds) * 1000000 + static_cast<uint64_t>(microseconds);
         }
 
+        static DFKI::Time fromMicroseconds(uint64_t value)
+        {
+            return DFKI::Time(value / 1000000ULL, value % 1000000ULL);
+        }
+
 
     private:
         /** This method makes sure that the constraint on microseconds is met
