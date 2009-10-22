@@ -1,0 +1,3 @@
+<package>
+    <rosdep name="eigen2" />
+</package>
