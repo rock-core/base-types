@@ -263,7 +263,11 @@ namespace DFKI {
 #endif
     };
 
-
+    struct Pose3D 
+    {
+      struct Vector3 position;
+      struct Quaternion orientation;
+    };
 }
 
 #endif
