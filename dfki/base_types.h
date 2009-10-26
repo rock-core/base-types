@@ -163,6 +163,12 @@ namespace DFKI {
 	z() = vec.z();
       }
       
+      Vector3 &operator=(const Eigen::Vector3d &vec) {
+	x() = vec.x();
+	y() = vec.y();
+	z() = vec.z();
+      }
+
       double &x() 
       {
 	return data[0];
@@ -205,6 +211,7 @@ namespace DFKI {
      */ 
     struct Quaternion {
       double data[4];
+
 #ifndef __orogen
       Quaternion() {
 	data[0] = 0;
@@ -215,6 +222,13 @@ namespace DFKI {
       
       Quaternion(Eigen::Quaterniond &q) 
       {
+	x() = q.x();
+	y() = q.y();
+	z() = q.z();
+	w() = q.w();
+      }
+
+      Quaternion &operator=(const Eigen::Quaterniond &q) {
 	x() = q.x();
 	y() = q.y();
 	z() = q.z();

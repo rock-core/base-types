@@ -1,11 +1,6 @@
 #ifndef ORIENTATION_H__
 #define ORIENTATION_H__ 
 
-#ifndef __orogen
-#include <vector>
-#include <Eigen/Core>
-#include <Eigen/Geometry>
-#endif
 
 #include <dfki/base_types.h>
 
@@ -15,7 +10,7 @@ namespace DFKI {
         Time stamp;
         
         /** The orientation quaternion */
-        Eigen::Quaterniond value;
+        DFKI::Quaternion value;
     };
 
     struct AccelerometerReading {
@@ -23,7 +18,7 @@ namespace DFKI {
         Time stamp;
   
         /** calibrated accelerometer readings */
-        Eigen::Vector3d value;
+        DFKI::Vector3 value;
     };
 
     struct AngularRateReading {
@@ -31,7 +26,7 @@ namespace DFKI {
         Time stamp;
   
         /** calibrated gyro reading*/
-        Eigen::Vector3d value;
+        DFKI::Vector3 value;
     };
 
     struct MagnetometerReading {
@@ -39,7 +34,7 @@ namespace DFKI {
         Time stamp;
   
         /** calibrated magnetometer reading*/
-        Eigen::Vector3d value;
+        DFKI::Vector3 value;
     };
 
 }

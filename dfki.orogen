@@ -5,13 +5,6 @@ toolkit do
     internal_dependency 'dfki-types', '0.1'
     load "dfki/base_types.h"
     load "dfki/laser_readings.h"
-
-    opaque_type "/Eigen/Quaterniond", "/DFKI/Quaternion",
-        :includes => ["Eigen/Core", "Eigen/Geometry"]
- 
-    opaque_type "/Eigen/Vector3d", "/DFKI/Vector3",
-        :includes => ["Eigen/Core", "Eigen/Geometry"]
-    
     load "dfki/imu_readings.h"
 end
 
