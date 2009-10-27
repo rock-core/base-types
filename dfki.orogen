@@ -7,5 +7,6 @@ toolkit do
     load "dfki/linear_algebra.h"
     load "dfki/laser_readings.h"
     load "dfki/imu_readings.h"
+    load "dfki/base_types.h"
 end
 
