@@ -1,8 +1,8 @@
 #ifndef ORIENTATION_H__
 #define ORIENTATION_H__ 
 
-
-#include <dfki/base_types.h>
+#include <dfki/time.h>
+#include <dfki/linear_algebra.h>
 
 namespace DFKI {    
     struct OrientationReading {
