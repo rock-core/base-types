@@ -1,5 +1,5 @@
-#ifndef DFKI_TIME_H__
-#define DFKI_TIME_H__
+#ifndef BASE_TYPES_TIME_H__
+#define BASE_TYPES_TIME_H__
 
 #ifndef __orogen
 #include <sys/time.h>
@@ -7,7 +7,7 @@
 #include <stdint.h>
 #endif
 
-namespace DFKI {
+namespace base {
     struct Time {
         /** The number of seconds */
         int seconds;
@@ -101,9 +101,9 @@ namespace DFKI {
             return static_cast<uint64_t>(seconds) * 1000000 + static_cast<uint64_t>(microseconds);
         }
 
-        static DFKI::Time fromMicroseconds(uint64_t value)
+        static base::Time fromMicroseconds(uint64_t value)
         {
-            return DFKI::Time(value / 1000000ULL, value % 1000000ULL);
+            return base::Time(value / 1000000ULL, value % 1000000ULL);
         }
 
 

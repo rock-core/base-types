@@ -1,14 +1,14 @@
-#ifndef DFKI_LASER_READINGS_H__
-#define DFKI_LASER_READINGS_H__
+#ifndef BASE_TYPES_LASER_READINGS_H__
+#define BASE_TYPES_LASER_READINGS_H__
 
 #ifndef __orogen
 #include <vector>
 #include <boost/cstdint.hpp>
 #endif
 
-#include <dfki/base_types.h>
+#include <base/base_types.h>
 
-namespace DFKI {
+namespace base {
     struct LaserReadings {
 #ifndef __orogen
         typedef boost::uint32_t uint32_t;

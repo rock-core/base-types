@@ -1,16 +1,16 @@
 #ifndef ORIENTATION_H__
 #define ORIENTATION_H__ 
 
-#include <dfki/time.h>
-#include <dfki/linear_algebra.h>
+#include <base/time.h>
+#include <base/linear_algebra.h>
 
-namespace DFKI {    
+namespace base {    
     struct OrientationReading {
          /** Timestamp of the orientation reading */
         Time stamp;
         
         /** The orientation quaternion */
-        DFKI::Quaternion value;
+        base::Quaternion value;
     };
 
     struct AccelerometerReading {
@@ -18,7 +18,7 @@ namespace DFKI {
         Time stamp;
   
         /** calibrated accelerometer readings */
-        DFKI::Vector3 value;
+        base::Vector3 value;
     };
 
     struct AngularRateReading {
@@ -26,7 +26,7 @@ namespace DFKI {
         Time stamp;
   
         /** calibrated gyro reading*/
-        DFKI::Vector3 value;
+        base::Vector3 value;
     };
 
     struct MagnetometerReading {
@@ -34,7 +34,7 @@ namespace DFKI {
         Time stamp;
   
         /** calibrated magnetometer reading*/
-        DFKI::Vector3 value;
+        base::Vector3 value;
     };
 
 }

@@ -1,0 +1,12 @@
+name 'base'
+version '0.1'
+
+toolkit do
+    internal_dependency 'base-types', '0.1'
+    load "base/time.h"
+    load "base/linear_algebra.h"
+    load "base/laser_readings.h"
+    load "base/imu_readings.h"
+    load "base/base_types.h"
+end
+

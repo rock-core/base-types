@@ -1,0 +1,10 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+includedir=${prefix}/include
+
+Name: baseTypes
+Version: 0.1
+Description: Common types for robotics modules
+Libs:
+Cflags: -I${includedir} -I@EIGEN2_INCLUDE_DIR@
+

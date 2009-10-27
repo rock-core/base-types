@@ -1,12 +1,12 @@
-#ifndef DFKI_LINEAR_ALGEBRA_H__
-#define DFKI_LINEAR_ALGEBRA_H__
+#ifndef BASE_TYPES_LINEAR_ALGEBRA_H__
+#define BASE_TYPES_LINEAR_ALGEBRA_H__
 
 #ifndef __orogen
 #include <Eigen/Core>
 #include <Eigen/Geometry> 
 #endif
 
-namespace DFKI {
+namespace base {
     /**
      * Wrapper class for Eigen to work around
      * the alignment problem.
