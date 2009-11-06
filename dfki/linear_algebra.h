@@ -42,6 +42,7 @@ namespace DFKI {
 	x() = vec.x();
 	y() = vec.y();
 	z() = vec.z();
+        return *this;
       }
 
       double &x() 
@@ -108,6 +109,7 @@ namespace DFKI {
 	y() = q.y();
 	z() = q.z();
 	w() = q.w();
+        return *this;
       }
       
       double &x() 
