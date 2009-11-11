@@ -1,5 +1,5 @@
-#ifndef ORIENTATION_H__
-#define ORIENTATION_H__ 
+#ifndef IMU_READINGS_H__
+#define IMU_READINGS_H__ 
 
 #include <dfki/time.h>
 #include <dfki/linear_algebra.h>
