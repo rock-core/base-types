@@ -6,5 +6,5 @@ Name: dfkiTypes
 Version: 0.1
 Description: dfki Robotik common types
 Libs:
-Cflags: -I${includedir} -I@EIGEN2_INCLUDE_DIR@ -DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT
+Cflags: -I${includedir} -I@EIGEN2_INCLUDE_DIR@
 
