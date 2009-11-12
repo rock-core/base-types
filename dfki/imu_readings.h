@@ -5,38 +5,22 @@
 #include <dfki/linear_algebra.h>
 
 namespace DFKI {    
-    struct OrientationReading {
+    struct IMUReading {
          /** Timestamp of the orientation reading */
         Time stamp;
         
         /** The orientation quaternion */
-        DFKI::Quaternion value;
-    };
+        DFKI::Quaternion orientation;
 
-    struct AccelerometerReading {
-        /** Timestamp of the orientation reading */
-        Time stamp;
-  
         /** calibrated accelerometer readings */
-        DFKI::Vector3 value;
-    };
+        DFKI::Vector3 acc;
 
-    struct AngularRateReading {
-        /** Timestamp of the orientation reading */
-        Time stamp;
-  
         /** calibrated gyro reading*/
-        DFKI::Vector3 value;
-    };
+        DFKI::Vector3 gyro;
 
-    struct MagnetometerReading {
-        /** Timestamp of the orientation reading */
-        Time stamp;
-  
         /** calibrated magnetometer reading*/
-        DFKI::Vector3 value;
+        DFKI::Vector3 mag;
     };
-
 }
 
 #endif
