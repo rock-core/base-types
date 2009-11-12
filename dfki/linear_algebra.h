@@ -31,7 +31,7 @@ namespace DFKI {
 	data[2] = 0;
       };
       
-      Vector3(Eigen::Vector3d vec) 
+      Vector3(const Eigen::Vector3d& vec) 
       {
 	x() = vec.x();
 	y() = vec.y();
@@ -98,7 +98,7 @@ namespace DFKI {
 	re = 1.0;
       };
       
-      Quaternion(Eigen::Quaterniond &q) 
+      Quaternion(const Eigen::Quaterniond &q) 
       {
 	x() = q.x();
 	y() = q.y();
