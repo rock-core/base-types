@@ -5,6 +5,7 @@
 #include <sys/time.h>
 #include <time.h>
 #include <stdint.h>
+#include <math.h>
 #endif
 
 namespace DFKI {
@@ -15,11 +16,17 @@ namespace DFKI {
         int microseconds;
 
 #ifndef __orogen
+	static const int UsecPerSec = 1000000;
+
         Time()
             : seconds(0), microseconds(0) {}
 
         explicit Time(int seconds, int microseconds = 0)
-            : seconds(seconds), microseconds(microseconds) {}
+            : seconds(seconds), microseconds(microseconds) 
+	{
+	    if( seconds < 0 || microseconds < 0 || microseconds >= UsecPerSec )
+		canonize();
+	}
 
         /** Returns the current time */
         static Time now() {
@@ -65,7 +72,6 @@ namespace DFKI {
 	    
 	    timeInMicroSec /= divider;
 
-            int const UsecPerSec = 1000000;
             int64_t offset = timeInMicroSec / UsecPerSec;
             result.seconds = offset;
             timeInMicroSec -= offset * UsecPerSec;
@@ -103,9 +109,19 @@ namespace DFKI {
 
         static DFKI::Time fromMicroseconds(uint64_t value)
         {
-            return DFKI::Time(value / 1000000ULL, value % 1000000ULL);
+            return DFKI::Time(value / UsecPerSec, value % UsecPerSec);
         }
 
+        static DFKI::Time fromSeconds(double value)
+        {
+	    double fi;
+	    double ff = modf( value, &fi );
+
+	    int i = fi>=0 ? static_cast<int>(fi+.5) : static_cast<int>(fi-.5);
+	    int f = static_cast<int>(ff*UsecPerSec);
+	    
+            return DFKI::Time( i, f );
+        }
 
     private:
         /** This method makes sure that the constraint on microseconds is met
@@ -113,7 +129,6 @@ namespace DFKI {
          */
         void canonize()
         {
-	  int const UsecPerSec = 1000000;
 	  int offset = microseconds / UsecPerSec;
 	  seconds      += offset;
 	  microseconds -= offset * UsecPerSec;
