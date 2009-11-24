@@ -1,42 +1,26 @@
-#ifndef ORIENTATION_H__
-#define ORIENTATION_H__ 
+#ifndef IMU_READINGS_H__
+#define IMU_READINGS_H__ 
 
 #include <base/time.h>
 #include <base/linear_algebra.h>
 
 namespace base {    
-    struct OrientationReading {
+    struct IMUReading {
          /** Timestamp of the orientation reading */
         Time stamp;
         
         /** The orientation quaternion */
-        base::Quaternion value;
-    };
+        base::Quaternion orientation;
 
-    struct AccelerometerReading {
-        /** Timestamp of the orientation reading */
-        Time stamp;
-  
         /** calibrated accelerometer readings */
-        base::Vector3 value;
-    };
+        base::Vector3 acc;
 
-    struct AngularRateReading {
-        /** Timestamp of the orientation reading */
-        Time stamp;
-  
         /** calibrated gyro reading*/
-        base::Vector3 value;
-    };
+        base::Vector3 gyro;
 
-    struct MagnetometerReading {
-        /** Timestamp of the orientation reading */
-        Time stamp;
-  
         /** calibrated magnetometer reading*/
-        base::Vector3 value;
+        base::Vector3 mag;
     };
-
 }
 
 #endif

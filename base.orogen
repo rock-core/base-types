@@ -8,5 +8,6 @@ toolkit do
     load "base/laser_readings.h"
     load "base/imu_readings.h"
     load "base/base_types.h"
+    load "base/position.h"
 end
 

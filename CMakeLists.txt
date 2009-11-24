@@ -6,9 +6,14 @@ endif(COMMAND cmake_policy)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 
+find_package(Boost REQUIRED)
+include_directories(${BOOST_INCLUDE_DIR})
+
 find_package(Eigen2 REQUIRED)
 include_directories(${EIGEN2_INCLUDE_DIR})
-add_definitions(-DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT)
+
+add_executable(test test.cpp)
+target_link_libraries(test)
 
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}")
 IF (EXISTS "${CMAKE_SOURCE_DIR}/.orogen")

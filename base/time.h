@@ -5,6 +5,7 @@
 #include <sys/time.h>
 #include <time.h>
 #include <stdint.h>
+#include <math.h>
 #endif
 
 namespace base {
@@ -15,11 +16,17 @@ namespace base {
         int microseconds;
 
 #ifndef __orogen
+	static const int UsecPerSec = 1000000;
+
         Time()
             : seconds(0), microseconds(0) {}
 
         explicit Time(int seconds, int microseconds = 0)
-            : seconds(seconds), microseconds(microseconds) {}
+            : seconds(seconds), microseconds(microseconds) 
+	{
+	    if( seconds < 0 || microseconds < 0 || microseconds >= UsecPerSec )
+		canonize();
+	}
 
         /** Returns the current time */
         static Time now() {
@@ -65,7 +72,6 @@ namespace base {
 	    
 	    timeInMicroSec /= divider;
 
-            int const UsecPerSec = 1000000;
             int64_t offset = timeInMicroSec / UsecPerSec;
             result.seconds = offset;
             timeInMicroSec -= offset * UsecPerSec;
@@ -101,11 +107,21 @@ namespace base {
             return static_cast<uint64_t>(seconds) * 1000000 + static_cast<uint64_t>(microseconds);
         }
 
-        static base::Time fromMicroseconds(uint64_t value)
+        static Time fromMicroseconds(uint64_t value)
         {
-            return base::Time(value / 1000000ULL, value % 1000000ULL);
+            return base::Time(value / UsecPerSec, value % UsecPerSec);
         }
 
+        static Time fromSeconds(double value)
+        {
+	    double fi;
+	    double ff = modf( value, &fi );
+
+	    int i = fi>=0 ? static_cast<int>(fi+.5) : static_cast<int>(fi-.5);
+	    int f = static_cast<int>(ff*UsecPerSec);
+	    
+            return Time( i, f );
+        }
 
     private:
         /** This method makes sure that the constraint on microseconds is met
@@ -113,7 +129,6 @@ namespace base {
          */
         void canonize()
         {
-	  int const UsecPerSec = 1000000;
 	  int offset = microseconds / UsecPerSec;
 	  seconds      += offset;
 	  microseconds -= offset * UsecPerSec;

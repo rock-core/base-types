@@ -42,6 +42,7 @@ namespace base {
 	x() = vec.x();
 	y() = vec.y();
 	z() = vec.z();
+        return *this;
       }
 
       double &x() 
@@ -85,14 +86,16 @@ namespace base {
      * the alignment problem.
      */ 
     struct Quaternion {
-      double data[4];
+      // store as imaginary and real part, so it comes out clear in the pocosim logs
+      double im[3];
+      double re;
 
 #ifndef __orogen
       Quaternion() {
-	data[0] = 0;
-	data[1] = 1;
-	data[2] = 2;
-	data[3] = 3;
+	im[0] = 0;
+	im[1] = 0;
+	im[2] = 0;
+	re = 1.0;
       };
       
       Quaternion(Eigen::Quaterniond &q) 
@@ -108,46 +111,47 @@ namespace base {
 	y() = q.y();
 	z() = q.z();
 	w() = q.w();
+        return *this;
       }
       
       double &x() 
       {
-	return data[0];
+	return im[0];
       }
       
       const double &x() const 
       {
-	return data[0];
+	return im[0];
       }
       
       double &y() 
       {
-	return data[1];
+	return im[1];
       }
 
       const double &y() const 
       {
-	return data[1];
+	return im[1];
       }
 
       double &z() 
       {
-	return data[2];
+	return im[2];
       }
 
       const double &z() const 
       {
-	return data[2];
+	return im[2];
       }
 
       double &w() 
       {
-	return data[3];
+	return re; 
       }
 
       const double &w() const 
       {
-	return data[3];
+	return re;
       }
       
       Eigen::Quaterniond getEigenType() const
