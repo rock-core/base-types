@@ -37,6 +37,12 @@ namespace DFKI {
          */
         std::vector<uint32_t> ranges;
 
+        /** The remission value from the laserscan.
+	 * This value is not normalised and depends on various factors, like distance, 
+	 * angle of incidence and reflectivity of object.
+         */
+        std::vector<float> remission;
+
 #ifndef __orogen
         LaserReadings()
             : min(0), resolution(0), speed(0) {}
