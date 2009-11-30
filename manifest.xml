@@ -11,7 +11,7 @@
         DFKI/robotik@dfki.de
         Sylvain Joyeux/sylvain.joyeux@m4x.org
     </copyright>
-    <license>GPL v2 or later</license>
+    <license>LGPL v2 or later</license>
 
     <rosdep name="eigen2" />
 </package>
