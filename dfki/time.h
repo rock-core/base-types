@@ -6,6 +6,8 @@
 #include <time.h>
 #include <stdint.h>
 #include <math.h>
+#include <ostream>
+#include <iomanip>
 #endif
 
 namespace DFKI {
@@ -141,5 +143,13 @@ namespace DFKI {
 #endif
     };
 }
+
+#ifndef __orogen
+inline std::ostream &operator<<(std::ostream &stream, DFKI::Time ob)
+{
+  stream << ob.seconds << '.' << std::setw(6) << std::setfill('0') << ob.microseconds;
+  return stream;
+}
+#endif
 
 #endif

@@ -22,4 +22,6 @@ BOOST_AUTO_TEST_CASE( time_test )
     BOOST_CHECK_EQUAL( t1.seconds, -3 );
     BOOST_CHECK_EQUAL( t1.microseconds, 500000 );
 
+    cout << t1 << endl;
+    cout << DFKI::Time(1,10) << endl;
 }
