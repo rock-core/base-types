@@ -24,6 +24,23 @@ namespace DFKI {
 	/** Angular Velocity in rad/s,
 	 * in body fixed frame (Right-Front-Up) */
 	DFKI::Vector3 angular_velocity;
+
+	/** Covariance matrix of the position
+	 */
+	DFKI::Matrix3 cov_position;
+
+	/** Covariance matrix of the orientation as an 
+	 * axis/angle manifold in body coordinates
+	 */
+	DFKI::Matrix3 cov_orientation;
+
+	/** Covariance of the velocity 
+	 */
+	DFKI::Matrix3 cov_velocity;
+
+	/** Covariance of the angular velocity
+	 */
+	DFKI::Matrix3 cov_angular_velocity;
     };
 }
 
