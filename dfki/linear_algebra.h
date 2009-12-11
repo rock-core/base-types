@@ -14,8 +14,38 @@ namespace DFKI {
     struct Matrix3 
     {
       double data[9];
-      
+#ifndef __orogen
+      Matrix3()
+      {
+	  for(int i=0;i<9;data[i++]=0);
+      }
 
+      Matrix3(const Eigen::Matrix3d& mat)
+      {
+	  for(int i=0;i<9;i++)
+	      data[i] = mat(i/3,i%3);
+      }
+
+      Matrix3 &operator=(const Eigen::Matrix3d &mat)
+      {
+	  for(int i=0;i<9;i++)
+	      data[i] = mat(i/3,i%3);
+	  return *this;
+      }
+
+      Eigen::Matrix3d getEigenType() const 
+      {
+	  Eigen::Matrix3d m;
+	  for(int i=0;i<9;i++)
+	      m(i/3,i%3) = data[i];
+	  return m;
+      }
+
+      double& operator() (int m,int n) 
+      {
+	  return data[m*3+n];
+      }
+#endif
     };
 
     /**

@@ -2,6 +2,8 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include "dfki/time.h"
+#include "dfki/linear_algebra.h"
+#include <Eigen/Core> 
 
 using namespace std;
 
@@ -24,4 +26,19 @@ BOOST_AUTO_TEST_CASE( time_test )
 
     cout << t1 << endl;
     cout << DFKI::Time(1,10) << endl;
+}
+
+BOOST_AUTO_TEST_CASE( linear_algebra )
+{
+    Eigen::Matrix3d em1 = Eigen::Matrix3d::Identity();
+    em1(2,1) = 2;
+    DFKI::Matrix3 m1 = em1;
+
+    BOOST_CHECK_EQUAL( 0, m1(0,1) );
+    BOOST_CHECK_EQUAL( 1, m1(1,1) );
+    BOOST_CHECK_EQUAL( 2, m1(2,1) );
+    
+    Eigen::Matrix3d em2 = m1.getEigenType();
+
+    cout << em2 << endl;
 }
