@@ -24,3 +24,7 @@ INSTALL(FILES ${CMAKE_BINARY_DIR}/base-types.pc DESTINATION lib/pkgconfig)
 # FIND_PACKAGE(KDL)
 # FIND_PACKAGE(OCL)
 
+CONFIGURE_FILE(Doxyfile.in Doxyfile @ONLY)
+ADD_CUSTOM_TARGET(doc doxygen Doxyfile)
+
+
