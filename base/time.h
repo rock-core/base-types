@@ -1,5 +1,5 @@
-#ifndef BASE_TYPES_TIME_H__
-#define BASE_TYPES_TIME_H__
+#ifndef BASE_TIME_H__
+#define BASE_TIME_H__
 
 #ifndef __orogen
 #include <sys/time.h>
@@ -10,8 +10,10 @@
 #include <iomanip>
 #endif
 
-namespace base {
-    struct Time {
+namespace base
+{
+    struct Time
+    {
         /** The number of seconds */
         int seconds;
         /** The number of microseconds. This is always in [0, 1000000]. */
