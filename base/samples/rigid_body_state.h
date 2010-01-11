@@ -6,11 +6,13 @@
 #endif
 
 #include <base/pose.h>
+#include <base/time.h>
 
 namespace base { namespace samples {
     struct RigidBodyState
     {
-        Time time;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+        base::Time time;
 
 	/** Position in m, 
 	 * world fixed frame of reference (East-North-Up) */
