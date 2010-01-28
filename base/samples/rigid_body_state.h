@@ -41,6 +41,23 @@ namespace base { namespace samples {
 	/** Covariance of the angular velocity
 	 */
         Eigen::Matrix3d cov_angular_velocity;
+	
+	void initSane() {
+	    cov_orientation = Eigen::Matrix3d::Identity();
+	    cov_orientation *= INFINITY;
+
+	    cov_position = Eigen::Matrix3d::Identity();
+	    cov_position *= INFINITY;
+
+	    cov_angular_velocity = Eigen::Matrix3d::Identity();
+	    cov_angular_velocity *= INFINITY;
+
+	    cov_velocity = Eigen::Matrix3d::Identity();
+	    cov_velocity *= INFINITY;
+	    
+	    position = Eigen::Vector3d(0,0,0);	    
+	    orientation = Eigen::Quaterniond::Identity();
+	}
     };
 }}
 
