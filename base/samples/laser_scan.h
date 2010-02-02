@@ -19,19 +19,19 @@ namespace base { namespace samples {
          */
         Time time;
 
-        /** The step at which the range readings start. Step zero is at the back of
-         * the device and turns counter-clockwise. There is \c resolution steps per
-         * turn 
+        /** The angle at which the range readings start. Zero is at the back of
+         * the device and turns counter-clockwise. 
+	 * This value is in radians
          */
-        uint32_t min;
+        double start_angle;
 
-        /** How much steps there is per turn
+        /** Angle difference between two scan point in radians;
          */
-        uint32_t resolution;
+        double angular_resolution;
 
-        /** The rotation speed in microseconds per step
+        /** The rotation speed of the laserbeam in radians/seconds
          */
-        uint32_t speed;
+        double speed;
 
         /** The ranges themselves: the distance to obstacles in millimeters
          */
@@ -45,7 +45,7 @@ namespace base { namespace samples {
 
 #ifndef __orogen
         LaserScan()
-            : min(0), resolution(0), speed(0) {}
+            : start_angle(0), angular_resolution(0), speed(0) {}
 #endif
     };
 }} // namespaces
