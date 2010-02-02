@@ -58,6 +58,15 @@ namespace base { namespace samples {
 	    position = Eigen::Vector3d(0,0,0);	    
 	    orientation = Eigen::Quaterniond::Identity();
 	}
+	
+	bool hasValidPosition() {
+	    return !isinf(cov_position(0,0)) && !isinf(cov_position(1,1)) && !isinf(cov_position(2,2));
+	}
+	
+	bool hasValidOrientation() {
+	    return !isinf(cov_orientation(0,0)) && !isinf(cov_orientation(1,1)) && !isinf(cov_orientation(2,2));
+	}
+	
     };
 }}
 
