@@ -19,7 +19,7 @@ namespace base { namespace samples {
          */
         Time time;
 
-        /** The angle at which the range readings start. Zero is at the back of
+        /** The angle at which the range readings start. Zero is at the front of
          * the device and turns counter-clockwise. 
 	 * This value is in radians
          */
