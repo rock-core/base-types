@@ -169,6 +169,7 @@ void NURBSCurve3D::update()
 void NURBSCurve3D::printCurveProperties()
 {
     std::cout << "CURVE PROPERTIES " << std::endl
+	<< "  Point count  : " << curve->in    << std::endl
 	<< "  Order        : " << curve->ik    << std::endl
 	<< "  Dimension    : " << curve->idim  << std::endl
 	<< "  Kind         : " << curve->ikind << std::endl
