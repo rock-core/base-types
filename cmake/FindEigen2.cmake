@@ -9,24 +9,19 @@
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
 if (EIGEN2_INCLUDE_DIR)
-
-  # in cache already
-  set(EIGEN2_FOUND TRUE)
-
+    # in cache already
+    set(EIGEN2_FOUND TRUE)
 else (EIGEN2_INCLUDE_DIR)
+    find_path(EIGEN2_INCLUDE_DIR NAMES Eigen/Core
+        PATH_SUFFIXES eigen2
+        HINTS
+        ${INCLUDE_INSTALL_DIR}
+        ${KDE4_INCLUDE_DIR}
+        )
 
-find_path(EIGEN2_INCLUDE_DIR NAMES Eigen/Core
-     PATH_SUFFIXES eigen2
-     HINTS
-     ${INCLUDE_INSTALL_DIR}
-     ${KDE4_INCLUDE_DIR}
-   )
+    include(FindPackageHandleStandardArgs)
+    find_package_handle_standard_args(Eigen2 DEFAULT_MSG EIGEN2_INCLUDE_DIR)
 
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(Eigen2 DEFAULT_MSG EIGEN2_INCLUDE_DIR )
-
-
-mark_as_advanced(EIGEN2_INCLUDE_DIR)
-
+    mark_as_advanced(EIGEN2_INCLUDE_DIR)
 endif(EIGEN2_INCLUDE_DIR)
 
