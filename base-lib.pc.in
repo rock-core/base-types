@@ -5,7 +5,6 @@ includedir=${prefix}/include
 Name: baseLib
 Version: 0.1
 Description: Common types for robotics modules, part that require a library
-Libs:
 Cflags: -I${includedir} -I@EIGEN2_INCLUDE_DIR@
-Ldflags: @CMAKE_INSTALL_PREFIX@/lib/libbase.so
+Libs: -L@CMAKE_INSTALL_PREFIX@/lib -lbase
 
