@@ -309,3 +309,36 @@ vector<double> NURBSCurve3D::simplify(double tolerance)
     return vector<double>(maxerr, maxerr + 3);
 }
 
+double NURBSCurve3D::headingError(double _actZRot, double _param)
+{
+    // Orientation error
+    return  getHeading(_param) - _actZRot;
+}
+
+double NURBSCurve3D::distanceError(Vector3d _pt, double _param)
+{
+    // Error vector
+    Vector3d error = _pt-getPoint(_param);
+    error(2) = 0.0;  // Z axis error not needed
+
+    // Finds the angle of error vector to the Frenet X axis 
+    Vector2d pt_vec(error(0),error(1));
+    pt_vec.normalize(); 
+    double  angle = atan2(pt_vec.y(),pt_vec.x()) - getHeading(_param);
+
+    // Sign of the distance error depending on position of the 
+    // actual robot in Frenet frame
+    return (angle >= 0.0)?(error.norm()):(-error.norm());
+}
+
+Vector3d NURBSCurve3D::poseError(Vector3d _pt, double _actZRot, double _st_para, double _len_tol)
+{
+    // Finds the search length
+    double del_para = getDeltaParameter(_len_tol);
+
+    // Finds teh closest poiont in the search length
+    double param = localClosestPointSearch(_pt, _st_para, _st_para, _st_para + del_para);    
+
+    // Returns the error [orientation error, distance error, parameter] 
+    return Vector3d(headingError(_actZRot, param), distanceError(_pt, param), param);
+}

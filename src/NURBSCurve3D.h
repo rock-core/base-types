@@ -34,6 +34,7 @@ namespace geometry {
 	    double getCurveLength() const { return curve_length; }; 
 	    double getStartParam() const { return start_param; };
 	    double getEndParam()   const { return end_param; };
+	    double getDeltaParameter(double _len) { return  (end_param - start_param) / curve_length;  };
 
             /** Returns the length-to-parametric scale
              *
@@ -114,6 +115,10 @@ namespace geometry {
 
 	    void printCurveProperties();
 
+	    /** Calculates the heading error */
+	    double headingError(double _actZRot, double _param);
+	    /** Calculates the distance error */
+	    double distanceError(Eigen::Vector3d _pt, double _param);
 	    /** Calculates the pose error */
 	    Eigen::Vector3d poseError(Eigen::Vector3d _pt, double _actZRot, double _start_param, double _length_tol);
 
