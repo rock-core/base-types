@@ -76,6 +76,19 @@ double NURBSCurve3D::getVariationOfCurvature(double _param)  // Variation of Cur
     return VoC;
 }
 
+double NURBSCurve3D::findCurvatureMax()
+{
+    double curvature, delPara = getUnitParameter() * geometric_resolution;
+    curvature_max = 0.0;
+
+    for(double p = start_param; p <= end_param; p+= delPara)
+    {
+	curvature = getCurvature(p);
+	if(curvature > curvature_max )
+	    curvature_max = curvature;
+    }
+    return curvature_max;
+} 
 
 void NURBSCurve3D::addPoint(Vector3d pt)
 {
@@ -164,6 +177,9 @@ void NURBSCurve3D::update()
     s1240(curve, geometric_resolution, &curve_length, &status);
     if (status != 0)
         throw std::runtime_error("cannot get the curve length");
+
+    // Iterates and finds the maximum curvature
+    findCurvatureMax();
 }
 
 void NURBSCurve3D::printCurveProperties()

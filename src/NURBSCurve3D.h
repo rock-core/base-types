@@ -31,8 +31,9 @@ namespace geometry {
             /** Returns the number of points for this curve */
 	    int    getPointCount() const { return points.size(); };
             /** Returns the length of the curve in geometric space */
-	    double getCurveLength() const { return curve_length; }; 
-	    double getStartParam() const { return start_param; };
+	    double getCurveLength() const { return curve_length; };
+            double getStartParam() const { return start_param; };
+	    double getCurvatureMax() const { return curvature_max; }; 
 	    double getEndParam()   const { return end_param; };
 	    double getDeltaParameter(double _len) { return  (end_param - start_param) / curve_length;  };
 
@@ -61,7 +62,13 @@ namespace geometry {
              * end_param] and runtime_error if SISL returns an error
              */
 	    double getVariationOfCurvature(double _param);  // Variation of Curvature
-	 
+		    
+            /** Returns the maximum curvature in a curve
+             *
+	     * Iterates through the curve and return the maximum curvature found
+	     *  Checks every delLen for the parameter
+             */
+	    double findCurvatureMax(); 
 
             /** \overload
              */
@@ -115,6 +122,7 @@ namespace geometry {
 
 	    void printCurveProperties();
 
+
 	    /** Calculates the heading error */
 	    double headingError(double _actZRot, double _param);
 	    /** Calculates the distance error */
@@ -150,6 +158,8 @@ namespace geometry {
 	    double end_param;
             //! the length of the curve in geometric space
 	    double curve_length; // Length of the curve
+	    //! maximum curvature in the curve
+	    double curvature_max;
     };
 
 } // geometry
