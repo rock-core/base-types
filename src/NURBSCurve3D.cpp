@@ -29,6 +29,7 @@ NURBSCurve3D::NURBSCurve3D(NURBSCurve3D const& source)
     , start_param(source.start_param)
     , end_param(source.end_param)
     , curve_length(source.curve_length)
+    , curvature_max(source.curvature_max)
 {
 }
 
