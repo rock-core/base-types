@@ -35,7 +35,6 @@ namespace geometry {
             double getStartParam() const { return start_param; };
 	    double getCurvatureMax() const { return curvature_max; }; 
 	    double getEndParam()   const { return end_param; };
-	    double getDeltaParameter(double _len) { return  (end_param - start_param) / curve_length;  };
 
             /** Returns the length-to-parametric scale
              *

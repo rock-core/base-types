@@ -350,11 +350,11 @@ double NURBSCurve3D::distanceError(Vector3d _pt, double _param)
 Vector3d NURBSCurve3D::poseError(Vector3d _pt, double _actZRot, double _st_para, double _len_tol)
 {
     // Finds the search length
-    double del_para = getDeltaParameter(_len_tol);
+    double del_para = getUnitParameter() *  _len_tol;
 
     // Finds teh closest poiont in the search length
     double param = localClosestPointSearch(_pt, _st_para, _st_para, _st_para + del_para);    
 
-    // Returns the error [orientation error, distance error, parameter] 
-    return Vector3d(headingError(_actZRot, param), distanceError(_pt, param), param);
+    // Returns the error [distance error, orientation error, parameter] 
+    return Vector3d(distanceError(_pt, param), headingError(_actZRot, param), param);
 }
