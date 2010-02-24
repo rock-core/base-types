@@ -251,7 +251,7 @@ double NURBSCurve3D::localClosestPointSearch(Vector3d const& _pt, double _guess,
     // Finds the closest point on the curve
     int status;
     s1774(curve, point, DIM, _geores, _start, _end, _guess, &param, &status);
-    if (status != 0)
+    if (status < 0)
         throw std::runtime_error("failed to find the closest points");
 
     // Returns the parameter of the point
