@@ -12,7 +12,8 @@ NURBSCurve3D::NURBSCurve3D ( double _geometric_resolution, int _curve_order,
         std::vector<Eigen::Vector3d> const& points)
     : curve(0), geometric_resolution(_geometric_resolution)
     , curve_order(_curve_order), points(points)
-    , has_curve_length(false), has_curvature_max(false)
+    , has_curve_length(false), curve_length(-1)
+    , has_curvature_max(false), curvature_max(-1)
 {
 }
 
@@ -20,7 +21,8 @@ NURBSCurve3D::NURBSCurve3D(double geometric_resolution, int order,
         std::vector<Eigen::Vector3d> const& points, SISLCurve* curve)
     : curve(curve), geometric_resolution(geometric_resolution)
     , points(points), curve_order(order)
-    , has_curve_length(false), has_curvature_max(false)
+    , has_curve_length(false), curve_length(-1)
+    , has_curvature_max(false), curvature_max(-1)
 {
     int status;
 
