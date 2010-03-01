@@ -12,6 +12,7 @@ NURBSCurve3D::NURBSCurve3D ( double _geometric_resolution, int _curve_order,
         std::vector<Eigen::Vector3d> const& points)
     : curve(0), geometric_resolution(_geometric_resolution)
     , curve_order(_curve_order), points(points)
+    , has_curve_length(false), has_curvature_max(false)
 {
 }
 
@@ -19,6 +20,7 @@ NURBSCurve3D::NURBSCurve3D(double geometric_resolution, int order,
         std::vector<Eigen::Vector3d> const& points, SISLCurve* curve)
     : curve(curve), geometric_resolution(geometric_resolution)
     , points(points), curve_order(order)
+    , has_curve_length(false), has_curvature_max(false)
 {
     int status;
 
@@ -41,6 +43,8 @@ NURBSCurve3D::NURBSCurve3D(NURBSCurve3D const& source)
     , curve_order(source.curve_order)
     , start_param(source.start_param)
     , end_param(source.end_param)
+    , has_curve_length(source.has_curve_length), curve_length(source.curve_length)
+    , has_curvature_max(source.has_curvature_max), curvature_max(source.curvature_max)
 {
 }
 
@@ -88,19 +92,38 @@ double NURBSCurve3D::getVariationOfCurvature(double _param)  // Variation of Cur
     return VoC;
 }
 
-double NURBSCurve3D::findCurvatureMax()
+double NURBSCurve3D::getCurveLength()
 {
-    double curvature, delPara = getUnitParameter() * geometric_resolution;
+    if (has_curve_length)
+        return curve_length;
+
+    int status;
+    s1240(curve, geometric_resolution, &curve_length, &status);
+    if (status != 0)
+        throw std::runtime_error("cannot get the curve length");
+
+    has_curve_length = true;
+    return curve_length;
+}
+
+double NURBSCurve3D::getCurvatureMax()
+{
+    if (has_curvature_max)
+        return curvature_max;
+
+    double const delPara = getUnitParameter() * geometric_resolution;
     curvature_max = 0.0;
 
-    for(double p = start_param; p <= end_param; p+= delPara)
+    for (double p = start_param; p <= end_param; p+= delPara)
     {
-	curvature = getCurvature(p);
-	if(curvature > curvature_max )
+	double curvature = getCurvature(p);
+	if (curvature > curvature_max)
 	    curvature_max = curvature;
     }
+
+    has_curvature_max = true;
     return curvature_max;
-} 
+}
 
 void NURBSCurve3D::addPoint(Vector3d pt)
 {
@@ -185,13 +208,6 @@ void NURBSCurve3D::update()
     if (status != 0)
         throw std::runtime_error("cannot generate the curve");
 
-    // Get the curve length
-    s1240(curve, geometric_resolution, &curve_length, &status);
-    if (status != 0)
-        throw std::runtime_error("cannot get the curve length");
-
-    // Iterates and finds the maximum curvature
-    findCurvatureMax();
 }
 
 void NURBSCurve3D::printCurveProperties()

@@ -39,8 +39,9 @@ namespace geometry {
 	    int    getPointCount() const { return points.size(); };
             int    getCurveOrder() const { return curve_order; }
             /** Returns the length of the curve in geometric space */
-	    double getCurveLength() const { return curve_length; };
-	    double getCurvatureMax() const { return curvature_max; }; 
+	    double getCurveLength();
+            /** Returns the maximum curvature of the curve */
+	    double getCurvatureMax();
 	    double getStartParam() const { return start_param; };
 	    double getEndParam()   const { return end_param; };
 
@@ -177,7 +178,14 @@ namespace geometry {
 	    double start_param;
             //! the end parameter, as returned by SISL
 	    double end_param;
+
+            //! if we have already calculated the curve length
+            bool has_curve_length;
+            //! the cache value for the curve length in geometric space
 	    double curve_length; // Length of the curve
+
+            //! if we have already calculated the maximum curvature
+            bool has_curvature_max;
 	    //! maximum curvature in the curve
 	    double curvature_max;
     };
