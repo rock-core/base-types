@@ -20,21 +20,43 @@ namespace geometry {
         static const int DIM = 3;
 
 	public:
-	    explicit NURBSCurve3D(double geometric_resolution = 0, double order = 3);
-	    ~NURBSCurve3D();
-
+	    explicit NURBSCurve3D(double geometric_resolution = 0.1, int order = 3,
+                    std::vector<Eigen::Vector3d> const& points = std::vector<Eigen::Vector3d>());
+	    explicit NURBSCurve3D(double geometric_resolution, int order,
+                    std::vector<Eigen::Vector3d> const& points,
+                    SISLCurve* curve);
             NURBSCurve3D(NURBSCurve3D const& source);
+	    ~NURBSCurve3D();
 
             /** Changes the default geometric resolution */
             void setGeometricResolution(double _geores) { geometric_resolution = _geores; }
+            double getGeometricResolution() const { return geometric_resolution; };
+
+            std::vector<Eigen::Vector3d> const& getPoints() const
+            { return points; }
 
             /** Returns the number of points for this curve */
 	    int    getPointCount() const { return points.size(); };
+            int    getCurveOrder() const { return curve_order; }
             /** Returns the length of the curve in geometric space */
 	    double getCurveLength() const { return curve_length; };
-            double getStartParam() const { return start_param; };
 	    double getCurvatureMax() const { return curvature_max; }; 
+	    double getStartParam() const { return start_param; };
 	    double getEndParam()   const { return end_param; };
+
+            /** Return a pointer to the underlying SISL structure
+             *
+             * This pointer will be non-NULL only after update() has been called
+             * at least once.
+             */
+            SISLCurve const* getSISLCurve() const;
+
+            /** Return a pointer to the underlying SISL structure
+             *
+             * This pointer will be non-NULL only after update() has been called
+             * at least once.
+             */
+            SISLCurve* getSISLCurve();
 
             /** Returns the length-to-parametric scale
              *
@@ -150,12 +172,11 @@ namespace geometry {
             //! the geometric resolution
             double geometric_resolution;
             //! the order of the NURBS curve that approximates the points
-            double curve_order;
+            int curve_order;
             //! the start parameter (usually 0.0)
 	    double start_param;
             //! the end parameter, as returned by SISL
 	    double end_param;
-            //! the length of the curve in geometric space
 	    double curve_length; // Length of the curve
 	    //! maximum curvature in the curve
 	    double curvature_max;

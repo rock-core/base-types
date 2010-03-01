@@ -8,10 +8,23 @@ using namespace std;
 using namespace base::geometry;
 using namespace Eigen;
 
-NURBSCurve3D::NURBSCurve3D ( double _geometric_resolution, double _curve_order)
+NURBSCurve3D::NURBSCurve3D ( double _geometric_resolution, int _curve_order,
+        std::vector<Eigen::Vector3d> const& points)
     : curve(0), geometric_resolution(_geometric_resolution)
-    , curve_order(_curve_order)
+    , curve_order(_curve_order), points(points)
 {
+}
+
+NURBSCurve3D::NURBSCurve3D(double geometric_resolution, int order,
+        std::vector<Eigen::Vector3d> const& points, SISLCurve* curve)
+    : curve(curve), geometric_resolution(geometric_resolution)
+    , points(points), curve_order(order)
+{
+    int status;
+
+    s1363(curve, &start_param, &end_param, &status);
+    if (status != 0)
+        throw std::runtime_error("cannot get the curve start & end parameters");
 }
 
 NURBSCurve3D::~NURBSCurve3D ()
@@ -28,8 +41,6 @@ NURBSCurve3D::NURBSCurve3D(NURBSCurve3D const& source)
     , curve_order(source.curve_order)
     , start_param(source.start_param)
     , end_param(source.end_param)
-    , curve_length(source.curve_length)
-    , curvature_max(source.curvature_max)
 {
 }
 
@@ -359,3 +370,14 @@ Vector3d NURBSCurve3D::poseError(Vector3d _pt, double _actZRot, double _st_para,
     // Returns the error [distance error, orientation error, parameter] 
     return Vector3d(distanceError(_pt, param), headingError(_actZRot, param), param);
 }
+
+SISLCurve const* NURBSCurve3D::getSISLCurve() const
+{
+    return curve;
+}
+
+SISLCurve* NURBSCurve3D::getSISLCurve()
+{
+    return curve;
+}
+
