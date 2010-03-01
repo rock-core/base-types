@@ -64,7 +64,7 @@ namespace geometry {
              * I.e. it returns the number of parametric units that lie in one
              * curve length unit
              */
-	    double getUnitParameter() const { return (end_param - start_param) / curve_length;  };
+	    double getUnitParameter();
    	  
             /** Returns the geometric point that lies on the curve at the given
              * parameter */

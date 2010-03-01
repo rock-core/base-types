@@ -108,6 +108,11 @@ double NURBSCurve3D::getCurveLength()
     return curve_length;
 }
 
+double NURBSCurve3D::getUnitParameter()
+{
+    return (end_param - start_param) / getCurveLength();
+}
+
 double NURBSCurve3D::getCurvatureMax()
 {
     if (has_curvature_max)
@@ -220,7 +225,7 @@ void NURBSCurve3D::printCurveProperties()
 	<< "  Dimension    : " << curve->idim  << std::endl
 	<< "  Kind         : " << curve->ikind << std::endl
 	<< "  Parameters   : " << start_param  << "->" << end_param << std::endl
-	<< "  Length       : " << curve_length << std::endl;
+	<< "  Length       : " << getCurveLength() << std::endl;
 }
 
 double NURBSCurve3D::findOneClosestPoint(Vector3d const& _pt)
