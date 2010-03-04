@@ -188,6 +188,7 @@ namespace geometry {
         { 
             vector_t result;
             SplineBase::getPoint(result.data(), _param);
+            return result;
         }
 
         /** \overload
