@@ -37,7 +37,7 @@ SplineBase::~SplineBase ()
 }
 
 SplineBase::SplineBase(SplineBase const& source)
-    : dimension(source.dimension)
+    : singleton(source.singleton), dimension(source.dimension)
     , curve(source.curve ? copyCurve(source.curve) : 0)
     , geometric_resolution(source.geometric_resolution)
     , curve_order(source.curve_order)
@@ -53,6 +53,7 @@ SplineBase const& SplineBase::operator = (SplineBase const& source)
     if (&source == this)
         return *this;
 
+    singleton            = source.singleton;
     dimension            = source.dimension;
     curve                = source.curve ? copyCurve(source.curve) : 0;
     geometric_resolution = source.geometric_resolution;
@@ -67,18 +68,28 @@ SplineBase const& SplineBase::operator = (SplineBase const& source)
 }
 
 int SplineBase::getPointCount() const
-{ return curve->in; }
+{
+    if (curve)
+        return curve->in;
+    else
+        return (singleton.empty() ? 0 : 1);
+}
 
 void SplineBase::getPoint(double* result, double _param)
 {
     if (_param < start_param || _param > end_param) 
         throw std::out_of_range("_param is not in the [start_param, end_param] range");
 
-    int leftknot; // Not needed
-    int status;
-    s1227(curve, 0, _param, &leftknot, result, &status); // Gets the point
-    if (status != 0)
-        throw std::runtime_error("SISL error while computing a curve point");
+    if (curve)
+    {
+        int leftknot; // Not needed
+        int status;
+        s1227(curve, 0, _param, &leftknot, result, &status); // Gets the point
+        if (status != 0)
+            throw std::runtime_error("SISL error while computing a curve point");
+    }
+    else
+        copy(singleton.begin(), singleton.end(), result);
 }
 
 double SplineBase::getCurvature(double _param)
@@ -86,6 +97,10 @@ double SplineBase::getCurvature(double _param)
     // Limits the input paramter to the curve limit
     if (_param < start_param || _param > end_param) 
         throw std::out_of_range("_param is not in the [start_param, end_param] range");
+    else if (!singleton.empty())
+        throw std::runtime_error("getCurvature() called on a singleton");
+    else if (!curve)
+        throw std::runtime_error("getCurvature() called on an empty curve");
 
     double curvature; 
     int status;
@@ -100,6 +115,10 @@ double SplineBase::getVariationOfCurvature(double _param)  // Variation of Curva
 {
     if (_param < start_param || _param > end_param) 
         throw std::out_of_range("_param is not in the [start_param, end_param] range");
+    else if (!singleton.empty())
+        throw std::runtime_error("getVariationOfCurvature() called on a singleton");
+    else if (!curve)
+        throw std::runtime_error("getVariationOfCurvature() called on an empty curve");
 
     double VoC; 
     int status;
@@ -115,6 +134,9 @@ double SplineBase::getCurveLength()
     if (has_curve_length)
         return curve_length;
 
+    if (!curve)
+        throw std::runtime_error("getCurveLength() called on an empty curve");
+
     int status;
     s1240(curve, geometric_resolution, &curve_length, &status);
     if (status != 0)
@@ -126,11 +148,17 @@ double SplineBase::getCurveLength()
 
 double SplineBase::getUnitParameter()
 {
+    if (end_param == start_param) return 0;
     return (end_param - start_param) / getCurveLength();
 }
 
 double SplineBase::getCurvatureMax()
 {
+    if (!singleton.empty())
+        throw std::runtime_error("getCurvatureMax() called on a singleton");
+    else if (!curve)
+        throw std::runtime_error("getCurvatureMax() called on an empty curve");
+
     if (has_curvature_max)
         return curvature_max;
 
@@ -149,23 +177,39 @@ double SplineBase::getCurvatureMax()
 }
 
 bool SplineBase::isNURBS() const
-{ return curve->ikind == 2 || curve->ikind == 4; }
+{
+    if (!curve) return false;
+    return curve->ikind == 2 || curve->ikind == 4;
+}
 
 void SplineBase::interpolate(std::vector<double> const& points, std::vector<double> const& parameters)
 {
-    vector<int> point_types;
-    point_types.resize(points.size() / dimension, 1);
-
-    // Generates curve
-    double* point_param;  
-    int nb_unique_param;
-    start_param = 0.0;
-
     if (curve)
     {
         freeCurve(curve);
         curve = 0;
     }
+    start_param = 0.0;
+    has_curvature_max = false;
+    has_curve_length  = false;
+
+    int const point_count = points.size() / dimension;
+    if (point_count == 1)
+    {
+        end_param = 0;
+        has_curve_length = true;
+        curve_length = 0;
+        singleton = points;
+        return;
+    }
+
+    singleton.clear();
+    vector<int> point_types;
+    point_types.resize(point_count, 1);
+
+    // Generates curve
+    double* point_param;  
+    int nb_unique_param;
 
     int status;
     if (parameters.empty())
@@ -200,7 +244,11 @@ void SplineBase::printCurveProperties(std::ostream& io)
 
 std::vector<double> SplineBase::getCoordinates() const
 {
-    if (isNURBS())
+    if (!singleton.empty())
+        return singleton;
+    else if (!curve)
+        return std::vector<double>();
+    else if (isNURBS())
         return std::vector<double>(curve->rcoef, curve->rcoef + (dimension + 1) * getPointCount());
     else
         return std::vector<double>(curve->ecoef, curve->ecoef + dimension * getPointCount());
@@ -208,11 +256,31 @@ std::vector<double> SplineBase::getCoordinates() const
 
 std::vector<double> SplineBase::getKnots() const
 {
-    return std::vector<double>(curve->et, curve->et + getPointCount() + getCurveOrder());
+    if (!curve)
+        return std::vector<double>();
+    else
+        return std::vector<double>(curve->et, curve->et + getPointCount() + getCurveOrder());
 }
 
 void SplineBase::reset(std::vector<double> const& coordinates, std::vector<double> const& knots, int kind)
 {
+    if (curve)
+    {
+        freeCurve(curve);
+        curve = 0;
+    }
+    has_curvature_max = false;
+    has_curve_length  = false;
+
+    if (coordinates.size() == static_cast<size_t>(dimension))
+    {
+        start_param = end_param = 0;
+        has_curve_length = true;
+        curve_length = 0;
+        singleton = coordinates;
+        return;
+    }
+
     int stride;
     if (kind == -1)
     {
@@ -230,10 +298,8 @@ void SplineBase::reset(std::vector<double> const& coordinates, std::vector<doubl
             getCurveOrder(), const_cast<double*>(&knots[0]), const_cast<double*>(&coordinates[0]),
             kind, dimension, 1);
 
-    if (curve)
-        freeCurve(curve);
-
     new_curve->cuopen = 1;
+    singleton.clear();
     this->curve = new_curve;
 
     int status;
@@ -244,6 +310,9 @@ void SplineBase::reset(std::vector<double> const& coordinates, std::vector<doubl
 
 double SplineBase::findOneClosestPoint(double const* _pt, double _geores)
 {
+    if (!curve)
+        return getStartParam();
+
     vector<double> points;
     vector< pair<double, double> > curves;
     findClosestPoints(_pt, points, curves, _geores);
@@ -259,6 +328,12 @@ double SplineBase::findOneClosestPoint(double const* _pt, double _geores)
 
 void SplineBase::findClosestPoints(double const* ref_point, vector<double>& _result_points, vector< pair<double, double> >& _result_curves, double _geores)
 {
+    if (!curve)
+    {
+        _result_points.push_back(0);
+        return;
+    }
+
     int points_count;
     double* points;
     int curves_count;
@@ -281,6 +356,9 @@ void SplineBase::findClosestPoints(double const* ref_point, vector<double>& _res
 
 double SplineBase::localClosestPointSearch(double* ref_point, double _guess, double _start, double _end, double  _geores)
 {
+    if (!curve)
+        return getStartParam();
+
     double param;
 
     // Finds the closest point on the curve
@@ -297,6 +375,7 @@ double SplineBase::localClosestPointSearch(double* ref_point, double _guess, dou
 
 void SplineBase::clear()
 {
+    singleton.clear();
     if (curve)
     {
         freeCurve(curve);
@@ -311,7 +390,13 @@ vector<double> SplineBase::simplify()
 
 vector<double> SplineBase::simplify(double tolerance)
 {
-    if (!curve)
+    if (!singleton.empty())
+    {
+        std::vector<double> result;
+        result.push_back(0);
+        return result;
+    }
+    else if (!curve)
         throw std::runtime_error("the curve is not initialized");
 
     SISLCurve* result = NULL;
@@ -345,6 +430,9 @@ SISLCurve* SplineBase::getSISLCurve()
 
 Eigen::Matrix3d SplineBase::getFrenetFrame(double _param)
 {
+    if (!curve)
+        throw std::runtime_error("getFrenetFrame() called on an empty or degenerate curve");
+
     double p;    // does nothing
     double t[3], n[3], b[3]; // Frame axis
 

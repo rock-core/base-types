@@ -32,10 +32,22 @@ namespace geometry {
         void setGeometricResolution(double _geores) { geometric_resolution = _geores; }
         double getGeometricResolution() const { return geometric_resolution; };
 
+        /** Returns true if the curve is not yet initialized */
+        bool isEmpty() const
+        { return !getSISLCurve() && singleton.empty(); }
+
+        /** Returns true if the curve is a point */
+        bool isSingleton() const
+        { return !singleton.empty(); }
+
         /** Returns the dimension of the space in which the curve lies */
         int    getDimension() const { return dimension; }
         /** Returns the number of points for this curve */
         int    getPointCount() const;
+        /** Change the curve order. This is only propagated after interpolate()
+         * is called
+         */
+        void setCurveOrder(int value) { curve_order = value; }
         /** Returns the order of the curve */
         int    getCurveOrder() const { return curve_order; }
         /** Returns the length of the curve in geometric space */
@@ -145,6 +157,8 @@ namespace geometry {
         Eigen::Vector3d poseError(Eigen::Vector3d _pt, double _actZRot, double _st_para, double _len_tol);;
 
     private:
+        std::vector<double> singleton;
+
         int dimension;
         //! the underlying SISL curve
         SISLCurve *curve;
