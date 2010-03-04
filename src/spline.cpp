@@ -148,54 +148,13 @@ double SplineBase::getCurvatureMax()
     return curvature_max;
 }
 
+bool SplineBase::isNURBS() const
+{ return curve->ikind == 2 || curve->ikind == 4; }
+
 void SplineBase::interpolate(std::vector<double> const& points, std::vector<double> const& parameters)
 {
     vector<int> point_types;
     point_types.resize(points.size() / dimension, 1);
-
-    /* 
-       Input Arguments:
-       points - Array (of length DIM inbpnt) containing the points/derivatives
-       to be interpolated.
-       nb_point - No. of points/derivatives in the epoint array.
-       idim - The dimension of the space in which the points lie.
-       nptyp - Array (length inbpnt) containing type indicator for 
-       points/derivatives/second-derivatives:
-       = 1 : Ordinary point.
-       = 2 : Knuckle point. (Is treated as an ordinary
-       point.)
-       = 3 : Derivative to next point.
-       = 4 : Derivative to prior point.
-       = 5 : Second-derivative to next point.
-       = 6 : Second derivative to prior point.
-       = 13 : Point of tangent to next point.
-       = 14 : Point of tangent to prior point.
-       icnsta - Additional condition at the start of the curve:
-       = 0 : No additional condition.
-       = 1 : Zero curvature at start.
-       icnend - Additional condition at the end of the curve:
-       = 0 : No additional condition.
-       = 1 : Zero curvature at end.
-       iopen - Flag telling if the curve should be open or closed:
-       = 1 : Open curve.
-       = 0 : Closed, non-periodic curve.
-       = -1 : Periodic (and closed) curve.
-       ORDER - The order of the spline curve to be produced.
-       start_param - Parameter value to be used at the start of the curve.
-
-       Output Arguments:
-       end_param - Parameter value used at the end of the curve.
-       curve - Pointer to output B-spline curve.
-       point_param - Pointer to the parameter values of the points in the 
-       curve. Represented only once, although derivatives
-       and second-derivatives will have the same parameter
-       value as the points.
-       nb_unique_param - No. of unique parameter values.
-       status - Status message
-       < 0 : Error.
-       = 0 : Ok.
-       > 0 : Warning.
-       */
 
     // Generates curve
     double* point_param;  
