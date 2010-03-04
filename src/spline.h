@@ -90,8 +90,13 @@ namespace geometry {
 
         void printCurveProperties();
 
-        /** Generates the curve */
-        void interpolate(std::vector<double> const& coordinates);
+        /** Generates the curve
+         *
+         * If the \c parameters array is given, it is the desired parameter for
+         * the provided points. Otherwise, an automatic parametrization is
+         * generated.
+         */
+        void interpolate(std::vector<double> const& coordinates, std::vector<double> const& parameters = std::vector<double>());
 
         /** Reinitializes the curve */
         void clear();
@@ -177,12 +182,12 @@ namespace geometry {
         { return findOneClosestPoint(_pt, getGeometricResolution()); }
 
         /** Compute the curve from the given set of points */
-        void interpolate(std::vector<vector_t> const& points)
+        void interpolate(std::vector<vector_t> const& points, std::vector<double> const& parameters = std::vector<double>())
         {
             std::vector<double> coordinates;
-            for (int i = 0; i < points.size(); ++i)
-                coordinates.insert(coordinates.end(), points[i].data(), points[i].data() + getDimension());
-            SplineBase::interpolate(coordinates);
+            for (size_t i = 0; i < points.size(); ++i)
+                coordinates.insert(coordinates.end(), points[i].data(), points[i].data() + DIM);
+            SplineBase::interpolate(coordinates, parameters);
         }
 
         /** Returns a single closest point to _pt

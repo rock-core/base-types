@@ -148,7 +148,7 @@ double SplineBase::getCurvatureMax()
     return curvature_max;
 }
 
-void SplineBase::interpolate(std::vector<double> const& points)
+void SplineBase::interpolate(std::vector<double> const& points, std::vector<double> const& parameters)
 {
     vector<int> point_types;
     point_types.resize(points.size() / dimension, 1);
@@ -209,8 +209,19 @@ void SplineBase::interpolate(std::vector<double> const& points)
     }
 
     int status;
-    s1356(const_cast<double*>(&points[0]), point_types.size(), dimension, &point_types[0], 0, 0, 1, curve_order, start_param, &end_param, &curve, 
-	    &point_param, &nb_unique_param, &status);
+    if (parameters.empty())
+    {
+        s1356(const_cast<double*>(&points[0]), point_types.size(), dimension, &point_types[0],
+                0, 0, 1, curve_order, start_param, &end_param, &curve, 
+                &point_param, &nb_unique_param, &status);
+    }
+    else
+    {
+        s1357(const_cast<double*>(&points[0]), point_types.size(), dimension, &point_types[0],
+                const_cast<double*>(&parameters[0]), 
+                0, 0, 1, curve_order, start_param, &end_param, &curve, 
+                &point_param, &nb_unique_param, &status);
+    }
     if (status != 0)
         throw std::runtime_error("cannot generate the curve");
 
