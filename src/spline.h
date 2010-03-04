@@ -174,6 +174,7 @@ namespace geometry {
     {
     public:
         typedef Eigen::Matrix<double, DIM, 1> vector_t;
+        typedef Eigen::Transform<double, DIM> transform_t;
 
         explicit Spline(double geometric_resolution = 0.1, int order = 3)
             : SplineBase(DIM, geometric_resolution, order) {}
@@ -265,6 +266,26 @@ namespace geometry {
         Eigen::Vector3d poseError(Eigen::Vector3d _pt, double _actZRot, double _st_para, double _len_tol,
                 typename boost::enable_if_c<DIM == 3>::type* enabler = 0)
         { return SplineBase::poseError(_pt, _actZRot, _st_para, _len_tol); }
+
+        void transform(transform_t const& t)
+        {
+            std::vector<double> const& current_coordinates = this->getCoordinates();
+            std::vector<double> coordinates(current_coordinates.begin(), current_coordinates.end());
+
+            bool is_nurbs = isNURBS();
+            int stride = getCoordinatesStride();
+
+            vector_t v;
+            for (int i = 0; i < getPointCount(); ++i)
+            {
+                memcpy(v.data(), &coordinates[i * stride], sizeof(double) * DIM);
+                v = t * v;
+                memcpy(&coordinates[i * stride], v.data(), sizeof(double) * DIM);
+            }
+            std::vector<double> knots = getKnots();
+
+            reset(coordinates, knots);
+        }
     };
 
     typedef Spline<3> NURBSCurve3D;
