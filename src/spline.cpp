@@ -222,6 +222,7 @@ void SplineBase::interpolate(std::vector<double> const& points, std::vector<doub
                 0, 0, 1, curve_order, start_param, &end_param, &curve, 
                 &point_param, &nb_unique_param, &status);
     }
+    free(point_param);
     if (status != 0)
         throw std::runtime_error("cannot generate the curve");
 
