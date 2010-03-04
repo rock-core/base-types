@@ -5,6 +5,7 @@ if(COMMAND cmake_policy)
 endif(COMMAND cmake_policy)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+add_definitions("-Wall")
 
 find_package(Boost REQUIRED)
 include_directories(${BOOST_INCLUDE_DIR})
