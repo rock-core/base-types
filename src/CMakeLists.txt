@@ -1,9 +1,9 @@
 find_package(SISL)
 if (SISL_FOUND)
     include_directories(${SISL_INCLUDE_DIRS})
-    install(FILES ${CMAKE_SOURCE_DIR}/src/NURBSCurve3D.h
+    install(FILES ${CMAKE_SOURCE_DIR}/src/spline.h
         DESTINATION include/base/geometry)
-    list(APPEND LIBBASE_FILES ${CMAKE_SOURCE_DIR}/src/NURBSCurve3D.cpp)
+    list(APPEND LIBBASE_FILES ${CMAKE_SOURCE_DIR}/src/spline.cpp)
     list(APPEND LIBBASE_DEPENDENCIES ${SISL_LIBRARIES})
 endif()
 
