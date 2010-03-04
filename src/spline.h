@@ -183,19 +183,51 @@ namespace geometry {
         double curvature_max;
     };
 
-    template<int DIM>
-    class Spline : public SplineBase
+    class Spline3Base : public SplineBase
     {
     public:
+        explicit Spline3Base(int dimension, double geometric_resolution, int order)
+            : SplineBase(dimension, geometric_resolution, order) {}
+        explicit Spline3Base(double geometric_resolution, SISLCurve* curve)
+            : SplineBase(geometric_resolution, curve) {}
+        Spline3Base(SplineBase const& source)
+            : SplineBase(source) {}
+
+        Eigen::Matrix3d getFrenetFrame(double _param)
+        { return SplineBase::getFrenetFrame(_param); }
+
+        double getHeading(double _param)
+        { return SplineBase::getHeading(_param); }
+
+        double headingError(double _actZRot, double _param)
+        { return SplineBase::headingError(_actZRot, _param); }
+
+        double distanceError(Eigen::Vector3d _pt, double _param)
+        { return SplineBase::distanceError(_pt, _param); }
+
+        Eigen::Vector3d poseError(Eigen::Vector3d _pt, double _actZRot, double _st_para, double _len_tol)
+        { return SplineBase::poseError(_pt, _actZRot, _st_para, _len_tol); }
+    };
+
+    template<int DIM> struct SplineBaseClass
+    { typedef SplineBase type; };
+    template<> struct SplineBaseClass<3>
+    { typedef Spline3Base type; };
+
+    template<int DIM>
+    class Spline : public SplineBaseClass<DIM>::type
+    {
+    public:
+        typedef typename SplineBaseClass<DIM>::type base_t;
         typedef Eigen::Matrix<double, DIM, 1> vector_t;
         typedef Eigen::Transform<double, DIM> transform_t;
 
         explicit Spline(double geometric_resolution = 0.1, int order = 3)
-            : SplineBase(DIM, geometric_resolution, order) {}
+            : base_t(DIM, geometric_resolution, order) {}
         explicit Spline(double geometric_resolution, SISLCurve* curve)
-            : SplineBase(geometric_resolution, curve) {}
+            : base_t(geometric_resolution, curve) {}
         Spline(SplineBase const& base)
-            : SplineBase(base) {}
+            : base_t(base) {}
 
         /** Returns the geometric point that lies on the curve at the given
          * parameter */
@@ -209,7 +241,7 @@ namespace geometry {
         /** \overload
          */
         double findOneClosestPoint(vector_t const& _pt)
-        { return findOneClosestPoint(_pt, getGeometricResolution()); }
+        { return findOneClosestPoint(_pt, SplineBase::getGeometricResolution()); }
 
         /** Compute the curve from the given set of points */
         void interpolate(std::vector<vector_t> const& points, std::vector<double> const& parameters = std::vector<double>())
@@ -236,7 +268,7 @@ namespace geometry {
         void findClosestPoints(vector_t const& _pt,
                 std::vector<double>& _points,
                 std::vector< std::pair<double, double> >& _curves)
-        { return findClosestPoints(_pt, _points, _curves, getGeometricResolution()); }
+        { return findClosestPoints(_pt, _points, _curves, SplineBase::getGeometricResolution()); }
 
         /**
          * Returns the single points and curve segments that are closest to
@@ -252,7 +284,7 @@ namespace geometry {
         /** \overload
          */
         double localClosestPointSearch(vector_t const& _pt, double _guess, double _start, double _end)
-        { return localClosestPointSearch(_pt, _guess, _start, _end, getGeometricResolution()); }
+        { return localClosestPointSearch(_pt, _guess, _start, _end, SplineBase::getGeometricResolution()); }
 
         /** Performs a Newton search in the provided parametric interval, starting with the given guess.
          *
@@ -261,44 +293,24 @@ namespace geometry {
         double localClosestPointSearch(vector_t const& _pt, double _guess, double _start, double _end, double _geores)
         { return SplineBase::localClosestPointSearch(_pt.data(), _guess, _start, _end, _geores); }
 
-        Eigen::Matrix3d getFrenetFrame(double _param,
-                typename boost::enable_if_c<DIM == 3>::type* enabler = 0)
-        { return SplineBase::getFrenetFrame(_param); }
-
-        double getHeading(double _param,
-                typename boost::enable_if_c<DIM == 3>::type* enabler = 0)
-        { return SplineBase::getHeading(_param); }
-
-        double headingError(double _actHeading, double _param,
-                typename boost::enable_if_c<DIM == 3>::type* enabler = 0)
-        { return SplineBase::headingError(_actHeading, _param); }
-
-        double distanceError(Eigen::Vector3d _pt, double _param,
-                typename boost::enable_if_c<DIM == 3>::type* enabler = 0)
-        { return SplineBase::distanceError(_pt, _param); }
-
-        Eigen::Vector3d poseError(Eigen::Vector3d _pt, double _actZRot, double _st_para, double _len_tol,
-                typename boost::enable_if_c<DIM == 3>::type* enabler = 0)
-        { return SplineBase::poseError(_pt, _actZRot, _st_para, _len_tol); }
-
         void transform(transform_t const& t)
         {
-            std::vector<double> const& current_coordinates = this->getCoordinates();
+            std::vector<double> const& current_coordinates = SplineBase::getCoordinates();
             std::vector<double> coordinates(current_coordinates.begin(), current_coordinates.end());
 
-            bool is_nurbs = isNURBS();
-            int stride = getCoordinatesStride();
+            bool is_nurbs = SplineBase::isNURBS();
+            int stride = SplineBase::getCoordinatesStride();
 
             vector_t v;
-            for (int i = 0; i < getPointCount(); ++i)
+            for (int i = 0; i < SplineBase::getPointCount(); ++i)
             {
                 memcpy(v.data(), &coordinates[i * stride], sizeof(double) * DIM);
                 v = t * v;
                 memcpy(&coordinates[i * stride], v.data(), sizeof(double) * DIM);
             }
-            std::vector<double> knots = getKnots();
+            std::vector<double> knots = SplineBase::getKnots();
 
-            reset(coordinates, knots);
+            SplineBase::reset(coordinates, knots);
         }
     };
 
