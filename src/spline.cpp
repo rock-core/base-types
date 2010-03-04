@@ -198,6 +198,49 @@ void SplineBase::printCurveProperties(std::ostream& io)
 	<< "  Length       : " << getCurveLength() << std::endl;
 }
 
+std::vector<double> SplineBase::getCoordinates() const
+{
+    if (isNURBS())
+        return std::vector<double>(curve->rcoef, curve->rcoef + (dimension + 1) * getPointCount());
+    else
+        return std::vector<double>(curve->ecoef, curve->ecoef + dimension * getPointCount());
+}
+
+std::vector<double> SplineBase::getKnots() const
+{
+    return std::vector<double>(curve->et, curve->et + getPointCount() + getCurveOrder());
+}
+
+void SplineBase::reset(std::vector<double> const& coordinates, std::vector<double> const& knots, int kind)
+{
+    int stride;
+    if (kind == -1)
+    {
+        kind   = curve->ikind;
+        stride = getCoordinatesStride();
+    }
+    else
+    {
+        stride = dimension;
+        if (kind == 2 || kind == 4)
+            ++stride;
+    }
+
+    SISLCurve* new_curve = newCurve(coordinates.size() / stride,
+            getCurveOrder(), const_cast<double*>(&knots[0]), const_cast<double*>(&coordinates[0]),
+            kind, dimension, 1);
+
+    if (curve)
+        freeCurve(curve);
+
+    new_curve->cuopen = 1;
+    this->curve = new_curve;
+
+    int status;
+    s1363(curve, &start_param, &end_param, &status);
+    if (status != 0)
+        throw std::runtime_error("cannot get the curve start & end parameters");
+}
 
 double SplineBase::findOneClosestPoint(double const* _pt, double _geores)
 {
@@ -369,7 +412,4 @@ Eigen::Vector3d SplineBase::poseError(Eigen::Vector3d _pt, double _actZRot, doub
     // Returns the error [distance error, orientation error, parameter] 
     return Eigen::Vector3d(distanceError(_pt, param), headingError(_actZRot, param), param);
 }
-
-
-
 

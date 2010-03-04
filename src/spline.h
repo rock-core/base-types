@@ -88,6 +88,12 @@ namespace geometry {
          */
         double findCurvatureMax(); 
 
+        std::vector<double> getCoordinates() const;
+
+        std::vector<double> getKnots() const;
+
+        /** Display the curve properties on the given IO object */
+        void printCurveProperties(std::ostream& io);
 
         /** Generates the curve
          *
@@ -97,9 +103,6 @@ namespace geometry {
          */
         void interpolate(std::vector<double> const& coordinates, std::vector<double> const& parameters = std::vector<double>());
 
-        /** Display the curve properties on the given IO object */
-        void printCurveProperties(std::ostream& io);
-
         /** Reinitializes the curve */
         void clear();
 
@@ -107,6 +110,16 @@ namespace geometry {
         std::vector<double> simplify(double tolerance);
 
         SplineBase const& operator = (SplineBase const& base);
+
+        bool isNURBS() const;
+
+        void reset(std::vector<double> const& coordinates, std::vector<double> const& knots, int kind = -1);
+
+        int getCoordinatesStride() const
+        {
+            if (isNURBS()) return dimension + 1;
+            else return dimension;
+        }
 
     protected:
         void getPoint(double* result, double _param);
@@ -130,7 +143,6 @@ namespace geometry {
         double distanceError(Eigen::Vector3d _pt, double _param);
         //! available only in Spline<3>
         Eigen::Vector3d poseError(Eigen::Vector3d _pt, double _actZRot, double _st_para, double _len_tol);;
-
 
     private:
         int dimension;
