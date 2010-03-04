@@ -187,9 +187,9 @@ void SplineBase::interpolate(std::vector<double> const& points, std::vector<doub
 
 }
 
-void SplineBase::printCurveProperties()
+void SplineBase::printCurveProperties(std::ostream& io)
 {
-    std::cout << "CURVE PROPERTIES " << std::endl
+    io << "CURVE PROPERTIES " << std::endl
 	<< "  Point count  : " << curve->in    << std::endl
 	<< "  Order        : " << curve->ik    << std::endl
 	<< "  Dimension    : " << curve->idim  << std::endl

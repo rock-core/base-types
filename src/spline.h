@@ -88,7 +88,6 @@ namespace geometry {
          */
         double findCurvatureMax(); 
 
-        void printCurveProperties();
 
         /** Generates the curve
          *
@@ -97,6 +96,9 @@ namespace geometry {
          * generated.
          */
         void interpolate(std::vector<double> const& coordinates, std::vector<double> const& parameters = std::vector<double>());
+
+        /** Display the curve properties on the given IO object */
+        void printCurveProperties(std::ostream& io);
 
         /** Reinitializes the curve */
         void clear();
