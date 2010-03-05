@@ -19,7 +19,6 @@ namespace geometry {
      */
     class SplineBase
     {
-        SplineBase();
     public:
         SplineBase(SplineBase const& source);
         virtual ~SplineBase();
