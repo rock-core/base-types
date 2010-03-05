@@ -295,22 +295,31 @@ namespace geometry {
 
         void transform(transform_t const& t)
         {
-            std::vector<double> const& current_coordinates = SplineBase::getCoordinates();
-            std::vector<double> coordinates(current_coordinates.begin(), current_coordinates.end());
-
-            bool is_nurbs = SplineBase::isNURBS();
-            int stride = SplineBase::getCoordinatesStride();
-
-            vector_t v;
-            for (int i = 0; i < SplineBase::getPointCount(); ++i)
+            if (SplineBase::isEmpty())
+                return;
+            else if (SplineBase::isSingleton())
             {
-                memcpy(v.data(), &coordinates[i * stride], sizeof(double) * DIM);
+                vector_t v = getPoint(0);
                 v = t * v;
-                memcpy(&coordinates[i * stride], v.data(), sizeof(double) * DIM);
+                std::vector<double> coordinates(v.data(), v.data() + DIM);
+                SplineBase::reset(coordinates, std::vector<double>());
             }
-            std::vector<double> knots = SplineBase::getKnots();
+            else
+            {
+                std::vector<double> const& current_coordinates = SplineBase::getCoordinates();
+                std::vector<double> coordinates(current_coordinates.begin(), current_coordinates.end());
+                bool is_nurbs = SplineBase::isNURBS();
+                int stride = SplineBase::getCoordinatesStride();
 
-            SplineBase::reset(coordinates, knots);
+                vector_t v;
+                for (int i = 0; i < SplineBase::getPointCount(); ++i)
+                {
+                    memcpy(v.data(), &coordinates[i * stride], sizeof(double) * DIM);
+                    v = t * v;
+                    memcpy(&coordinates[i * stride], v.data(), sizeof(double) * DIM);
+                }
+                SplineBase::reset(coordinates, SplineBase::getKnots());
+            }
         }
     };
 
