@@ -54,6 +54,9 @@ SplineBase const& SplineBase::operator = (SplineBase const& source)
     if (&source == this)
         return *this;
 
+    if (curve)
+        freeCurve(curve);
+
     singleton            = source.singleton;
     dimension            = source.dimension;
     curve                = source.curve ? copyCurve(source.curve) : 0;
