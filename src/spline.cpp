@@ -268,17 +268,13 @@ std::vector<double> SplineBase::getKnots() const
 
 void SplineBase::reset(std::vector<double> const& coordinates, std::vector<double> const& knots, int kind)
 {
-    if (curve)
-    {
-        freeCurve(curve);
-        curve = 0;
-    }
-    has_curvature_max = false;
-    has_curve_length  = false;
-
     if (coordinates.size() == static_cast<size_t>(dimension))
     {
+        if (curve)
+            freeCurve(curve);
+
         start_param = end_param = 0;
+        has_curvature_max = false;
         has_curve_length = true;
         curve_length = 0;
         singleton = coordinates;
@@ -304,6 +300,10 @@ void SplineBase::reset(std::vector<double> const& coordinates, std::vector<doubl
 
     new_curve->cuopen = 1;
     singleton.clear();
+    has_curvature_max = false;
+    has_curve_length = true;
+    if (curve)
+        freeCurve(curve);
     this->curve = new_curve;
 
     int status;
