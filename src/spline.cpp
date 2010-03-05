@@ -394,14 +394,12 @@ vector<double> SplineBase::simplify()
 
 vector<double> SplineBase::simplify(double tolerance)
 {
-    if (!singleton.empty())
+    if (!curve)
     {
         std::vector<double> result;
         result.push_back(0);
         return result;
     }
-    else if (!curve)
-        throw std::runtime_error("the curve is not initialized");
 
     SISLCurve* result = NULL;
     double epsilon[3] = { tolerance, tolerance, tolerance };
