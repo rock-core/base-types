@@ -363,7 +363,13 @@ vector<double> NURBSCurve3D::simplify(double tolerance)
 double NURBSCurve3D::headingError(double _actZRot, double _param)
 {
     // Orientation error
-    return  getHeading(_param) - _actZRot;
+    double error = _actZRot - getHeading(_param);
+    if(error > M_PI)
+	return error - M_2_PI;
+    else if (error < -M_PI)
+	return error + M_2_PI;
+    else
+     	return error;
 }
 
 double NURBSCurve3D::distanceError(Vector3d _pt, double _param)

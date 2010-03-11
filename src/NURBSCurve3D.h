@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <eigen2/Eigen/Core>
+#include <math.h>
 
 struct SISLCurve;
 
