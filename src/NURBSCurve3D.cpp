@@ -264,7 +264,7 @@ void NURBSCurve3D::findClosestPoints(Vector3d const& _pt, vector<double>& _resul
     int status;
     s1953(curve, point, DIM, _geores, _geores, &points_count, &points, &curves_count, &curves, &status);
     if (status != 0)
-        throw std::runtime_error("failed to find the closes points");
+        throw std::runtime_error("failed to find the closest points");
 
     for (int i = 0; i < curves_count; ++i)
         _result_curves.push_back(make_pair(curves[i]->epar1[0], curves[i]->epar1[1]));
@@ -360,14 +360,14 @@ vector<double> NURBSCurve3D::simplify(double tolerance)
     return vector<double>(maxerr, maxerr + 3);
 }
 
-double NURBSCurve3D::headingError(double _actZRot, double _param)
+double NURBSCurve3D::headingError(double _actHeading, double _param)
 {
     // Orientation error
-    double error = _actZRot - getHeading(_param);
+    double error = _actHeading - getHeading(_param);
     if(error > M_PI)
-	return error - M_2_PI;
+	return error - 2*M_PI;
     else if (error < -M_PI)
-	return error + M_2_PI;
+	return error + 2*M_PI;
     else
      	return error;
 }
