@@ -198,7 +198,13 @@ void SplineBase::interpolate(std::vector<double> const& points, std::vector<doub
     has_curve_length  = false;
 
     int const point_count = points.size() / dimension;
-    if (point_count == 1)
+    if (point_count == 0)
+    {
+        end_param = 0;
+        singleton.clear();
+        return;
+    }
+    else if (point_count == 1)
     {
         end_param = 0;
         has_curve_length = true;
