@@ -311,11 +311,11 @@ namespace geometry {
                 int stride = SplineBase::getCoordinatesStride();
 
                 vector_t v;
-                for (int i = 0; i < SplineBase::getPointCount(); ++i)
+                for (int i = 0; i < current_coordinates.size(); i += stride)
                 {
-                    memcpy(v.data(), &coordinates[i * stride], sizeof(double) * DIM);
+                    memcpy(v.data(), &coordinates[i], sizeof(double) * DIM);
                     v = t * v;
-                    memcpy(&coordinates[i * stride], v.data(), sizeof(double) * DIM);
+                    memcpy(&coordinates[i], v.data(), sizeof(double) * DIM);
                 }
                 SplineBase::reset(coordinates, SplineBase::getKnots());
             }
