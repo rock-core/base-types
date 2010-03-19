@@ -365,6 +365,9 @@ double SplineBase::localClosestPointSearch(double* ref_point, double _guess, dou
     if (!curve)
         return getStartParam();
 
+    if (_end < _start)
+        swap(_end, _start);
+
     double param;
 
     // Finds the closest point on the curve
@@ -373,8 +376,14 @@ double SplineBase::localClosestPointSearch(double* ref_point, double _guess, dou
     if (status < 0)
         throw std::runtime_error("failed to find the closest points");
 
-    // Returns the parameter of the point
-    return param;
+    // If the first guess is really wrong, the search might return a parameter
+    // that is not between _start and _end. Validate the result value so that it
+    // does not happen
+    if (param < _start)
+        return _start;
+    else if (param > _end)
+        return _end;
+    else return param;
 }
 
 

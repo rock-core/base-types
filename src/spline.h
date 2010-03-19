@@ -285,7 +285,7 @@ namespace geometry {
         double localClosestPointSearch(vector_t const& _pt, double _guess, double _start, double _end)
         { return localClosestPointSearch(_pt, _guess, _start, _end, SplineBase::getGeometricResolution()); }
 
-        /** Performs a Newton search in the provided parametric interval, starting with the given guess.
+        /** Performs a Newton search in the provided parametric interval, starting with the given guess. The order between _start and _end can be arbitrary.
          *
          * This method is subject to local minima problems
          */
