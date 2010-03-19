@@ -289,8 +289,11 @@ double NURBSCurve3D::localClosestPointSearch(Vector3d const& _pt, double _guess,
     if (status < 0)
         throw std::runtime_error("failed to find the closest points");
 
-    // Returns the parameter of the point
-    return param;
+    // Returns the parameter of the point if param is between _start and -end
+    if( (param > _start && param < _end) || (param > _end && param < _start))
+    	return param;
+    else
+	return _start;
 }
 
 Matrix3d NURBSCurve3D::getFrenetFrame(double _param)
