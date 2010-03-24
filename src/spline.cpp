@@ -497,6 +497,11 @@ double SplineBase::distanceError(Eigen::Vector3d _pt, double _param)
     pt_vec.normalize(); 
     double  angle = atan2(pt_vec.y(),pt_vec.x()) - getHeading(_param);
 
+    if(angle > M_PI)
+	angle -= 2*M_PI;
+    else if (angle < -M_PI)
+	angle += 2*M_PI;
+    
     // Sign of the distance error depending on position of the 
     // actual robot in Frenet frame
     return (angle >= 0.0)?(error.norm()):(-error.norm());
