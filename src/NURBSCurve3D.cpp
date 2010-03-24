@@ -239,7 +239,7 @@ double NURBSCurve3D::findOneClosestPoint(Vector3d const& _pt, double _geores)
     if (points.empty())
     {
         if (curves.empty())
-            throw std::logic_error("no closes point returned by findClosestPoints");
+            throw std::logic_error("no closest point returned by findClosestPoints");
         return curves.front().first;
     }
     else
@@ -399,13 +399,18 @@ double NURBSCurve3D::distanceError(Vector3d _pt, double _param)
     return (angle >= 0.0)?(error.norm()):(-error.norm());
 }
 
-Vector3d NURBSCurve3D::poseError(Vector3d _pt, double _actZRot, double _st_para, double _len_tol)
+Vector3d NURBSCurve3D::poseError(Vector3d _pt, double _actZRot, double _guess_para, double _len_tol)
 {
-    // Finds the search length
-    double del_para = getUnitParameter() *  _len_tol;
+    double start_param = _guess_para - getUnitParameter() *  _len_tol;
+    if(start_param < getStartParam())
+	start_param = getStartParam();
 
-    // Finds teh closest poiont in the search length
-    double param = localClosestPointSearch(_pt, _st_para, _st_para, _st_para + del_para);    
+    double end_param = _guess_para + getUnitParameter() *  _len_tol;
+    if(end_param > getEndParam())
+	end_param = getEndParam();
+
+    // Finds the closest point in the search length
+    double param = localClosestPointSearch(_pt, start_param, _guess_para, end_param);    
 
     // Returns the error [distance error, orientation error, parameter] 
     return Vector3d(distanceError(_pt, param), headingError(_actZRot, param), param);
