@@ -289,6 +289,9 @@ double NURBSCurve3D::localClosestPointSearch(Vector3d const& _pt, double _guess,
     if (status < 0)
         throw std::runtime_error("failed to find the closest points");
 
+
+    std::cout << " Pose Error  " << param << endl;
+
     // Returns the parameter of the point if param is between _start and -end
     if( (param > _start && param < _end) || (param > _end && param < _start))
     	return param;
@@ -386,6 +389,11 @@ double NURBSCurve3D::distanceError(Vector3d _pt, double _param)
     pt_vec.normalize(); 
     double  angle = atan2(pt_vec.y(),pt_vec.x()) - getHeading(_param);
 
+    if(angle > M_PI)
+	angle -= 2*M_PI;
+    else if (angle < -M_PI)
+	angle += 2*M_PI;
+    
     // Sign of the distance error depending on position of the 
     // actual robot in Frenet frame
     return (angle >= 0.0)?(error.norm()):(-error.norm());
