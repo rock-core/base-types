@@ -8,6 +8,16 @@ using namespace std;
 using namespace base::geometry;
 using namespace Eigen;
 
+static double angleLimit(double angle)
+{
+    if(angle > M_PI)
+	return angle - 2*M_PI;
+    else if (angle < -M_PI)
+	return angle + 2*M_PI;
+    else
+     	return angle;
+}
+
 SplineBase::SplineBase (int dim, double _geometric_resolution, int _curve_order)
     : dimension(dim), curve(0), geometric_resolution(_geometric_resolution)
     , curve_order(_curve_order)
@@ -475,13 +485,7 @@ double SplineBase::getHeading(double _param)
 double SplineBase::headingError(double _actHeading, double _param)
 {
     // Orientation error
-    double error = _actHeading - getHeading(_param);
-    if(error > M_PI)
-	return error - 2*M_PI;
-    else if (error < -M_PI)
-	return error + 2*M_PI;
-    else
-     	return error;
+    return angleLimit( _actHeading - getHeading(_param));
 }
 
 double SplineBase::distanceError(Eigen::Vector3d _pt, double _param)
@@ -495,12 +499,7 @@ double SplineBase::distanceError(Eigen::Vector3d _pt, double _param)
     // Finds the angle of error vector to the Frenet X axis 
     Vector2d pt_vec(error(0),error(1));
     pt_vec.normalize(); 
-    double  angle = atan2(pt_vec.y(),pt_vec.x()) - getHeading(_param);
-
-    if(angle > M_PI)
-	angle -= 2*M_PI;
-    else if (angle < -M_PI)
-	angle += 2*M_PI;
+    double  angle = angleLimit(atan2(pt_vec.y(),pt_vec.x()) - getHeading(_param));
     
     // Sign of the distance error depending on position of the 
     // actual robot in Frenet frame
