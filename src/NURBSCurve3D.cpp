@@ -8,6 +8,17 @@ using namespace std;
 using namespace base::geometry;
 using namespace Eigen;
 
+double angleLimit(double angle)
+{
+    if(angle > M_PI)
+	return angle - 2*M_PI;
+    else if (angle < -M_PI)
+	return angle + 2*M_PI;
+    else
+     	return angle;
+}
+
+
 NURBSCurve3D::NURBSCurve3D ( double _geometric_resolution, int _curve_order,
         std::vector<Eigen::Vector3d> const& points)
     : curve(0), geometric_resolution(_geometric_resolution)
@@ -369,13 +380,7 @@ vector<double> NURBSCurve3D::simplify(double tolerance)
 double NURBSCurve3D::headingError(double _actHeading, double _param)
 {
     // Orientation error
-    double error = _actHeading - getHeading(_param);
-    if(error > M_PI)
-	return error - 2*M_PI;
-    else if (error < -M_PI)
-	return error + 2*M_PI;
-    else
-     	return error;
+    return angleLimit( _actHeading - getHeading(_param));
 }
 
 double NURBSCurve3D::distanceError(Vector3d _pt, double _param)
@@ -387,13 +392,8 @@ double NURBSCurve3D::distanceError(Vector3d _pt, double _param)
     // Finds the angle of error vector to the Frenet X axis 
     Vector2d pt_vec(error(0),error(1));
     pt_vec.normalize(); 
-    double  angle = atan2(pt_vec.y(),pt_vec.x()) - getHeading(_param);
+    double  angle = angleLimit(atan2(pt_vec.y(),pt_vec.x()) - getHeading(_param));
 
-    if(angle > M_PI)
-	angle -= 2*M_PI;
-    else if (angle < -M_PI)
-	angle += 2*M_PI;
-    
     // Sign of the distance error depending on position of the 
     // actual robot in Frenet frame
     return (angle >= 0.0)?(error.norm()):(-error.norm());
