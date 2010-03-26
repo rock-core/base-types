@@ -257,6 +257,32 @@ double NURBSCurve3D::findOneClosestPoint(Vector3d const& _pt, double _geores)
         return points.front();
 }
 
+double NURBSCurve3D::findOneClosestParamPoint(Eigen::Vector3d const& _pt, double _param)
+{ return findOneClosestParamPoint(_pt, _param, geometric_resolution); }
+
+double NURBSCurve3D::findOneClosestParamPoint(Vector3d const& _pt, double _param, double _geores)
+{
+    vector<double> points;
+    vector< pair<double, double> > curves;
+    findClosestPoints(_pt, points, curves, _geores);
+    if (points.empty())
+    {
+        if (curves.empty())
+            throw std::logic_error("no closest point returned by findClosestPoints");
+        return curves.front().first;
+    }
+    else
+    {
+        double closestPoint = points.front();	
+	for(std::vector<double>::iterator it = points.begin()+1; it != points.end(); it++) 
+        {
+            if( fabs(*it - _param) < fabs(closestPoint - _param) )
+		closestPoint = *it;
+        }
+        return closestPoint;
+    }
+}
+
 void NURBSCurve3D::findClosestPoints(Vector3d const& _pt, vector<double>& _points, vector< pair<double, double> >& _curves)
 {
     return findClosestPoints(_pt, _points, _curves, geometric_resolution);
@@ -401,16 +427,22 @@ double NURBSCurve3D::distanceError(Vector3d _pt, double _param)
 
 Vector3d NURBSCurve3D::poseError(Vector3d _pt, double _actZRot, double _guess_para, double _len_tol)
 {
-    double start_param = _guess_para; // - getUnitParameter() *  _len_tol;
-    if(start_param < getStartParam())
-	start_param = getStartParam();
-
-    double end_param = _guess_para + getUnitParameter() *  _len_tol;
-    if(end_param > getEndParam())
-	end_param = getEndParam();
+//    double start_param = _guess_para; // - getUnitParameter() *  _len_tol;
+//    if(start_param < getStartParam())
+//	start_param = getStartParam();
+//
+//    double end_param = _guess_para + getUnitParameter() *  _len_tol;
+//    if(end_param > getEndParam())
+//	end_param = getEndParam();
 
     // Finds the closest point in the search length
-    double param = localClosestPointSearch(_pt, start_param,  _guess_para, end_param);    
+//    double param = localClosestPointSearch(_pt, start_param,  _guess_para, end_param);    
+
+    double param = findOneClosestPoint(_pt);    
+
+    // NEEDS TO WRITE CODE TO FIND MULTIPLE GLOBAL SEARCH POINTS AND FIND 
+    // THE CLOSEST TO THE LAST PARAMETER
+
 
     // Returns the error [distance error, orientation error, parameter] 
     return Vector3d(distanceError(_pt, param), headingError(_actZRot, param), param);

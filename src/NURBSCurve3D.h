@@ -109,6 +109,21 @@ namespace geometry {
 
             /** \overload
              */
+            double findOneClosestParamPoint(Eigen::Vector3d const& _pt, double _param);
+
+            /** Returns a single closest point to _pt and given parameter
+             *
+             * This is a convenience method that calls findClosestPoint and find the closest 
+	     * points and returns point closest to the parameter
+             *
+             * @return the parameter of the found closes point
+             * @throw std::runtime_error if no points have been found (should not happen)
+             * @see localClosestPointSearch findClosestPoints findOneClosestPoint
+             */
+            double findOneClosestParamPoint(Eigen::Vector3d const& _pt, double _param, double _geometric_resolution);
+
+            /** \overload
+             */
             void findClosestPoints(Eigen::Vector3d const& _pt,
                     std::vector<double>& _points,
                     std::vector< std::pair<double, double> >& _curves);
