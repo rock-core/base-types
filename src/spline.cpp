@@ -531,15 +531,11 @@ double SplineBase::distanceError(Eigen::Vector3d _pt, double _param)
     return (angle >= 0.0)?(error.norm()):(-error.norm());
 }
 
-Eigen::Vector3d SplineBase::poseError(Eigen::Vector3d _pt, double _actZRot, double _st_para, double _len_tol)
+Eigen::Vector3d SplineBase::poseError(Eigen::Vector3d _position, double _heading, double _guess)
 {
-    // Finds the search length
-    double del_para = getUnitParameter() *  _len_tol;
-
-    // Finds teh closest poiont in the search length
-    double param = localClosestPointSearch(_pt.data(), _st_para, _st_para, _st_para + del_para, getGeometricResolution());
+    double param = findOneClosestPoint(_position.data(), _guess, getGeometricResolution());
 
     // Returns the error [distance error, orientation error, parameter] 
-    return Eigen::Vector3d(distanceError(_pt, param), headingError(_actZRot, param), param);
+    return Eigen::Vector3d(distanceError(_position, param), headingError(_heading, param), param);
 }
 

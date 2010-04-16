@@ -153,7 +153,7 @@ namespace geometry {
         //! available only in Spline<3>
         double distanceError(Eigen::Vector3d _pt, double _param);
         //! available only in Spline<3>
-        Eigen::Vector3d poseError(Eigen::Vector3d _pt, double _actZRot, double _st_para, double _len_tol);;
+        Eigen::Vector3d poseError(Eigen::Vector3d _pt, double _actZRot, double _st_para);
 
     private:
         std::vector<double> singleton;
@@ -204,8 +204,15 @@ namespace geometry {
         double distanceError(Eigen::Vector3d _pt, double _param)
         { return SplineBase::distanceError(_pt, _param); }
 
-        Eigen::Vector3d poseError(Eigen::Vector3d _pt, double _actZRot, double _st_para, double _len_tol)
-        { return SplineBase::poseError(_pt, _actZRot, _st_para, _len_tol); }
+        /** Searches for the closest point in the curve, and returns the pose
+         * error between the frenet frame on the curve and the given pose given
+         * by _position and _heading.
+         *
+         * The returned vector is (distance_error, heading_error,
+         * curve_parameter)
+         */
+        Eigen::Vector3d poseError(Eigen::Vector3d _position, double _heading, double _guess)
+        { return SplineBase::poseError(_position, _heading, _guess); }
     };
 
     template<int DIM> struct SplineBaseClass
