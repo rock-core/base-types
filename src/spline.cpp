@@ -188,11 +188,7 @@ bool SplineBase::isNURBS() const
 
 void SplineBase::interpolate(std::vector<double> const& points, std::vector<double> const& parameters)
 {
-    if (curve)
-    {
-        freeCurve(curve);
-        curve = 0;
-    }
+    clear();
     start_param = 0.0;
     has_curvature_max = false;
     has_curve_length  = false;
