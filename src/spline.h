@@ -292,7 +292,8 @@ namespace geometry {
         double localClosestPointSearch(vector_t const& _pt, double _guess, double _start, double _end, double _geores)
         { return SplineBase::localClosestPointSearch(_pt.data(), _guess, _start, _end, _geores); }
 
-        void transform(transform_t const& t)
+        template<typename Transform>
+        void transform(Transform const& t)
         {
             if (SplineBase::isEmpty())
                 return;
