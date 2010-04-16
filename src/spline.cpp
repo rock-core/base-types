@@ -324,7 +324,7 @@ void SplineBase::reset(std::vector<double> const& coordinates, std::vector<doubl
         throw std::runtime_error("cannot get the curve start & end parameters");
 }
 
-double SplineBase::findOneClosestPoint(double const* _pt, double _geores)
+double SplineBase::findOneClosestPoint(double const* _pt, double _guess, double _geores)
 {
     if (!curve)
         return getStartParam();
@@ -332,14 +332,39 @@ double SplineBase::findOneClosestPoint(double const* _pt, double _geores)
     vector<double> points;
     vector< pair<double, double> > curves;
     findClosestPoints(_pt, points, curves, _geores);
+
+    double closestPoint;
     if (points.empty())
     {
         if (curves.empty())
-            throw std::logic_error("no closes point returned by findClosestPoints");
-        return curves.front().first;
+            throw std::logic_error("no closest point returned by findClosestPoints");
+        else
+            closestPoint = curves.front().first;
     }
     else
-        return points.front();
+    {
+        closestPoint = points.front();
+        for(std::vector<double>::iterator it = points.begin() + 1; it != points.end(); ++it) 
+        {
+            if( fabs(*it - _guess) < fabs(closestPoint - _guess) )
+                closestPoint = *it;
+        }
+    }
+
+    for (std::vector< pair<double, double> >::iterator it = curves.begin();
+            it != curves.end(); ++it)
+    {
+        if (it->first <= _guess && it->second >= _guess)
+            return _guess;
+
+        if (fabs(it->first  - _guess) < fabs(closestPoint  - _guess))
+            closestPoint = it->first;
+
+        if (fabs(it->second - _guess) < fabs(closestPoint - _guess))
+            closestPoint = it->second;
+    }
+
+    return closestPoint;
 }
 
 void SplineBase::findClosestPoints(double const* ref_point, vector<double>& _result_points, vector< pair<double, double> >& _result_curves, double _geores)

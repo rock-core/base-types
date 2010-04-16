@@ -134,7 +134,7 @@ namespace geometry {
 
     protected:
         void getPoint(double* result, double _param);
-        double findOneClosestPoint(double const* _pt, double _geores);
+        double findOneClosestPoint(double const* _pt, double _guess, double _geores);
         void findClosestPoints(double const* ref_point,
                 std::vector<double>& _result_points,
                 std::vector< std::pair<double, double> >& _result_curves,
@@ -237,11 +237,6 @@ namespace geometry {
             return result;
         }
 
-        /** \overload
-         */
-        double findOneClosestPoint(vector_t const& _pt)
-        { return findOneClosestPoint(_pt, SplineBase::getGeometricResolution()); }
-
         /** Compute the curve from the given set of points */
         void interpolate(std::vector<vector_t> const& points, std::vector<double> const& parameters = std::vector<double>())
         {
@@ -251,16 +246,32 @@ namespace geometry {
             SplineBase::interpolate(coordinates, parameters);
         }
 
-        /** Returns a single closest point to _pt
+        /** \overload
+         */
+        double findOneClosestPoint(vector_t const& _pt)
+        { return findOneClosestPoint(_pt, SplineBase::getGeometricResolution()); }
+
+        /** \overload
          *
-         * This is a convenience method that calls findClosestPoints
-         *
-         * @return the parameter of the found closes point
-         * @throw std::runtime_error if no points have been found (should not happen)
-         * @see localClosestPointSearch findClosestPoints
+         * Calls findOneClosestPoint using the start parameter as the guess
+         * parameter. I.e. it will always return the point closest to the start
+         * of the curve.
          */
         double findOneClosestPoint(vector_t const& _pt, double _geometric_resolution)
-        { return SplineBase::findOneClosestPoint(_pt.data(), _geometric_resolution); }
+        { return findOneClosestPoint(_pt, SplineBase::getStartParam(), _geometric_resolution); }
+
+        /** Returns a single closest point to _pt
+         *
+         * This is a convenience method that calls findClosestPoints and returns
+         * one single parameter in the values returned. The returned parameter
+         * is the closes point closest to _guess.
+         *
+         * @return the parameter of the found closes point
+         * @throw std::logic_error if no points have been found (should not happen)
+         * @see localClosestPointSearch findClosestPoints
+         */
+        double findOneClosestPoint(vector_t const& _pt, double _guess, double _geometric_resolution)
+        { return SplineBase::findOneClosestPoint(_pt.data(), _guess, _geometric_resolution); }
 
         /** \overload
          */
