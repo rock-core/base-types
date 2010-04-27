@@ -43,17 +43,10 @@ namespace base { namespace samples {
         Eigen::Matrix3d cov_angular_velocity;
 	
 	void initSane() {
-	    cov_orientation = Eigen::Matrix3d::Identity();
-	    cov_orientation *= INFINITY;
-
-	    cov_position = Eigen::Matrix3d::Identity();
-	    cov_position *= INFINITY;
-
-	    cov_angular_velocity = Eigen::Matrix3d::Identity();
-	    cov_angular_velocity *= INFINITY;
-
-	    cov_velocity = Eigen::Matrix3d::Identity();
-	    cov_velocity *= INFINITY;
+	    invalidateOrienation();
+	    invalidatePosition();
+	    invalidateVelocity();
+	    invalidateAngularVelocity();
 	    
 	    position = Eigen::Vector3d(0,0,0);	    
 	    orientation = Eigen::Quaterniond::Identity();
@@ -67,6 +60,25 @@ namespace base { namespace samples {
 	    return !isinf(cov_orientation(0,0)) && !isinf(cov_orientation(1,1)) && !isinf(cov_orientation(2,2));
 	}
 	
+	void invalidatePosition() {
+	    cov_position = Eigen::Matrix3d::Identity();
+	    cov_position *= INFINITY;	  
+	}
+	
+	void invalidateOrienation() {
+	    cov_orientation = Eigen::Matrix3d::Identity();
+	    cov_orientation *= INFINITY;
+	}
+	
+	void invalidateVelocity() {
+	    cov_velocity = Eigen::Matrix3d::Identity();
+	    cov_velocity *= INFINITY;	  
+	}
+	
+	void invalidateAngularVelocity() {
+	    cov_angular_velocity = Eigen::Matrix3d::Identity();
+	    cov_angular_velocity *= INFINITY;
+	}
     };
 }}
 
