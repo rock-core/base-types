@@ -52,11 +52,11 @@ namespace base { namespace samples {
 	    orientation = Eigen::Quaterniond::Identity();
 	}
 	
-	bool hasValidPosition() {
+	bool hasValidPosition() const {
 	    return !isinf(cov_position(0,0)) && !isinf(cov_position(1,1)) && !isinf(cov_position(2,2));
 	}
 	
-	bool hasValidOrientation() {
+	bool hasValidOrientation() const {
 	    return !isinf(cov_orientation(0,0)) && !isinf(cov_orientation(1,1)) && !isinf(cov_orientation(2,2));
 	}
 	
