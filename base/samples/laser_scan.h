@@ -4,6 +4,8 @@
 #ifndef __orogen
 #include <vector>
 #include <boost/cstdint.hpp>
+#include <Eigen/Geometry>
+#include <stdexcept>
 #endif
 
 #include <base/time.h>
@@ -37,6 +39,12 @@ namespace base { namespace samples {
          */
         std::vector<uint32_t> ranges;
 
+	/** minimal valid range returned by laserscanner */
+	uint32_t minRange;
+	
+	/** maximal valid range returned by laserscanner */
+	uint32_t maxRange;
+	
         /** The remission value from the laserscan.
 	 * This value is not normalised and depends on various factors, like distance, 
 	 * angle of incidence and reflectivity of object.
@@ -46,6 +54,30 @@ namespace base { namespace samples {
 #ifndef __orogen
         LaserScan()
             : start_angle(0), angular_resolution(0), speed(0) {}
+            
+        bool isValidBeam(const unsigned int i) const {
+	    if(i > ranges.size())
+		throw std::out_of_range("Invalid beam index given");
+
+	    uint32_t range = ranges[i];
+	    if(range > minRange && range < maxRange)
+		return true;
+	    
+	    return false;
+	}
+            
+        bool getPointFromScanBeam(const unsigned int i, Eigen::Vector3d &point) const
+	{
+	    if(!isValidBeam(i))
+		return false;
+	    
+	    //get a vector with the right length
+	    point = Eigen::Vector3d(0.0 , ranges[i] / 1000.0, 0.0);
+	    //rotate
+	    point = Eigen::Quaterniond(Eigen::AngleAxisd(start_angle + i * angular_resolution, Eigen::Vector3d::UnitZ())) * point;
+	    
+	    return true;
+	}
 #endif
     };
 }} // namespaces
