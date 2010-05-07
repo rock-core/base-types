@@ -78,6 +78,21 @@ namespace base { namespace samples {
 	    
 	    return true;
 	}
+	
+	std::vector<Eigen::Vector3d> convertScanToPointCloud(const Eigen::Transform3d& transform) const
+	{
+	    std::vector<Eigen::Vector3d> pointCloud;
+	    
+	    for(unsigned int i = 0; i < ranges.size(); i++) {
+		Eigen::Vector3d point;
+		if(getPointFromScanBeam(i, point)) {
+		    point = transform * point;
+		    pointCloud.push_back(point);
+		}
+	    }
+	    
+	    return pointCloud;
+	}
 #endif
     };
 }} // namespaces
