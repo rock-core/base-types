@@ -124,13 +124,14 @@ namespace base { namespace samples { namespace frame {
 		attributes.clear();
 	    }
 
-	    bool isHDR()       {
+	    bool isHDR()const       
+	    {
 		return (hasAttribute("hdr")&&getAttribute<bool>("hdr"));
 	    }
-	    bool isGrayscale() {
+	    bool isGrayscale()const {
 		return this->frame_mode == MODE_GRAYSCALE;
 	    }
-	    bool isRGB()       {
+	    bool isRGB()const       {
 		return this->frame_mode == MODE_RGB;
 	    }
 
@@ -145,7 +146,7 @@ namespace base { namespace samples { namespace frame {
 	    int getChannelCount() const {
 		return getChannelCount(this->frame_mode);
 	    }
-	    static int getChannelCount(frame_mode_t mode)
+	    static int getChannelCount(frame_mode_t mode)const
 	    {
 		switch (mode)
 		{
