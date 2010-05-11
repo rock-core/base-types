@@ -100,6 +100,11 @@ namespace base { namespace samples { namespace frame {
 	    
 	    Frame(const Frame &other)
 	    {
+		init(other);
+	    }
+	    
+	    void init(const Frame &other)
+	    {
 		init(other.getWidth(),other.getHeight(),other.getDataDepth(),other.getFrameMode(),other.isHDR());
 	    }
 
@@ -146,7 +151,7 @@ namespace base { namespace samples { namespace frame {
 	    int getChannelCount() const {
 		return getChannelCount(this->frame_mode);
 	    }
-	    static int getChannelCount(frame_mode_t mode)const
+	    static int getChannelCount(frame_mode_t mode)
 	    {
 		switch (mode)
 		{
