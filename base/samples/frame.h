@@ -337,9 +337,9 @@ namespace base { namespace samples { namespace frame {
 		return cv::Mat(size.height,size.width, itype, getImagePtr());
 	    }
 	    #else
-	      #define convertToCvMat no_openc_cv_2_1_found_include_cv_h_first
+	      #define convertToCvMat If_you_want_to_use_convertToCvMat_include_opencv_2_1_first
 	    #endif
-	#endif
+	 #endif
 
 	    // The unix time at which the camFrame was captured
 	    base::Time              time;
