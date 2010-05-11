@@ -97,6 +97,11 @@ namespace base { namespace samples { namespace frame {
 	    {
 		init(width,height,depth,mode,hdr);
 	    }
+	    
+	    Frame(const Frame &other)
+	    {
+		init(other.getWidth(),other.getHeight(),other.getDataDepth(),other.getFrameMode(),other.isHDR());
+	    }
 
 	    void init(uint16_t width, uint16_t height, uint8_t depth, frame_mode_t mode, bool hdr = false)
 	    {
@@ -120,7 +125,7 @@ namespace base { namespace samples { namespace frame {
 	    }
 
 	    bool isHDR()       {
-		return hasAttribute("hdr");
+		return (hasAttribute("hdr")&&getAttribute<bool>("hdr"));
 	    }
 	    bool isGrayscale() {
 		return this->frame_mode == MODE_GRAYSCALE;
