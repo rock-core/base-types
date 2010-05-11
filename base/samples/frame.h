@@ -98,16 +98,27 @@ namespace base { namespace samples { namespace frame {
 		init(width,height,depth,mode,hdr);
 	    }
 	    
+	    //makes a copy of other
 	    Frame(const Frame &other)
 	    {
 		init(other);
 	    }
 	    
+	    //makes a copy of other
 	    void init(const Frame &other)
 	    {
-		init(other.getWidth(),other.getHeight(),other.getDataDepth(),other.getFrameMode(),other.isHDR());
+	       //hdr is copied by attributes = other.attributes;
+	       //change size if the frame does not fit
+	       if(other.getHeight() != getHeight() || other.getWidth() !=  getWidth() || other.getFrameMode() != getFrameMode())
+		 init(other.getWidth(),other.getHeight(),other.getDataDepth(),other.getFrameMode(),false);
+	       
+	       setImage(other.getImage());
+	       attributes = other.attributes;
+	       time = other.time;
+	       received_time = other.received_time;
+	       frame_status = other.frame_status;
 	    }
-
+	    
 	    void init(uint16_t width, uint16_t height, uint8_t depth, frame_mode_t mode, bool hdr = false)
 	    {
 		this->frame_mode = mode;
