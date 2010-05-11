@@ -319,8 +319,8 @@ namespace base { namespace samples { namespace frame {
 		return ;
 	    }
 
-	    //check if opencv 2.1 is present
-	    #if defined( __OPENCV_CV_H__) ||defined (__OPENCV_CV_HPP__)
+	    //check if opencv is present
+	    #if defined( __OPENCV_CV_H__) ||defined (__OPENCV_CV_HPP__) || defined(_CV_H) || defined(_CV_HPP)
 	    inline cv::Mat convertToCvMat()
 	    {
 		int itype = 0;
@@ -359,7 +359,7 @@ namespace base { namespace samples { namespace frame {
 		return cv::Mat(size.height,size.width, itype, getImagePtr());
 	    }
 	    #else
-	      #define convertToCvMat If_you_want_to_use_convertToCvMat_include_opencv_2_1_first
+	      #define convertToCvMat If_you_want_to_use_convertToCvMat_include_opencv_2_first
 	    #endif
 	 #endif
 
