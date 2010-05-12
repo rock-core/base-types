@@ -386,6 +386,14 @@ namespace base { namespace samples { namespace frame {
 	    frame_mode_t            frame_mode;
 	    frame_status_t	    frame_status;
 	};
+
+	struct FramePair
+	{
+	    base::Time time;
+	    Frame first;
+            Frame second;
+	    uint64_t id;	
+	};
 }}}
 
 #endif
