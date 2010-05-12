@@ -13,8 +13,11 @@ namespace base
     typedef Eigen::Vector3d    Position;
     typedef Eigen::Quaterniond Orientation;
 
+    typedef Eigen::Vector2d    Position2D;
+    typedef double             Orientation2D;
+
     /**
-     * Representation for a pose
+     * Representation for a pose in 3D
      */
     struct Pose
     {
@@ -25,6 +28,21 @@ namespace base
             : position(Position::Identity()), orientation(Orientation::Identity()) {}
 
         Pose(Position const& p, Orientation const& o)
+            : position(p), orientation(o) {}
+    };
+
+    /**
+     * Representation for a pose in 2D
+     */
+    struct Pose2D
+    {
+        Position2D    position;
+        Orientation2D orientation;
+
+        Pose2D()
+            : position(Position2D::Identity()), orientation(0) {}
+
+        Pose2D(Position2D const& p, Orientation2D const& o)
             : position(p), orientation(o) {}
     };
 }
