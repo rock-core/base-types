@@ -320,7 +320,7 @@ namespace base { namespace samples { namespace frame {
 	    }
 
 	    //check if opencv is present
-	    #if defined( __OPENCV_CV_H__) ||defined (__OPENCV_CV_HPP__) || defined(_CV_H) || defined(_CV_HPP)
+	    #if defined( __OPENCV_CV_H__) ||defined (__OPENCV_CV_HPP__) || defined(_CV_H_) || defined(_CV_HPP_)
 	    inline cv::Mat convertToCvMat()
 	    {
 		int itype = 0;
