@@ -5,22 +5,26 @@
 #include <base/time.h>
 #include <base/pose.h>
 
-namespace base
+namespace base 
 {
-    /** Class which provides an abstract odometry model for a robot
+namespace odometry
+{
+
+    /** Class which provides common methods for bodystate handling which can be
+     * used in the odometry models 
      */
-    template <class BodyState_, class Pose_>
-    class Odometry
+    template <class BodyState_>
+    class State
     {
     public:
-	Odometry() 
+	State() 
 	    : update_counter(0) {}
 
 	/** 
 	 * will set the current body state and store the previous state
 	 * to perform the odometry calculations.
 	 */
-	virtual void updateBodyState( const BodyState_& state )
+	virtual void update( const BodyState_& state )
 	{
 	    // make the current configuration the previous configuration
 	    state_k = state_kp;
@@ -47,12 +51,12 @@ namespace base
 	    return state_kp.time - state_k.time;
 	}
 
-	const BodyState_& getCurrentBodyState() const
+	const BodyState_& getCurrent() const
 	{
 	    return state_kp;
 	}
 
-	const BodyState_& getPreviousBodyState() const
+	const BodyState_& getPrevious() const
 	{
 	    return state_k;
 	}
@@ -65,16 +69,15 @@ namespace base
     };
 
     /** 
-     * base class an odometry model with a gaussian error model
+     * base class of a 3d odometry model with a gaussian error model
      */
-    template <class BodyState_>
-    class GaussianOdometry : public Odometry<BodyState_, Pose_>
+    class Gaussian3D
     {
 	/**
 	 * return the pose delta in the body fixed frame of the previous
 	 * state. 
 	 */
-	virtual Pose_ getPoseDelta() = 0;
+	virtual Pose getPoseDelta() = 0;
 	
 	/**
 	 * returns the covariance matrix of the linear velocity 
@@ -88,25 +91,16 @@ namespace base
 	virtual Eigen::Matrix3d getOrientationError() = 0;
     };
 
-    /**
-     * base class of an odometry with an arbitrary error model
-     * which can be sampled.
+    /** 
+     * base class of a 2d odometry model with an arbitrary error model, which
+     * can be sampled from
      */
-    template <class BodyState_, class Pose_>
-    class SamplingOdometry : public Odometry<BodyState_, Pose_>
+    class Sampling2D
     {
-	virtual Pose_ getPoseDeltaSample() = 0;
+	virtual Pose2D getPoseDeltaSample() = 0;
     };
 
-    template <class BodyState_>
-    class GaussianOdometry3D : public GaussianOdometry<BodyState_, base::Pose>
-    {
-    };
-
-    template <class BodyState_>
-    class SamplingOdometry2D : public SamplingOdometry<BodyState_, base::Pose2D>
-    {
-    };
+}
 }
 
 #endif
