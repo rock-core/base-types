@@ -91,6 +91,13 @@ namespace odometry
 	virtual Eigen::Matrix3d getOrientationError() = 0;
     };
 
+    class Gaussian2D
+    {
+	virtual Pose2D getPoseDelta() = 0;
+	virtual Eigen::Matrix2d getPositionError() = 0;
+	virtual double getOrientationError() = 0;
+    };
+
     /** 
      * base class of a 2d odometry model with an arbitrary error model, which
      * can be sampled from
