@@ -29,6 +29,14 @@ namespace base
 
         Pose(Position const& p, Orientation const& o)
             : position(p), orientation(o) {}
+
+	Eigen::Transform3d toTransform() const
+	{
+	    Eigen::Transform3d t;
+	    t = orientation;
+	    t.translate( position );
+	    return t;
+	}
     };
 
     /**
