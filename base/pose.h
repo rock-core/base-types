@@ -34,7 +34,7 @@ namespace base
 	{
 	    Eigen::Transform3d t;
 	    t = orientation;
-	    t.translate( position );
+	    t.pretranslate( position );
 	    return t;
 	}
     };
