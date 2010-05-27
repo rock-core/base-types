@@ -17,6 +17,7 @@
 
 #include "../time.h"
 
+
 namespace base { namespace samples { namespace frame { 
 	struct frame_attrib_t
 	{
@@ -72,7 +73,43 @@ namespace base { namespace samples { namespace frame {
 	    typedef uint16_t channel_t;
 	};
 	#endif
-
+	
+	#ifndef __orogen
+	//iterates over one specific column
+	//this is index save
+	class ConstColumnIterator
+	{
+	  private:
+	    uint32_t row_size;
+	    const uint8_t* pdata;
+	    const uint8_t* pend;
+	  public:
+	  ConstColumnIterator(uint32_t _row_size,const uint8_t* _pdata, const uint8_t* _pend)
+	    :row_size(_row_size),pdata(_pdata),pend(_pend){}
+	  ConstColumnIterator()  //end iterator
+	  {row_size =0;pdata = NULL;pend = NULL;}
+	  
+	  ConstColumnIterator &operator++()
+	  {
+	    if(pdata >= pend)
+	    {
+	      pdata = NULL;
+	      pend = NULL;
+	      return *this;
+	    }
+	    pdata += row_size;
+	    return *this;
+	  }
+	  bool operator==(const ConstColumnIterator &other)const{ return (pdata == other.pdata);}
+	  const uint8_t* operator*()const{return pdata;}
+	  bool operator==(uint8_t* p)const{return (pdata == p);}
+	  bool operator!=(uint8_t* p)const{return !(pdata == p);}
+	  bool operator!=(const ConstColumnIterator &other)const{return !(pdata == other.pdata);}
+	  void operator=(const ConstColumnIterator &other)
+	  {row_size = other.row_size;pdata = other.pdata;pend = other.pend;}
+	};
+	#endif
+	
 	/* A single image frame */
 	struct Frame
 	{
@@ -99,20 +136,20 @@ namespace base { namespace samples { namespace frame {
 	    }
 	    
 	    //makes a copy of other
-	    Frame(const Frame &other)
+	    Frame(const Frame &other,bool bcopy = true)
 	    {
-		init(other);
+		init(other,bcopy);
 	    }
 	    
 	    //makes a copy of other
-	    void init(const Frame &other)
+	    void init(const Frame &other,bool bcopy = true)
 	    {
 	       //hdr is copied by attributes = other.attributes;
 	       //change size if the frame does not fit
 	       if(other.getHeight() != getHeight() || other.getWidth() !=  getWidth() || other.getFrameMode() != getFrameMode())
-		 init(other.getWidth(),other.getHeight(),other.getDataDepth(),other.getFrameMode(),false);
-	       
-	       setImage(other.getImage());
+		  init(other.getWidth(),other.getHeight(),other.getDataDepth(),other.getFrameMode(),false);
+	       if(bcopy)
+		  setImage(other.getImage());
 	       attributes = other.attributes;
 	       time = other.time;
 	       received_time = other.received_time;
@@ -195,6 +232,23 @@ namespace base { namespace samples { namespace frame {
 	    inline int getPixelSize() const {
 		return this->pixel_size;
 	    }
+	    
+	    /**
+	     * Returns the size of a row (in bytes). This takes into account the image
+	     * mode as well as the data depth.
+	     * @return Number of channels * width * bytes used to represent one colour
+	     */
+	    inline int getRowSize() const {
+		return this->row_size;
+	    }
+
+	     /**
+	     * Returns the total count of pixels in this frame * data depth
+	     * @return Returns the overall number of pixels *data depth
+	     */
+	    inline uint32_t getNumberOfBytes() const {
+		return getPixelSize()*getPixelCount();
+	    }
 
 	    /**
 	     * Returns the total count of pixels in this frame
@@ -214,6 +268,7 @@ namespace base { namespace samples { namespace frame {
 		// Update pixel size
 		uint32_t comp_size = ((this->data_depth + 7) / 8);
 		this->pixel_size = getChannelCount(this->frame_mode) * comp_size;
+		this->row_size = this->pixel_size * getWidth();
 	    }
 
 	    inline frame_size_t getSize() const {
@@ -297,6 +352,7 @@ namespace base { namespace samples { namespace frame {
 		}
 		return false;
 	    }
+	    
 
 	    template<typename T>
 	    inline void setAttribute(const std::string &name,const T &data)
@@ -318,7 +374,27 @@ namespace base { namespace samples { namespace frame {
 		attributes.back().set(name,strstr.str());
 		return ;
 	    }
-
+	    
+	    ConstColumnIterator getColumnBegin(uint8_t column)const
+	    {
+	      if(column >= getWidth())
+	      {
+		 std::cerr << "Frame: "
+		              << __FUNCTION__ << " (" << __FILE__ << ", line "
+		              << __LINE__ << "): " << "out of index!"
+		              << std::endl;
+		return ConstColumnIterator();
+	      }
+	      const uint8_t *pdata = getImageConstPtr()+column*getPixelSize();
+	      return ConstColumnIterator(getRowSize(),pdata,pdata+getRowSize()*getHeight());
+	    }
+	    
+	    ConstColumnIterator end()
+	    {
+	      static ConstColumnIterator iter;
+	      return iter;
+	    }
+	    
 	    //check if opencv is present
 	    #if defined( __OPENCV_CV_H__) ||defined (__OPENCV_CV_HPP__) || defined(_CV_H_) || defined(_CV_HPP_)
 	    inline cv::Mat convertToCvMat()
@@ -358,7 +434,7 @@ namespace base { namespace samples { namespace frame {
 		}
 		return cv::Mat(size.height,size.width, itype, getImagePtr());
 	    }
-	    #else
+	    #elsef
 	      #define convertToCvMat If_you_want_to_use_convertToCvMat_include_opencv_2_first
 	    #endif
 	 #endif
@@ -369,7 +445,7 @@ namespace base { namespace samples { namespace frame {
             // The unix time at which the camFrame was received
 	    base::Time              received_time;
 
-	    std::vector<uint8_t>    image;
+	    std::vector<uint8_t>    	image;
 	    std::vector<frame_attrib_t> attributes;
 
 	    // The image size [width, height]
@@ -382,6 +458,7 @@ namespace base { namespace samples { namespace frame {
 	    // levels is 2^(this_number)
 	    uint32_t                data_depth;
 	    uint32_t                pixel_size;
+	    uint32_t 		    row_size;
 
 	    frame_mode_t            frame_mode;
 	    frame_status_t	    frame_status;
@@ -392,7 +469,7 @@ namespace base { namespace samples { namespace frame {
 	    base::Time time;
 	    Frame first;
             Frame second;
-	    uint64_t id;	
+	    uint32_t id;	
 	};
 }}}
 
