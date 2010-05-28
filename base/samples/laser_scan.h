@@ -16,6 +16,16 @@ namespace base { namespace samples {
         typedef boost::uint32_t uint32_t;
 #endif
 
+	/** Special values for the ranges. If a range has one of these values, then
+	* it is not valid and the value declares what is going on */
+	enum RANGE_ERRORS {
+	    TOO_FAR            = 1, // too far
+	    TOO_NEAR           = 2,
+	    MEASUREMENT_ERROR  = 3,
+	    OTHER_RANGE_ERRORS = 4,
+	    MAX_RANGE_ERROR    = 4
+	};
+
         /** The timestamp of this reading. The timestamp is the time at which the
          * laser passed the zero step (i.e. the step at the back of the device
          */
