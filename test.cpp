@@ -2,6 +2,7 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include "base/time.h"
+#include "base/timemark.h"
 #include "base/pose.h"
 #include "base/samples/imu.h"
 #include "base/samples/laser_scan.h"
@@ -14,6 +15,8 @@ using namespace std;
 
 BOOST_AUTO_TEST_CASE( time_test )
 {
+    base::TimeMark start("start");
+
     double f = 0.5;
     base::Time t1 = base::Time::fromSeconds( f );
     BOOST_CHECK_EQUAL( t1.seconds, 0 );
@@ -31,6 +34,12 @@ BOOST_AUTO_TEST_CASE( time_test )
 
     cout << t1 << endl;
     cout << base::Time(1,10) << endl;
+
+    //TODO add a test where now is subtracted from start time as this had some
+    //weird results when debugging the passed function
+
+    cout << start << endl;
+
 }
 
 BOOST_AUTO_TEST_CASE( pose_test )
