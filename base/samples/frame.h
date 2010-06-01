@@ -434,7 +434,7 @@ namespace base { namespace samples { namespace frame {
 		}
 		return cv::Mat(size.height,size.width, itype, getImagePtr());
 	    }
-	    #elsef
+	    #else
 	      #define convertToCvMat If_you_want_to_use_convertToCvMat_include_opencv_2_first
 	    #endif
 	 #endif
