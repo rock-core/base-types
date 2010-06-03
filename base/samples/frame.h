@@ -141,6 +141,15 @@ namespace base { namespace samples { namespace frame {
 		init(other,bcopy);
 	    }
 	    
+	    //copies all attributes which are independant from size and mode
+	    void copyImageIndependantAttributes(const Frame &other)
+	    {
+	       attributes = other.attributes;
+	       time = other.time;
+	       received_time = other.received_time;
+	       frame_status = other.frame_status;
+	    }
+	    
 	    //makes a copy of other
 	    void init(const Frame &other,bool bcopy = true)
 	    {
@@ -150,10 +159,7 @@ namespace base { namespace samples { namespace frame {
 		  init(other.getWidth(),other.getHeight(),other.getDataDepth(),other.getFrameMode(),false);
 	       if(bcopy)
 		  setImage(other.getImage());
-	       attributes = other.attributes;
-	       time = other.time;
-	       received_time = other.received_time;
-	       frame_status = other.frame_status;
+	       copyImageIndependantAttributes(other);
 	    }
 	    
 	    void init(uint16_t width, uint16_t height, uint8_t depth, frame_mode_t mode, bool hdr = false)
