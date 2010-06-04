@@ -209,6 +209,8 @@ namespace base { namespace samples { namespace frame {
 	    {
 		switch (mode)
 		{
+		case MODE_BAYER:
+		    return 1;
 		case MODE_BAYER_RGGB:
 		    return 1;
 		case MODE_BAYER_BGGR:
