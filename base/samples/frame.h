@@ -46,11 +46,11 @@ namespace base { namespace samples { namespace frame {
 	    MODE_GRAYSCALE = 1,
 	    MODE_RGB       = 2,
 	    RAW_MODES = 128,
-	    MODE_BAYER_RGGB = RAW_MODES + 0,
-	    MODE_BAYER_GRBG = RAW_MODES + 1,
-	    MODE_BAYER_BGGR = RAW_MODES + 2,
-	    MODE_BAYER_GBRG = RAW_MODES + 3
-
+	    MODE_BAYER = RAW_MODES + 0,
+	    MODE_BAYER_RGGB = RAW_MODES + 1,
+	    MODE_BAYER_GRBG = RAW_MODES + 2,
+	    MODE_BAYER_BGGR = RAW_MODES + 3,
+	    MODE_BAYER_GBRG = RAW_MODES + 4
 	};
 
 	enum frame_status_t {
