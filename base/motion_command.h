@@ -15,8 +15,19 @@ namespace base {
         // value.
     };
 
+    struct AUVMotionCommand
+    {
+        double heading;    //! absolute heading, in radians (positive
+                           //! counter-clockwise, has to be in -PI/PI)
+        double z;          //! absolute altitude, in meters (goes positive upwards)
+        double x_speed;    //! desired forward speed, in m/s
+        double y_speed;    //! desired left speed, in m/s
 
-	
+#ifndef __orogen
+        AUVMotionCommand()
+            : heading(0), z(0), x_speed(0), y_speed(0) {}
+#endif
+    };
 }
 
 
