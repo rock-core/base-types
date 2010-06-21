@@ -144,14 +144,14 @@ namespace base
         }
 #endif
     };
+}
 
 #ifndef __orogen
-    std::ostream &operator<<(std::ostream &stream, const base::Time &ob)
-    {
-	  stream << ob.seconds << '.' << std::setw(6) << std::setfill('0') << ob.microseconds;
-      return stream;
-    }
-#endif
+inline std::ostream &operator<<(std::ostream &stream, base::Time ob)
+{
+  stream << ob.seconds << '.' << std::setw(6) << std::setfill('0') << ob.microseconds;
+  return stream;
 }
+#endif
 
 #endif
