@@ -1,0 +1,9 @@
+<package>
+    <description brief="ruby extension for displaying images">
+    </description>
+    <author>Alexander Duda/Alexander.Duda@dfki.de</author>
+    <license>GPL v2 or later</license>
+    <depend package="rice" />
+    <depend package="eigen2" />
+</package>
+
