@@ -9,7 +9,10 @@ require 'mkmf-rice'
 extension_name = 'eigen_ext'
 
 # If you need some pkg-config dependencies, add them here
-pkg_config('eigen2')
+if !pkg_config('eigen2')
+   STDERR.puts "could not find eigen2 pkg-config file, assuming eigen headers is in /usr/include/eigen2"
+   $CXXFLAGS += " -I/usr/include/eigen2"
+end
 
 create_makefile(extension_name)
 
