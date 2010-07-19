@@ -149,7 +149,12 @@ namespace base
 #ifndef __orogen
 inline std::ostream &operator<<(std::ostream &stream, base::Time ob)
 {
-  stream << ob.seconds << '.' << std::setw(6) << std::setfill('0') << ob.microseconds;
+  if (ob.seconds < -1)
+    stream << (ob.seconds+1) << '.' << std::setw(6) << std::setfill('0') << -(ob.microseconds-1000000);
+  else if (ob.seconds == -1)
+    stream << "-0." << std::setw(6) << std::setfill('0') << -(ob.microseconds-1000000);
+  else
+    stream << ob.seconds << '.' << std::setw(6) << std::setfill('0') << ob.microseconds;
   return stream;
 }
 #endif
