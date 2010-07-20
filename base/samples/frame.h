@@ -53,6 +53,7 @@ namespace base { namespace samples { namespace frame {
 	    MODE_BAYER_GBRG = RAW_MODES + 4
 	};
 
+
 	enum frame_status_t {
 	    STATUS_EMPTY,
 	    STATUS_VALID, 
@@ -227,6 +228,33 @@ namespace base { namespace samples { namespace frame {
 		    return 0;
 		}
 	    }
+
+
+            //qt ruby does not support enums as slot parameters
+            //therefore frame_mode_t is passed as string
+            static frame_mode_t toFrameMode(std::string &str)
+            {
+              if(str == "MODE_UNDEFINED")
+                return MODE_UNDEFINED;
+              else if (str == "MODE_GRAYSCALE")
+                return MODE_GRAYSCALE;
+              else if (str == "MODE_RGB")
+                return MODE_RGB;
+              else if (str == "RAW_MODES")
+                return RAW_MODES;
+              else if (str == "MODE_BAYER")
+                return MODE_BAYER;
+              else if (str == "MODE_BAYER_RGGB")
+                return MODE_BAYER_RGGB;
+              else if (str == "MODE_BAYER_GRBG")
+                return MODE_BAYER_GRBG;
+              else if (str == "MODE_BAYER_BGGR")
+                return MODE_BAYER_BGGR;
+              else if (str == "MODE_BAYER_GBRG")
+                return MODE_BAYER_GBRG;
+              else
+                return MODE_UNDEFINED;
+            };
 
 	    inline frame_mode_t getFrameMode() const {
 		return this->frame_mode;
