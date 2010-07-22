@@ -8,6 +8,8 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry> 
 
+#include <Eigen/SVD> 
+
 namespace base
 {
     typedef Eigen::Vector3d    Position;
@@ -29,6 +31,12 @@ namespace base
 
         Pose(Position const& p, Orientation const& o)
             : position(p), orientation(o) {}
+
+	Pose(const Eigen::Transform3d &t)
+	{
+	    position = t.translation();
+	    orientation = t.rotation();
+	}
 
 	Eigen::Transform3d toTransform() const
 	{
