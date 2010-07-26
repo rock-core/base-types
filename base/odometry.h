@@ -73,6 +73,7 @@ namespace odometry
      */
     class Gaussian3D
     {
+    public:
 	/**
 	 * return the pose delta in the body fixed frame of the previous
 	 * state. 
@@ -93,6 +94,7 @@ namespace odometry
 
     class Gaussian2D
     {
+    public:
 	virtual Pose2D getPoseDelta2D() = 0;
 	virtual Eigen::Matrix2d getPositionError2D() = 0;
 	virtual double getOrientationError2D() = 0;
@@ -104,6 +106,7 @@ namespace odometry
      */
     class Sampling2D
     {
+    public:
 	virtual Pose2D getPoseDeltaSample2D() = 0;
     };
 
@@ -113,6 +116,7 @@ namespace odometry
      */
     class Sampling3D
     {
+    public:
 	virtual Pose getPoseDeltaSample() = 0;
     };
 
