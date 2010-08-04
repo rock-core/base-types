@@ -1,6 +1,10 @@
 #ifndef BASE_SAMPLES_LASER_H__
 #define BASE_SAMPLES_LASER_H__
 
+#ifdef __GCCXML__
+#define EIGEN_DONT_VECTORIZE
+#endif
+
 #ifndef __orogen
 #include <vector>
 #include <boost/cstdint.hpp>

@@ -1,10 +1,15 @@
 #ifndef __BASE_WAYPOINT_HH__
 #define __BASE_WAYPOINT_HH__
 
+#ifdef __GCCXML__
+#define EIGEN_DONT_VECTORIZE
+#endif
+
 #ifdef __orogen
 #error "this header cannot be used in orogen-parsed code. Use wrappers/waypoint.h and wrappers::Waypoint instead"
 #endif
 
+#include <base/pose.h>
 #include <Eigen/Core>
 #include <Eigen/Geometry> 
 

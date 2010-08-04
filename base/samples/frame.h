@@ -15,7 +15,7 @@
 #include <sstream>
 #endif
 
-#include "../time.h"
+#include "base/time.h"
 
 
 namespace base { namespace samples { namespace frame { 

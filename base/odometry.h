@@ -1,6 +1,10 @@
 #ifndef __BASE_ODOMETRY_HPP__
 #define __BASE_ODOMETRY_HPP__
 
+#ifdef __GCCXML__
+#define EIGEN_DONT_VECTORIZE
+#endif
+
 #include <Eigen/Core>
 #include <base/time.h>
 #include <base/pose.h>

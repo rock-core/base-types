@@ -1,6 +1,10 @@
 #ifndef __BASE_POSE_HH__
 #define __BASE_POSE_HH__
 
+#ifdef __GCCXML__
+#define EIGEN_DONT_VECTORIZE
+#endif
+
 #ifdef __orogen
 #error "this header cannot be used in orogen-parsed code. Use wrappers/pose.h and wrappers::Pose instead"
 #endif

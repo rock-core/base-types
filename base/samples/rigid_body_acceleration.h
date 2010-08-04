@@ -1,6 +1,10 @@
 #ifndef __BASE_SAMPLES_RIGID_BODY_ACCELERATION_HH
 #define __BASE_SAMPLES_RIGID_BODY_ACCELERATION_HH
 
+#ifdef __GCCXML__
+#define EIGEN_DONT_VECTORIZE
+#endif
+
 #ifdef __orogen
 #error "this header cannot be used. Use the wrapper version form Acceleration"
 #endif

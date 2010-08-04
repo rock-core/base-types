@@ -1,6 +1,10 @@
 #ifndef __BASE_SAMPLES_RIGID_BODY_STATE_HH
 #define __BASE_SAMPLES_RIGID_BODY_STATE_HH
 
+#ifdef __GCCXML__
+#define EIGEN_DONT_VECTORIZE
+#endif
+
 #ifdef __orogen
 #error "this header cannot be used in orogen-parsed code. Use wrappers/samples/rigid_body_state.h and wrappers::samples::RigidBodyState instead"
 #endif

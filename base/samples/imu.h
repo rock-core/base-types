@@ -1,6 +1,10 @@
 #ifndef BASE_SAMPLES_IMU_H__
 #define BASE_SAMPLES_IMU_H__ 
 
+#ifdef __GCCXML__
+#define EIGEN_DONT_VECTORIZE
+#endif
+
 #ifdef __orogen
 #error "this header cannot be used in orogen-parsed code. Use wrappers/samples/imu.h and wrappers::IMUSensors instead"
 #endif
