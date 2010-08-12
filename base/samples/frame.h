@@ -3,7 +3,7 @@
 */
 
 #ifndef BASE_SAMPLES_FRAME_H__
-#define BASE_SAMPLES_FRAME_H__ 
+#define BASE_SAMPLES_FRAME_H__
 
 #ifndef __orogen
 #include <stdint.h>
@@ -244,7 +244,7 @@ namespace base { namespace samples { namespace frame {
 
             //qt ruby does not support enums as slot parameters
             //therefore frame_mode_t is passed as string
-            static frame_mode_t toFrameMode(std::string &str)
+            static frame_mode_t toFrameMode(const std::string &str)
             {
               if(str == "MODE_UNDEFINED")
                 return MODE_UNDEFINED;
@@ -437,7 +437,7 @@ namespace base { namespace samples { namespace frame {
 	      return ConstColumnIterator(getRowSize(),pdata,pdata+getRowSize()*getHeight());
 	    }
 	    
-	    ConstColumnIterator end()
+	    ConstColumnIterator end()const
 	    {
 	      static ConstColumnIterator iter;
 	      return iter;
