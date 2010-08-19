@@ -27,11 +27,13 @@ namespace base
      */
     struct Pose
     {
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+	
         Position    position;
         Orientation orientation;
 
         Pose()
-            : position(Position::Identity()), orientation(Orientation::Identity()) {}
+            : position(Position::Zero()), orientation(Orientation::Identity()) {}
 
         Pose(Position const& p, Orientation const& o)
             : position(p), orientation(o) {}
@@ -56,11 +58,13 @@ namespace base
      */
     struct Pose2D
     {
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+	
         Position2D    position;
         Orientation2D orientation;
 
         Pose2D()
-            : position(Position2D::Identity()), orientation(0) {}
+            : position(Position2D::Zero()), orientation(0) {}
 
         Pose2D(Position2D const& p, Orientation2D const& o)
             : position(p), orientation(o) {}
