@@ -1,7 +1,7 @@
 # Loads mkmf which is used to make makefiles for Ruby extensions
 require 'rubygems'
 #workaround for require 'mkmf-rice'
-gem 'rice', '~> 1.3.2'
+gem 'rice', '>= 1.3.2'
 
 require 'mkmf-rice'
 
