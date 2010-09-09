@@ -13,6 +13,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #endif
 
 #include "base/time.h"
@@ -114,7 +115,7 @@ namespace base { namespace samples { namespace frame {
 	    return *this;
 	  }
 	  bool operator==(const ConstColumnIterator &other)const{ return (pdata == other.pdata);}
-	  const uint8_t* operator*()const{return pdata;}
+	  uint8_t operator*()const{return *pdata;}
 	  bool operator==(uint8_t* p)const{return (pdata == p);}
 	  bool operator!=(uint8_t* p)const{return !(pdata == p);}
 	  bool operator!=(const ConstColumnIterator &other)const{return !(pdata == other.pdata);}
@@ -423,7 +424,7 @@ namespace base { namespace samples { namespace frame {
 		return ;
 	    }
 	    
-	    ConstColumnIterator getColumnBegin(uint8_t column)const
+	    ConstColumnIterator getColumnBegin(uint16_t column)const
 	    {
 	      if(column >= getWidth())
 	      {
@@ -434,7 +435,7 @@ namespace base { namespace samples { namespace frame {
 		return ConstColumnIterator();
 	      }
 	      const uint8_t *pdata = getImageConstPtr()+column*getPixelSize();
-	      return ConstColumnIterator(getRowSize(),pdata,pdata+getRowSize()*getHeight());
+	      return ConstColumnIterator(getRowSize(),pdata,pdata+getRowSize()*(getHeight()-1));
 	    }
 	    
 	    ConstColumnIterator end()const
@@ -443,6 +444,13 @@ namespace base { namespace samples { namespace frame {
 	      return iter;
 	    }
 	    
+	    template <typename Tp> Tp& at(unsigned int column,unsigned int row)
+		{
+	    	if(column >= size.width || row >= size.height )
+	    		throw std::runtime_error("out of index");
+	    	return *((Tp*)(getImagePtr()+row*getRowSize()+column*getPixelSize()));
+		}
+
 	    //check if opencv is present
 	    #if defined( __OPENCV_CV_H__) ||defined (__OPENCV_CV_HPP__) || defined(_CV_H_) || defined(_CV_HPP_)
 	    inline cv::Mat convertToCvMat()
