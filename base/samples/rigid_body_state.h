@@ -12,6 +12,9 @@
 #include <base/pose.h>
 #include <base/time.h>
 
+#include <Eigen/Core>
+#include <Eigen/LU>
+
 namespace base { namespace samples {
     struct RigidBodyState
     {
