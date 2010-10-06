@@ -47,6 +47,12 @@ namespace base { namespace samples {
 	 */
         Eigen::Matrix3d cov_angular_velocity;
 
+	void setTransform(const Eigen::Transform3d& transform)
+	{
+	    orientation = Eigen::Quaterniond( transform.rotation() );
+	    position = transform.translation();
+	}	    
+
         static RigidBodyState invalid() {
             RigidBodyState result;
             result.invalidate();
