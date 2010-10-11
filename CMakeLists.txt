@@ -5,7 +5,13 @@ if(COMMAND cmake_policy)
 endif(COMMAND cmake_policy)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-add_definitions("-Wall")
+
+# Enable -Wall for compilers that know it
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-Wall" CXX_SUPPORTS_WALL)
+if (CXX_SUPPORTS_WALL)
+    add_definitions (-Wall)
+endif (CXX_SUPPORTS_WALL)
 
 find_package(Boost REQUIRED)
 include_directories(${BOOST_INCLUDE_DIR})
