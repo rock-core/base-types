@@ -329,7 +329,7 @@ namespace geometry {
                 int stride = SplineBase::getCoordinatesStride();
 
                 vector_t v;
-                for (int i = 0; i < current_coordinates.size(); i += stride)
+                for (unsigned int i = 0; i < current_coordinates.size(); i += stride)
                 {
                     memcpy(v.data(), &coordinates[i], sizeof(double) * DIM);
                     v = t * v;
