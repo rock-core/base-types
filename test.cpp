@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE( time_test )
     BOOST_CHECK_EQUAL( t1.microseconds, 500000 );
 
     cout << t1 << endl;
-    cout << base::Time(1,10) << endl;
+    cout << base::Time::fromSeconds(1,10) << endl;
 
     //TODO add a test where now is subtracted from start time as this had some
     //weird results when debugging the passed function

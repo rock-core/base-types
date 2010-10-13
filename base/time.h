@@ -25,6 +25,7 @@ namespace base
         Time()
             : seconds(0), microseconds(0) {}
 
+    private:
         explicit Time(int seconds, int microseconds = 0)
             : seconds(seconds), microseconds(microseconds) 
 	{
@@ -32,6 +33,7 @@ namespace base
 		canonize();
 	}
 
+    public:
         /** Returns the current time */
         static Time now() {
             timeval t;
@@ -116,6 +118,10 @@ namespace base
             return base::Time(value / UsecPerSec, value % UsecPerSec);
         }
 
+        static Time fromSeconds(int seconds)
+	{ return Time(seconds, 0); }
+        static Time fromSeconds(int seconds, int microseconds)
+	{ return Time(seconds, microseconds); }
         static Time fromSeconds(double value)
         {
 	    double fi;
