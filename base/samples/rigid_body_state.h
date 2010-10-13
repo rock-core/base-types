@@ -55,6 +55,15 @@ namespace base { namespace samples {
 	    orientation = Eigen::Quaterniond( transform.rotation() );
 	    position = transform.translation();
 	}	    
+	
+	operator Eigen::Transform3d() const
+	{
+	    Eigen::Transform3d ret;
+	    ret.setIdentity();
+	    ret.rotate(this->orientation);
+	    ret.translation() = this->position;
+	    return ret;
+	}
 
         static RigidBodyState invalid() {
             RigidBodyState result;
