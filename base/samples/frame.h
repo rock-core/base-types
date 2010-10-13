@@ -189,7 +189,7 @@ namespace base { namespace samples { namespace frame {
 
 	    void reset()
 	    {
-		this->time = base::Time(0);
+		this->time = base::Time();
 		if (this->image.size() > 0) {
 		    memset(&this->image[0], 0, this->image.size());
 		}
