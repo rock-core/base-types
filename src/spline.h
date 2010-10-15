@@ -326,7 +326,6 @@ namespace geometry {
             {
                 std::vector<double> const& current_coordinates = SplineBase::getCoordinates();
                 std::vector<double> coordinates(current_coordinates.begin(), current_coordinates.end());
-                bool is_nurbs = SplineBase::isNURBS();
                 int stride = SplineBase::getCoordinatesStride();
 
                 vector_t v;
