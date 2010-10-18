@@ -31,7 +31,8 @@ namespace base { namespace samples {
 #endif
 
         /** The timestamp of this reading. The timestamp is the time at which the
-         * laser passed the zero step (i.e. the step at the back of the device
+         * laser passed the zero step (i.e. the step at the back of the device,
+         * which is distinct from the measurement 0)
          */
         Time time;
 
