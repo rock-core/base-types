@@ -12,3 +12,8 @@ task :setup do
 end
 task :default => :setup
 
+task :clean do
+    FileUtils.rm_f File.join('ext', 'eigen_ext.so')
+    FileUtils.rm_f File.join('lib', 'eigen_ext.so')
+    FileUtils.rm_f File.join('ext', 'Eigen.o')
+end
