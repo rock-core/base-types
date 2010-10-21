@@ -144,9 +144,9 @@ namespace base { namespace samples { namespace frame {
 		reset();
 	    }
 	    
-	    Frame(uint16_t width, uint16_t height, uint8_t depth, frame_mode_t mode, bool hdr = false)
+	    Frame(uint16_t width, uint16_t height, uint8_t depth, frame_mode_t mode, uint8_t const val = 0, bool hdr = false)
 	    {
-		init(width,height,depth,mode,hdr);
+		init(width,height,depth,mode,val,hdr);
 	    }
 	    
 	    //makes a copy of other
@@ -170,27 +170,28 @@ namespace base { namespace samples { namespace frame {
 	       //hdr is copied by attributes = other.attributes;
 	       //change size if the frame does not fit
 	       if(other.getHeight() != getHeight() || other.getWidth() !=  getWidth() || other.getFrameMode() != getFrameMode())
-		  init(other.getWidth(),other.getHeight(),other.getDataDepth(),other.getFrameMode(),false);
+		  init(other.getWidth(),other.getHeight(),other.getDataDepth(),other.getFrameMode(), -1, false);
 	       if(bcopy)
 		  setImage(other.getImage());
 	       copyImageIndependantAttributes(other);
 	    }
 	    
-	    void init(uint16_t width, uint16_t height, uint8_t depth, frame_mode_t mode, bool hdr = false)
+	    void init(uint16_t width, uint16_t height, uint8_t depth, frame_mode_t mode, int const val = 0, bool hdr = false)
 	    {
 		this->frame_mode = mode;
 		this->size = frame_size_t(width, height);
 		setDataDepth(depth);
 		image.resize(getPixelSize() * getPixelCount());
-		reset();
+		reset(val);
 		if(hdr)
 		  setAttribute<bool>("hdr",true);
 	    }
 
-	    void reset()
+            // if val is negative the image will not be initialized
+	    void reset(int const val = 0)
 	    {
 		this->time = base::Time();
-		if (this->image.size() > 0) {
+		if (this->image.size() > 0 && val >= 0) {
 		    memset(&this->image[0], 0, this->image.size());
 		}
 		setStatus(STATUS_EMPTY);
