@@ -192,7 +192,7 @@ namespace base { namespace samples { namespace frame {
 	    {
 		this->time = base::Time();
 		if (this->image.size() > 0 && val >= 0) {
-		    memset(&this->image[0], 0, this->image.size());
+		    memset(&this->image[0], val%256, this->image.size());
 		}
 		setStatus(STATUS_EMPTY);
 		attributes.clear();
