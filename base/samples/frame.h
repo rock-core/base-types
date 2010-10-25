@@ -359,6 +359,14 @@ namespace base { namespace samples { namespace frame {
 		return static_cast<const uint8_t *>(&this->image[0]);
 	    }
 
+            inline uint8_t* getLastByte(){
+              return static_cast<uint8_t *>(&this->image.back());
+            }
+
+            inline const uint8_t* getLastConstByte()const{
+              return static_cast<const uint8_t *>(&this->image.back());
+            }
+
 	    inline bool hasAttribute(const std::string &name)const
 	    {
 		std::vector<frame_attrib_t>::const_iterator _iter = attributes.begin();
