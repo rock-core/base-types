@@ -21,6 +21,12 @@ namespace base { namespace samples {
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         base::Time time;
 
+	/** Source frame of the transformation */
+	std::string sourceFrame;
+	
+	/** Target frame of the transformation */
+	std::string targetFrame;
+	
         /** Position in m, world fixed frame of reference (East-North-Up) */
         Position   position;
 	/** Covariance matrix of the position
