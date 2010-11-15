@@ -83,7 +83,7 @@ namespace base {
 
         //! Workaround for a bug in GCCXML where the typedef is not enough to
         // get the definition of Status<4>
-        struct internalStatusInstanciator { Status<4> s4; };
+        struct __gccxml_workaround_StatusInstanciator { Status<4> s4; };
         typedef Status<4> FourWheeled;
     }
 }

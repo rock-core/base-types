@@ -25,7 +25,7 @@ namespace base {
 
         //! Workaround for a bug in GCCXML where the typedef is not enough to
         // get the definition of Command<4>
-        struct internalCommandInstanciator { Command<4> c4; };
+        struct __gccxml_workaround_CommandInstanciator { Command<4> c4; };
         typedef Command<4> FourWheelCommand;
     }
 }
