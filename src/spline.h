@@ -341,6 +341,10 @@ namespace geometry {
     };
 
     typedef Spline<3> NURBSCurve3D;
+
+    // This is for GCCXML parsing
+    struct __gccxml_workaround_spline { base::geometry::Spline<3> instanciation; };
+    typedef base::geometry::Spline<3> Spline3;
 } // geometry
 } // base
 #endif
