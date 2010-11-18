@@ -13,5 +13,6 @@
     </copyright>
     <license>LGPL v2 or later</license>
 
+    <depend package="external/sisl" optional="1" />
     <rosdep name="eigen2" />
 </package>
