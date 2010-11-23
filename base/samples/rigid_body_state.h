@@ -18,37 +18,36 @@
 namespace base { namespace samples {
     struct RigidBodyState
     {
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         base::Time time;
 
         /** Position in m, world fixed frame of reference (East-North-Up) */
         Position   position;
 	/** Covariance matrix of the position
 	 */
-        Eigen::Matrix3d cov_position;
+        base::Matrix3d cov_position;
 
         /** Orientation as a body->world transformation */
         Orientation orientation;
         /** Covariance matrix of the orientation as an axis/angle manifold in
          * body coordinates
 	 */
-        Eigen::Matrix3d cov_orientation;
+        base::Matrix3d cov_orientation;
 
         /** Velocity in m/s with respect to world fixed frame, in body fixed
          * frame (Right-Front-Up) */
-        Eigen::Vector3d velocity;
+        base::Vector3d velocity;
 	/** Covariance of the velocity 
 	 */
-        Eigen::Matrix3d cov_velocity;
+        base::Matrix3d cov_velocity;
 
         /** Angular Velocity as an axis-angle representation in body fixed frame
          * (Right-Front-Up)
          *
          * The direction of the vector is the axis, its length the speed */
-        Eigen::Vector3d angular_velocity;
+        base::Vector3d angular_velocity;
         /** Covariance of the angular velocity
 	 */
-        Eigen::Matrix3d cov_angular_velocity;
+        base::Matrix3d cov_angular_velocity;
 
 	void setTransform(const Eigen::Transform3d& transform)
 	{

@@ -10,7 +10,7 @@
 #endif
 
 #include <base/time.h>
-#include <Eigen/Geometry>
+#include <base/eigen.h>
 
 namespace base { namespace samples {
     struct IMUSensors
@@ -19,13 +19,13 @@ namespace base { namespace samples {
         Time time;
         
         /** raw accelerometer readings */
-        Eigen::Vector3d acc;
+        base::Vector3d acc;
 
         /** raw gyro reading*/
-        Eigen::Vector3d gyro;
+        base::Vector3d gyro;
 
         /** raw magnetometer reading*/
-        Eigen::Vector3d mag;
+        base::Vector3d mag;
     };
 }} // namespaces
 

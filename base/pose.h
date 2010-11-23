@@ -9,26 +9,21 @@
 #error "this header cannot be used in orogen-parsed code. Use wrappers/pose.h and wrappers::Pose instead"
 #endif
 
-#include <Eigen/Core>
-#include <Eigen/Geometry> 
-
-#include <Eigen/SVD> 
+#include <base/eigen.h>
 
 namespace base
 {
-    typedef Eigen::Vector3d    Position;
-    typedef Eigen::Quaterniond Orientation;
+    typedef base::Vector3d    Position;
+    typedef base::Quaterniond Orientation;
 
-    typedef Eigen::Vector2d    Position2D;
-    typedef double             Orientation2D;
+    typedef base::Vector2d    Position2D;
+    typedef double            Orientation2D;
 
     /**
      * Representation for a pose in 3D
      */
     struct Pose
     {
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-	
         Position    position;
         Orientation orientation;
 
@@ -58,8 +53,6 @@ namespace base
      */
     struct Pose2D
     {
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-	
         Position2D    position;
         Orientation2D orientation;
 
