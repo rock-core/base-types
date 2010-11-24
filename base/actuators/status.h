@@ -1,53 +1,10 @@
 #ifndef BASE_ACTUATORS_STATUS_HH
 #define BASE_ACTUATORS_STATUS_HH
 
+#include <vector>
+
 namespace base {
     namespace actuators {
-        struct ErrorState {
-            bool motorOverheated;
-            bool boardOverheated;
-            bool overCurrent;
-            bool timeout;
-            bool badConfig;
-            bool encodersNotInitalized;
-            bool hardwareShutdown;
-#ifndef __orogen
-
-            ErrorState() :
-                motorOverheated(false), boardOverheated(false), overCurrent(false), timeout(false), badConfig(false), encodersNotInitalized(false), hardwareShutdown(false)
-            {}
-            
-            bool hasError() 
-            {
-                return (motorOverheated || boardOverheated || overCurrent || timeout || badConfig || encodersNotInitalized || hardwareShutdown);
-            }
-                    
-            void printError()
-            {
-                std::cout << "MotorOverheated      :" << motorOverheated << std::endl;
-                std::cout << "boardOverheated      :" << boardOverheated << std::endl;
-                std::cout << "overCurrent          :" << overCurrent << std::endl;
-                std::cout << "timeout              :" << timeout << std::endl;
-                std::cout << "badConfig            :" << badConfig << std::endl;
-                std::cout << "encodersNotInitalized:" << encodersNotInitalized << std::endl;
-                std::cout << "hardwareShutdown     :" << hardwareShutdown << std::endl;
-            }
-            
-            ErrorState merge(ErrorState const& es) const
-            {
-                ErrorState ret;
-                ret.motorOverheated = this->motorOverheated || es.motorOverheated;
-                ret.boardOverheated = this->boardOverheated || es.boardOverheated;
-                ret.overCurrent     = this->overCurrent || es.overCurrent;
-                ret.timeout         = this->timeout || es.timeout;
-                ret.badConfig       = this->badConfig || es.badConfig;
-                ret.encodersNotInitalized = this->encodersNotInitalized || es.encodersNotInitalized;
-                ret.hardwareShutdown = this->hardwareShutdown || es.hardwareShutdown;
-                return ret;
-            }
-#endif
-        };
-    
         /** Represents the state of a single actuator
          *
          * +current+ is the current reading
@@ -70,7 +27,6 @@ namespace base {
             double   position; //! position in radians
             double   positionExtern; //! position of external encoder in radians
             float    pwm;      //! duty cycle in [-1; 1]
-            struct ErrorState error; //! indicates the current status of the actuator
         };
 
         /** Synchronized set of actuator states */
