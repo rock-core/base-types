@@ -74,17 +74,11 @@ namespace base {
         };
 
         /** Synchronized set of actuator states */
-        template<int count>
         struct Status {
             base::Time time;
             uint64_t index;    //! index of this packet, i.e. the position of this packet since the beginning
-            MotorState states[count];
+            std::vector<MotorState> states;
         };
-
-        //! Workaround for a bug in GCCXML where the typedef is not enough to
-        // get the definition of Status<4>
-        struct __gccxml_workaround_StatusInstanciator { Status<4> s4; };
-        typedef Status<4> FourWheeled;
     }
 }
 
