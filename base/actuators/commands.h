@@ -1,9 +1,25 @@
 #ifndef BASE_ACTUATORS_COMMANDS_H
 #define BASE_ACTUATORS_COMMANDS_H
 
+#include <vector>
+
 namespace base {
     namespace actuators {
-        /** The control mode as requested by a given output.
+        /** Structure holding PID values
+         *
+         * The actual meaning of those values will obviously depend on the
+         * actuator and control electronics.
+         */
+        struct PIDValues{
+            float kp;
+            float ki;
+            float kd;
+            float maxPWM;
+
+            PIDValues() : kp(0), ki(0), kd(0), maxPWM(0) {};
+        };
+
+        /** The control mode requested for a controller output
          */
         enum DRIVE_MODE
         {
@@ -14,19 +30,43 @@ namespace base {
         };
 
         /** Synchronized set of commands for a set of actuators
+         *
+         * Since this type contains std::vector, one must preallocate it
+         * and resize the mode and target vectors accordingly before
+         * updateHook().
          */
-        template<int count>
         struct Command {
             base::Time time;
 
-            DRIVE_MODE mode[count];   //! one of DM_PWM, DM_SPEED, DM_POSITION
-            double     target[count]; //! speeds are in rad/s, positions in rad and PWM in [-1, 1]
+            std::vector<DRIVE_MODE> mode;   //! one of DM_PWM, DM_SPEED, DM_POSITION
+            std::vector<double>     target; //! speeds are in rad/s, positions in rad and PWM in [-1, 1]
         };
 
-        //! Workaround for a bug in GCCXML where the typedef is not enough to
-        // get the definition of Command<4>
-        struct __gccxml_workaround_CommandInstanciator { Command<4> c4; };
-        typedef Command<4> FourWheelCommand;
+        enum ADAPTATIVE_MODE
+        {
+            PID_POSITION = 64,
+            PID_SPEED    = 128
+        };
+
+        struct AdaptativeCommand {
+            double     target;
+
+            int mode; //! OR-ed set of DRIVE_MODE and ADAPTATIVE_MODE
+            PIDValues  pid_position;
+            PIDValues  pid_speed;
+        };
+
+        /** Synchronized set of adaptive commands for a set of actuators
+         *
+         * Since this type contains std::vector, one must preallocate it
+         * and resize the mode and target vectors accordingly before
+         * updateHook().
+         */
+        struct AdaptativeCommands {
+            base::Time time;
+
+            std::vector<AdaptativeCommand> commands;
+        };
     }
 }
 
