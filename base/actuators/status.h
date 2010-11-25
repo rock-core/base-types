@@ -27,6 +27,9 @@ namespace base {
             double   position; //! position in radians
             double   positionExtern; //! position of external encoder in radians
             float    pwm;      //! duty cycle in [-1; 1]
+
+            MotorState()
+                : current(0), position(0), positionExtern(0), pwm(0) {}
         };
 
         /** Synchronized set of actuator states */
@@ -34,6 +37,11 @@ namespace base {
             base::Time time;
             uint64_t index;    //! index of this packet, i.e. the position of this packet since the beginning
             std::vector<MotorState> states;
+
+            void resize(int size)
+            {
+                states.resize(size);
+            }
         };
     }
 }

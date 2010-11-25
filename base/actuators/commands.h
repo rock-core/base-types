@@ -40,6 +40,14 @@ namespace base {
 
             std::vector<DRIVE_MODE> mode;   //! one of DM_PWM, DM_SPEED, DM_POSITION
             std::vector<double>     target; //! speeds are in rad/s, positions in rad and PWM in [-1, 1]
+
+            void resize(int size)
+            {
+                mode.resize(size);
+                std::fill(mode.begin(), mode.end(), DM_UNINITIALIZED);
+                target.resize(size);
+                std::fill(target.begin(), target.end(), 0);
+            }
         };
 
         enum ADAPTATIVE_MODE
@@ -54,6 +62,9 @@ namespace base {
             int mode; //! OR-ed set of DRIVE_MODE and ADAPTATIVE_MODE
             PIDValues  pid_position;
             PIDValues  pid_speed;
+
+            AdaptativeCommand()
+                : target(0), mode(DM_UNINITIALIZED) {}
         };
 
         /** Synchronized set of adaptive commands for a set of actuators
@@ -64,8 +75,12 @@ namespace base {
          */
         struct AdaptativeCommands {
             base::Time time;
-
             std::vector<AdaptativeCommand> commands;
+
+            void resize(int size)
+            {
+                commands.resize(size);
+            }
         };
     }
 }
