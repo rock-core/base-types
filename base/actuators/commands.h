@@ -2,6 +2,7 @@
 #define BASE_ACTUATORS_COMMANDS_H
 
 #include <vector>
+#include <base/time.h>
 
 namespace base {
     namespace actuators {

@@ -1,6 +1,7 @@
 #ifndef BASE_ACTUATORS_STATUS_HH
 #define BASE_ACTUATORS_STATUS_HH
 
+#include <base/time.h>
 #include <vector>
 
 namespace base {
