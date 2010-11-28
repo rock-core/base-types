@@ -20,6 +20,12 @@ namespace base { namespace samples {
     {
         base::Time time;
 
+	/** name of the source reference frame */
+	std::string sourceFrame;
+
+	/** name of the target reference frame */
+	std::string targetFrame;
+
         /** Position in m, world fixed frame of reference (East-North-Up) */
         Position   position;
 	/** Covariance matrix of the position
