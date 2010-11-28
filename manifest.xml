@@ -1,10 +1,7 @@
 <package>
     <description brief="base types for robotic infrastructures">
         This software package are header-only definitions of types that are
-        generally useful for robotic systems. It can be installed as either a
-        pure header library (i.e. no build and/or binaries involved), or as an
-        orogen project. In the latter case, the types can then be used in other
-        orogen projects for the component interfaces.
+        generally useful for algorithms in robotic systems.
     </description>
     <author>Sylvain Joyeux/sylvain.joyeux@m4x.org</author>
     <copyright>
