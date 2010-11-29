@@ -1,0 +1,3 @@
+doc/
+ext/*.o
+ext/*.so
