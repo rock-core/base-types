@@ -23,8 +23,9 @@ struct TimeMark
 
 inline std::ostream &operator<<(std::ostream &stream, base::TimeMark ob)
 {
-  stream << ob.passed() << "s since " << ob.label;
-  return stream;
+    stream << ob.passed() << "s since " << ob.label;
+    return stream;
 }
+
 
 #endif
