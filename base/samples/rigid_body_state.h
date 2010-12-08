@@ -59,7 +59,16 @@ namespace base { namespace samples {
 	{
 	    orientation = Eigen::Quaterniond( transform.rotation() );
 	    position = transform.translation();
-	}	    
+	}
+
+	 Eigen::Transform3d getTransform() const 
+	 {
+	    Eigen::Transform3d ret;
+	    ret.setIdentity();
+	    ret.rotate(this->orientation);
+	    ret.translation() = this->position;
+	    return ret;
+	 }
 
 	void setPose(const base::Pose& pose)
 	{
