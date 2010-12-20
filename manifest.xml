@@ -12,4 +12,5 @@
 
     <depend package="external/sisl" optional="1" />
     <rosdep name="eigen2" />
+    <tags>stable</tags>
 </package>
