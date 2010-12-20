@@ -93,7 +93,7 @@ struct Quaternion
 };
 
 // The initialization method for this module
-extern "C" void Init_eigen_ext()
+void Init_eigen_ext()
 {
      Rice::Module rb_mEigen = define_module("Eigen");
 

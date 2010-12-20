@@ -1,4 +1,4 @@
-require 'eigen_ext'
+require 'base_types_ext'
 
 module Eigen
     class Vector3
