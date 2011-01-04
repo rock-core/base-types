@@ -20,6 +20,15 @@ module BaseTypes
                 result
             end
 
+            def sample(delta_t)
+                result = []
+                start_param.step(end_param, delta_t) do |t|
+                    result << get(t)
+                end
+                result
+            end
+
+
             def interpolate(points, parameters = nil)
                 if points.empty?
                     clear
