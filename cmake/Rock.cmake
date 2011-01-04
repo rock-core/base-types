@@ -146,23 +146,41 @@ function(rock_executable TARGET_NAME)
     endif()
 endfunction()
 
-function(rock_library TARGET_NAME)
+macro(rock_library_common TARGET_NAME)
     rock_target_definition(${TARGET_NAME} ${ARGN})
 
     add_library(${TARGET_NAME} SHARED ${${TARGET_NAME}_SOURCES})
     rock_target_setup(${TARGET_NAME})
 
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc.in
-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc @ONLY)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_NAME}.pc.in
+        ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.pc @ONLY)
+    if (${TARGET_NAME}_INSTALL)
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.pc
+            DESTINATION lib/pkgconfig)
+    endif()
+endmacro()
+
+function(rock_library TARGET_NAME)
+    rock_library_common(${TARGET_NAME} ${ARGN})
+
     if (${TARGET_NAME}_INSTALL)
         install(TARGETS ${TARGET_NAME}
             LIBRARY DESTINATION lib)
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc
-            DESTINATION lib/pkgconfig)
         install(FILES ${${TARGET_NAME}_HEADERS}
             DESTINATION include/${PROJECT_NAME})
     endif()
 endfunction()
+
+function(rock_vizkit_plugin TARGET_NAME)
+    rock_library_common(${TARGET_NAME} ${ARGN} DEPS_PKGCONFIG vizkit)
+    if (${TARGET_NAME}_INSTALL)
+        install(TARGETS ${TARGET_NAME}
+            LIBRARY DESTINATION lib)
+        install(FILES ${${TARGET_NAME}_HEADERS}
+            DESTINATION include/vizkit)
+    endif()
+endfunction()
+
 
 function(rock_testsuite TARGET_NAME)
     rock_executable(${TARGET_NAME} ${ARGN}
