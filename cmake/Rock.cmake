@@ -14,6 +14,7 @@ macro(rock_use_full_rpath install_rpath)
     SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 endmacro()
 
+## Main initialization for Rock CMake projects
 function (rock_init PROJECT_NAME PROJECT_VERSION)
     project(${PROJECT_NAME})
     set(PROJECT_VERSION ${PROJECT_VERSION})
@@ -77,12 +78,16 @@ function (rock_init PROJECT_NAME PROJECT_VERSION)
     endif()
 endfunction()
 
+## Like pkg_check_modules, but calls include_directories and link_directories
+# using the resulting information
 macro (rock_find_pkgconfig VARIABLE)
     pkg_check_modules(${VARIABLE} ${ARGN})
     include_directories(${${VARIABLE}_INCLUDE_DIRS})
     link_directories(${${VARIABLE}_LIBRARY_DIRS})
 endmacro()
 
+## Like find_package, but calls include_directories and link_directories using
+# the resulting information
 macro (rock_find_cmake VARIABLE)
     find_package(${VARIABLE} ${ARGN})
     include_directories(${${VARIABLE}_INCLUDE_DIRS})
@@ -91,6 +96,7 @@ macro (rock_find_cmake VARIABLE)
     link_directories(${${VARIABLE}_LIBRARY_DIR})
 endmacro()
 
+## Common parsing of parameters for all the C/C++ target types
 macro(rock_target_definition TARGET_NAME)
     set(${TARGET_NAME}_INSTALL ON)
     set(ROCK_TARGET_AVAILABLE_MODES "SOURCES;HEADERS;DEPS;DEPS_PKGCONFIG;DEPS_CMAKE")
@@ -121,6 +127,7 @@ macro(rock_target_definition TARGET_NAME)
     endforeach()
 endmacro()
 
+## Common post-target-definition setup for all C/C++ targets
 macro(rock_target_setup TARGET_NAME)
     set_property(TARGET ${TARGET_NAME}
         PROPERTY DEPS_PKGCONFIG ${${TARGET_NAME}_DEPS_PKGCONFIG})
@@ -134,6 +141,7 @@ macro(rock_target_setup TARGET_NAME)
     endforeach()
 endmacro()
 
+## Defines a new executable that follows Rock guidelines
 function(rock_executable TARGET_NAME)
     rock_target_definition(${TARGET_NAME} ${ARGN})
 
@@ -146,6 +154,8 @@ function(rock_executable TARGET_NAME)
     endif()
 endfunction()
 
+## Common setup for libraries in Rock. Used by rock_library and
+# rock_vizkit_plugin
 macro(rock_library_common TARGET_NAME)
     rock_target_definition(${TARGET_NAME} ${ARGN})
 
@@ -160,6 +170,7 @@ macro(rock_library_common TARGET_NAME)
     endif()
 endmacro()
 
+## Defines a new shared library
 function(rock_library TARGET_NAME)
     rock_library_common(${TARGET_NAME} ${ARGN})
 
@@ -171,6 +182,7 @@ function(rock_library TARGET_NAME)
     endif()
 endfunction()
 
+## Defines a new vizkit plugin
 function(rock_vizkit_plugin TARGET_NAME)
     rock_library_common(${TARGET_NAME} ${ARGN} DEPS_PKGCONFIG vizkit)
     if (${TARGET_NAME}_INSTALL)
@@ -181,7 +193,7 @@ function(rock_vizkit_plugin TARGET_NAME)
     endif()
 endfunction()
 
-
+## Creates a testsuite
 function(rock_testsuite TARGET_NAME)
     rock_executable(${TARGET_NAME} ${ARGN}
         NOINSTALL)
