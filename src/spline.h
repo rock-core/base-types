@@ -126,6 +126,10 @@ namespace geometry {
 
         void reset(std::vector<double> const& coordinates, std::vector<double> const& knots, int kind = -1);
 
+        /** Reverses the direction of the curve
+         */
+        void reverse();
+
         int getCoordinatesStride() const
         {
             if (isNURBS()) return dimension + 1;

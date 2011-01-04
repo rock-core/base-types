@@ -448,6 +448,12 @@ void SplineBase::clear()
     }
 }
 
+void SplineBase::reverse()
+{
+    if (curve)
+        s1706(curve);
+}
+
 vector<double> SplineBase::simplify()
 {
     return simplify(geometric_resolution);
