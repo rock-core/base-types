@@ -1,3 +1,7 @@
 doc/
-ext/*.o
-ext/*.so
+core
+*.o
+*.so
+ext/mkmf.log
+ext/Makefile
+*.swp
