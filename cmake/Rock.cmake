@@ -84,7 +84,7 @@ macro (rock_find_pkgconfig VARIABLE)
 endmacro()
 
 macro (rock_find_cmake VARIABLE)
-    pkg_check_modules(${VARIABLE} ${ARGN})
+    find_package(${VARIABLE} ${ARGN})
     include_directories(${${VARIABLE}_INCLUDE_DIRS})
     include_directories(${${VARIABLE}_INCLUDE_DIR})
     link_directories(${${VARIABLE}_LIBRARY_DIRS})
