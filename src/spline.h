@@ -133,7 +133,9 @@ namespace geometry {
         }
 
     protected:
-        void getPoint(double* result, double _param);
+        void getPoint(double* result, double _param) const;
+        void getPointAndTangent(double* result, double _param) const;
+
         double findOneClosestPoint(double const* _pt, double _guess, double _geores);
         void findClosestPoints(double const* ref_point,
                 std::vector<double>& _result_points,
@@ -143,6 +145,8 @@ namespace geometry {
         double localClosestPointSearch(double* ref_point,
                 double _guess, double _start, double _end,
                 double  _geores);
+
+        void getPointAndTangentHelper(double* result, double _param, bool with_tangent) const;
 
         //! available only in Spline<3>
         Eigen::Matrix3d getFrenetFrame(double _param);
@@ -237,11 +241,22 @@ namespace geometry {
 
         /** Returns the geometric point that lies on the curve at the given
          * parameter */
-        vector_t getPoint(double _param)
-        { 
+        vector_t getPoint(double _param) const
+        {
             vector_t result;
             SplineBase::getPoint(result.data(), _param);
             return result;
+        }
+
+        /** Returns the geometric point that lies on the curve at the given
+         * parameter */
+        std::pair<vector_t, vector_t> getPointAndTangent(double _param) const
+        {
+            double result[DIM * 2];
+            SplineBase::getPointAndTangent(result, _param);
+            vector_t point(result);
+            vector_t tangent(result + DIM);
+            return make_pair(point, tangent);
         }
 
         /** Compute the curve from the given set of points */

@@ -89,7 +89,13 @@ int SplineBase::getPointCount() const
         return (singleton.empty() ? 0 : 1);
 }
 
-void SplineBase::getPoint(double* result, double _param)
+void SplineBase::getPoint(double* result, double _param) const
+{ return getPointAndTangentHelper(result, _param, false); }
+
+void SplineBase::getPointAndTangent(double* result, double _param) const
+{ return getPointAndTangentHelper(result, _param, true); }
+
+void SplineBase::getPointAndTangentHelper(double* result, double _param, bool with_tangent) const
 {
     if (_param < start_param || _param > end_param) 
         throw std::out_of_range("_param is not in the [start_param, end_param] range");
@@ -98,12 +104,21 @@ void SplineBase::getPoint(double* result, double _param)
     {
         int leftknot; // Not needed
         int status;
-        s1227(curve, 0, _param, &leftknot, result, &status); // Gets the point
+        s1227(curve, (with_tangent ? 1 : 0), _param,
+                &leftknot, result, &status); // Gets the point
         if (status != 0)
             throw std::runtime_error("SISL error while computing a curve point");
     }
     else
+    {
         copy(singleton.begin(), singleton.end(), result);
+        if (with_tangent)
+        {
+            int const dim = getDimension();
+            for (int i = 0; i < dim; ++i)
+                result[i + dim] = 0;
+        }
+    }
 }
 
 double SplineBase::getCurvature(double _param)
