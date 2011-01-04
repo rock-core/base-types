@@ -91,17 +91,12 @@ namespace geometry {
          * end_param] and runtime_error if SISL returns an error
          */
         double getVariationOfCurvature(double _param);  // Variation of Curvature
-                
-        /** Returns the maximum curvature in a curve
-         *
-         * Iterates through the curve and return the maximum curvature found
-         *  Checks every delLen for the parameter
-         */
-        double findCurvatureMax(); 
 
         std::vector<double> getCoordinates() const;
 
         std::vector<double> getKnots() const;
+
+        int getSISLCurveType() const;
 
         /** Display the curve properties on the given IO object */
         void printCurveProperties(std::ostream& io);
@@ -130,6 +125,23 @@ namespace geometry {
          */
         void reverse();
 
+        /** Appends @c other at the end of @c this.
+         *
+         * \c other is translated so that other's start point is equal to \c
+         * this's end point. The resulting curve is then appended to \c this
+         *
+         * @see join
+         */
+        void append(SplineBase const& other);
+
+        /** Joins \c this and \c other
+         *
+         * Unlike \c append, if the distance between \c this's end point and \c
+         * other's start point is greater than \c tolerance, the method computes
+         * an intermediate curve that smoothly joins \c this and \c other.
+         */
+        void join(SplineBase const& other, double tolerance);
+
         int getCoordinatesStride() const
         {
             if (isNURBS()) return dimension + 1;
@@ -137,6 +149,7 @@ namespace geometry {
         }
 
     protected:
+        void reset(SISLCurve* curve);
         void getPoint(double* result, double _param) const;
         void getPointAndTangent(double* result, double _param) const;
 

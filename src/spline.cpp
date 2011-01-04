@@ -293,9 +293,39 @@ std::vector<double> SplineBase::getKnots() const
         return std::vector<double>(curve->et, curve->et + getPointCount() + getCurveOrder());
 }
 
+int SplineBase::getSISLCurveType() const
+{
+    if (curve)
+        return curve->ikind;
+    else return 0;
+}
+
+void SplineBase::reset(SISLCurve* new_curve)
+{
+    if (curve)
+        freeCurve(curve);
+    this->curve = new_curve;
+
+    new_curve->cuopen = 1;
+    singleton.clear();
+    has_curvature_max = false;
+    has_curve_length = true;
+    this->curve = new_curve;
+
+    int status;
+    s1363(curve, &start_param, &end_param, &status);
+    if (status != 0)
+        throw std::runtime_error("cannot get the curve start & end parameters");
+}
+
 void SplineBase::reset(std::vector<double> const& coordinates, std::vector<double> const& knots, int kind)
 {
-    if (coordinates.size() == static_cast<size_t>(dimension))
+    if (coordinates.empty())
+    {
+        clear();
+        return;
+    }
+    else if (coordinates.size() == static_cast<size_t>(dimension))
     {
         if (curve)
             freeCurve(curve);
@@ -311,6 +341,9 @@ void SplineBase::reset(std::vector<double> const& coordinates, std::vector<doubl
     int stride;
     if (kind == -1)
     {
+        if (!curve)
+            throw std::runtime_error("must give a 'kind' parameter to reset() since this curve is empty");
+
         kind   = curve->ikind;
         stride = getCoordinatesStride();
     }
@@ -324,19 +357,7 @@ void SplineBase::reset(std::vector<double> const& coordinates, std::vector<doubl
     SISLCurve* new_curve = newCurve(coordinates.size() / stride,
             getCurveOrder(), const_cast<double*>(&knots[0]), const_cast<double*>(&coordinates[0]),
             kind, dimension, 1);
-
-    new_curve->cuopen = 1;
-    singleton.clear();
-    has_curvature_max = false;
-    has_curve_length = true;
-    if (curve)
-        freeCurve(curve);
-    this->curve = new_curve;
-
-    int status;
-    s1363(curve, &start_param, &end_param, &status);
-    if (status != 0)
-        throw std::runtime_error("cannot get the curve start & end parameters");
+    reset(new_curve);
 }
 
 double SplineBase::findOneClosestPoint(double const* _pt, double _guess, double _geores)
@@ -436,7 +457,151 @@ double SplineBase::localClosestPointSearch(double* ref_point, double _guess, dou
     else return param;
 }
 
+void SplineBase::append(SplineBase const& other)
+{
+    if (isEmpty())
+    {
+        *this = other;
+        return;
+    }
+    else if (other.isEmpty() || other.isSingleton())
+    {
+        return;
+    }
+    else if (isSingleton())
+    {
+        throw std::runtime_error("cannot append a curve to a singleton");
+    }
 
+    SISLCurve* joined_curve;
+    int result;
+    s1715(this->curve, other.curve, 1, 0, &joined_curve, &result);
+    if (result != 0)
+        throw std::runtime_error("failed to join the curves");
+
+    reset(joined_curve);
+}
+
+void SplineBase::join(SplineBase const& other, double tolerance)
+{
+    if (tolerance < 0)
+        tolerance = 0;
+
+    int const dim = getDimension();
+    if (other.getDimension() != dim)
+        throw std::runtime_error("incompatible dimensions in #join");
+
+    std::vector<double> joining_points;
+    int joining_types[4] = { 0, 0, 0, 0 };
+
+    double* end_point = 0, * start_point = 0;
+
+    if (isEmpty())
+    {
+        *this = other;
+        return;
+    }
+    else if (other.isEmpty())
+        return;
+    else if (isSingleton() && other.isSingleton())
+    {
+        std::vector<double> line;
+        line.resize(dim * 2);
+        copy(singleton.begin(), singleton.end(), line.begin());
+        copy(other.singleton.begin(), other.singleton.end(), line.begin() + dim);
+        interpolate(line);
+        return;
+    }
+    else if (other.isSingleton())
+    {
+        joining_points.resize(3 * dim);
+        getPointAndTangent(&joining_points[0], getEndParam());
+        copy(other.singleton.begin(), other.singleton.end(), joining_points.begin() + 2 * dim);
+        for (int i = 0; i < dim; ++i)
+            joining_points[i + dim] += joining_points[i];
+        start_point = &joining_points[0];
+        end_point   = &joining_points[2 * dim];
+        joining_types[0] = 1;
+        joining_types[1] = 14;
+        joining_types[2] = 1;
+    }
+    else if (isSingleton())
+    {
+        joining_points.resize(3 * dim);
+        copy(singleton.begin(), singleton.end(), joining_points.begin());
+        other.getPointAndTangent(&joining_points[dim], getStartParam());
+        for (int i = 0; i < dim; ++i)
+            joining_points[i + 2 * dim] += joining_points[i + dim];
+        start_point = &joining_points[0];
+        end_point   = &joining_points[dim];
+        joining_types[0] = 1;
+        joining_types[1] = 1;
+        joining_types[2] = 14;
+    }
+    else
+    {
+        joining_points.resize(4 * dim);
+        // We get the tangents as well as the points, as we might need them later
+        getPointAndTangent(&joining_points[0], getEndParam());
+        other.getPointAndTangent(&joining_points[2 * dim], other.getStartParam());
+        start_point = &joining_points[0];
+        end_point   = &joining_points[2 * dim];
+        joining_types[0] = 1;
+        joining_types[1] = 14;
+        joining_types[2] = 1;
+        joining_types[3] = 14;
+
+        for (int i = 0; i < dim; ++i)
+        {
+            joining_points[i + dim] += joining_points[i];
+            joining_points[i + 3 * dim] += joining_points[i + 2 * dim];
+        }
+    }
+
+    double dist = 0;
+    for (int i = 0; i < dim; ++i)
+    {
+        double d = (start_point[i] - end_point[i]);
+        dist += d * d;
+    }
+    dist = sqrt(dist);
+
+    if (dist <= tolerance)
+        return append(other);
+
+    // Create an intermediate curve
+    SISLCurve* raw_intermediate_curve = NULL;
+    double end_par;
+    double* gpar = NULL;
+    int jnbpar;
+    int ret;
+    s1356(&joining_points[0], joining_points.size() / dim, dim, joining_types, 0, 0, 1, getCurveOrder(), 0,
+            &end_par, &raw_intermediate_curve, &gpar, &jnbpar, &ret);
+    if (ret != 0)
+    {
+        std::cerr << "SplineBase::join failed to generate the intermediate curve" << std::endl;
+        std::cerr << "dist=" << dist << std::endl;
+        std::cerr << "start=" << getStartParam() << " end=" << getEndParam() << " singleton=" << isSingleton() << std::endl;
+        std::cerr << "other.start=" << other.getStartParam() << " other.end=" << other.getEndParam() << " other.singleton=" << other.isSingleton() << std::endl;
+        std::cerr << "points:" << std::endl;
+        for (int p = 0; p < joining_points.size() / dim; ++p)
+        {
+            std::cerr << p;
+            for (int i = 0; i < dim; ++i)
+                std::cerr << "  " << joining_points[p * dim + i];
+            std::cerr << std::endl;
+        }
+        throw std::runtime_error("cannot generate the intermediate curve");
+    }
+
+    SplineBase intermediate_curve(getGeometricResolution(), raw_intermediate_curve);
+    if (isSingleton())
+        *this = intermediate_curve;
+    else
+        append(intermediate_curve);
+
+    append(other);
+}
 
 void SplineBase::clear()
 {
