@@ -1,6 +1,6 @@
 require 'base_types_ext'
 
-module Base
+module BaseTypes
     module Geometry
         class Spline
             def self.interpolate(points, coordinates)

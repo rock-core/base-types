@@ -5,7 +5,7 @@ require 'base/geometry/spline'
 
 class TC_Geometry_Spline < Test::Unit::TestCase
     def test_base
-        v = Base::Geometry::Spline.new(3)
+        v = BaseTypes::Geometry::Spline.new(3)
         assert_equal 3, v.dimension
         assert_equal 0.1, v.geometric_resolution
         assert_equal 3, v.order
@@ -16,10 +16,10 @@ class TC_Geometry_Spline < Test::Unit::TestCase
     end
 
     def test_concat
-        v1 = Base::Geometry::Spline.new(3)
+        v1 = BaseTypes::Geometry::Spline.new(3)
         v1.interpolate([0, 0, 0, 1, 2, 3])
 
-        v2 = Base::Geometry::Spline.new(3)
+        v2 = BaseTypes::Geometry::Spline.new(3)
         v2.interpolate([2, 2, 2, 4, 6, 8])
 
         result = v1.dup
@@ -31,10 +31,10 @@ class TC_Geometry_Spline < Test::Unit::TestCase
     end
 
     def test_join
-        v1 = Base::Geometry::Spline.new(3)
+        v1 = BaseTypes::Geometry::Spline.new(3)
         v1.interpolate([0, 0, 0, 1, 2, 3])
 
-        v2 = Base::Geometry::Spline.new(3)
+        v2 = BaseTypes::Geometry::Spline.new(3)
         v2.interpolate([4, 4, 4, 4, 6, 8])
 
         result = v1.dup
