@@ -619,6 +619,30 @@ void SplineBase::reverse()
         s1706(curve);
 }
 
+bool SplineBase::testIntersection(SplineBase const& other, double resolution) const
+{
+    if (!curve || !other.curve)
+        return false;
+
+    int point_count;
+    double* points_t1 = 0;
+    double* points_t2 = 0;
+    int curve_count;
+    SISLIntcurve **curves = 0;
+    int result;
+    s1857(curve, other.curve, resolution, resolution,
+            &point_count, &points_t1, &points_t2,
+            &curve_count, &curves, &result);
+    if (result != 0)
+        throw std::runtime_error("error computing curve intersections");
+
+    if (points_t1) free(points_t1);
+    if (points_t2) free(points_t2);
+    if (curves) free(curves);
+
+    return (point_count > 0) || (curve_count > 0);
+}
+
 vector<double> SplineBase::simplify()
 {
     return simplify(geometric_resolution);

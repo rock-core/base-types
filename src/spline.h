@@ -109,6 +109,10 @@ namespace geometry {
          */
         void interpolate(std::vector<double> const& coordinates, std::vector<double> const& parameters = std::vector<double>());
 
+        /** Tests for intersection between two curves
+         */
+        bool testIntersection(SplineBase const& other, double resolution = 0.01) const;
+
         /** Reinitializes the curve */
         void clear();
 
