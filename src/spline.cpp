@@ -584,7 +584,7 @@ void SplineBase::join(SplineBase const& other, double tolerance)
         std::cerr << "start=" << getStartParam() << " end=" << getEndParam() << " singleton=" << isSingleton() << std::endl;
         std::cerr << "other.start=" << other.getStartParam() << " other.end=" << other.getEndParam() << " other.singleton=" << other.isSingleton() << std::endl;
         std::cerr << "points:" << std::endl;
-        for (int p = 0; p < joining_points.size() / dim; ++p)
+        for (unsigned int p = 0; p < joining_points.size() / dim; ++p)
         {
             std::cerr << p;
             for (int i = 0; i < dim; ++i)
