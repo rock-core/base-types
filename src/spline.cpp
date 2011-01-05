@@ -309,7 +309,7 @@ void SplineBase::reset(SISLCurve* new_curve)
     new_curve->cuopen = 1;
     singleton.clear();
     has_curvature_max = false;
-    has_curve_length = true;
+    has_curve_length = false;
     this->curve = new_curve;
 
     int status;
