@@ -84,6 +84,7 @@ endmacro()
 # using the resulting information
 macro (rock_find_pkgconfig VARIABLE)
     pkg_check_modules(${VARIABLE} ${ARGN})
+    add_definitions(${${VARIABLE}_CFLAGS})
     include_directories(${${VARIABLE}_INCLUDE_DIRS})
     link_directories(${${VARIABLE}_LIBRARY_DIRS})
 endmacro()
