@@ -45,7 +45,8 @@ macro(rock_standard_layout)
 
     if (IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src)
         execute_process(
-            COMMAND cmake -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/include
+            COMMAND cmake -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/include)
+        execute_process(
             COMMAND cmake -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME})
         include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR}/include)
         add_subdirectory(src)
