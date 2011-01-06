@@ -170,6 +170,10 @@ macro(rock_library_common TARGET_NAME)
     add_library(${TARGET_NAME} SHARED ${${TARGET_NAME}_SOURCES})
     rock_target_setup(${TARGET_NAME})
 
+    foreach(pkgname ${${TARGET_NAME}_DEPS_PKGCONFIG})
+        set(DEPS_PKGCONFIG "${DEPS_PKGCONFIG} ${pkgname}")
+    endforeach()
+
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_NAME}.pc.in
         ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.pc @ONLY)
     if (${TARGET_NAME}_INSTALL)
