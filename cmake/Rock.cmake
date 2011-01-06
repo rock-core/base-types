@@ -101,7 +101,7 @@ endmacro()
 ## Common parsing of parameters for all the C/C++ target types
 macro(rock_target_definition TARGET_NAME)
     set(${TARGET_NAME}_INSTALL ON)
-    set(ROCK_TARGET_AVAILABLE_MODES "SOURCES;HEADERS;DEPS;DEPS_PKGCONFIG;DEPS_CMAKE")
+    set(ROCK_TARGET_AVAILABLE_MODES "SOURCES;HEADERS;DEPS;DEPS_PKGCONFIG;DEPS_CMAKE;MOC")
 
     set(${TARGET_NAME}_MODE "SOURCES")
     foreach(ELEMENT ${ARGN})
@@ -127,6 +127,12 @@ macro(rock_target_definition TARGET_NAME)
     foreach (cmake_pkg ${${TARGET_NAME}_DEPS_CMAKE})
         rock_find_cmake(${cmake_pkg} REQUIRED)
     endforeach()
+
+    list(LENGTH ${TARGET_NAME}_MOC QT_SOURCE_LENGTH)
+    if (QT_SOURCE_LENGTH GREATER 0)
+        QT4_WRAP_CPP(${TARGET_NAME}_MOC_SRCS ${${TARGET_NAME}_MOC})
+        list(APPEND ${TARGET_NAME}_SOURCES ${${TARGET_NAME}_MOC_SRCS})
+    endif()
 endmacro()
 
 ## Common post-target-definition setup for all C/C++ targets
