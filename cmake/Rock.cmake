@@ -15,7 +15,7 @@ macro(rock_use_full_rpath install_rpath)
 endmacro()
 
 ## Main initialization for Rock CMake projects
-function (rock_init PROJECT_NAME PROJECT_VERSION)
+macro (rock_init PROJECT_NAME PROJECT_VERSION)
     project(${PROJECT_NAME})
     set(PROJECT_VERSION ${PROJECT_VERSION})
     rock_use_full_rpath("${CMAKE_INSTALL_PREFIX}/lib")
@@ -26,7 +26,9 @@ function (rock_init PROJECT_NAME PROJECT_VERSION)
     if (ROCK_CXX_SUPPORTS_WALL)
         add_definitions(-Wall)
     endif()
+endmacro()
 
+macro(rock_standard_layout)
     if (EXISTS ${CMAKE_SOURCE_DIR}/Doxyfile.in)
         find_package(Doxygen)
         if (DOXYGEN_FOUND)
@@ -76,7 +78,7 @@ function (rock_init PROJECT_NAME PROJECT_VERSION)
             add_subdirectory(ruby)
         endif()
     endif()
-endfunction()
+endmacro()
 
 ## Like pkg_check_modules, but calls include_directories and link_directories
 # using the resulting information
