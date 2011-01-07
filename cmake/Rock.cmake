@@ -28,6 +28,14 @@ macro (rock_init PROJECT_NAME PROJECT_VERSION)
     endif()
 endmacro()
 
+function(rock_export_includedir DIR TARGET_DIR)
+    execute_process(
+        COMMAND cmake -E make_directory ${PROJECT_BINARY_DIR}/include)
+    execute_process(
+        COMMAND cmake -E create_symlink ${DIR} ${PROJECT_BINARY_DIR}/include/${TARGET_DIR})
+    include_directories(BEFORE ${PROJECT_BINARY_DIR}/include)
+endfunction()
+
 macro(rock_standard_layout)
     if (EXISTS ${PROJECT_SOURCE_DIR}/Doxyfile.in)
         find_package(Doxygen)
@@ -44,11 +52,7 @@ macro(rock_standard_layout)
     endif()
 
     if (IS_DIRECTORY ${PROJECT_SOURCE_DIR}/src)
-        execute_process(
-            COMMAND cmake -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/include)
-        execute_process(
-            COMMAND cmake -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME})
-        include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR}/include)
+        rock_export_includedir(${PROJECT_SOURCE_DIR}/src ${PROJECT_NAME})
         add_subdirectory(src)
     endif()
 
@@ -204,6 +208,20 @@ function(rock_vizkit_plugin TARGET_NAME)
             LIBRARY DESTINATION lib)
         install(FILES ${${TARGET_NAME}_HEADERS}
             DESTINATION include/vizkit)
+    endif()
+endfunction()
+
+## Defines a new vizkit plugin
+function(rock_vizkit_widget TARGET_NAME)
+    rock_export_includedir(${CMAKE_CURRENT_SOURCE_DIR} vizkit)
+    rock_library_common(${TARGET_NAME} ${ARGN} DEPS_PKGCONFIG vizkit)
+    if (${TARGET_NAME}_INSTALL)
+        install(TARGETS ${TARGET_NAME}
+            LIBRARY DESTINATION lib)
+        install(FILES ${${TARGET_NAME}_HEADERS}
+            DESTINATION include/vizkit)
+        install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/lib${TARGET_NAME}.so.rb
+            DESTINATION lib OPTIONAL)
     endif()
 endfunction()
 
