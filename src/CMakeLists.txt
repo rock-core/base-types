@@ -1,3 +1,4 @@
+include_directories(BEFORE ${PROJECT_SOURCE_DIR})
 find_package(SISL)
 if (SISL_FOUND)
     include_directories(${SISL_INCLUDE_DIRS})
