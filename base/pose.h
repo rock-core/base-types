@@ -19,6 +19,11 @@ namespace base
     typedef base::Vector2d    Position2D;
     typedef double            Orientation2D;
 
+    static double getYaw(const base::Orientation& orientation)
+    {
+        return orientation.toRotationMatrix().eulerAngles(2,1,0)[0];
+    }
+
     /**
      * Representation for a pose in 3D
      */
@@ -46,6 +51,11 @@ namespace base
 	    t.pretranslate( position );
 	    return t;
 	}
+
+        double getYaw() const
+        {
+            return base::getYaw(orientation);
+        }
     };
 
     /**

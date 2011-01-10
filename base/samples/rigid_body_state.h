@@ -75,6 +75,11 @@ namespace base { namespace samples {
 	    orientation = pose.orientation;
 	    position = pose.position;
 	}
+
+        double getYaw() const
+        {
+            return base::getYaw(orientation);
+        }
 	
 	operator Eigen::Transform3d() const
 	{
