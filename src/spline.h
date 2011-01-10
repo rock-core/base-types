@@ -289,6 +289,15 @@ namespace geometry {
             SplineBase::interpolate(coordinates, parameters);
         }
 
+        /** Returns the distance between the given point and the curve
+         */
+        double distanceTo(vector_t const& _pt) const
+        {
+            double closest = findOneClosestPoint(_pt);
+            vector_t curve_p = getPoint(closest);
+            return (_pt - curve_p).norm();
+        }
+
         /** \overload
          */
         double findOneClosestPoint(vector_t const& _pt) const
