@@ -36,6 +36,11 @@ ELSEIF(NOT RUBY_EXTENSIONS_AVAILABLE)
             DESTINATION ${RUBY_LIBRARY_INSTALL_DIR}/${dirname})
     endfunction()
 
+    function(ROCK_TYPELIB_RUBY_PLUGIN)
+        install(FILES ${ARGN}
+            DESTINATION share/typelib/ruby)
+    endfunction()
+
     function(ROCK_RUBY_EXTENSION target)
 	INCLUDE_DIRECTORIES(${RUBY_INCLUDE_PATH})
         list(GET ${RUBY_INCLUDE_PATH} 0 rubylib_path)
