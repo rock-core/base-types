@@ -2,7 +2,7 @@
 #define  _BASE_SPLINE_HPP_INC
 
 #include <vector>
-#include <eigen2/Eigen/Core>
+#include <base/eigen.h>
 
 #include <boost/utility/enable_if.hpp>
 
@@ -157,28 +157,28 @@ namespace geometry {
         void getPoint(double* result, double _param) const;
         void getPointAndTangent(double* result, double _param) const;
 
-        double findOneClosestPoint(double const* _pt, double _guess, double _geores);
+        double findOneClosestPoint(double const* _pt, double _guess, double _geores) const;
         void findClosestPoints(double const* ref_point,
                 std::vector<double>& _result_points,
                 std::vector< std::pair<double, double> >& _result_curves,
-                double _geores);
+                double _geores) const;
 
         double localClosestPointSearch(double* ref_point,
                 double _guess, double _start, double _end,
-                double  _geores);
+                double  _geores) const;
 
         void getPointAndTangentHelper(double* result, double _param, bool with_tangent) const;
 
         //! available only in Spline<3>
-        Eigen::Matrix3d getFrenetFrame(double _param);
+        base::Matrix3d getFrenetFrame(double _param);
         //! available only in Spline<3>
         double getHeading(double _param);
         //! available only in Spline<3>
         double headingError(double _actHeading, double _param);
         //! available only in Spline<3>
-        double distanceError(Eigen::Vector3d _pt, double _param);
+        double distanceError(base::Vector3d _pt, double _param);
         //! available only in Spline<3>
-        Eigen::Vector3d poseError(Eigen::Vector3d _pt, double _actZRot, double _st_para);
+        base::Vector3d poseError(base::Vector3d _pt, double _actZRot, double _st_para);
 
     private:
         std::vector<double> singleton;
@@ -217,7 +217,7 @@ namespace geometry {
         Spline3Base(SplineBase const& source)
             : SplineBase(source) {}
 
-        Eigen::Matrix3d getFrenetFrame(double _param)
+        base::Matrix3d getFrenetFrame(double _param)
         { return SplineBase::getFrenetFrame(_param); }
 
         double getHeading(double _param)
@@ -226,7 +226,7 @@ namespace geometry {
         double headingError(double _actZRot, double _param)
         { return SplineBase::headingError(_actZRot, _param); }
 
-        double distanceError(Eigen::Vector3d _pt, double _param)
+        double distanceError(base::Vector3d _pt, double _param)
         { return SplineBase::distanceError(_pt, _param); }
 
         /** Searches for the closest point in the curve, and returns the pose
@@ -236,7 +236,7 @@ namespace geometry {
          * The returned vector is (distance_error, heading_error,
          * curve_parameter)
          */
-        Eigen::Vector3d poseError(Eigen::Vector3d _position, double _heading, double _guess)
+        base::Vector3d poseError(base::Vector3d const& _position, double _heading, double _guess)
         { return SplineBase::poseError(_position, _heading, _guess); }
     };
 
@@ -250,7 +250,7 @@ namespace geometry {
     {
     public:
         typedef typename SplineBaseClass<DIM>::type base_t;
-        typedef Eigen::Matrix<double, DIM, 1> vector_t;
+        typedef Eigen::Matrix<double, DIM, 1, Eigen::DontAlign>     vector_t;
         typedef Eigen::Transform<double, DIM> transform_t;
 
         explicit Spline(double geometric_resolution = 0.1, int order = 3)
@@ -277,7 +277,7 @@ namespace geometry {
             SplineBase::getPointAndTangent(result, _param);
             vector_t point(result);
             vector_t tangent(result + DIM);
-            return make_pair(point, tangent);
+            return std::make_pair(point, tangent);
         }
 
         /** Compute the curve from the given set of points */
@@ -291,7 +291,7 @@ namespace geometry {
 
         /** \overload
          */
-        double findOneClosestPoint(vector_t const& _pt)
+        double findOneClosestPoint(vector_t const& _pt) const
         { return findOneClosestPoint(_pt, SplineBase::getGeometricResolution()); }
 
         /** \overload
@@ -300,7 +300,7 @@ namespace geometry {
          * parameter. I.e. it will always return the point closest to the start
          * of the curve.
          */
-        double findOneClosestPoint(vector_t const& _pt, double _geometric_resolution)
+        double findOneClosestPoint(vector_t const& _pt, double _geometric_resolution) const
         { return findOneClosestPoint(_pt, SplineBase::getStartParam(), _geometric_resolution); }
 
         /** Returns a single closest point to _pt
@@ -313,14 +313,14 @@ namespace geometry {
          * @throw std::logic_error if no points have been found (should not happen)
          * @see localClosestPointSearch findClosestPoints
          */
-        double findOneClosestPoint(vector_t const& _pt, double _guess, double _geometric_resolution)
+        double findOneClosestPoint(vector_t const& _pt, double _guess, double _geometric_resolution) const
         { return SplineBase::findOneClosestPoint(_pt.data(), _guess, _geometric_resolution); }
 
         /** \overload
          */
         void findClosestPoints(vector_t const& _pt,
                 std::vector<double>& _points,
-                std::vector< std::pair<double, double> >& _curves)
+                std::vector< std::pair<double, double> >& _curves) const
         { return findClosestPoints(_pt, _points, _curves, SplineBase::getGeometricResolution()); }
 
         /**

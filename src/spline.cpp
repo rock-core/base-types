@@ -360,7 +360,7 @@ void SplineBase::reset(std::vector<double> const& coordinates, std::vector<doubl
     reset(new_curve);
 }
 
-double SplineBase::findOneClosestPoint(double const* _pt, double _guess, double _geores)
+double SplineBase::findOneClosestPoint(double const* _pt, double _guess, double _geores) const
 {
     if (!curve)
         return getStartParam();
@@ -403,7 +403,7 @@ double SplineBase::findOneClosestPoint(double const* _pt, double _guess, double 
     return closestPoint;
 }
 
-void SplineBase::findClosestPoints(double const* ref_point, vector<double>& _result_points, vector< pair<double, double> >& _result_curves, double _geores)
+void SplineBase::findClosestPoints(double const* ref_point, vector<double>& _result_points, vector< pair<double, double> >& _result_curves, double _geores) const
 {
     if (!curve)
     {
@@ -431,7 +431,7 @@ void SplineBase::findClosestPoints(double const* ref_point, vector<double>& _res
     free(points);
 }
 
-double SplineBase::localClosestPointSearch(double* ref_point, double _guess, double _start, double _end, double  _geores)
+double SplineBase::localClosestPointSearch(double* ref_point, double _guess, double _start, double _end, double  _geores) const
 {
     if (!curve)
         return getStartParam();
@@ -686,7 +686,7 @@ SISLCurve* SplineBase::getSISLCurve()
     return curve;
 }
 
-Eigen::Matrix3d SplineBase::getFrenetFrame(double _param)
+base::Matrix3d SplineBase::getFrenetFrame(double _param)
 {
     if (!curve)
         throw std::runtime_error("getFrenetFrame() called on an empty or degenerate curve");
@@ -723,7 +723,7 @@ double SplineBase::headingError(double _actHeading, double _param)
     return angleLimit( _actHeading - getHeading(_param));
 }
 
-double SplineBase::distanceError(Eigen::Vector3d _pt, double _param)
+double SplineBase::distanceError(base::Vector3d _pt, double _param)
 {
     // Error vector
     Vector3d curve_point;
@@ -741,11 +741,11 @@ double SplineBase::distanceError(Eigen::Vector3d _pt, double _param)
     return (angle >= 0.0)?(error.norm()):(-error.norm());
 }
 
-Eigen::Vector3d SplineBase::poseError(Eigen::Vector3d _position, double _heading, double _guess)
+base::Vector3d SplineBase::poseError(base::Vector3d _position, double _heading, double _guess)
 {
     double param = findOneClosestPoint(_position.data(), _guess, getGeometricResolution());
 
     // Returns the error [distance error, orientation error, parameter] 
-    return Eigen::Vector3d(distanceError(_position, param), headingError(_heading, param), param);
+    return base::Vector3d(distanceError(_position, param), headingError(_heading, param), param);
 }
 
