@@ -1,8 +1,10 @@
+require 'base/geometry/spline'
+
 # If we get a /base/Time, convert it to Ruby's Time class
-Typelib.convert_to_ruby '/base/Time', :if => lambda { |t| t.has_field?('seconds') } do |value|
+Typelib.convert_to_ruby '/base/Time', Time, :if => lambda { |t| t.has_field?('seconds') } do |value|
     Time.at(value.seconds, value.microseconds)
 end
-Typelib.convert_to_ruby '/base/Time', :if => lambda { |t| !t.has_field?('seconds') } do |value|
+Typelib.convert_to_ruby '/base/Time', Time, :if => lambda { |t| !t.has_field?('seconds') } do |value|
     microseconds = value.microseconds
     seconds = microseconds / 1_000_000
     Time.at(seconds, microseconds % 1_000_000)
@@ -23,14 +25,15 @@ end
 ##
 # base/geometry/Spline to BaseTypes::Geometry::Spline convertions
 require 'base/geometry/spline'
-Typelib.convert_to_ruby '/wrappers/geometry/Spline', :dynamic_wrappers => false do |value|
-    result = BaseTypes::Geometry::Spline.new(value.dimension, value.geometric_resolution, value.curve_order)
+Typelib.convert_to_ruby '/wrappers/geometry/Spline', Types::Base::Geometry::Spline, :dynamic_wrappers => false do |value|
+    result = Types::Base::Geometry::Spline.new(
+        value.dimension, value.geometric_resolution, value.curve_order)
 
     kind_t = value.class.kind
     result.reset(value.vertices.to_a, value.knots.to_a, kind_t.value_of(value.kind.to_s))
     result
 end
-Typelib.convert_from_ruby BaseTypes::Geometry::Spline, '/wrappers/geometry/Spline' do |value, type|
+Typelib.convert_from_ruby Types::Base::Geometry::Spline, '/wrappers/geometry/Spline' do |value, type|
     result = type.new
     result.geometric_resolution = value.geometric_resolution
     result.curve_order = value.order
