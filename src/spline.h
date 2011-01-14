@@ -157,6 +157,22 @@ namespace geometry {
         void getPoint(double* result, double _param) const;
         void getPointAndTangent(double* result, double _param) const;
 
+        void findPointIntersections(double const* _point,
+                std::vector<double>& _result_points,
+                std::vector< std::pair<double, double> >& _result_curves,
+                double _geores) const;
+
+        std::pair<double, bool> findOneLineIntersection(double const* _point,
+                double const* _normal, double _guess, double _geores) const;
+        void findLineIntersections(double const* _point, double const* _normal,
+                std::vector<double>& _result_points,
+                std::vector< std::pair<double, double> >& _result_curves,
+                double _geores) const;
+
+        void findSphereIntersections(double const* _center, double radius,
+                std::vector<double>& points,
+                std::vector< std::pair<double, double> >& segments, double _geores) const;
+
         double findOneClosestPoint(double const* _pt, double _guess, double _geores) const;
         void findClosestPoints(double const* ref_point,
                 std::vector<double>& _result_points,
@@ -168,6 +184,16 @@ namespace geometry {
                 double  _geores) const;
 
         void getPointAndTangentHelper(double* result, double _param, bool with_tangent) const;
+
+        /** Helper function for findOneClosestPoint and findOneLineIntersection.
+         * It returns the parameter in points and/or curves that is the closest
+         * to the given guess
+         *
+         * The caller is in charge of making sure that at least one of \c points
+         * or \c curves is not empty
+         */
+        double getResultClosestToGuess(double _guess, std::vector<double> points,
+            std::vector< std::pair<double, double> > curves) const;
 
         //! available only in Spline<3>
         base::Matrix3d getFrenetFrame(double _param);
@@ -296,6 +322,83 @@ namespace geometry {
             double closest = findOneClosestPoint(_pt);
             vector_t curve_p = getPoint(closest);
             return (_pt - curve_p).norm();
+        }
+
+        void findSphereIntersections(vector_t const& _center, double _radius,
+                std::vector<double>& points, std::vector< std::pair<double, double> >& segments) const
+        { return findSphereIntersections(_center, _radius, points, segments, SplineBase::getGeometricResolution()); }
+
+        void findSphereIntersections(vector_t const& _center, double _radius,
+                std::vector<double>& points, std::vector< std::pair<double, double> >& segments, double _geores) const
+        { return SplineBase::findSphereIntersections(_center.data(), _radius,
+                points, segments, _geores); }
+
+        void findPointIntersections(vector_t const& _point,
+                std::vector<double>& _result_points,
+                std::vector< std::pair<double, double> >& _result_curves,
+                double _geores) const
+        { return SplineBase::findPointIntersections(_point.data(),
+                _result_points, _result_curves, _geores); }
+
+        /** \overload
+         */
+        std::pair<double, bool> findOneLineIntersection(vector_t const& _pt, vector_t const& _normal) const
+        { return findOneLineIntersection(_pt, _normal, SplineBase::getGeometricResolution()); }
+
+        /** \overload
+         *
+         * Calls findOneClosestPoint using the start parameter as the guess
+         * parameter. I.e. it will always return the point closest to the start
+         * of the curve.
+         */
+        std::pair<double, bool> findOneLineIntersection(vector_t const& _pt, vector_t const& _normal, double geometric_resolution) const
+        { return findOneLineIntersection(_pt, _normal, SplineBase::getStartParam(), geometric_resolution); }
+
+        /** Returns a single intersection point between this curve and the line
+         * or plan defined by \c _pt and \c _normal
+         *
+         * This is a convenience method that calls findLineIntersections and
+         * returns one single parameter in the values returned. The returned
+         * parameter is the closes point closest to _guess.
+         *
+         * @return a (t, true) pair, with t being the parameter of the found intersection, if there is one. If
+         * there is none, the (0, false) pair is returned
+         */
+        std::pair<double, bool> findOneLineIntersection(vector_t const& _pt, vector_t const& _normal, double _guess, double _geometric_resolution) const
+        { return SplineBase::findOneLineIntersection(_pt.data(), _normal.data(), _guess, _geometric_resolution); }
+
+        /** \overload
+         */
+        std::pair<double, bool> findOneLineIntersection(vector_t const& _pt, vector_t const& _normal, vector_t const& _guess, double _geometric_resolution) const
+        {
+            std::vector<double> points;
+            std::vector< std::pair<double, double> > curves;
+            findLineIntersections(_pt.data(), _normal.data(), points, curves, _geometric_resolution);
+
+            if (points.empty() && curves.empty())
+                return std::make_pair(0, false);
+
+            for (unsigned int i = 0; i < curves.size(); ++i)
+            {
+                points.push_back(curves[i].first);
+                points.push_back(curves[i].second);
+            }
+
+            double result_t = points[0];
+            vector_t result_p = getPoint(result_t);
+            double min_d = (result_p - _guess).norm();
+            for (unsigned int i = 1; i < points.size(); ++i)
+            {
+                vector_t p = getPoint(points[i]);
+                double   d = (p - _guess).norm();
+                if (d < min_d)
+                {
+                    result_t = points[i];
+                    result_p = p;
+                    min_d    = d;
+                }
+            }
+            return std::make_pair(result_t, true);
         }
 
         /** \overload

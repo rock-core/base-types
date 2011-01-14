@@ -369,6 +369,12 @@ double SplineBase::findOneClosestPoint(double const* _pt, double _guess, double 
     vector< pair<double, double> > curves;
     findClosestPoints(_pt, points, curves, _geores);
 
+    return getResultClosestToGuess(_guess, points, curves);
+}
+
+double SplineBase::getResultClosestToGuess(double _guess, vector<double> points,
+        vector< pair<double, double> > curves) const
+{
     double closestPoint;
     if (points.empty())
     {
@@ -455,6 +461,124 @@ double SplineBase::localClosestPointSearch(double* ref_point, double _guess, dou
     else if (param > _end)
         return _end;
     else return param;
+}
+
+void SplineBase::findPointIntersections(double const* _point,
+        std::vector<double>& _result_points,
+        std::vector< std::pair<double, double> >& _result_curves,
+        double _geores) const
+{
+    _result_points.clear();
+    _result_curves.clear();
+
+    if (!curve)
+        return; // no intersection between points and lines
+
+    int points_count = 0;
+    double* points = 0;
+    int curves_count = 0;
+    SISLIntcurve** curves = 0;
+    int status;
+
+    s1871(curve, const_cast<double*>(_point),
+            getDimension(), _geores,
+            &points_count, &points, &curves_count, &curves,
+            &status);
+    if (status != 0)
+        throw std::runtime_error("error computing intersection between curve and line/plane");
+
+    for (int i = 0; i < curves_count; ++i)
+        _result_curves.push_back(make_pair(curves[i]->epar1[0], curves[i]->epar1[1]));
+    for (int i = 0; i < points_count; ++i)
+        _result_points.push_back(points[i]);
+
+    free(curves);
+    free(points);
+}
+
+std::pair<double, bool> SplineBase::findOneLineIntersection(double const* _point, double const* _normal, double _guess, double _geores) const
+{
+    std::vector<double> points;
+    std::vector< std::pair<double, double> > curves;
+    findLineIntersections(_point, _normal,
+            points, curves, _geores);
+
+    if (points.empty() && curves.empty())
+        return make_pair(0, false);
+
+    double result = getResultClosestToGuess(_guess, points, curves);
+    return make_pair(result, true);
+}
+
+void SplineBase::findLineIntersections(double const* _point, double const* _normal,
+        std::vector<double>& _result_points,
+        std::vector< std::pair<double, double> >& _result_curves,
+        double _geores) const
+{
+    _result_points.clear();
+    _result_curves.clear();
+
+    if (!curve)
+        return; // no intersection between points and lines
+
+    if (getDimension() != 2 && getDimension() != 3)
+        throw std::runtime_error("can compute line/plane to curve intersections only in dimensions 2 and 3");
+
+    int points_count = 0;
+    double* points = 0;
+    int curves_count = 0;
+    SISLIntcurve** curves = 0;
+    int status;
+
+    s1850(curve, const_cast<double*>(_point), const_cast<double*>(_normal),
+            getDimension(), 0, _geores,
+            &points_count, &points, &curves_count, &curves,
+            &status);
+    if (status != 0)
+        throw std::runtime_error("error computing intersection between curve and line/plane");
+
+    for (int i = 0; i < curves_count; ++i)
+        _result_curves.push_back(make_pair(curves[i]->epar1[0], curves[i]->epar1[1]));
+    for (int i = 0; i < points_count; ++i)
+        _result_points.push_back(points[i]);
+
+    free(curves);
+    free(points);
+}
+
+void SplineBase::findSphereIntersections(double const* _center, double radius,
+        std::vector<double>& _result_points,
+        std::vector< std::pair<double, double> >& _result_curves, double _geores) const
+{
+    _result_points.clear();
+    _result_curves.clear();
+
+    if (!curve)
+        return; // no intersection between points and lines
+
+    if (getDimension() != 2 && getDimension() != 3)
+        throw std::runtime_error("can compute line/plane to curve intersections only in dimensions 2 and 3");
+
+    int points_count = 0;
+    double* points = 0;
+    int curves_count = 0;
+    SISLIntcurve** curves = 0;
+    int status;
+
+    s1371(curve, const_cast<double*>(_center), radius,
+            getDimension(), _geores, _geores,
+            &points_count, &points, &curves_count, &curves,
+            &status);
+    if (status != 0)
+        throw std::runtime_error("error computing intersection between curve and circle/sphere");
+
+    for (int i = 0; i < curves_count; ++i)
+        _result_curves.push_back(make_pair(curves[i]->epar1[0], curves[i]->epar1[1]));
+    for (int i = 0; i < points_count; ++i)
+        _result_points.push_back(points[i]);
+
+    free(curves);
+    free(points);
 }
 
 void SplineBase::append(SplineBase const& other)
