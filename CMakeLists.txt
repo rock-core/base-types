@@ -14,7 +14,7 @@ if (CXX_SUPPORTS_WALL)
 endif (CXX_SUPPORTS_WALL)
 
 find_package(Boost REQUIRED)
-include_directories(${BOOST_INCLUDE_DIR})
+include_directories(${Boost_INCLUDE_DIR})
 
 find_package(Eigen2 REQUIRED)
 include_directories(${EIGEN2_INCLUDE_DIR})
