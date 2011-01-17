@@ -9,6 +9,10 @@ module Eigen
         # Returns the quaternion as [w, x, y, z]
         def to_a; [w, x, y, z] end
 
+        def self.Unit
+            Quaternion.new(1, 0, 0, 0)
+        end
+
         def self.from_euler(*args)
             q = new(0, 0, 0, 0)
             q.from_euler(*args)
