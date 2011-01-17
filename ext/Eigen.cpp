@@ -98,7 +98,10 @@ void Init_eigen_ext()
      Rice::Module rb_mEigen = define_module("Eigen");
 
      Data_Type<Vector3> rb_Vector3 = define_class_under<Vector3>(rb_mEigen, "Vector3")
-       .define_constructor(Constructor<Vector3,double,double,double>())
+       .define_constructor(Constructor<Vector3,double,double,double>(),
+               (Arg("x") = static_cast<double>(0),
+               Arg("y") = static_cast<double>(0),
+               Arg("z") = static_cast<double>(0)))
        .define_method("x",  &Vector3::x)
        .define_method("y",  &Vector3::y)
        .define_method("z",  &Vector3::z)
