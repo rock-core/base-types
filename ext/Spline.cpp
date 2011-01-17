@@ -128,7 +128,7 @@ void Init_spline_ext(Rice::Module& base_m)
         .define_method("clear", &SplineBase::clear)
         .define_method("sisl_curve_type", &SplineBase::getSISLCurveType)
         .define_method("coordinate_stride", &SplineBase::getCoordinatesStride)
-        .define_method("join", &SplineBase::join, (Arg("curve"), Arg("tolerance") = 0))
+        .define_method("join", &SplineBase::join, (Arg("curve"), Arg("tolerance") = static_cast<double>(0)))
         .define_method("append", &SplineBase::append);
 
     Data_Type<RubySpline> rb_Spline = define_class_under<RubySpline, SplineBase>(base_m, "Spline")
