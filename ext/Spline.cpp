@@ -49,11 +49,20 @@ public:
         SplineBase::reset(array_to_double_vector(coordinates), array_to_double_vector(knots), kind);
     }
 
-    Array do_getPoint(double param)
+    Array do_getPoint(double param, bool with_tangent)
     {
         std::vector<double> result;
-        result.resize(getDimension());
-        getPoint(&result[0], param);
+        if (with_tangent)
+        {
+            result.resize(getDimension() * 2);
+            getPointAndTangent(&result[0], param);
+        }
+        else
+        {
+            result.resize(getDimension());
+            getPoint(&result[0], param);
+        }
+
         return double_vector_to_array(result);
     }
 
@@ -130,6 +139,6 @@ void Init_spline_ext(Rice::Module& base_m)
         .define_method("coordinates", &RubySpline::do_coordinates)
         .define_method("knots", &RubySpline::do_knots)
         .define_method("reset", &RubySpline::do_reset, (Arg("coordinates"), Arg("knots"), Arg("kind") = -1))
-        .define_method("get", &RubySpline::do_getPoint);
+        .define_method("get", &RubySpline::do_getPoint, (Arg("parameter"), Arg("with_tangent") = false));
 }
 
