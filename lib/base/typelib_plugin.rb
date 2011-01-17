@@ -25,15 +25,22 @@ end
 ##
 # base/geometry/Spline to BaseTypes::Geometry::Spline convertions
 require 'base/geometry/spline'
-Typelib.convert_to_ruby '/wrappers/geometry/Spline', Types::Base::Geometry::Spline, :dynamic_wrappers => false do |value|
-    result = Types::Base::Geometry::Spline.new(
+Typelib.convert_to_ruby '/wrappers/geometry/Spline', Types::Base::Geometry::Spline do |value|
+    if value.dimension == 3
+        klass = Types::Base::Geometry::Spline3
+    else
+        klass = Types::Base::Geometry::Spline
+    end
+
+    result = klass.new(
         value.dimension, value.geometric_resolution, value.curve_order)
 
     kind_t = value.class.kind
     result.reset(value.vertices.to_a, value.knots.to_a, kind_t.value_of(value.kind.to_s))
     result
 end
-Typelib.convert_from_ruby Types::Base::Geometry::Spline, '/wrappers/geometry/Spline' do |value, type|
+
+def convert_spline_to_typelib(value, type)
     result = type.new
     result.geometric_resolution = value.geometric_resolution
     result.curve_order = value.order
@@ -43,6 +50,9 @@ Typelib.convert_from_ruby Types::Base::Geometry::Spline, '/wrappers/geometry/Spl
     result.vertices = value.coordinates
     result
 end
+
+Typelib.convert_from_ruby Types::Base::Geometry::Spline3, '/wrappers/geometry/Spline', &method(:convert_spline_to_typelib)
+Typelib.convert_from_ruby Types::Base::Geometry::Spline, '/wrappers/geometry/Spline', &method(:convert_spline_to_typelib)
 
 ##
 # Eigen convertions
