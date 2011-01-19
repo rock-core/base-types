@@ -344,6 +344,46 @@ namespace geometry {
             return std::make_pair(point, tangent);
         }
 
+        /** Returns a discretization of this curve so that two consecutive
+         * points are separated by a curve length lower than _geores
+         */
+        std::vector<vector_t> sample(double _geores) const
+        {
+            std::vector<vector_t> result;
+            sample(result, _geores);
+            return result;
+        }
+
+        /** Samples the curve so that the distance between two consecutive
+         * points is always below _geores
+         */
+        void sample(std::vector<vector_t>& result, double _geores) const
+        {
+            double start = this->getStartParam();
+            vector_t start_p = this->getPoint(start);
+            result.push_back(start_p);
+
+            double end   = this->getEndParam();
+            vector_t end_p = this->getPoint(end);
+            sample(result, start, start_p, end, end_p, _geores);
+        }
+
+        /** Helper method for the other sample methods
+         */
+        void sample(std::vector<vector_t>& result, double start, vector_t const& start_p, double end, vector_t const& end_p, double _geores) const
+        {
+            if ((start_p - end_p).norm() < _geores)
+            {
+                result.push_back(end_p);
+                return;
+            }
+
+            double middle = (start + end) / 2;
+            vector_t middle_p = getPoint(middle);
+            sample(result, start, start_p, middle, middle_p, _geores);
+            sample(result, middle, middle_p, end, end_p, _geores);
+        }
+
         /** Compute the curve from the given set of points */
         void interpolate(std::vector<vector_t> const& points, std::vector<double> const& parameters = std::vector<double>())
         {
