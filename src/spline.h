@@ -479,6 +479,15 @@ namespace geometry {
             return std::make_pair(result_t, true);
         }
 
+        void findLineIntersections(vector_t const& _point, vector_t const& _normal,
+                std::vector<double>& _result_points,
+                std::vector< std::pair<double, double> >& _result_curves,
+                double _geores) const
+        {
+            return SplineBase::findLineIntersections(_point.data(), _normal.data(),
+                    _result_points, _result_curves, _geores);
+        }
+
         /** \overload
          */
         double findOneClosestPoint(vector_t const& _pt) const
