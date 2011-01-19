@@ -295,6 +295,44 @@ namespace geometry {
             return result;
         }
 
+        /** Private method */
+        bool doAdvance(double& result, double& cur, double target, double start, vector_t const& start_p, double end, vector_t const& end_p, double _geores) const
+        {
+            double d = (start_p - end_p).norm();
+            if (d < _geores)
+            {
+                cur += d;
+                if (cur > target)
+                {
+                    result = end;
+                    return true;
+                }
+                return false;
+            }
+
+            double middle = (start + end) / 2;
+            vector_t middle_p = getPoint(middle);
+            if (doAdvance(result, cur, target, start, start_p, middle, middle_p, _geores))
+                return true;
+            if (doAdvance(result, cur, target, middle, middle_p, end, end_p, _geores))
+                return true;
+
+            return false;
+        }
+
+        /** find a parameter separated from another by a given curve length
+         *
+         * Specifically, this method finds the parameter t1 so that the curve
+         * length between t and t1 is in [length, length + _geores]
+         */
+        std::pair<double, double> advance(double t, double length, double _geores)
+        {
+            double result_t = 0;
+            double result_d = 0;
+            doAdvance(result_t, result_d, length, t, getPoint(t), this->getEndParam(), getPoint(this->getEndParam()), _geores);
+            return std::make_pair(result_t, result_d);
+        }
+
         /** Returns the geometric point that lies on the curve at the given
          * parameter */
         std::pair<vector_t, vector_t> getPointAndTangent(double _param) const
