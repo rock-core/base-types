@@ -39,12 +39,16 @@ namespace base { namespace samples {
 
         /** The array one scanline at the angle, distance between to indexes is given trought  
          */
-        std::vector<uint8_t> ranges;
+        std::vector<uint8_t> scanData;
 
 
 #ifndef __orogen
         SonarScan()
             : angle(0), time_beetween_bins(0){}
+	
+	double getScale(double sonicVelocityinWater = 1500.0){
+	  return  ((scanData.size()*time_beetween_bins)*sonicVelocityinWater/2.0)/scanData.size();
+	}
             
 #endif
     };
