@@ -6,6 +6,7 @@
 #include "base/pose.h"
 #include "base/samples/imu.h"
 #include "base/samples/laser_scan.h"
+#include "base/samples/sonar_scan.h"
 #include "base/samples/rigid_body_state.h"
 
 #include <Eigen/SVD>
