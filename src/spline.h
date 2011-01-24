@@ -21,7 +21,7 @@ namespace geometry {
     {
     public:
         SplineBase(SplineBase const& source);
-        virtual ~SplineBase();
+        ~SplineBase();
 
         explicit SplineBase(int dimension,
                 double geometric_resolution = 0.1, int order = 3);
