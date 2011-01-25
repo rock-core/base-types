@@ -26,6 +26,9 @@ struct Vector3
     void setY(double value) { v->y() = value; }
     void setZ(double value) { v->z() = value; }
 
+    double get(int i) const { return (*v)[i]; }
+    void set(int i, double value) { (*v)[i] = value; }
+
     Vector3* operator + (Vector3 const& other) const
     { return new Vector3(*v + *other.v); }
     Vector3* operator - (Vector3 const& other) const
@@ -102,6 +105,8 @@ void Init_eigen_ext()
                (Arg("x") = static_cast<double>(0),
                Arg("y") = static_cast<double>(0),
                Arg("z") = static_cast<double>(0)))
+       .define_method("[]",  &Vector3::get)
+       .define_method("[]=",  &Vector3::set)
        .define_method("x",  &Vector3::x)
        .define_method("y",  &Vector3::y)
        .define_method("z",  &Vector3::z)
