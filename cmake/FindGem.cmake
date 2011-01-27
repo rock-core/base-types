@@ -6,9 +6,6 @@
 # 	- support basic search functionality 
 #       - tested to find rice
 #
-# INPUT: 
-# Gem_NAME to the gem you want to find
-#
 # OUTPUT:
 #
 # GEM_INCLUDE_DIRS	After successful search contains the include directores
@@ -22,12 +19,17 @@
 # include_directories(${GEM_INCLUDE_DIRS})
 # target_link_libraries(${GEM_LIBRARIES}
 #
+#
 
-# TBD: check for gem first
-set(GEM_EXECUTABLE gem)
+# Check for gem binary first
+SET(GEM_EXECUTABLE gem)
+EXECUTE_PROCESS(COMMAND which ${GEM_EXECUTABLE} OUTPUT_VARIABLE GEM_EXEC_EXISTS)
+if( NOT GEM_EXEC_EXISTS)
+	MESSAGE(FATAL_ERROR "Could not find the gem executable - install 'gem' first")
+endif()
 
 if(NOT Gem_FIND_COMPONENTS)
-	MESSAGE(FATAL_ERROR "If searching for a Gem you have to set COMPONENTS for with the name of the gem first") 
+	MESSAGE(FATAL_ERROR "If searching for a Gem you have to provide COMPONENTS with the name of the gem") 
 endif()
 
 foreach(Gem_NAME ${Gem_FIND_COMPONENTS})
@@ -38,6 +40,7 @@ foreach(Gem_NAME ${Gem_FIND_COMPONENTS})
 
 	set(GEM_HOME ENV{GEM_HOME})
 
+	# Safe output of gem list --local into ${GEM_LOCAL_INFO}
 	EXECUTE_PROCESS(COMMAND ${GEM_EXECUTABLE} list --local OUTPUT_VARIABLE GEMS_LOCAL_INFO)
 
 	if("${GEMS_LOCAL_INFO}" STREQUAL "")
