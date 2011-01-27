@@ -83,6 +83,13 @@ macro(rock_standard_layout)
             add_subdirectory(ruby)
         endif()
     endif()
+
+    if (IS_DIRECTORY ${PROJECT_SOURCE_DIR}/configuration)
+	install(DIRECTORY ${PROJECT_SOURCE_DIR}/configuration/ DESTINATION configuration/${PROJECT_NAME}
+	        FILES_MATCHING PATTERN "*" 
+	                       PATTERN "*.pc" EXCLUDE)
+    endif()
+
 endmacro()
 
 ## Like pkg_check_modules, but calls include_directories and link_directories
