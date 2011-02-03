@@ -24,9 +24,9 @@ namespace base
         return orientation.toRotationMatrix().eulerAngles(2,1,0)[0];
     }
 
-    static void removeYaw(base::Orientation& orientation)
+    static inline base::Orientation removeYaw(const base::Orientation& orientation)
     {
-	orientation = Eigen::AngleAxisd( -getYaw(orientation), Eigen::Vector3d::UnitZ()) * orientation;
+	return Eigen::AngleAxisd( -getYaw(orientation), Eigen::Vector3d::UnitZ()) * orientation;
     }
 
     /**
