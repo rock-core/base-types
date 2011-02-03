@@ -30,6 +30,11 @@ BOOST_AUTO_TEST_CASE( pose_test )
     cout << orientation.coeffs().transpose() << endl;
 }
 
+base::Angle rand_angle()
+{
+    return base::Angle::fromRad(((rand() / (RAND_MAX + 1.0))-0.5) * M_PI);
+}
+
 BOOST_AUTO_TEST_CASE( angle_test )
 {
     using namespace base;
@@ -44,3 +49,28 @@ BOOST_AUTO_TEST_CASE( angle_test )
     BOOST_CHECK_CLOSE( (Angle::fromDeg(45)+Angle::fromDeg(-45)).getRad(), Angle::fromRad(0).getRad(), 1e-3 );
     std::cout << a << std::endl;
 }
+
+BOOST_AUTO_TEST_CASE( yaw_test )
+{
+    using namespace base;
+
+    for(int i=0;i<10;i++)
+    {
+	Angle roll = rand_angle();
+	Angle pitch = rand_angle();
+	Angle yaw = rand_angle();
+	Eigen::Quaterniond pitchroll = 
+	    Eigen::AngleAxisd( pitch.getRad(), Eigen::Vector3d::UnitY() ) *
+	    Eigen::AngleAxisd( roll.getRad(), Eigen::Vector3d::UnitX() );
+
+	Eigen::Quaterniond rot =
+	    Eigen::AngleAxisd( yaw.getRad(), Eigen::Vector3d::UnitZ() ) *
+	    pitchroll;
+
+	BOOST_CHECK_CLOSE( yaw.getRad(), Angle::fromRad(getYaw( rot )).getRad(), 1e-3 );
+
+	base::removeYaw( rot );
+	BOOST_CHECK( rot.isApprox( pitchroll ) );
+    }
+}
+
