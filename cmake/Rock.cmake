@@ -162,7 +162,32 @@ macro(rock_target_setup TARGET_NAME)
     endforeach()
 endmacro()
 
-## Defines a new executable that follows Rock guidelines
+## Defines a new C++ executable
+#
+# rock_executable(name
+#     SOURCES source.cpp source1.cpp ...
+#     [DEPS target1 target2 target3]
+#     [DEPS_PKGCONFIG pkg1 pkg2 pkg3]
+#     [DEPS_CMAKE pkg1 pkg2 pkg3]
+#     [MOC qtsource1.cpp qtsource2.hpp])
+#
+# Creates a C++ executable and (optionally) installs it
+#
+# The following arguments are mandatory:
+#
+# SOURCES: list of the C++ sources that should be built into that library
+#
+# The following optional arguments are available:
+#
+# DEPS: lists the other targets from this CMake project against which the
+# library should be linked
+# DEPS_PKGCONFIG: list of pkg-config packages that the library depends upon. The
+# necessary link and compilation flags are added
+# DEPS_CMAKE: list of packages which can be found with CMake's find_package,
+# that the library depends upon. It is assumed that the Find*.cmake scripts
+# follow the cmake accepted standard for variable naming
+# MOC: if the library is Qt-based, a list of headers that should be processed by
+# moc. The resulting implementation files are built into the library
 function(rock_executable TARGET_NAME)
     rock_target_definition(${TARGET_NAME} ${ARGN})
 
@@ -196,6 +221,40 @@ macro(rock_library_common TARGET_NAME)
 endmacro()
 
 ## Defines a new shared library
+#
+# rock_library(name
+#     SOURCES source.cpp source1.cpp ...
+#     [DEPS target1 target2 target3]
+#     [DEPS_PKGCONFIG pkg1 pkg2 pkg3]
+#     [DEPS_CMAKE pkg1 pkg2 pkg3]
+#     [HEADERS header1.hpp header2.hpp header3.hpp ...]
+#     [MOC qtsource1.cpp qtsource2.hpp]
+#     [NOINSTALL])
+#
+# Creates and (optionally) installs a shared library.
+#
+# As with all rock libraries, the target must have a pkg-config file along, that
+# gets generated and (optionally) installed by the macro.
+# 
+# The following arguments are mandatory:
+#
+# SOURCES: list of the C++ sources that should be built into that library
+#
+# The following optional arguments are available:
+#
+# DEPS: lists the other targets from this CMake project against which the
+# library should be linked
+# DEPS_PKGCONFIG: list of pkg-config packages that the library depends upon. The
+# necessary link and compilation flags are added
+# DEPS_CMAKE: list of packages which can be found with CMake's find_package,
+# that the library depends upon. It is assumed that the Find*.cmake scripts
+# follow the cmake accepted standard for variable naming
+# HEADERS: a list of headers that should be installed with the library. They get
+# installed in include/project_name
+# MOC: if the library is Qt-based, a list of headers that should be processed by
+# moc. The resulting implementation files are built into the library
+# NOINSTALL: by default, the library gets installed on 'make install'. If this
+# argument is given, this is turned off
 function(rock_library TARGET_NAME)
     rock_library_common(${TARGET_NAME} ${ARGN})
 
@@ -208,6 +267,43 @@ function(rock_library TARGET_NAME)
 endfunction()
 
 ## Defines a new vizkit plugin
+#
+# rock_vizkit_plugin(name
+#     SOURCES source.cpp source1.cpp ...
+#     [DEPS target1 target2 target3]
+#     [DEPS_PKGCONFIG pkg1 pkg2 pkg3]
+#     [DEPS_CMAKE pkg1 pkg2 pkg3]
+#     [HEADERS header1.hpp header2.hpp header3.hpp ...]
+#     [MOC qtsource1.cpp qtsource2.hpp]
+#     [NOINSTALL])
+#
+# Creates and (optionally) installs a shared library that defines a vizkit
+# plugin. In Rock, vizkit is the base for data display. Vizkit plugins are
+# plugins to the 3D display in vizkit.
+#
+# The library gets linked against the vizkit libraries automatically (no
+# need to list them in DEPS_PKGCONFIG). Moreoer, unlike with a normal shared
+# library, the headers get installed in include/vizkit
+# 
+# The following arguments are mandatory:
+#
+# SOURCES: list of the C++ sources that should be built into that library
+#
+# The following optional arguments are available:
+#
+# DEPS: lists the other targets from this CMake project against which the
+# library should be linked
+# DEPS_PKGCONFIG: list of pkg-config packages that the library depends upon. The
+# necessary link and compilation flags are added
+# DEPS_CMAKE: list of packages which can be found with CMake's find_package,
+# that the library depends upon. It is assumed that the Find*.cmake scripts
+# follow the cmake accepted standard for variable naming
+# HEADERS: a list of headers that should be installed with the library. They get
+# installed in include/project_name
+# MOC: if the library is Qt-based, a list of headers that should be processed by
+# moc. The resulting implementation files are built into the library
+# NOINSTALL: by default, the library gets installed on 'make install'. If this
+# argument is given, this is turned off
 function(rock_vizkit_plugin TARGET_NAME)
     rock_library_common(${TARGET_NAME} ${ARGN} DEPS_PKGCONFIG vizkit)
     if (${TARGET_NAME}_INSTALL)
@@ -218,7 +314,44 @@ function(rock_vizkit_plugin TARGET_NAME)
     endif()
 endfunction()
 
-## Defines a new vizkit plugin
+## Defines a new vizkit widget
+#
+# rock_vizkit_widget(name
+#     SOURCES source.cpp source1.cpp ...
+#     [DEPS target1 target2 target3]
+#     [DEPS_PKGCONFIG pkg1 pkg2 pkg3]
+#     [DEPS_CMAKE pkg1 pkg2 pkg3]
+#     [HEADERS header1.hpp header2.hpp header3.hpp ...]
+#     [MOC qtsource1.cpp qtsource2.hpp]
+#     [NOINSTALL])
+#
+# Creates and (optionally) installs a shared library that defines a vizkit
+# widget. In Rock, vizkit is the base for data display. Vizkit widgets are
+# Qt widgets that can be seamlessly integrated in the vizkit framework.
+#
+# The library gets linked against the vizkit libraries automatically (no
+# need to list them in DEPS_PKGCONFIG). Moreoer, unlike with a normal shared
+# library, the headers get installed in include/vizkit
+# 
+# The following arguments are mandatory:
+#
+# SOURCES: list of the C++ sources that should be built into that library
+#
+# The following optional arguments are available:
+#
+# DEPS: lists the other targets from this CMake project against which the
+# library should be linked
+# DEPS_PKGCONFIG: list of pkg-config packages that the library depends upon. The
+# necessary link and compilation flags are added
+# DEPS_CMAKE: list of packages which can be found with CMake's find_package,
+# that the library depends upon. It is assumed that the Find*.cmake scripts
+# follow the cmake accepted standard for variable naming
+# HEADERS: a list of headers that should be installed with the library. They get
+# installed in include/project_name
+# MOC: if the library is Qt-based, a list of headers that should be processed by
+# moc. The resulting implementation files are built into the library
+# NOINSTALL: by default, the library gets installed on 'make install'. If this
+# argument is given, this is turned off
 function(rock_vizkit_widget TARGET_NAME)
     rock_export_includedir(${CMAKE_CURRENT_SOURCE_DIR} vizkit)
     rock_library_common(${TARGET_NAME} ${ARGN} DEPS_PKGCONFIG vizkit)
@@ -232,7 +365,32 @@ function(rock_vizkit_widget TARGET_NAME)
     endif()
 endfunction()
 
-## Creates a testsuite
+## Defines a new C++ test suite
+#
+# rock_testsuite(name
+#     SOURCES source.cpp source1.cpp ...
+#     [DEPS target1 target2 target3]
+#     [DEPS_PKGCONFIG pkg1 pkg2 pkg3]
+#     [DEPS_CMAKE pkg1 pkg2 pkg3]
+#     [MOC qtsource1.cpp qtsource2.hpp])
+#
+# Creates a C++ test suite that is using the boost unit test framework
+#
+# The following arguments are mandatory:
+#
+# SOURCES: list of the C++ sources that should be built into that library
+#
+# The following optional arguments are available:
+#
+# DEPS: lists the other targets from this CMake project against which the
+# library should be linked
+# DEPS_PKGCONFIG: list of pkg-config packages that the library depends upon. The
+# necessary link and compilation flags are added
+# DEPS_CMAKE: list of packages which can be found with CMake's find_package,
+# that the library depends upon. It is assumed that the Find*.cmake scripts
+# follow the cmake accepted standard for variable naming
+# MOC: if the library is Qt-based, a list of headers that should be processed by
+# moc. The resulting implementation files are built into the library
 function(rock_testsuite TARGET_NAME)
     rock_executable(${TARGET_NAME} ${ARGN}
         NOINSTALL)
