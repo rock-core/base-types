@@ -2,6 +2,7 @@
 #define __BASE_ANGLE_HH__
 
 #include <boost/format.hpp>
+#include <math.h>
 
 namespace base
 {
@@ -22,6 +23,11 @@ public:
      * to be used as an interface type.
      */
     double rad;
+
+    /** 
+     * default constructor, which will leave the angle uninitialized.
+     */
+    Angle() {}
     
 protected:
     explicit Angle( double rad ) : rad(rad) 
