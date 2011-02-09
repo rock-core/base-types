@@ -90,6 +90,7 @@ namespace base { namespace samples { namespace frame {
 	#endif
 	
 	#ifndef __orogen
+
 	//iterates over one specific column
 	//this is index save
 	class ConstColumnIterator
@@ -99,10 +100,14 @@ namespace base { namespace samples { namespace frame {
 	    const uint8_t* pdata;
 	    const uint8_t* pend;
 	  public:
+          ConstColumnIterator(const ConstColumnIterator &other )
+	    :row_size(other.row_size),pdata(other.pdata),pend(other.pend){};
+
 	  ConstColumnIterator(uint32_t _row_size,const uint8_t* _pdata, const uint8_t* _pend)
-	    :row_size(_row_size),pdata(_pdata),pend(_pend){}
+	    :row_size(_row_size),pdata(_pdata),pend(_pend){};
+
 	  ConstColumnIterator()  //end iterator
-	  {row_size =0;pdata = NULL;pend = NULL;}
+	  {row_size =0;pdata = NULL;pend = NULL;};
 	  
 	  ConstColumnIterator &operator++()
 	  {
@@ -115,6 +120,27 @@ namespace base { namespace samples { namespace frame {
 	    pdata += row_size;
 	    return *this;
 	  }
+
+          ConstColumnIterator& operator+=(unsigned int rows)
+	  {
+            //calc new position 
+            pdata += row_size*rows;
+	    if(pdata >= pend)
+	    {
+	      pdata = NULL;
+	      pend = NULL;
+	    }
+	    return *this;
+	  }
+
+          const ConstColumnIterator operator+(unsigned int rows)
+	  {
+            //make a copy
+            ConstColumnIterator result(*this);
+            result += rows;
+	    return result;
+	  }
+
 	  bool operator==(const ConstColumnIterator &other)const{ return (pdata == other.pdata);}
 	  uint8_t operator*()const{return *pdata;}
 	  bool operator==(uint8_t* p)const{return (pdata == p);}
