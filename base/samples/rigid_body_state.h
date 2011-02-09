@@ -57,7 +57,7 @@ namespace base { namespace samples {
 
 	void setTransform(const Eigen::Transform3d& transform)
 	{
-	    orientation = Eigen::Quaterniond( transform.rotation() );
+	    orientation = Eigen::Quaterniond( transform.linear() );
 	    position = transform.translation();
 	}
 
