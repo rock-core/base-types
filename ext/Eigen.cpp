@@ -41,6 +41,8 @@ struct Vector3
     { return this->v->dot(*other.v); }
     Vector3* cross(Vector3 const& other) const
     { return new Vector3(this->v->cross(*other.v)); }
+    bool operator ==(Vector3 const& other) const
+    { return (*this->v) == (*other.v); }
 };
 
 struct Quaternion
@@ -109,6 +111,7 @@ void Init_eigen_ext()
                (Arg("x") = static_cast<double>(0),
                Arg("y") = static_cast<double>(0),
                Arg("z") = static_cast<double>(0)))
+       .define_method("==",  &Vector3::operator ==)
        .define_method("[]",  &Vector3::get)
        .define_method("[]=",  &Vector3::set)
        .define_method("x",  &Vector3::x)
