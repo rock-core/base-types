@@ -55,9 +55,13 @@ module Base
         # Specialization of Spline for 3D splines
         class Spline3 < Spline
             def self.interpolate(points, parameters = nil)
-                spline = Spline3.new(3)
+                spline = Spline3.new
                 spline.interpolate(points, coordinates)
                 spline
+            end
+
+            def initialize(geometric_resolution = 0.1, order = 3)
+                super(3, geometric_resolution, order)
             end
 
             def interpolate(points, parameters = nil)

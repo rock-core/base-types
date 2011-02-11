@@ -27,13 +27,10 @@ end
 require 'base/geometry/spline'
 Typelib.convert_to_ruby '/wrappers/geometry/Spline', Types::Base::Geometry::Spline do |value|
     if value.dimension == 3
-        klass = Types::Base::Geometry::Spline3
+        result = Types::Base::Geometry::Spline3.new(value.geometric_resolution, value.curve_order)
     else
-        klass = Types::Base::Geometry::Spline
+        result = Types::Base::Geometry::Spline.new(value.dimension, value.geometric_resolution, value.curve_order)
     end
-
-    result = klass.new(
-        value.dimension, value.geometric_resolution, value.curve_order)
 
     kind_t = value.class.kind
     result.reset(value.vertices.to_a, value.knots.to_a, kind_t.value_of(value.kind.to_s))
