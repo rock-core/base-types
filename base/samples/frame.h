@@ -125,7 +125,7 @@ namespace base { namespace samples { namespace frame {
 	  {
             //calc new position 
             pdata += row_size*rows;
-	    if(pdata >= pend)
+	    if(pdata > pend)
 	    {
 	      pdata = NULL;
 	      pend = NULL;
