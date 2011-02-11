@@ -37,6 +37,10 @@ struct Vector3
     { return new Vector3(-*v); }
     Vector3* scale(double value) const
     { return new Vector3(*v * value); }
+    double dot(Vector3 const& other) const
+    { return this->v->dot(*other.v); }
+    Vector3* cross(Vector3 const& other) const
+    { return new Vector3(this->v->cross(*other.v)); }
 };
 
 struct Quaternion
@@ -116,7 +120,9 @@ void Init_eigen_ext()
        .define_method("+",  &Vector3::operator +)
        .define_method("-",  &Vector3::operator -)
        .define_method("-@", &Vector3::negate)
-       .define_method("*",  &Vector3::scale);
+       .define_method("*",  &Vector3::scale)
+       .define_method("cross", &Vector3::cross)
+       .define_method("dot",  &Vector3::dot);
 
      Data_Type<Quaternion> rb_Quaternion = define_class_under<Quaternion>(rb_mEigen, "Quaternion")
        .define_constructor(Constructor<Quaternion,double,double,double,double>())
