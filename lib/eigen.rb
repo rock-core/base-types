@@ -3,6 +3,18 @@ require 'base_types_ext'
 module Eigen
     class Vector3
         def to_a; [x, y, z] end
+
+        def self.UnitX()
+            return Vector3.new(1, 0, 0)
+        end
+
+        def self.UnitY()
+            return Vector3.new(0, 1, 0)
+        end
+
+        def self.UnitZ()
+            return Vector3.new(0, 0, 1)
+        end
     end
 
     class Quaternion
