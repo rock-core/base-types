@@ -607,7 +607,7 @@ void SplineBase::append(SplineBase const& other)
     reset(joined_curve);
 }
 
-void SplineBase::join(SplineBase const& other, double tolerance)
+void SplineBase::join(SplineBase const& other, double tolerance, bool with_tangents)
 {
     if (tolerance < 0)
         tolerance = 0;
@@ -628,6 +628,16 @@ void SplineBase::join(SplineBase const& other, double tolerance)
     }
     else if (other.isEmpty())
         return;
+    else if (!with_tangents)
+    {
+        joining_points.resize(2 * dim);
+        getPoint(&joining_points[0], getEndParam());
+        other.getPoint(&joining_points[dim], other.getStartParam());
+        start_point = &joining_points[0];
+        end_point   = &joining_points[dim];
+        joining_types[0] = 1;
+        joining_types[1] = 1;
+    }
     else if (isSingleton() && other.isSingleton())
     {
         std::vector<double> line;

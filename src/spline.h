@@ -144,7 +144,7 @@ namespace geometry {
          * other's start point is greater than \c tolerance, the method computes
          * an intermediate curve that smoothly joins \c this and \c other.
          */
-        void join(SplineBase const& other, double tolerance);
+        void join(SplineBase const& other, double tolerance, bool with_tangents);
 
         int getCoordinatesStride() const
         {
