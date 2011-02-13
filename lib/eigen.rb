@@ -35,6 +35,14 @@ module Eigen
             q
         end
 
+        def yaw
+            to_euler(2, 1, 0)[0]
+        end
+
+        def self.from_yaw(yaw)
+            from_euler(Eigen::Vector3.new(yaw, 0, 0), 2, 1, 0)
+        end
+
         def *(obj)
             if obj.kind_of?(Quaternion)
                 concatenate(obj)
