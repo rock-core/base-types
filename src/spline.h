@@ -451,7 +451,7 @@ namespace geometry {
         {
             std::vector<double> points;
             std::vector< std::pair<double, double> > curves;
-            findLineIntersections(_pt.data(), _normal.data(), points, curves, _geometric_resolution);
+            findLineIntersections(_pt, _normal, points, curves, _geometric_resolution);
 
             if (points.empty() && curves.empty())
                 return std::make_pair(0, false);
