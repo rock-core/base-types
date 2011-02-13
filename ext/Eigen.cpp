@@ -26,6 +26,11 @@ struct Vector3
     void setY(double value) { v->y() = value; }
     void setZ(double value) { v->z() = value; }
 
+
+    double norm() const { return v->norm(); }
+    Vector3* normalize() const { return new Vector3(v->normalized()); }
+    void normalize_bang() const { v->normalize(); }
+
     double get(int i) const { return (*v)[i]; }
     void set(int i, double value) { (*v)[i] = value; }
 
@@ -112,6 +117,9 @@ void Init_eigen_ext()
                Arg("y") = static_cast<double>(0),
                Arg("z") = static_cast<double>(0)))
        .define_method("==",  &Vector3::operator ==)
+       .define_method("norm",  &Vector3::norm)
+       .define_method("normalize!",  &Vector3::normalize_bang)
+       .define_method("normalize",  &Vector3::normalize)
        .define_method("[]",  &Vector3::get)
        .define_method("[]=",  &Vector3::set)
        .define_method("x",  &Vector3::x)
