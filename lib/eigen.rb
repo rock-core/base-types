@@ -15,6 +15,10 @@ module Eigen
         def self.UnitZ()
             return Vector3.new(0, 0, 1)
         end
+
+        def angle_to(v)
+            Math.atan2(v.y, v.x) - Math.atan2(y, x)
+        end
     end
 
     class Quaternion
