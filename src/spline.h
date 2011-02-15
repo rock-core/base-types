@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <base/eigen.h>
+#include <stdexcept>
 
 #include <boost/utility/enable_if.hpp>
 
@@ -146,11 +147,20 @@ namespace geometry {
          */
         void join(SplineBase const& other, double tolerance, bool with_tangents);
 
+        /** Crops this curve at the specified boundaries
+         *
+         * After this operation, +this+ will represent the part of the curve
+         * that was in between the two given parameters
+         */
+        void crop(double start_t, double end_t);
+
         int getCoordinatesStride() const
         {
             if (isNURBS()) return dimension + 1;
             else return dimension;
         }
+
+        void setSingleton(double const* coordinates);
 
     protected:
         void reset(SISLCurve* curve);
@@ -286,12 +296,35 @@ namespace geometry {
         Spline(SplineBase const& base)
             : base_t(base) {}
 
+        /** Returns the geometric start point of the curve */
+        vector_t getStartPoint() const
+        { return getPoint(this->getStartParam()); }
+
+        /** Returns the geometric end point of the curve */
+        vector_t getEndPoint() const
+        { return getPoint(this->getEndParam()); }
+
+        /** Resets this curve to a singleton */
+        void setSingleton(vector_t const& v)
+        {
+            SplineBase::setSingleton(v.data());
+        }
+
         /** Returns the geometric point that lies on the curve at the given
          * parameter */
         vector_t getPoint(double _param) const
         {
             vector_t result;
             SplineBase::getPoint(result.data(), _param);
+            return result;
+        }
+
+        std::vector<vector_t> getPoints(std::vector<double> const& parameters) const
+        {
+            std::vector<vector_t> result;
+            result.reserve(parameters.size());
+            for (unsigned int i = 0; i < parameters.size(); ++i)
+                result.push_back(getPoint(parameters[i]));
             return result;
         }
 
@@ -347,41 +380,46 @@ namespace geometry {
         /** Returns a discretization of this curve so that two consecutive
          * points are separated by a curve length lower than _geores
          */
-        std::vector<vector_t> sample(double _geores) const
+        std::vector<vector_t> sample(double _geores, std::vector<double>* parameters = 0) const
         {
             std::vector<vector_t> result;
-            sample(result, _geores);
+            sample(result, _geores, parameters);
             return result;
         }
 
         /** Samples the curve so that the distance between two consecutive
          * points is always below _geores
          */
-        void sample(std::vector<vector_t>& result, double _geores) const
+        void sample(std::vector<vector_t>& result, double _geores, std::vector<double>* parameters = 0) const
         {
             double start = this->getStartParam();
             vector_t start_p = this->getPoint(start);
+            if (parameters)
+                parameters->push_back(start);
             result.push_back(start_p);
 
             double end   = this->getEndParam();
             vector_t end_p = this->getPoint(end);
-            sample(result, start, start_p, end, end_p, _geores);
+            sample(result, start, start_p, end, end_p, _geores, parameters);
         }
 
         /** Helper method for the other sample methods
          */
-        void sample(std::vector<vector_t>& result, double start, vector_t const& start_p, double end, vector_t const& end_p, double _geores) const
+        void sample(std::vector<vector_t>& result, double start, vector_t const& start_p, double end, vector_t const& end_p, double _geores, std::vector<double>* parameters) const
         {
             if ((start_p - end_p).norm() < _geores)
             {
+                if (parameters)
+                    parameters->push_back(end);
+
                 result.push_back(end_p);
                 return;
             }
 
             double middle = (start + end) / 2;
             vector_t middle_p = getPoint(middle);
-            sample(result, start, start_p, middle, middle_p, _geores);
-            sample(result, middle, middle_p, end, end_p, _geores);
+            sample(result, start, start_p, middle, middle_p, _geores, parameters);
+            sample(result, middle, middle_p, end, end_p, _geores, parameters);
         }
 
         /** Compute the curve from the given set of points */
@@ -400,6 +438,48 @@ namespace geometry {
             double closest = findOneClosestPoint(_pt);
             vector_t curve_p = getPoint(closest);
             return (_pt - curve_p).norm();
+        }
+
+        template<typename Test>
+        std::pair<double, double> dichotomic_search(double start_t, double end_t, Test test, double resolution, double parameter_threshold)
+        {
+            return this->dichotomic_search(
+                    start_t, this->getPoint(start_t),
+                    end_t, this->getPoint(end_t),
+                    test, resolution, parameter_threshold);
+        }
+
+        /** Does a dichotomic search to find the first point in [start_t, end_t]
+         * for which func returns true
+         *
+         * end_t might be lower than start_t, in which case the point returned
+         * will be the last point in the curve
+         */
+        template<typename Test>
+        std::pair<double, double> dichotomic_search(double start_t, base::Vector3d const& start_p, double end_t, base::Vector3d const& end_p,
+                Test test, double resolution, double parameter_threshold)
+        {
+            std::pair<bool, double> test_result =
+                test(start_t, end_t, *this);
+            if (!test_result.first)
+                return std::make_pair(0, 0);
+
+            if (fabs(end_t - start_t) < parameter_threshold || test_result.second < resolution)
+                return std::make_pair(start_t, end_t);
+
+            double middle_t = (start_t + end_t) / 2;
+            base::Vector3d middle_p = getPoint(middle_t);
+            std::pair<double, double> result;
+
+            result = dichotomic_search(start_t, start_p, middle_t, middle_p, test, resolution, parameter_threshold);
+            if (result.first != result.second)
+                return result;
+
+            result = dichotomic_search(middle_t, middle_p, end_t, end_p, test, resolution, parameter_threshold);
+            if (result.first != result.second)
+                return result;
+
+            throw std::runtime_error("cannot find a solution, but we should have. Is the provided function stable ?");
         }
 
         void findSphereIntersections(vector_t const& _center, double _radius,
@@ -530,7 +610,7 @@ namespace geometry {
         void findClosestPoints(vector_t const& _pt,
                 std::vector<double>& _points,
                 std::vector< std::pair<double, double> >& _curves,
-                double _geores)
+                double _geores) const
         { return SplineBase::findClosestPoints(_pt.data(), _points, _curves, _geores); }
 
         /** \overload

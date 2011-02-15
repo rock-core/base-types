@@ -893,3 +893,25 @@ base::Vector3d SplineBase::poseError(base::Vector3d _position, double _heading, 
     return base::Vector3d(distanceError(_position, param), headingError(_heading, param), param);
 }
 
+void SplineBase::crop(double start_t, double end_t)
+{
+    if (isEmpty())
+        throw std::runtime_error("trying to crop an empty curve");
+    else if (isSingleton())
+        return;
+
+    SISLCurve* new_curve;
+    int result;
+    s1712(curve, start_t, end_t, &new_curve, &result);
+    if (result != 0)
+        throw std::runtime_error("failed to crop the curve at specified boundaries");
+    reset(new_curve);
+}
+
+void SplineBase::setSingleton(double const* coordinates)
+{
+    clear();
+    singleton.resize(getDimension());
+    copy(coordinates, coordinates + getDimension(), &singleton[0]);
+}
+
