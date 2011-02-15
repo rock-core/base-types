@@ -599,7 +599,12 @@ void SplineBase::append(SplineBase const& other)
     }
     else if (isSingleton())
     {
-        throw std::runtime_error("cannot append a curve to a singleton");
+        std::vector<double> p(getDimension());
+        other.getPoint(&p[0], other.getStartParam());
+        if (singleton != p)
+            throw std::runtime_error("cannot append a curve to a singleton if that curve does not start at the singleton's");
+        *this = other;
+        return;
     }
 
     SISLCurve* joined_curve;
