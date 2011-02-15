@@ -623,7 +623,7 @@ void SplineBase::join(SplineBase const& other, double tolerance, bool with_tange
 
     int const dim = getDimension();
     if (other.getDimension() != dim)
-        throw std::runtime_error("incompatible dimensions in #join. 'this' is of dimension " + boost::lexical_cast<std::string>(getDimension()) + " while 'other' is of dimension " + boost::lexical_cast<std::string>(other.getDimension()));
+        throw std::runtime_error("incompatible dimensions in #join. 'this' is of dimension " + lexical_cast<string>(getDimension()) + " while 'other' is of dimension " + lexical_cast<string>(other.getDimension()));
 
     std::vector<double> joining_points;
     int joining_types[4] = { 0, 0, 0, 0 };
