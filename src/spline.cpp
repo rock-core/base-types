@@ -673,7 +673,7 @@ void SplineBase::join(SplineBase const& other, double tolerance, bool with_tange
     {
         joining_points.resize(3 * dim);
         copy(singleton.begin(), singleton.end(), joining_points.begin());
-        other.getPointAndTangent(&joining_points[dim], getStartParam());
+        other.getPointAndTangent(&joining_points[dim], other.getStartParam());
         for (int i = 0; i < dim; ++i)
             joining_points[i + 2 * dim] += joining_points[i + dim];
         start_point = &joining_points[0];
