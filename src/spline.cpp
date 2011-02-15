@@ -7,6 +7,7 @@
 
 using namespace std;
 using namespace base::geometry;
+using boost::lexical_cast;
 using namespace Eigen;
 
 static double angleLimit(double angle)
@@ -99,7 +100,10 @@ void SplineBase::getPointAndTangent(double* result, double _param) const
 void SplineBase::getPointAndTangentHelper(double* result, double _param, bool with_tangent) const
 {
     if (_param < start_param || _param > end_param) 
-        throw std::out_of_range("_param is not in the [start_param, end_param] range");
+    {
+        string msg = "_param=" + lexical_cast<string>(_param) + " is not in the accepted range [" + lexical_cast<string>(start_param) + ", " + lexical_cast<string>(end_param) + "]";
+        throw std::out_of_range(msg);
+    }
 
     if (curve)
     {
