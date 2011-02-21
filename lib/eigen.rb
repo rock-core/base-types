@@ -19,6 +19,14 @@ module Eigen
         def angle_to(v)
             Math.atan2(v.y, v.x) - Math.atan2(y, x)
         end
+
+        def _dump(level)
+            Marshal.dump(to_a)
+        end
+
+        def self._load(coordinates)
+            new(*Marshal.load(coordinates))
+        end
     end
 
     class Quaternion
@@ -49,6 +57,14 @@ module Eigen
             else
                 transform(obj)
             end
+        end
+
+        def _dump(level)
+            Marshal.dump(to_a)
+        end
+
+        def self._load(coordinates)
+            new(*Marshal.load(coordinates))
         end
     end
 end

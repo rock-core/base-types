@@ -25,5 +25,12 @@ class TC_Eigen_Quaternion < Test::Unit::TestCase
 
         assert(q.approx?(result, 0.0001))
     end
+
+    def test_dump_load
+        q = Eigen::Quaternion.new(0.2, 0.5, 0.1, 0.5)
+        dumped = Marshal.dump(q)
+        loaded = Marshal.load(dumped)
+        assert(q.approx?(loaded, 0.0001))
+    end
 end
 
