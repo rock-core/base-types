@@ -599,28 +599,45 @@ namespace base { namespace samples { namespace frame {
 	    #endif
 	 #endif
 
-	    // The unix time at which the camFrame was captured
+	    /** The time at which this frame has been captured
+             *
+             * This is obviously an estimate
+             */
 	    base::Time              time;
-
-            // The unix time at which the camFrame was received
+            /** The time at which this frame has been received on the system */
 	    base::Time              received_time;
 
+            /** The raw data */
 	    std::vector<uint8_t>    	image;
+            /** Additional metadata */
 	    std::vector<frame_attrib_t> attributes;
 
-	    // The image size [width, height]
+	    /** The image size in pixels */
 	    frame_size_t            size;
 
-	    // The number of effective bits per pixel. The number
-	    // of actual bits per pixels is always a multiple of
-	    // height (i.e. a 12-bit effective depth is represented
-	    // using 16-bits per channels). The number of greyscale
-	    // levels is 2^(this_number)
+	    /** The number of effective bits per pixel. The number
+	     * of actual bits per pixels is always a multiple of
+	     * height (i.e. a 12-bit effective depth is represented
+	     * using 16-bits per channels). The number of greyscale
+	     * levels is 2^(this_number)
+             */
 	    uint32_t                data_depth;
+            /** The size of one pixel, in bytes
+             *
+             * For instance, for a RGB image with a 8 bit data depth, it would
+             * be 3. For a 12 bit non-packed image (i.e with each channel
+             * encoded on 2 bytes), it would be 6.
+             */
 	    uint32_t                pixel_size;
+            /** The size of a complete row in bytes
+             */
 	    uint32_t 		    row_size;
 
+            /** The colorspace of the image
+             */
 	    frame_mode_t            frame_mode;
+
+            /** Status flag */
 	    frame_status_t	    frame_status;
 	};
 
