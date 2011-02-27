@@ -236,6 +236,10 @@ namespace base { namespace samples { namespace frame {
 		return this->frame_mode == MODE_RGB;
 	    }
 
+            inline bool isBayer()const     {
+                return this->frame_mode == MODE_BAYER || MODE_BAYER_RGGB || MODE_BAYER_GRBG || MODE_BAYER_BGGR || MODE_BAYER_GBRG;
+            }
+
 	    inline void setStatus(const frame_status_t value){
 		frame_status = value;
 	    }
