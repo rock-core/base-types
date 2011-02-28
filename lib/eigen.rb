@@ -27,6 +27,10 @@ module Eigen
         def self._load(coordinates)
             new(*Marshal.load(coordinates))
         end
+
+        def to_s
+            "Vector3(#{x}, #{y}, #{z})"
+        end
     end
 
     class Quaternion
@@ -65,6 +69,10 @@ module Eigen
 
         def self._load(coordinates)
             new(*Marshal.load(coordinates))
+        end
+
+        def to_s
+            "Quaternion(#{w}, (#{x}, #{y}, #{z}))"
         end
     end
 end
