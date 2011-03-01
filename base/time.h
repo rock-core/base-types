@@ -83,7 +83,7 @@ namespace base
 
 inline std::ostream& operator << (std::ostream& io, base::Time const& time)
 {
-    io << time.toSeconds();
+    io << time.toMicroseconds();
     return io;
 }
 
