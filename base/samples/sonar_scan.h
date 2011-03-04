@@ -47,6 +47,9 @@ namespace base { namespace samples {
             : angle(0), time_beetween_bins(0){}
 	
 	double getScale(double sonicVelocityinWater = 1500.0){
+		if(scanData.size() == 0){
+			return 0;
+		}
 	  return  ((scanData.size()*time_beetween_bins)*sonicVelocityinWater/2.0)/scanData.size();
 	}
             
