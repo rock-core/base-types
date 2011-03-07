@@ -26,11 +26,11 @@ class TC_Eigen_Quaternion < Test::Unit::TestCase
         assert(q.approx?(result, 0.0001))
     end
 
-    def test_dump_load
-        q = Eigen::Quaternion.new(0.2, 0.5, 0.1, 0.5)
-        dumped = Marshal.dump(q)
-        loaded = Marshal.load(dumped)
-        assert(q.approx?(loaded, 0.0001))
+    def test_inverse
+	q = Eigen::Quaternion.from_euler( Eigen::Vector3.new(0.1, 0, 0), 2, 1, 0)
+	q1 = Eigen::Quaternion.from_euler( Eigen::Vector3.new(-0.1, 0, 0), 2, 1, 0)
+
+	assert(q.approx?( q1.inverse, 0.0001 ))
     end
 end
 
