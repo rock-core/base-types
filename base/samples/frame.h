@@ -59,7 +59,7 @@ namespace base { namespace samples { namespace frame {
 	    MODE_GRAYSCALE = 1,
 	    MODE_RGB       = 2,
 	    MODE_UYVY	   = 3,
-	    RAW_MODES = 128,
+	    RAW_MODES = 32,
 	    MODE_BAYER = RAW_MODES + 0,
 	    MODE_BAYER_RGGB = RAW_MODES + 1,
 	    MODE_BAYER_GRBG = RAW_MODES + 2,
@@ -205,6 +205,7 @@ namespace base { namespace samples { namespace frame {
 	    
 	    void init(uint16_t width, uint16_t height, uint8_t depth, frame_mode_t mode, int const val = 0, bool hdr = false)
 	    {
+
 		this->frame_mode = mode;
 		this->size = frame_size_t(width, height);
 		setDataDepth(depth);
@@ -237,7 +238,7 @@ namespace base { namespace samples { namespace frame {
 	    }
 
             inline bool isBayer()const     {
-                return this->frame_mode == MODE_BAYER || MODE_BAYER_RGGB || MODE_BAYER_GRBG || MODE_BAYER_BGGR || MODE_BAYER_GBRG;
+                return (this->frame_mode == MODE_BAYER || this->frame_mode == MODE_BAYER_RGGB || this->frame_mode == MODE_BAYER_GRBG || this->frame_mode == MODE_BAYER_BGGR || this->frame_mode == MODE_BAYER_GBRG);
             }
 
 	    inline void setStatus(const frame_status_t value){
