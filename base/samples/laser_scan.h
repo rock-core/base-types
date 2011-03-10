@@ -80,6 +80,17 @@ namespace base { namespace samples {
 	    
 	    return false;
 	}
+        
+        //resets the sample
+        void reset()
+        {
+          speed = 0.0;
+          start_angle = 0.0;
+          minRange = 0;
+          maxRange = 0;
+          ranges.clear();
+          remission.clear();
+        }
             
         bool getPointFromScanBeam(const unsigned int i, Eigen::Vector3d &point) const
 	{
