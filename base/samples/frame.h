@@ -132,6 +132,15 @@ namespace base { namespace samples { namespace frame {
 	    return *this;
 	  }
 
+          //calc distance between to iterators
+          int operator-(const ConstColumnIterator &other)
+          {
+            //chech if iterator belongs to the same column
+            if(pend != other.pend)
+              throw std::runtime_error("Iterator mismatch. Iterators belong to different columns!");
+            return (pdata-other.pdata)/row_size;
+          }
+
           const ConstColumnIterator operator+(unsigned int rows)
 	  {
             //make a copy
