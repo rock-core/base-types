@@ -111,13 +111,12 @@ namespace base { namespace samples { namespace frame {
 	  
 	  ConstColumnIterator &operator++()
 	  {
-	    if(pdata >= pend)
+	    pdata += row_size;
+	    if(pdata > pend)
 	    {
 	      pdata = NULL;
 	      pend = NULL;
-	      return *this;
 	    }
-	    pdata += row_size;
 	    return *this;
 	  }
 
