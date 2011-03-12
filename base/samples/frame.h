@@ -59,7 +59,7 @@ namespace base { namespace samples { namespace frame {
 	    MODE_GRAYSCALE = 1,
 	    MODE_RGB       = 2,
 	    MODE_UYVY	   = 3,
-	    RAW_MODES = 32,
+	    RAW_MODES = 128,
 	    MODE_BAYER = RAW_MODES + 0,
 	    MODE_BAYER_RGGB = RAW_MODES + 1,
 	    MODE_BAYER_GRBG = RAW_MODES + 2,
