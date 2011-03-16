@@ -22,7 +22,7 @@ namespace base { namespace samples {
         TOO_NEAR           = 2,
         MEASUREMENT_ERROR  = 3,
         OTHER_RANGE_ERRORS = 4,
-        MAX_RANGE_ERROR    = 4
+        MAX_RANGE_ERROR    = 5  
     };
 
     struct LaserScan {
