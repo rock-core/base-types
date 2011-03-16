@@ -14,6 +14,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <iterator>
 #endif
 
 #include "base/time.h"
@@ -93,21 +94,23 @@ namespace base { namespace samples { namespace frame {
 
 	//iterates over one specific column
 	//this is index save
-	class ConstColumnIterator
+        //at the moment only 8 Bit data depth is supported 
+	class ConstColumnIterator: public std::iterator<std::input_iterator_tag, char>
 	{
 	  private:
 	    uint32_t row_size;
 	    const uint8_t* pdata;
 	    const uint8_t* pend;
+	    const uint8_t* pstart;
 	  public:
           ConstColumnIterator(const ConstColumnIterator &other )
-	    :row_size(other.row_size),pdata(other.pdata),pend(other.pend){};
+	    :row_size(other.row_size),pdata(other.pdata),pend(other.pend),pstart(other.pstart){};
 
 	  ConstColumnIterator(uint32_t _row_size,const uint8_t* _pdata, const uint8_t* _pend)
-	    :row_size(_row_size),pdata(_pdata),pend(_pend){};
+	    :row_size(_row_size),pdata(_pdata),pend(_pend),pstart(_pdata){};
 
 	  ConstColumnIterator()  //end iterator
-	  {row_size =0;pdata = NULL;pend = NULL;};
+	  {row_size =0;pdata = NULL;pend = NULL;pstart=NULL;};
 	  
 	  ConstColumnIterator &operator++()
 	  {
@@ -116,6 +119,19 @@ namespace base { namespace samples { namespace frame {
 	    {
 	      pdata = NULL;
 	      pend = NULL;
+              pstart = NULL;
+	    }
+	    return *this;
+	  }
+          
+          ConstColumnIterator &operator--()
+	  {
+	    pdata -= row_size;
+	    if(pdata < pstart)
+	    {
+	      pdata = NULL;
+	      pend = NULL;
+              pstart = NULL;
 	    }
 	    return *this;
 	  }
@@ -128,20 +144,31 @@ namespace base { namespace samples { namespace frame {
 	    {
 	      pdata = NULL;
 	      pend = NULL;
+              pstart = NULL;
 	    }
 	    return *this;
 	  }
 
           //calc distance between to iterators
-          int operator-(const ConstColumnIterator &other)
+          int operator-(const ConstColumnIterator &other)const
           {
-            //chech if iterator belongs to the same column
+            if(pend == NULL)
+              if(other.pend != NULL)
+                return (other.pend -other.pdata)/row_size; 
+              else
+                return 0;
+
+            //check if iterator belongs to the same column
             if(pend != other.pend)
               throw std::runtime_error("Iterator mismatch. Iterators belong to different columns!");
+
+            if(pdata < other.pdata)
+              return -(other.pdata-pdata)/row_size;
+
             return (pdata-other.pdata)/row_size;
           }
 
-          const ConstColumnIterator operator+(unsigned int rows)
+          const ConstColumnIterator operator+(unsigned int rows)const
 	  {
             //make a copy
             ConstColumnIterator result(*this);
@@ -155,7 +182,7 @@ namespace base { namespace samples { namespace frame {
 	  bool operator!=(uint8_t* p)const{return !(pdata == p);}
 	  bool operator!=(const ConstColumnIterator &other)const{return !(pdata == other.pdata);}
 	  void operator=(const ConstColumnIterator &other)
-	  {row_size = other.row_size;pdata = other.pdata;pend = other.pend;}
+	  {row_size = other.row_size;pdata = other.pdata;pend = other.pend;pstart = other.pstart;}
 	};
 	#endif
 	
