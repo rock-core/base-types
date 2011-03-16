@@ -25,10 +25,19 @@ namespace base { namespace samples {
         MAX_RANGE_ERROR    = 5  
     };
 
+    //status of the hole laser scan
+    enum LASER_SCAN_STATUS{
+      INVALID = 0,
+      VALID = 1,                
+      RECTIFIED = 2             //sensor is calibrated, samples are RECTIFIED
+    };
+
     struct LaserScan {
 #ifndef __orogen
         typedef boost::uint32_t uint32_t;
 #endif
+        //status of the hole laser scan
+        LASER_SCAN_STATUS status;
 
         /** The timestamp of this reading. The timestamp is the time at which the
          * laser passed the zero step (i.e. the step at the back of the device,
@@ -68,7 +77,7 @@ namespace base { namespace samples {
 
 #ifndef __orogen
         LaserScan()
-            : start_angle(0), angular_resolution(0), speed(0) {}
+            :status(INVALID), start_angle(0), angular_resolution(0), speed(0){};
             
         bool isValidBeam(const unsigned int i) const {
 	    if(i > ranges.size())
@@ -84,12 +93,14 @@ namespace base { namespace samples {
         //resets the sample
         void reset()
         {
+          status = INVALID;
           speed = 0.0;
           start_angle = 0.0;
           minRange = 0;
           maxRange = 0;
           ranges.clear();
           remission.clear();
+
         }
             
         bool getPointFromScanBeam(const unsigned int i, Eigen::Vector3d &point) const
