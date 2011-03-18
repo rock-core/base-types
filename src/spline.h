@@ -357,12 +357,16 @@ namespace geometry {
          *
          * Specifically, this method finds the parameter t1 so that the curve
          * length between t and t1 is in [length, length + _geores]
+         *
+         * If the end of the curve is reached first, then the parameter of the
+         * end of the curve is returned.
          */
         std::pair<double, double> advance(double t, double length, double _geores)
         {
             double result_t = 0;
             double result_d = 0;
-            doAdvance(result_t, result_d, length, t, getPoint(t), this->getEndParam(), getPoint(this->getEndParam()), _geores);
+            if (!doAdvance(result_t, result_d, length, t, getPoint(t), this->getEndParam(), getPoint(this->getEndParam()), _geores))
+                return std::make_pair(this->getEndParam(), result_d);
             return std::make_pair(result_t, result_d);
         }
 
