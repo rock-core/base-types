@@ -37,7 +37,7 @@ Typelib.convert_to_ruby '/wrappers/geometry/Spline', Types::Base::Geometry::Spli
     result
 end
 
-def convert_spline_to_typelib(value, type)
+def convert_spline_to_typelib(value, type) # :nodoc:
     result = type.new
     result.geometric_resolution = value.geometric_resolution
     result.curve_order = value.order
