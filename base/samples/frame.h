@@ -153,10 +153,12 @@ namespace base { namespace samples { namespace frame {
           int operator-(const ConstColumnIterator &other)const
           {
             if(pend == NULL)
+            {
               if(other.pend != NULL)
                 return (other.pend -other.pdata)/row_size; 
               else
                 return 0;
+            }
 
             //check if iterator belongs to the same column
             if(pend != other.pend)
