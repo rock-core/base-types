@@ -10,7 +10,7 @@ macro(rock_use_full_rpath install_rpath)
     SET(CMAKE_INSTALL_RPATH ${install_rpath})
 
     # add the automatically determined parts of the RPATH
-    # which point to directories outside the build tree to the install RPATH
+    # which point to directories outside the build tree to the insgall RPATH
     SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 endmacro()
 
@@ -67,7 +67,7 @@ macro(rock_standard_layout)
         endif()
     endif()
 
-    if (IS_DIRECTORY ${PROJECT_SOURCE_DIR}/test)
+    if (IS_DIRECTORY ${PRoJECT_SOURCE_DIR}/test)
         find_package(Boost REQUIRED COMPONENTS unit_test_framework)
         if (Boost_UNIT_TEST_FRAMEWORK_FOUND)
             message(STATUS "boost/test found ... building test the suite")
@@ -111,6 +111,14 @@ macro (rock_find_cmake VARIABLE)
     link_directories(${${VARIABLE}_LIBRARY_DIR})
 endmacro()
 
+macro (rock_find_qt4) 
+    find_package(Qt4 REQUIRED QtCore QtGui)
+    add_definitions(${QT_DEFINITIONS})
+    include_directories(${QT_INCLUDE_DIR})
+    link_directories(${QT_LIBRARY_DIR})
+    include(${QT_USE_FILE})
+endmacro()
+
 ## Common parsing of parameters for all the C/C++ target types
 macro(rock_target_definition TARGET_NAME)
     set(${TARGET_NAME}_INSTALL ON)
@@ -143,6 +151,8 @@ macro(rock_target_definition TARGET_NAME)
 
     list(LENGTH ${TARGET_NAME}_MOC QT_SOURCE_LENGTH)
     if (QT_SOURCE_LENGTH GREATER 0)
+        rock_find_qt4()
+        set(${TARGET_NAME}_DEPS "${${TARGET_NAME}_DEPS};${QT_QTCORE_LIBRARY};${QT_QTGUI_LIBRARY}") 
         QT4_WRAP_CPP(${TARGET_NAME}_MOC_SRCS ${${TARGET_NAME}_MOC})
         list(APPEND ${TARGET_NAME}_SOURCES ${${TARGET_NAME}_MOC_SRCS})
     endif()
@@ -169,7 +179,7 @@ endmacro()
 #     [DEPS target1 target2 target3]
 #     [DEPS_PKGCONFIG pkg1 pkg2 pkg3]
 #     [DEPS_CMAKE pkg1 pkg2 pkg3]
-#     [MOC qtsource1.cpp qtsource2.hpp])
+#     [MOC qtsource1.hpp qtsource2.hpp])
 #
 # Creates a C++ executable and (optionally) installs it
 #
@@ -228,7 +238,7 @@ endmacro()
 #     [DEPS_PKGCONFIG pkg1 pkg2 pkg3]
 #     [DEPS_CMAKE pkg1 pkg2 pkg3]
 #     [HEADERS header1.hpp header2.hpp header3.hpp ...]
-#     [MOC qtsource1.cpp qtsource2.hpp]
+#     [MOC qtsource1.hpp qtsource2.hpp]
 #     [NOINSTALL])
 #
 # Creates and (optionally) installs a shared library.
@@ -274,7 +284,7 @@ endfunction()
 #     [DEPS_PKGCONFIG pkg1 pkg2 pkg3]
 #     [DEPS_CMAKE pkg1 pkg2 pkg3]
 #     [HEADERS header1.hpp header2.hpp header3.hpp ...]
-#     [MOC qtsource1.cpp qtsource2.hpp]
+#     [MOC qtsource1.hpp qtsource2.hpp]
 #     [NOINSTALL])
 #
 # Creates and (optionally) installs a shared library that defines a vizkit
@@ -322,20 +332,22 @@ endfunction()
 #     [DEPS_PKGCONFIG pkg1 pkg2 pkg3]
 #     [DEPS_CMAKE pkg1 pkg2 pkg3]
 #     [HEADERS header1.hpp header2.hpp header3.hpp ...]
-#     [MOC qtsource1.cpp qtsource2.hpp]
+#     [MOC qtsource1.hpp qtsource2.hpp]
 #     [NOINSTALL])
 #
 # Creates and (optionally) installs a shared library that defines a vizkit
 # widget. In Rock, vizkit is the base for data display. Vizkit widgets are
-# Qt widgets that can be seamlessly integrated in the vizkit framework.
-#
-# The library gets linked against the vizkit libraries automatically (no
-# need to list them in DEPS_PKGCONFIG). Moreoer, unlike with a normal shared
-# library, the headers get installed in include/vizkit
+# Qt designer widgets that can be seamlessly integrated in the vizkit framework.
+# 
+# The library gets linked against the QtCore librariy automatically (no
+# need to list them in DEPS_PKGCONFIG). Moreover, unlike with a normal shared
+# library, the headers get installed in include/package_name
 # 
 # The following arguments are mandatory:
 #
 # SOURCES: list of the C++ sources that should be built into that library
+# MOC:     a list of headers that should be processed by moc. The resulting 
+#          implementation files are built into the library
 #
 # The following optional arguments are available:
 #
@@ -348,20 +360,15 @@ endfunction()
 # follow the cmake accepted standard for variable naming
 # HEADERS: a list of headers that should be installed with the library. They get
 # installed in include/project_name
-# MOC: if the library is Qt-based, a list of headers that should be processed by
-# moc. The resulting implementation files are built into the library
 # NOINSTALL: by default, the library gets installed on 'make install'. If this
 # argument is given, this is turned off
 function(rock_vizkit_widget TARGET_NAME)
-    rock_export_includedir(${CMAKE_CURRENT_SOURCE_DIR} vizkit)
-    rock_library_common(${TARGET_NAME} ${ARGN} DEPS_PKGCONFIG vizkit)
+    rock_library_common(${TARGET_NAME} ${ARGN})
     if (${TARGET_NAME}_INSTALL)
         install(TARGETS ${TARGET_NAME}
-            LIBRARY DESTINATION lib)
+            LIBRARY DESTINATION lib/qt/designer)
         install(FILES ${${TARGET_NAME}_HEADERS}
-            DESTINATION include/vizkit)
-        install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/lib${TARGET_NAME}.so.rb
-            DESTINATION lib OPTIONAL)
+            DESTINATION include/${PROJECT_NAME})
     endif()
 endfunction()
 
@@ -372,7 +379,7 @@ endfunction()
 #     [DEPS target1 target2 target3]
 #     [DEPS_PKGCONFIG pkg1 pkg2 pkg3]
 #     [DEPS_CMAKE pkg1 pkg2 pkg3]
-#     [MOC qtsource1.cpp qtsource2.hpp])
+#     [MOC qtsource1.hpp qtsource2.hpp])
 #
 # Creates a C++ test suite that is using the boost unit test framework
 #
