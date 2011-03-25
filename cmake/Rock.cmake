@@ -67,7 +67,7 @@ macro(rock_standard_layout)
         endif()
     endif()
 
-    if (IS_DIRECTORY ${PRoJECT_SOURCE_DIR}/test)
+    if (IS_DIRECTORY ${PROJECT_SOURCE_DIR}/test)
         find_package(Boost REQUIRED COMPONENTS unit_test_framework)
         if (Boost_UNIT_TEST_FRAMEWORK_FOUND)
             message(STATUS "boost/test found ... building test the suite")
