@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE( yaw_test )
 
 	BOOST_CHECK_CLOSE( yaw.getRad(), Angle::fromRad(getYaw( rot )).getRad(), 1e-3 );
 
-	base::removeYaw( rot );
+	rot = base::removeYaw( rot );
 	BOOST_CHECK( rot.isApprox( pitchroll ) );
     }
 }
