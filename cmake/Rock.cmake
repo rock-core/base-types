@@ -338,6 +338,11 @@ endfunction()
 # Creates and (optionally) installs a shared library that defines a vizkit
 # widget. In Rock, vizkit is the base for data display. Vizkit widgets are
 # Qt designer widgets that can be seamlessly integrated in the vizkit framework.
+#
+# If a file exists that goes by the name <name>.rb exists, it is assumed to be
+# a ruby extension used to extend the C++ interface in ruby scripting. It gets
+# installed in share/vizkit/cplusplus_extensions, where vizkit is looking for
+# it.
 # 
 # The library gets linked against the QtCore librariy automatically (no
 # need to list them in DEPS_PKGCONFIG). Moreover, unlike with a normal shared
@@ -369,6 +374,9 @@ function(rock_vizkit_widget TARGET_NAME)
             LIBRARY DESTINATION lib/qt/designer)
         install(FILES ${${TARGET_NAME}_HEADERS}
             DESTINATION include/${PROJECT_NAME})
+        install(FILES ${TARGET_NAME}.rb
+            DESTINATION share/vizkit/ext
+            OPTIONAL)
     endif()
 endfunction()
 
