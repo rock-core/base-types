@@ -76,6 +76,11 @@ namespace base { namespace samples {
 	    position = pose.position;
 	}
 
+	base::Pose getPose() const
+	{
+	    return base::Pose( position, orientation );
+	}
+
         double getYaw() const
         {
             return base::getYaw(orientation);
