@@ -46,7 +46,7 @@ namespace base
 	Pose(const Eigen::Transform3d &t)
 	{
 	    position = t.translation();
-	    orientation = t.rotation();
+	    orientation = t.linear();
 	}
 
 	Eigen::Transform3d toTransform() const
