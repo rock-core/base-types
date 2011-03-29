@@ -178,6 +178,19 @@ module Eigen
             "Quaternion(#{w}, (#{x}, #{y}, #{z}))"
         end
 
+        # Tests for equality
+        #
+        # Since Quaternion stores the coordinates as floating-point values, this is
+        # a bad test. Use
+        #
+        #   (v - other_v).norm < threshold
+        #
+        # instead
+        def ==(q)
+            q.kind_of?(self.class) &&
+                __equal__(q)
+        end
+
         ##
         # :method: w
 

@@ -72,6 +72,9 @@ struct Quaternion
     void setY(double value) { q->y() = value; }
     void setZ(double value) { q->z() = value; }
 
+    bool operator ==(Quaternion const& other) const
+    { return x() == other.x() && y() == other.y() && z() == other.z() && w() == other.w(); }
+
     Quaternion* concatenate(Quaternion const& other) const
     { return new Quaternion((*q) * (*other.q)); }
     Vector3* transform(Vector3 const& v) const
@@ -137,6 +140,7 @@ void Init_eigen_ext()
 
      Data_Type<Quaternion> rb_Quaternion = define_class_under<Quaternion>(rb_mEigen, "Quaternion")
        .define_constructor(Constructor<Quaternion,double,double,double,double>())
+       .define_method("__equal__", &Quaternion::operator ==)
        .define_method("w",  &Quaternion::w)
        .define_method("x",  &Quaternion::x)
        .define_method("y",  &Quaternion::y)
