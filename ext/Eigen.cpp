@@ -116,7 +116,7 @@ void Init_eigen_ext()
                (Arg("x") = static_cast<double>(0),
                Arg("y") = static_cast<double>(0),
                Arg("z") = static_cast<double>(0)))
-       .define_method("==",  &Vector3::operator ==)
+       .define_method("__equal__",  &Vector3::operator ==)
        .define_method("norm",  &Vector3::norm)
        .define_method("normalize!",  &Vector3::normalize_bang)
        .define_method("normalize",  &Vector3::normalize)

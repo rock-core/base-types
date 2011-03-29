@@ -27,6 +27,19 @@ module Eigen
             Math.atan2(v.y, v.x) - Math.atan2(y, x)
         end
 
+        # Tests for equality
+        #
+        # Since Vector3 stores the coordinates as floating-point values, this is
+        # a bad test. Use
+        #
+        #   q.approx?(other_q, tolerance)
+        #
+        # instead
+        def ==(v)
+            q.kind_of?(self.class) &&
+                __equal__(v)
+        end
+
         # Support for Marshal
         def _dump(level) # :nodoc:
             Marshal.dump(to_a)
