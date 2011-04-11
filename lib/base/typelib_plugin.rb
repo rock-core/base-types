@@ -32,7 +32,7 @@ Typelib.convert_to_ruby '/wrappers/geometry/Spline', Types::Base::Geometry::Spli
         result = Types::Base::Geometry::Spline.new(value.dimension, value.geometric_resolution, value.curve_order)
     end
 
-    kind_t = value.class.kind
+    kind_t = value.class['kind']
     result.reset(value.vertices.to_a, value.knots.to_a, kind_t.value_of(value.kind.to_s))
     result
 end
