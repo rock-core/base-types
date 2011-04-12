@@ -542,8 +542,8 @@ namespace base { namespace samples { namespace frame {
 
 	    //check if opencv is present
 	    #if defined( __OPENCV_CV_H__) ||defined (__OPENCV_CV_HPP__) || defined(_CV_H_) || defined(_CV_HPP_) || defined(__OPENCV_ALL_HPP__) ||defined(__OPENCV_OLD_CV_H__)
-	    inline cv::Mat convertToCvMat()
-	    {
+            int getOpenCvType()const
+            {
 		int itype = 0;
 		switch (getChannelCount())
 		{
@@ -577,7 +577,16 @@ namespace base { namespace samples { namespace frame {
 		    throw "Unknown format. Can not convert Frame "
 		    "to cv::Mat.";
 		}
-		return cv::Mat(size.height,size.width, itype, getImagePtr());
+                return itype;
+            }
+
+	    inline cv::Mat convertToCvMat()
+	    {
+		return cv::Mat(size.height,size.width, getOpenCvType(), getImagePtr());
+	    }
+	    inline const cv::Mat convertToCvMat()const
+	    {
+		return cv::Mat(size.height,size.width, getOpenCvType(), (void*)getImageConstPtr());
 	    }
 	    #else
 	      #define convertToCvMat If_you_want_to_use_convertToCvMat_include_opencv_2_first
