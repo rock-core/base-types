@@ -332,6 +332,8 @@ namespace base { namespace samples { namespace frame {
                 return MODE_GRAYSCALE;
               else if (str == "MODE_RGB")
                 return MODE_RGB;
+              else if (str == "MODE_BGR")
+                return MODE_BGR;
 	      else if (str == "MODE_UYVY")
 		return MODE_UYVY;
               else if (str == "RAW_MODES")
