@@ -262,7 +262,18 @@ void SplineBase::interpolate(std::vector<double> const& points, std::vector<doub
                 &point_param, &nb_unique_param, &status);
     }
     if (status != 0)
-        throw std::runtime_error("cannot generate the curve");
+    {
+        std::ostringstream str;
+        for (unsigned int i = 0; i< point_types.size(); ++i)
+        {
+            str << " (" << points[0];
+            for (int c = 1; c < dimension; ++c)
+                str << " " << points[c];
+            str << ")";
+        }
+
+        throw std::runtime_error("cannot create a spline interpolating the required points" + str.str());
+    }
 
     free(point_param);
 }
@@ -602,7 +613,25 @@ void SplineBase::append(SplineBase const& other)
         std::vector<double> p(getDimension());
         other.getPoint(&p[0], other.getStartParam());
         if (singleton != p)
-            throw std::runtime_error("cannot append a curve to a singleton if that curve does not start at the singleton's");
+        {
+            std::vector<double> end_p(getDimension());
+            other.getPoint(&end_p[0], other.getEndParam());
+            std::ostringstream singleton_pos, other_start_pos, other_end_pos;
+            singleton_pos   << " (" << singleton[0];
+            other_start_pos << " (" << p[0];
+            other_end_pos   << " (" << end_p[0];
+            for (int c = 1; c < dimension; ++c)
+            {
+                singleton_pos   << " " << singleton[c];
+                other_start_pos << " " << p[c];
+                other_end_pos   << " " << end_p[c];
+            }
+            singleton_pos   << ")";
+            other_start_pos << ")";
+            other_end_pos   << ")";
+
+            throw std::runtime_error("cannot append a curve to a singleton if that curve does not start at the singleton's position, singleton is =(" + singleton_pos.str() + "), other.start_p=(" + other_start_pos.str() + ") other.end_p=(" + other_end_pos.str() + ")");
+        }
         *this = other;
         return;
     }
@@ -904,7 +933,7 @@ void SplineBase::crop(double start_t, double end_t)
     int result;
     s1712(curve, start_t, end_t, &new_curve, &result);
     if (result != 0)
-        throw std::runtime_error("failed to crop the curve at specified boundaries");
+        throw std::runtime_error("failed to crop the curve at between " + boost::lexical_cast<std::string>(start_t) + " and " + boost::lexical_cast<std::string>(end_t));
     reset(new_curve);
 }
 
