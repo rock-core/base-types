@@ -246,6 +246,11 @@ namespace base { namespace samples { namespace frame {
 	       if(size.height != height || size.width !=  width || this->frame_mode != frame_mode || 
                  this->data_depth != depth)
                {
+                //check if depth = 0
+                //this might be a programmer error 
+                if(depth==0 && (height != 0 || width != 0 ))
+                    throw std::runtime_error("Frame::init: Cannot initialize frame with depth = 0.");
+
 		this->frame_mode = mode;
 		this->size = frame_size_t(width, height);
 		setDataDepth(depth);
@@ -299,29 +304,24 @@ namespace base { namespace samples { namespace frame {
 	    {
 		switch (mode)
 		{
+                case MODE_UNDEFINED:
+                    return 0;
 		case MODE_BAYER:
-		    return 1;
 		case MODE_BAYER_RGGB:
-		    return 1;
 		case MODE_BAYER_BGGR:
-		    return 1;
 		case MODE_BAYER_GBRG:
-		    return 1;
 		case MODE_BAYER_GRBG:
-		    return 1;
 		case MODE_GRAYSCALE:
-		    return 1;
 		case MODE_UYVY:
 		    return 1;
 		case MODE_RGB:
-		    return 3;
 		case MODE_BGR:
 		    return 3;
 		default:
+                    throw std::runtime_error("Frame::getChannelCount: Unknown frame_mode");
 		    return 0;
 		}
 	    }
-
 
             //qt ruby does not support enums as slot parameters
             //therefore frame_mode_t is passed as string
