@@ -929,6 +929,15 @@ void SplineBase::crop(double start_t, double end_t)
     else if (isSingleton())
         return;
 
+    if (start_t == end_t)
+    {
+        std::vector<double> point;
+        point.resize(getDimension());
+        getPoint(&point[0], start_t);
+        setSingleton(&point[0]);
+        return;
+    }
+
     SISLCurve* new_curve;
     int result;
     s1712(curve, start_t, end_t, &new_curve, &result);
