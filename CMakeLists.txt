@@ -6,6 +6,11 @@ endif(COMMAND cmake_policy)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+# Symlink to allow correct include statement
+execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/include/)
+execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/include/${PROJECT_NAME})
+include_directories(${PROJECT_BINARY_DIR}/include/)
+
 # Enable -Wall for compilers that know it
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-Wall" CXX_SUPPORTS_WALL)
@@ -22,7 +27,7 @@ include_directories(${EIGEN2_INCLUDE_DIR})
 add_subdirectory(src)
 
 add_executable(test test.cpp)
-target_link_libraries(test)
+target_link_libraries(test ${PROJECT_NAME})
 
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}")
 

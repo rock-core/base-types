@@ -8,6 +8,8 @@ if (SISL_FOUND)
     list(APPEND LIBBASE_DEPENDENCIES ${SISL_LIBRARIES})
 endif()
 
+list(APPEND LIBBASE_FILES ${CMAKE_SOURCE_DIR}/src/logging.cpp)
+
 if (LIBBASE_FILES)
     add_library(base SHARED ${LIBBASE_FILES})
     target_link_libraries(base ${LIBBASE_DEPENDENCIES})
