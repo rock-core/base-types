@@ -79,7 +79,8 @@ BOOST_AUTO_TEST_CASE( yaw_test )
 
 BOOST_AUTO_TEST_CASE( logging_test )
 {
-        BASE_LOG_INIT("test-namespace", INFO, stdout);
+        FILE* s = fopen("test.out", "w");
+        BASE_LOG_CONFIGURE(INFO, s);
         BASE_LOG_INFO("info-message")
         std::string test("additional-argument");
 

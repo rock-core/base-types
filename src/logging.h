@@ -10,7 +10,9 @@
 
 // Need to map to logging::Priority order
 // ALlowing to set a log level via CFLAGS - method call will not be compiled into the system
-// and setting the enviroment variable BASE_LOG_LEVEL does not have any effect
+// Setting the enviroment variable BASE_LOG_LEVEL does only have any effect if the compiled
+// level is equal or higher (closer to FATAL) than the one request
+//
 #if defined(BASE_LOG_FATAL)
 #define BASE_LOG_PRIORITY 1
 #undef BASE_LOG_FATAL
@@ -28,10 +30,13 @@
 #undef BASE_LOG_DEBUG
 #endif
 
+// Default logging priority that is compiled in, i.e. all log levels 
+// will be accessible at runtime
 #ifndef BASE_LOG_PRIORITY
 #define BASE_LOG_PRIORITY 6
 #endif
 
+// Empty definition of debug statement
 #define BASE_LOG_DEBUG(FORMAT, ARGS...)
 #define BASE_LOG_INFO(FORMAT, ARGS...)
 #define BASE_LOG_WARN(FORMAT, ARGS...)
@@ -41,33 +46,51 @@
 
 #ifndef Release
 
+#ifndef __BASE_LOG_NAMESPACE__
+#warning "__BASE_LOG_NAMESPACE__ is not set - will be using empty namespaces"
+#define __BASE_LOG_NAMESPACE__ ""
+#else 
+// The debug flag __BASE_LOG_NAMESPACE__ needs to be converted to a string
+// Stringify element
+#define __STRINGIFY_(X) #X
+// expand x before being stringified
+#define __STRINGIFY(X) __STRINGIFY_(X)
+#endif
+
+// Depending on the globally set log level insert log statements by preprocessor
+//
+// The namespace represents the library name and should be set via definitions, e.g. in
+// your CMakeLists.txt -D__BASE_LOG_NAMESPACE__=yournamespace
+//
+#define __LOG(PRIO, FORMAT, ARGS ...) { using namespace logging; Logger::getInstance()->log(PRIO, __FILE__, __LINE__, "%s::" FORMAT, __STRINGIFY(__BASE_LOG_NAMESPACE__), ## ARGS); }
+
 #if BASE_LOG_PRIORITY >= 1 
 #undef BASE_LOG_FATAL
-#define BASE_LOG_FATAL(FORMAT, ARGS...) { using namespace logging; Logger::getInstance()->log(FATAL,__FILE__, __LINE__, FORMAT, ## ARGS); }
+#define BASE_LOG_FATAL(FORMAT, ARGS...) __LOG(FATAL, FORMAT, ## ARGS)
 #endif
 
 #if BASE_LOG_PRIORITY >= 2
 #undef BASE_LOG_ERROR
-#define BASE_LOG_ERROR(FORMAT, ARGS...) { using namespace logging; Logger::getInstance()->log(ERROR, __FILE__, __LINE__, FORMAT, ## ARGS); }
+#define BASE_LOG_ERROR(FORMAT, ARGS...) __LOG(ERROR, FORMAT, ## ARGS)
 #endif
  
 #if BASE_LOG_PRIORITY >= 3
 #undef BASE_LOG_WARN
-#define BASE_LOG_WARN(FORMAT, ARGS...) { using namespace logging; Logger::getInstance()->log(WARN,__FILE__, __LINE__, FORMAT, ## ARGS); }
+#define BASE_LOG_WARN(FORMAT, ARGS...) __LOG(WARN, FORMAT, ## ARGS)
 #endif
 
 #if BASE_LOG_PRIORITY >= 4 
 #undef BASE_LOG_INFO
-#define BASE_LOG_INFO(FORMAT, ARGS...) { using namespace logging; Logger::getInstance()->log(INFO, __FILE__, __LINE__, FORMAT, ## ARGS); }
+#define BASE_LOG_INFO(FORMAT, ARGS...) __LOG(INFO, FORMAT, ## ARGS)
 #endif
 
 #if BASE_LOG_PRIORITY >= 5
 #undef BASE_LOG_DEBUG
-#define BASE_LOG_DEBUG(FORMAT, ARGS...) { using namespace logging; Logger::getInstance()->log(DEBUG,__FILE__, __LINE__, FORMAT, ## ARGS); }
+#define BASE_LOG_DEBUG(FORMAT, ARGS...) __LOG(DEBUG, FORMAT, ## ARGS)  
 #endif
 
-#undef BASE_LOG_INIT
-#define BASE_LOG_INIT(NS, PRIO, STREAM) { using namespace logging; Logger::getInstance()->configure(NS, PRIO, STREAM); }
+#undef BASE_LOG_CONFIGURE
+#define BASE_LOG_CONFIGURE(PRIO,STREAM) { using namespace logging; Logger::getInstance()->configure(PRIO, STREAM); }
 
 #endif
 
@@ -89,7 +112,17 @@ namespace logging {
          * requirements
          * 
          * The logger will be only active in an application compiled 
-         * with DEBUG flags 
+         * not with Release Flag 
+         *
+         * Use the enviroment variable BASE_LOG_LEVEL to define the 
+         * requested logging level. 
+         * 
+         * A library designer can decide using the BASE_LOG_xxx flag at compile time which log level
+         * should be available. 
+         * 
+         * If a different output stream is requested BASE_LOG_CONFIGURE(priority,ostream)
+         * can be used.
+         * Ostream request a FILE* ptr 
          * 
 	 */
 	class Logger : public Singleton<Logger>
@@ -103,22 +136,25 @@ namespace logging {
 		Logger();
 	public:
 
+		virtual ~Logger();
+
                 /** 
                 * Configure logger - this is for the library developer so he can set a maximum log
                 * level, which cannot be further limited to higher log priorities via setting BASE_LOG_LEVEL
                 * If no previous configuration is given, no output logging will be done
                 */
-                void configure(const std::string& _namespace, Priority priority, FILE* outputStream);
-
-		virtual ~Logger();
+                void configure(Priority priority, FILE* outputStream);
 		
 		/**
  		* Logs a message with a given priority, can be used with printf style format
  		* @param priority priority level
- 		* @param format string
+                * @param ns namespace to be used
+                * @param filename Filename
+                * @param line Linenumber
+ 		* @param format printf like format string
  		* @param ... variable argument list
  		*/
-		void log(Priority priority, const char* file, int line, const char* format, ...);
+		void log(Priority priority, const char* filename, int line, const char* format, ...);
 
 	private:
                 /**
@@ -126,7 +162,6 @@ namespace logging {
                 */
                 Priority getLogLevelFromEnv();
 
-		std::string mNamespace;
                 FILE* mStream;
                 std::vector<std::string> mPriorityNames;
                 Priority mPriority;

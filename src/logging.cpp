@@ -14,7 +14,7 @@
 
 namespace logging { 
 
-Logger::Logger() : mNamespace(""), mStream(stdout), mPriorityNames(10), mPriority(UNKNOWN)
+Logger::Logger() : mStream(stderr), mPriorityNames(10), mPriority(UNKNOWN)
 
 {
     mPriorityNames[INFO] = "INFO";
@@ -31,17 +31,17 @@ Logger::~Logger()
 {
 }
 
-void Logger::configure(const std::string& _namespace, Priority priority, FILE* outputStream)
+void Logger::configure(Priority priority, FILE* outputStream)
 {
-    // check 
     Priority envPriority = getLogLevelFromEnv();
-    mNamespace = _namespace;
+    // Only limit to higher (close to FATAL) priorities
     if(envPriority < priority && envPriority != UNKNOWN)
         mPriority = envPriority;
     else
         mPriority = priority;
 
-    mStream = outputStream;
+    if(outputStream)
+        mStream = outputStream;
 }
 
 Priority Logger::getLogLevelFromEnv()
@@ -90,12 +90,11 @@ void Logger::log(Priority priority, const char* file, int line, const char* form
             gettimeofday(&tv,0);
             int milliSecs = tv.tv_usec/1000;
 
-            strftime(currentTime, 25, "%Y%d%m-%H:%M:%S", current);
-        
-            fprintf(mStream, "[%s:%03d][%s] - %s:: %s (%s:%d)\n", currentTime, milliSecs,  mPriorityNames[priority].c_str(), mNamespace.c_str(), buffer, file, line);
+            strftime(currentTime, 25, "%Y%m%d-%H:%M:%S", current);
+             
+            fprintf(mStream, "[%s:%03d][%s] - %s (%s:%d)\n", currentTime, milliSecs,  mPriorityNames[priority].c_str(), buffer, file, line);
         }
 }
-
 
 } // end namespace 
 
