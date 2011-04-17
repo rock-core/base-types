@@ -62,7 +62,7 @@
 // The namespace represents the library name and should be set via definitions, e.g. in
 // your CMakeLists.txt -D__BASE_LOG_NAMESPACE__=yournamespace
 //
-#define __LOG(PRIO, FORMAT, ARGS ...) { using namespace logging; Logger::getInstance()->log(PRIO, __FILE__, __LINE__, "%s::" FORMAT, __STRINGIFY(__BASE_LOG_NAMESPACE__), ## ARGS); }
+#define __LOG(PRIO, FORMAT, ARGS ...) { using namespace base::logging; Logger::getInstance()->log(PRIO, __FILE__, __LINE__, "%s::" FORMAT, __STRINGIFY(__BASE_LOG_NAMESPACE__), ## ARGS); }
 
 #if BASE_LOG_PRIORITY >= 1 
 #undef BASE_LOG_FATAL
@@ -90,7 +90,7 @@
 #endif
 
 #undef BASE_LOG_CONFIGURE
-#define BASE_LOG_CONFIGURE(PRIO,STREAM) { using namespace logging; Logger::getInstance()->configure(PRIO, STREAM); }
+#define BASE_LOG_CONFIGURE(PRIO,STREAM) { using namespace base::logging; Logger::getInstance()->configure(PRIO, STREAM); }
 
 #endif
 
@@ -100,6 +100,8 @@
 #include <base/singleton.h>
 
 using namespace std;
+
+namespace base {
 
 namespace logging {
 
@@ -168,6 +170,7 @@ namespace logging {
 
 	};
 
+} // end namespace
 } // end namespace
 
 #endif /* _BASE_LOGGER_H_ */

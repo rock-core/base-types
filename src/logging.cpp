@@ -12,6 +12,7 @@
 #include <vector>
 #include "logging.h"
 
+namespace base {
 namespace logging { 
 
 Logger::Logger() : mStream(stderr), mPriorityNames(10), mPriority(UNKNOWN)
@@ -96,5 +97,6 @@ void Logger::log(Priority priority, const char* file, int line, const char* form
         }
 }
 
-} // end namespace 
+} // end namespace logging
+} // end namespace base
 

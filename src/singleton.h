@@ -1,6 +1,8 @@
 #ifndef _BASE_SINGLETON_H_
 #define _BASE_SINGLETON_H_
 
+namespace base {
+
 template<class Derived>
 class Singleton
 {
@@ -49,6 +51,8 @@ public:
 };
 
 template<typename Derived> Derived* Singleton<Derived>::msInstance = 0;
+
+} // end namespace base;
 
 
 #endif // _BASE_SINGLETON_H_
