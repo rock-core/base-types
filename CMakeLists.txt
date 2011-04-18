@@ -18,7 +18,8 @@ if (CXX_SUPPORTS_WALL)
     add_definitions (-Wall)
 endif (CXX_SUPPORTS_WALL)
 
-add_definitions(-D__BASE_LOG_NAMESPACE__="${PROJECT_NAME}")
+add_definitions(-DBASE_LOG_NAMESPACE=${PROJECT_NAME})
+#add_definitions(-DBASE_LONG_NAMES)
 
 find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})

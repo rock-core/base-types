@@ -36,33 +36,44 @@
 #define BASE_LOG_PRIORITY 6
 #endif
 
+#ifdef BASE_LONG_NAMES
 // Empty definition of debug statement
 #define BASE_LOG_DEBUG(FORMAT, ARGS...)
 #define BASE_LOG_INFO(FORMAT, ARGS...)
 #define BASE_LOG_WARN(FORMAT, ARGS...)
 #define BASE_LOG_ERROR(FORMAT, ARGS...)
 #define BASE_LOG_FATAL(FORMAT, ARGS...)
-#define BASE_LOG_INIT(NS, PRIO, STREAM)
+#define BASE_LOG_CONFIGURE(PRIO, STREAM)
+#else
+#define LOG_DEBUG(FORMAT, ARGS...)
+#define LOG_INFO(FORMAT, ARGS...)
+#define LOG_WARN(FORMAT, ARGS...)
+#define LOG_ERROR(FORMAT, ARGS...)
+#define LOG_FATAL(FORMAT, ARGS...)
+#define LOG_CONFIGURE(PRIO, STREAM)
+#endif // BASE_LONG_NAMES
 
 #ifndef Release
 
-#ifndef __BASE_LOG_NAMESPACE__
-#warning "__BASE_LOG_NAMESPACE__ is not set - will be using empty namespaces"
-#define __BASE_LOG_NAMESPACE__ ""
+#ifndef BASE_LOG_NAMESPACE
+#warning "BASE_LOG_NAMESPACE is not set - will be using empty namespaces"
+#define BASE_LOG_NAMESPACE ""
 #else 
 // The debug flag __BASE_LOG_NAMESPACE__ needs to be converted to a string
 // Stringify element
 #define __STRINGIFY_(X) #X
 // expand x before being stringified
 #define __STRINGIFY(X) __STRINGIFY_(X)
-#endif
+#endif // BASE_LOG_NAMESPACE
 
 // Depending on the globally set log level insert log statements by preprocessor
 //
 // The namespace represents the library name and should be set via definitions, e.g. in
 // your CMakeLists.txt -D__BASE_LOG_NAMESPACE__=yournamespace
 //
-#define __LOG(PRIO, FORMAT, ARGS ...) { using namespace base::logging; Logger::getInstance()->log(PRIO, __FILE__, __LINE__, "%s::" FORMAT, __STRINGIFY(__BASE_LOG_NAMESPACE__), ## ARGS); }
+#define __LOG(PRIO, FORMAT, ARGS ...) { using namespace base::logging; Logger::getInstance()->log(PRIO, __FILE__, __LINE__, "%s::" FORMAT, __STRINGIFY(BASE_LOG_NAMESPACE), ## ARGS); }
+
+#ifdef BASE_LONG_NAMES
 
 #if BASE_LOG_PRIORITY >= 1 
 #undef BASE_LOG_FATAL
@@ -92,7 +103,42 @@
 #undef BASE_LOG_CONFIGURE
 #define BASE_LOG_CONFIGURE(PRIO,STREAM) { using namespace base::logging; Logger::getInstance()->configure(PRIO, STREAM); }
 
+#else // #ifdef BASE_LONG_NAMES
+
+// If there should be conflicts with other libraries, switch to long names
+// Other wise short names will be available as only
+#undef LOG_CONFIGURE
+#define LOG_CONFIGURE(PRIO,STREAM) { using namespace base::logging; Logger::getInstance()->configure(PRIO, STREAM); }
+
+#if BASE_LOG_PRIORITY >= 1 
+#undef LOG_FATAL
+#define LOG_FATAL(FORMAT, ARGS...) __LOG(FATAL, FORMAT, ## ARGS)
 #endif
+
+#if BASE_LOG_PRIORITY >= 2
+#undef LOG_ERROR
+#define LOG_ERROR(FORMAT, ARGS...) __LOG(ERROR, FORMAT, ## ARGS)
+#endif
+ 
+#if BASE_LOG_PRIORITY >= 3
+#undef LOG_WARN
+#define LOG_WARN(FORMAT, ARGS...) __LOG(WARN, FORMAT, ## ARGS)
+#endif
+
+#if BASE_LOG_PRIORITY >= 4 
+#undef LOG_INFO
+#define LOG_INFO(FORMAT, ARGS...) __LOG(INFO, FORMAT, ## ARGS)
+#endif
+
+#if BASE_LOG_PRIORITY >= 5
+#undef LOG_DEBUG
+#define LOG_DEBUG(FORMAT, ARGS...) __LOG(DEBUG, FORMAT, ## ARGS)  
+#endif
+
+#endif // BASE_LONG_NAMES
+
+#endif // Release
+
 
 #include <string>
 #include <stdio.h>

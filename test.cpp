@@ -80,8 +80,14 @@ BOOST_AUTO_TEST_CASE( yaw_test )
 BOOST_AUTO_TEST_CASE( logging_test )
 {
         FILE* s = fopen("test.out", "w");
+#ifdef BASE_LONG_NAMES
         BASE_LOG_CONFIGURE(INFO, s);
         BASE_LOG_INFO("info-message")
+#else
+        LOG_CONFIGURE(INFO, s);
+        LOG_INFO("info-message")
+#endif
+
         std::string test("additional-argument");
 
         int number = 1000000;
@@ -89,7 +95,11 @@ BOOST_AUTO_TEST_CASE( logging_test )
         time(&start);
         for(int i = 0; i < number; i++)
         {
+#ifdef BASE_LONG_NAMES
             BASE_LOG_FATAL("test fatal log %s", test.c_str())
+#else
+            LOG_FATAL("test fatal log %s", test.c_str())
+#endif
         }
         time(&stop);
         double seconds = difftime(stop, start)/(number*1.0);
