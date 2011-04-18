@@ -9,6 +9,9 @@ if (SISL_FOUND)
 endif()
 
 list(APPEND LIBBASE_FILES ${CMAKE_SOURCE_DIR}/src/logging.cpp)
+install(FILES ${CMAKE_SOURCE_DIR}/src/logging.h
+              ${CMAKE_SOURCE_DIR}/src/singleton.h
+        DESTINATION include/base)
 
 if (LIBBASE_FILES)
     add_library(base SHARED ${LIBBASE_FILES})
