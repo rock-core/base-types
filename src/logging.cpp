@@ -15,7 +15,7 @@
 namespace base {
 namespace logging { 
 
-Logger::Logger() : mStream(stderr), mPriorityNames(10), mPriority(UNKNOWN)
+Logger::Logger() : mStream(stderr), mPriorityNames(10)
 
 {
     mPriorityNames[INFO] = "INFO";
@@ -26,6 +26,10 @@ Logger::Logger() : mStream(stderr), mPriorityNames(10), mPriority(UNKNOWN)
     mPriorityNames[UNKNOWN] = "UNKNOWN";
 
     mPriority = getLogLevelFromEnv();
+
+    // Per default enable ERROR logging
+    if(mPriority == UNKNOWN)
+        mPriority == ERROR;
 }
 
 Logger::~Logger()
