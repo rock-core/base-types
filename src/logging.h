@@ -58,13 +58,13 @@
 #ifndef BASE_LOG_NAMESPACE
 #warning "BASE_LOG_NAMESPACE is not set - will be using empty namespaces"
 #define BASE_LOG_NAMESPACE ""
-#else 
+#endif // BASE_LOG_NAMESPACE
+
 // The debug flag __BASE_LOG_NAMESPACE__ needs to be converted to a string
 // Stringify element
 #define __STRINGIFY_(X) #X
 // expand x before being stringified
 #define __STRINGIFY(X) __STRINGIFY_(X)
-#endif // BASE_LOG_NAMESPACE
 
 // Depending on the globally set log level insert log statements by preprocessor
 //
@@ -143,6 +143,7 @@
 #include <string>
 #include <stdio.h>
 #include <stdarg.h>
+#include <vector>
 #include <base/singleton.h>
 
 using namespace std;
