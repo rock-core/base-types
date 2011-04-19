@@ -328,32 +328,47 @@ namespace geometry {
             return result;
         }
 
-        /** Private method */
-        bool doAdvance(double& result, double& cur, double target, double start, vector_t const& start_p, double end, vector_t const& end_p, double _geores) const
+        /** Private helper method for advance and length
+         *
+         * Iteratively computes a discretization of the curve from +start+ to
+         * +end+, with two points in the discretization not being further apart
+         * than _geores.
+         *
+         * It accumulates the distance while doing so. If, at some point in the
+         * search, the accumulated distance \c cur_length gets bigger than \c
+         * target, then the parameter at that point gets stored in result and
+         * the method returns true.
+         *
+         * If it never happens, the method returns false. In this case, \c
+         * result is set to \c end and \c cur_length is the approximate length
+         * of the whole segment.
+         */
+        bool doAdvance(double& result, double& cur_length, double target, double start, vector_t const& start_p, double end, vector_t const& end_p, double _geores) const
         {
             double d = (start_p - end_p).norm();
             if (d < _geores)
             {
-                cur += d;
-                if (cur > target)
+                cur_length += d;
+                if (cur_length > target)
                 {
                     result = end;
-                    return true;
+                    return false;
                 }
                 return false;
             }
 
             double middle = (start + end) / 2;
             vector_t middle_p = getPoint(middle);
-            if (doAdvance(result, cur, target, start, start_p, middle, middle_p, _geores))
+
+            if (doAdvance(result, cur_length, target, start, start_p, middle, middle_p, _geores))
                 return true;
-            if (doAdvance(result, cur, target, middle, middle_p, end, end_p, _geores))
+            if (doAdvance(result, cur_length, target, middle, middle_p, end, end_p, _geores))
                 return true;
 
             return false;
         }
 
-        /** find a parameter separated from another by a given curve length
+        /** Find a parameter separated from another by a given curve length
          *
          * Specifically, this method finds the parameter t1 so that the curve
          * length between t and t1 is in [length, length + _geores]
@@ -368,6 +383,19 @@ namespace geometry {
             if (!doAdvance(result_t, result_d, length, t, getPoint(t), this->getEndParam(), getPoint(this->getEndParam()), _geores))
                 return std::make_pair(this->getEndParam(), result_d);
             return std::make_pair(result_t, result_d);
+        }
+
+        /** Computes the length of a curve segment
+         *
+         * Specifically, this method finds the length of the curve by
+         * discretizing it with a step length of _geores
+         */
+        double length(double start, double end, double _geores)
+        {
+            double result_t = 0;
+            double result_d = 0;
+            doAdvance(result_t, result_d, std::numeric_limits<double>::infinity(), start, getPoint(start), end, getPoint(end), _geores);
+            return result_d;
         }
 
         /** Returns the geometric point that lies on the curve at the given
