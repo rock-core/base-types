@@ -203,6 +203,13 @@ module Base
                 super(3, geometric_resolution, order)
             end
 
+            # Return the length of the curve segment contained between +start_t+
+            # and +end_t+. The length is computed by discretizing the curve with
+            # a step distance of +geores+
+            def length(start_t, end_t, geores)
+                return do_length(start_t, end_t, geores)
+            end
+
             # Resets this curve to a curve interpolating the given points
             #
             # +points+ is an array of Eigen::Vector3 instances. See
