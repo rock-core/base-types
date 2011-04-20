@@ -10,6 +10,9 @@
 #include "base/samples/sonar_scan.h"
 #include "base/samples/rigid_body_state.h"
 
+#define BASE_LOG_DEBUG
+#include "base/logging.h"
+
 #include <Eigen/SVD>
 #include <Eigen/LU>
 
@@ -72,5 +75,34 @@ BOOST_AUTO_TEST_CASE( yaw_test )
 	rot = base::removeYaw( rot );
 	BOOST_CHECK( rot.isApprox( pitchroll ) );
     }
+}
+
+BOOST_AUTO_TEST_CASE( logging_test )
+{
+        FILE* s = fopen("test.out", "w");
+#ifdef BASE_LONG_NAMES
+        BASE_LOG_CONFIGURE(INFO, s);
+        BASE_LOG_INFO("info-message")
+#else
+        LOG_CONFIGURE(INFO, s);
+        LOG_INFO("info-message")
+#endif
+
+        std::string test("additional-argument");
+
+        int number = 1000000;
+        time_t start,stop;
+        time(&start);
+        for(int i = 0; i < number; i++)
+        {
+#ifdef BASE_LONG_NAMES
+            BASE_LOG_FATAL("test fatal log %s", test.c_str())
+#else
+            LOG_FATAL("test fatal log %s", test.c_str())
+#endif
+        }
+        time(&stop);
+        double seconds = difftime(stop, start)/(number*1.0);
+        printf("Estimated time per log msg %f seconds", seconds);
 }
 
