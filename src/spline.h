@@ -385,7 +385,7 @@ namespace geometry {
          * If the end of the curve is reached first, then the parameter of the
          * end of the curve is returned.
          */
-        std::pair<double, double> advance(double t, double length, double _geores)
+        std::pair<double, double> advance(double t, double length, double _geores) const
         {
             double result_t = 0;
             double result_d = 0;
@@ -399,7 +399,7 @@ namespace geometry {
          * Specifically, this method finds the length of the curve by
          * discretizing it with a step length of _geores
          */
-        double length(double start, double end, double _geores)
+        double length(double start, double end, double _geores) const
         {
             double result_t = 0;
             double result_d = 0;
