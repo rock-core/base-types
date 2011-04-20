@@ -144,8 +144,17 @@ namespace geometry {
          * Unlike \c append, if the distance between \c this's end point and \c
          * other's start point is greater than \c tolerance, the method computes
          * an intermediate curve that smoothly joins \c this and \c other.
+         *
+         * It retusn the parameter offset by which the parameters in \c other
+         * have been translated. I.e. if 
+         *
+         * <code>
+         * offset = curve.join(other, tol, true);
+         * </code>
+         *
+         * Then other.get(t) == curve.get(t + offset)
          */
-        void join(SplineBase const& other, double tolerance, bool with_tangents);
+        double join(SplineBase const& other, double tolerance, bool with_tangents);
 
         /** Crops this curve at the specified boundaries
          *

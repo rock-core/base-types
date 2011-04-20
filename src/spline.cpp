@@ -645,7 +645,7 @@ void SplineBase::append(SplineBase const& other)
     reset(joined_curve);
 }
 
-void SplineBase::join(SplineBase const& other, double tolerance, bool with_tangents)
+double SplineBase::join(SplineBase const& other, double tolerance, bool with_tangents)
 {
     if (tolerance < 0)
         tolerance = 0;
@@ -662,10 +662,10 @@ void SplineBase::join(SplineBase const& other, double tolerance, bool with_tange
     if (isEmpty())
     {
         *this = other;
-        return;
+        return 0;
     }
     else if (other.isEmpty())
-        return;
+        return 0;
     else if (!with_tangents)
     {
         joining_points.resize(2 * dim);
@@ -683,7 +683,7 @@ void SplineBase::join(SplineBase const& other, double tolerance, bool with_tange
         copy(singleton.begin(), singleton.end(), line.begin());
         copy(other.singleton.begin(), other.singleton.end(), line.begin() + dim);
         interpolate(line);
-        return;
+        return getEndParam();
     }
     else if (other.isSingleton())
     {
@@ -740,7 +740,11 @@ void SplineBase::join(SplineBase const& other, double tolerance, bool with_tange
     dist = sqrt(dist);
 
     if (dist <= tolerance)
-        return append(other);
+    {
+        double current_end = getEndParam();
+        append(other);
+        return current_end - other.getStartParam();
+    }
 
     // Create an intermediate curve
     SISLCurve* raw_intermediate_curve = NULL;
@@ -773,7 +777,9 @@ void SplineBase::join(SplineBase const& other, double tolerance, bool with_tange
     else
         append(intermediate_curve);
 
+    double current_end = getEndParam();
     append(other);
+    return current_end - other.getStartParam();
 }
 
 void SplineBase::clear()
