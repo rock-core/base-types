@@ -73,6 +73,44 @@ module Base
             # Returns the point at the end of the curve
             def end_point; get(end_param) end
 
+            # Internal search method for +dichotomic_search+
+            def do_dichotomic_search(start_t, start_p, end_t, end_p, resolution, block)
+                if (start_p - end_p).norm < resolution
+                    return (start_t + end_t) / 2
+                end
+
+                middle_t = (start_t + end_t) / 2
+                middle_p = get(middle_t)
+
+                block_result = block.call(middle_t, middle_p)
+                if block_result.nil?
+                    return middle_t
+                elsif block_result
+                    return do_dichotomic_search(middle_t, middle_p, end_t, end_p, resolution, block)
+                else
+                    return do_dichotomic_search(start_t, start_p, middle_t, middle_p, resolution, block)
+                end
+            end
+
+            # Does a dochotomic search on the curve
+            #
+            # The given block is given a point and parameter on the curve and
+            # must return
+            # * true if the given point is before the point that is searched
+            # * false if the given point is after the point that is searched
+            # * nil if the point is an acceptable result for the search
+            #
+            # The resolution parameter gives the distance below which a segment
+            # on the curve won't get refined further
+            def dichotomic_search(resolution, start_t = nil, end_t = nil, &block)
+                start_t ||= start_param
+                end_t ||= end_param
+
+                start_p = get(start_param)
+                end_p   = get(end_param)
+                return do_dichotomic_search(start_t, start_p, end_t, end_p, resolution, block)
+            end
+
             ##
             # :method: dimension
             #
