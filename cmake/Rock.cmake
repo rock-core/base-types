@@ -28,6 +28,7 @@ macro (rock_init PROJECT_NAME PROJECT_VERSION)
     if (ROCK_CXX_SUPPORTS_WALL)
         add_definitions(-Wall)
     endif()
+    add_definitions(-DBASE_LOG_NAMESPACE=${PROJECT_NAME})
 endmacro()
 
 function(rock_export_includedir DIR TARGET_DIR)
