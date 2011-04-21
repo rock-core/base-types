@@ -161,10 +161,11 @@ namespace logging {
          * requirements
          * 
          * The logger will be only active in an application compiled 
-         * not with Release Flag 
+         * not with 'Release' Flag 
          *
          * Use the enviroment variable BASE_LOG_LEVEL to define the 
-         * requested logging level. 
+         * requested logging level, e.g. 
+         * export BASE_LOG_LEVEL="WARN" 
          * 
          * A library designer can decide using the BASE_LOG_xxx flag at compile time which log level
          * should be available. 
