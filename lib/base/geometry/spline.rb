@@ -203,6 +203,20 @@ module Base
                 super(3, geometric_resolution, order)
             end
 
+            ##
+            # :method: find_closest_points
+            # call-seq:
+            #   find_closest_points(reference_point, geometric_resolution, guess = 0) => points, segments
+            #
+            # Finds the part of the curve that are the closest to
+            # +reference_point+, with a tolerance of +geometric_resolution+
+            #
+            # The returned arrays are a set of single points (as parameters on
+            # the curve) and a set of curve segments.
+            def find_closest_points(reference_point, geometric_resolution)
+                do_find_closest_points(reference_point.to_a, geometric_resolution)
+            end
+
             # Return the length of the curve segment contained between +start_t+
             # and +end_t+. The length is computed by discretizing the curve with
             # a step distance of +geores+

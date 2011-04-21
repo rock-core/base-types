@@ -84,7 +84,7 @@ public:
         }
     }
 
-    Array do_findClosestPoints(Array _ref_point, double guess, double geores)
+    Array do_findClosestPoints(Array _ref_point, double geores)
     {
         std::vector<double> ref_point = array_to_double_vector(_ref_point);
         std::vector<double> result_points;
@@ -151,6 +151,7 @@ void Init_spline_ext(Rice::Module& base_m)
         .define_method("coordinates", &RubySpline::do_coordinates)
         .define_method("knots", &RubySpline::do_knots)
         .define_method("do_length", &RubySpline::do_length)
+        .define_method("do_find_closest_points", &RubySpline::do_findClosestPoints)
         .define_method("reset", &RubySpline::do_reset, (Arg("coordinates"), Arg("knots"), Arg("kind") = -1))
         .define_method("get", &RubySpline::do_getPoint, (Arg("parameter"), Arg("with_tangent") = false));
 }
