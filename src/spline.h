@@ -5,8 +5,6 @@
 #include <base/eigen.h>
 #include <stdexcept>
 
-#include <boost/utility/enable_if.hpp>
-
 struct SISLCurve;
 
 namespace base {
