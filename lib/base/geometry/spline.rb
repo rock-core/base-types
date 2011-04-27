@@ -241,6 +241,13 @@ module Base
                 super(3, geometric_resolution, order)
             end
 
+            # Returns a copy of this curve
+            def dup
+                result = self.class.new(geometric_resolution, order)
+                result.initialize_copy(self)
+                result
+            end
+
             ##
             # :method: find_closest_points
             # call-seq:
