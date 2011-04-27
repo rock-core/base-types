@@ -96,8 +96,8 @@ public:
         for (unsigned int i = 0; i < result_curves.size(); ++i)
         {
             Array pair;
-            pair[0] = result_curves[i].first;
-            pair[1] = result_curves[i].second;
+            pair.push(result_curves[i].first);
+            pair.push(result_curves[i].second);
             ruby_curves.push(pair);
         }
 
