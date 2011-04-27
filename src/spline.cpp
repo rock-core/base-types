@@ -610,6 +610,17 @@ void SplineBase::findSphereIntersections(double const* _center, double radius,
     free(points);
 }
 
+static double point_distance(double const* p0, double const* p1, int dim)
+{
+    double result = 0;
+    for (int i = 0; i < dim; ++i)
+    {
+        double delta = p1[i] - p0[i];
+        result += delta * delta;
+    }
+    return sqrt(result);
+}
+
 void SplineBase::append(SplineBase const& other)
 {
     if (isEmpty())
@@ -625,7 +636,8 @@ void SplineBase::append(SplineBase const& other)
     {
         std::vector<double> p(getDimension());
         other.getPoint(&p[0], other.getStartParam());
-        if (singleton != p)
+
+        if (point_distance(&p[0], &singleton[0], getDimension()) > 1e-6)
         {
             std::vector<double> end_p(getDimension());
             other.getPoint(&end_p[0], other.getEndParam());
