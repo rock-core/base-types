@@ -4,6 +4,7 @@
 #include <vector>
 #include <base/eigen.h>
 #include <stdexcept>
+#include <algorithm>
 
 struct SISLCurve;
 
@@ -605,6 +606,79 @@ namespace geometry {
         {
             return SplineBase::findLineIntersections(_point.data(), _normal.data(),
                     _result_points, _result_curves, _geores);
+        }
+
+
+        void findSegmentIntersections(vector_t const& _p0, vector_t const& _p1,
+                std::vector<double>& _result_points,
+                std::vector< std::pair<double, double> >& _result_curves,
+                double _geores) const
+        {
+            std::vector<double> points;
+            std::vector< std::pair<double, double> > curves;
+
+            vector_t p0p1 = (_p1 - _p0);
+            double p0p1_length = p0p1.norm();
+            p0p1.normalize();
+
+            vector_t normal;
+            if (p0p1.x() < p0p1.y() && p0p1.x() < p0p1.z())
+                normal = p0p1.cross(Eigen::Vector3d::UnitX());
+            else if (p0p1.y() < p0p1.x() && p0p1.y() < p0p1.z())
+                normal = p0p1.cross(Eigen::Vector3d::UnitY());
+            else if (p0p1.z() < p0p1.x() && p0p1.z() < p0p1.y())
+                normal = p0p1.cross(Eigen::Vector3d::UnitY());
+            findLineIntersections(_p0, normal, points, curves, _geores);
+
+            for (unsigned int i = 0; i < points.size(); ++i)
+            {
+                vector_t p = getPoint(points[i]);
+                double p_t = (p - _p0).dot(p0p1);
+                if (p_t >=0 && p_t <= p0p1_length && fabs((p - _p0).dot(normal)) < _geores)
+                    _result_points.push_back(points[i]);
+            }
+
+            for (unsigned int curve_idx = 0; curve_idx < curves.size(); ++curve_idx)
+            {
+                double curve_t[2] =
+                    { curves[curve_idx].first,  curves[curve_idx].second };
+                vector_t p[2];
+                double segment_t[2];
+                for (int i = 0; i < 2; ++i)
+                {
+                    p[i] = getPoint(curve_t[i]);
+                    segment_t[i] = (p[i] - _p0).dot(p0p1);
+                }
+
+                double* min_t = std::min_element(segment_t, segment_t + 2);
+                double* max_t = std::max_element(segment_t, segment_t + 2);
+                if (*min_t <= p0p1_length && *max_t >= 0)
+                {
+                    std::pair<double, double> segment;
+                    if (*min_t < 0)
+                        segment.first = findOneClosestPoint(_p0);
+                    else
+                        segment.first = curve_t[min_t - segment_t];
+
+                    if (*max_t > p0p1_length)
+                        segment.second = findOneClosestPoint(_p1);
+                    else
+                        segment.second = curve_t[max_t - segment_t];
+
+                    if (segment.first > segment.second)
+                        std::swap(segment.first, segment.second);
+                    _result_curves.push_back(segment);
+                }
+            }
+        }
+
+        /** Returns true if this curve intersects the given segment */
+        bool isIntersectingSegment(vector_t const& _p0, vector_t const& _p1, double _geores)
+        {
+            std::vector<double> points;
+            std::vector< std::pair<double, double> > curves;
+            findSegmentIntersections(_p0, _p1, points, curves, _geores);
+            return !points.empty() || !curves.empty();
         }
 
         /** \overload
