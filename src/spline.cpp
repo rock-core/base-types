@@ -278,6 +278,13 @@ void SplineBase::interpolate(std::vector<double> const& points, std::vector<doub
             str << ")";
         }
 
+        if (!parameters.empty())
+        {
+            str << " with parameters ";
+            for (unsigned int c = 0; c < parameters.size(); ++c)
+                str << " " << parameters[c];
+        }
+
         throw std::runtime_error("cannot create a spline interpolating the required points" + str.str());
     }
 
