@@ -29,7 +29,7 @@ Logger::Logger() : mStream(stderr), mPriorityNames(10)
 
     // Per default enable ERROR logging
     if(mPriority == UNKNOWN)
-        mPriority == ERROR;
+        mPriority = ERROR;
 }
 
 Logger::~Logger()
