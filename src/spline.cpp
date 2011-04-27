@@ -114,6 +114,10 @@ void SplineBase::getPointAndTangentHelper(double* result, double _param, bool wi
         if (status != 0)
             throw std::runtime_error("SISL error while computing a curve point");
     }
+    else if (singleton.empty()) // empty curve
+    {
+        throw std::runtime_error("attempting getPoint / getPointAndTangent on an empty curve");
+    }
     else
     {
         copy(singleton.begin(), singleton.end(), result);
