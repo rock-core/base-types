@@ -172,7 +172,9 @@ double SplineBase::getCurveLength()
     if (has_curve_length)
         return curve_length;
 
-    if (!curve)
+    if (isSingleton())
+        return 0;
+    if (isEmpty())
         throw std::runtime_error("getCurveLength() called on an empty curve");
 
     int status;
