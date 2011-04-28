@@ -39,6 +39,12 @@ function(rock_export_includedir DIR TARGET_DIR)
     include_directories(BEFORE ${PROJECT_BINARY_DIR}/include)
 endfunction()
 
+function(rock_add_source_dir DIR TARGET_DIR)
+    rock_export_includedir(${CMAKE_CURRENT_SOURCE_DIR}/${DIR}
+        ${TARGET_DIR})
+    add_subdirectory(${DIR})
+endfunction()
+
 macro(rock_standard_layout)
     if (EXISTS ${PROJECT_SOURCE_DIR}/Doxyfile.in)
         find_package(Doxygen)
@@ -54,9 +60,8 @@ macro(rock_standard_layout)
         endif(DOXYGEN_FOUND)
     endif()
 
-    if (IS_DIRECTORY ${PROJECT_SOURCE_DIR}/src)
-        rock_export_includedir(${PROJECT_SOURCE_DIR}/src ${PROJECT_NAME})
-        add_subdirectory(src)
+    if(IS_DIRECTORY ${PROJECT_SOURCE_DIR}/src)
+        rock_add_source_dir(src ${PROJECT_NAME})
     endif()
 
     # Test for known types of Rock subprojects
