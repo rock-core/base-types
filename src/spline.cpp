@@ -984,3 +984,29 @@ void SplineBase::setSingleton(double const* coordinates)
     copy(coordinates, coordinates + getDimension(), &singleton[0]);
 }
 
+void SplineBase::split(SplineBase& second_part, double _param)
+{
+    if (_param < start_param || _param > end_param) 
+    {
+        string msg = "_param=" + lexical_cast<string>(_param) + " is not in the accepted range [" + lexical_cast<string>(start_param) + ", " + lexical_cast<string>(end_param) + "]";
+        throw std::out_of_range(msg);
+    }
+
+    if (isEmpty())
+        throw std::runtime_error("trying to split an empty curve");
+
+    if (isSingleton())
+    {
+        second_part = *this;
+        return;
+    }
+
+    SISLCurve* part1 = 0, *part2 = 0;
+    int result;
+    s1710(getSISLCurve(), _param, &part1, &part2, &result);
+    if (result != 0)
+        throw std::runtime_error("failed to split the curve at " + boost::lexical_cast<std::string>(_param));
+    reset(part1);
+    second_part.reset(part2);
+}
+

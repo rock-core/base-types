@@ -155,6 +155,13 @@ namespace geometry {
          */
         double join(SplineBase const& other, double tolerance, bool with_tangents);
 
+        /** Splits this curve in two parts, at the specified parameter
+         *
+         * \c this is the first part of the new pair. \c second_part is filled
+         * with the second part
+         */
+        void split(SplineBase& second_part, double parameter);
+
         /** Crops this curve at the specified boundaries
          *
          * After this operation, +this+ will represent the part of the curve
