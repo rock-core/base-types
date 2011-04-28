@@ -420,17 +420,17 @@ namespace geometry {
         /** Returns a discretization of this curve so that two consecutive
          * points are separated by a curve length lower than _geores
          */
-        std::vector<vector_t> sample(double _geores, std::vector<double>* parameters = 0) const
+        std::vector<vector_t> sample(double _geores, std::vector<double>* parameters = 0, int max_recursion = 20) const
         {
             std::vector<vector_t> result;
-            sample(result, _geores, parameters);
+            sample(result, _geores, parameters, max_recursion);
             return result;
         }
 
         /** Samples the curve so that the distance between two consecutive
          * points is always below _geores
          */
-        void sample(std::vector<vector_t>& result, double _geores, std::vector<double>* parameters = 0) const
+        void sample(std::vector<vector_t>& result, double _geores, std::vector<double>* parameters = 0, int max_recursion = 20) const
         {
             double start = this->getStartParam();
             vector_t start_p = this->getPoint(start);
@@ -440,14 +440,14 @@ namespace geometry {
 
             double end   = this->getEndParam();
             vector_t end_p = this->getPoint(end);
-            sample(result, start, start_p, end, end_p, _geores, parameters);
+            sample(result, start, start_p, end, end_p, _geores, parameters, max_recursion);
         }
 
         /** Helper method for the other sample methods
          */
-        void sample(std::vector<vector_t>& result, double start, vector_t const& start_p, double end, vector_t const& end_p, double _geores, std::vector<double>* parameters) const
+        void sample(std::vector<vector_t>& result, double start, vector_t const& start_p, double end, vector_t const& end_p, double _geores, std::vector<double>* parameters, int max_recursion = 20) const
         {
-            if ((start_p - end_p).norm() < _geores)
+            if (max_recursion == 0 || (start_p - end_p).norm() < _geores)
             {
                 if (parameters)
                     parameters->push_back(end);
@@ -458,8 +458,8 @@ namespace geometry {
 
             double middle = (start + end) / 2;
             vector_t middle_p = getPoint(middle);
-            sample(result, start, start_p, middle, middle_p, _geores, parameters);
-            sample(result, middle, middle_p, end, end_p, _geores, parameters);
+            sample(result, start, start_p, middle, middle_p, _geores, parameters, max_recursion - 1);
+            sample(result, middle, middle_p, end, end_p, _geores, parameters, max_recursion - 1);
         }
 
         /** Compute the curve from the given set of points */
