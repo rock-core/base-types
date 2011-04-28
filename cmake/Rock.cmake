@@ -239,11 +239,13 @@ macro(rock_library_common TARGET_NAME)
         set(DEPS_PKGCONFIG "${DEPS_PKGCONFIG} ${pkgname}")
     endforeach()
 
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_NAME}.pc.in
-        ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.pc @ONLY)
-    if (${TARGET_NAME}_INSTALL)
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.pc
-            DESTINATION lib/pkgconfig)
+    if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_NAME}.pc.in)
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_NAME}.pc.in
+            ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.pc @ONLY)
+        if (${TARGET_NAME}_INSTALL)
+            install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.pc
+                DESTINATION lib/pkgconfig)
+        endif()
     endif()
 endmacro()
 
