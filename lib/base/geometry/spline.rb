@@ -220,6 +220,12 @@ module Base
             #
             # The point and tangent are represented as arrays of coordinates, of
             # size #dimension
+            
+            def split(position)
+                result = Spline.new(dimension, geometric_resolution, order)
+                do_split(result, position)
+                result
+            end
         end
 
         # Specialization of Spline for 3D splines
@@ -294,6 +300,12 @@ module Base
                 else
                     return p
                 end
+            end
+
+            def split(position)
+                result = Spline3.new(geometric_resolution, order)
+                do_split(result, position)
+                result
             end
         end
     end
