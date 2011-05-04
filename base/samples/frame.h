@@ -221,15 +221,18 @@ namespace base { namespace samples { namespace frame {
 		init(other,bcopy);
 	    }
 	    
-	    //copies all attributes which are independant from size and mode
+	    //copies all attributes which are independent from size and mode
+            //if an attribute already exists the old value is over written
 	    void copyImageIndependantAttributes(const Frame &other)
 	    {
-	       attributes = other.attributes;
+               std::vector<frame_attrib_t>::const_iterator iter = other.attributes.begin();
+               for(;iter!= other.attributes.end();++iter)
+                   setAttribute(iter->name_,iter->data_);
 	       time = other.time;
 	       received_time = other.received_time;
 	       frame_status = other.frame_status;
 	    }
-	    
+
 	    //makes a copy of other
 	    void init(const Frame &other,bool bcopy = true)
 	    {
