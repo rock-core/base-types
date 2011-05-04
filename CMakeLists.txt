@@ -6,6 +6,14 @@ endif(COMMAND cmake_policy)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+MACRO(CMAKE_USE_FULL_RPATH install_rpath)
+    SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+    SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+    SET(CMAKE_INSTALL_RPATH ${install_rpath})
+    SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+ENDMACRO(CMAKE_USE_FULL_RPATH)
+CMAKE_USE_FULL_RPATH("${CMAKE_INSTALL_PREFIX}/lib")
+
 # Symlink to allow correct include statement
 execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/include/)
 execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/include/${PROJECT_NAME})
