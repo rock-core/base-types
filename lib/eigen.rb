@@ -36,7 +36,7 @@ module Eigen
         #
         # instead
         def ==(v)
-            q.kind_of?(self.class) &&
+            v.kind_of?(self.class) &&
                 __equal__(v)
         end
 
