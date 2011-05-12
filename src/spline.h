@@ -367,7 +367,7 @@ namespace geometry {
                 if (cur_length > target)
                 {
                     result = end;
-                    return false;
+                    return true;
                 }
                 return false;
             }
