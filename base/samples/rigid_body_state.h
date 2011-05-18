@@ -55,15 +55,15 @@ namespace base { namespace samples {
 	 */
         base::Matrix3d cov_angular_velocity;
 
-	void setTransform(const Eigen::Transform3d& transform)
+	void setTransform(const Eigen::Affine3d& transform)
 	{
 	    orientation = Eigen::Quaterniond( transform.linear() );
 	    position = transform.translation();
 	}
 
-	 Eigen::Transform3d getTransform() const 
+	 Eigen::Affine3d getTransform() const 
 	 {
-	    Eigen::Transform3d ret;
+	    Eigen::Affine3d ret;
 	    ret.setIdentity();
 	    ret.rotate(this->orientation);
 	    ret.translation() = this->position;
@@ -86,9 +86,9 @@ namespace base { namespace samples {
             return base::getYaw(orientation);
         }
 	
-	operator Eigen::Transform3d() const
+	operator Eigen::Affine3d() const
 	{
-	    Eigen::Transform3d ret;
+	    Eigen::Affine3d ret;
 	    ret.setIdentity();
 	    ret.rotate(this->orientation);
 	    ret.translation() = this->position;

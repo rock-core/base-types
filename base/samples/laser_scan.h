@@ -105,7 +105,7 @@ namespace base { namespace samples {
 	    return true;
 	}
 	
-	std::vector<Eigen::Vector3d> convertScanToPointCloud(const Eigen::Transform3d& transform) const
+	std::vector<Eigen::Vector3d> convertScanToPointCloud(const Eigen::Affine3d& transform) const
 	{
 	    std::vector<Eigen::Vector3d> pointCloud;
 	    

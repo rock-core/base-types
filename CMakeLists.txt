@@ -6,7 +6,7 @@ rock_export_includedir(${PROJECT_SOURCE_DIR}/src base)
 include_directories(BEFORE ${PROJECT_SOURCE_DIR})
 
 rock_find_cmake(Boost REQUIRED)
-rock_find_cmake(Eigen2 REQUIRED)
+rock_find_cmake(Eigen3 REQUIRED)
 
 rock_standard_layout()
 

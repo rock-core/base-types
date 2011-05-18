@@ -5,6 +5,8 @@
 #include <vector>
 #include <boost/lexical_cast.hpp>
 
+#include <iostream>
+
 using namespace std;
 using namespace base::geometry;
 using boost::lexical_cast;

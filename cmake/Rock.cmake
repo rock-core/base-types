@@ -66,7 +66,7 @@ macro(rock_standard_layout)
 
     # Test for known types of Rock subprojects
     if(IS_DIRECTORY ${PROJECT_SOURCE_DIR}/viz)
-        pkg_check_modules(vizkit vizkit)
+        rock_find_pkgconfig(vizkit vizkit)
         if (vizkit_FOUND)
             message(STATUS "vizkit found ... building the vizkit plugin")
             add_subdirectory(viz)
@@ -267,7 +267,8 @@ endmacro()
 # Creates and (optionally) installs a shared library.
 #
 # As with all rock libraries, the target must have a pkg-config file along, that
-# gets generated and (optionally) installed by the macro.
+# gets generated and (optionally) installed by the macro. The pkg-config file
+# needs to be in the same directory and called <name>.pc.in
 # 
 # The following arguments are mandatory:
 #

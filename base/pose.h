@@ -43,15 +43,15 @@ namespace base
         Pose(Position const& p, Orientation const& o)
             : position(p), orientation(o) {}
 
-	Pose(const Eigen::Transform3d &t)
+	Pose(const Eigen::Affine3d &t)
 	{
 	    position = t.translation();
 	    orientation = t.linear();
 	}
 
-	Eigen::Transform3d toTransform() const
+	Eigen::Affine3d toTransform() const
 	{
-	    Eigen::Transform3d t;
+	    Eigen::Affine3d t;
 	    t = orientation;
 	    t.pretranslate( position );
 	    return t;

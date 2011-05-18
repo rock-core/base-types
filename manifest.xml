@@ -11,7 +11,7 @@
     <license>LGPL v2 or later</license>
 
     <depend package="external/sisl" />
-    <rosdep name="eigen2" />
+    <rosdep name="eigen3" />
     <rosdep name="boost" />
     <tags>stable</tags>
 </package>

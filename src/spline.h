@@ -302,7 +302,7 @@ namespace geometry {
     public:
         typedef typename SplineBaseClass<DIM>::type base_t;
         typedef Eigen::Matrix<double, DIM, 1, Eigen::DontAlign>     vector_t;
-        typedef Eigen::Transform<double, DIM> transform_t;
+        typedef Eigen::Transform<double, DIM, Eigen::Affine> transform_t;
 
         explicit Spline(double geometric_resolution = 0.1, int order = 3)
             : base_t(DIM, geometric_resolution, order) {}

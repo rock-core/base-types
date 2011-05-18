@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE( pose_test )
     Eigen::Quaterniond orientation( Eigen::AngleAxisd( 0.2, Eigen::Vector3d(0.5, 1.4, 0.1) ) );
 
     base::Pose p( pos, orientation ); 
-    Eigen::Transform3d t( p.toTransform() );
+    Eigen::Affine3d t( p.toTransform() );
 
     BOOST_CHECK( pos.isApprox( t.translation() ) );
     BOOST_CHECK( orientation.isApprox( Eigen::Quaterniond(t.rotation()), 0.01 ) );
