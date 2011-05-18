@@ -8,7 +8,7 @@
     <license>GPL v2 or later</license>
 
     <depend package="rice" />
-    <depend package="eigen2" />
+    <depend package="eigen3" />
     <depend package="base/types" />
 </package>
 
