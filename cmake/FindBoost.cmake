@@ -192,6 +192,91 @@
 # And ELSE/ENDIF pairs were removed for readability.
 #########################################################################
 
+#######################################################################
+# For downward capability to CMake 2.6.0 
+#
+# Input: a_in - value, not variable
+#        b_in - value, not variable
+#        result_out - variable with value:
+#                         -1 : a_in <  b_in
+#                          0 : a_in == b_in
+#                          1 : a_in >  b_in
+#
+# Written by James Bigler.
+MACRO(COMPARE_VERSION_STRINGS a_in b_in result_out)
+    # Since SEPARATE_ARGUMENTS using ' ' as the separation token,
+    # replace '.' with ' ' to allow easy tokenization of the string.
+    STRING(REPLACE "." " " a ${a_in})
+    STRING(REPLACE "." " " b ${b_in})
+    SEPARATE_ARGUMENTS(a)
+    SEPARATE_ARGUMENTS(b)
+
+    # Check the size of each list to see if they are equal.
+    LIST(LENGTH a a_length)
+    LIST(LENGTH b b_length)
+
+    # Pad the shorter list with zeros.
+
+    # Note that range needs to be one less than the length as the for
+    # loop is inclusive (silly CMake).
+    IF(a_length LESS b_length)
+        # a is shorter
+        SET(shorter a)
+        MATH(EXPR range "${b_length} - 1")
+        MATH(EXPR pad_range "${b_length} - ${a_length} - 1")
+    ELSE(a_length LESS b_length)
+        # b is shorter
+        SET(shorter b)
+        MATH(EXPR range "${a_length} - 1")
+        MATH(EXPR pad_range "${a_length} - ${b_length} - 1")
+    ENDIF(a_length LESS b_length)
+
+    # PAD out if we need to
+    IF(NOT pad_range LESS 0)
+        FOREACH(pad RANGE ${pad_range})
+            # Since shorter is an alias for b, we need to get to it by by dereferencing shorter.
+            LIST(APPEND ${shorter} 0)
+        ENDFOREACH(pad RANGE ${pad_range})
+    ENDIF(NOT pad_range LESS 0)
+
+    SET(result 0)
+    FOREACH(index RANGE ${range})
+        IF(result EQUAL 0)
+            # Only continue to compare things as long as they are equal
+            LIST(GET a ${index} a_version)
+            LIST(GET b ${index} b_version)
+            # LESS
+            IF(a_version LESS b_version)
+                SET(result -1)
+            ENDIF(a_version LESS b_version)
+            # GREATER
+            IF(a_version GREATER b_version)
+                SET(result 1)
+            ENDIF(a_version GREATER b_version)
+        ENDIF(result EQUAL 0)
+    ENDFOREACH(index)
+
+    # Copy out the return result
+    SET(${result_out} ${result})
+ENDMACRO(COMPARE_VERSION_STRINGS)
+
+MACRO(COMPARE_VERSION a OP b)
+    set(COMPARE_VERSION_EVAL false)
+    COMPARE_VERSION_STRINGS(${a} ${b} result)
+    if( "${OP}" STREQUAL "VERSION_LESS") 
+        if(result LESS 0)
+            set(COMPARE_VERSION_EVAL true)
+        endif()
+    elseif( "${OP}" STREQUAL "VERSION_GREATER") 
+        if(result GREATER 0)
+            set(COMPARE_VERSION_EVAL true)
+        endif()
+    elseif( "${OP}" STREQUAL "VERSION_EQUAL")
+        set(COMPARE_VERSION_EVAL true)
+    endif()
+ENDMACRO(COMPARE_VERSION)
+
+######################################################################
 MACRO (_Boost_ADJUST_LIB_VARS basename)
   IF (Boost_INCLUDE_DIR )
     IF (Boost_${basename}_LIBRARY_DEBUG AND Boost_${basename}_LIBRARY_RELEASE)
@@ -305,13 +390,17 @@ else(Boost_FIND_VERSION_EXACT)
     set(_Boost_FIND_VERSION_SHORT "${Boost_FIND_VERSION_MAJOR}.${Boost_FIND_VERSION_MINOR}")
     # Select acceptable versions.
     foreach(version ${_Boost_KNOWN_VERSIONS})
-      if(NOT "${version}" VERSION_LESS "${Boost_FIND_VERSION}")
+      COMPARE_VERSION("${version}" VERSION_GREATER "${Boost_FIND_VERSION}")
+      if(COMPARE_VERSION_EVAL)
         # This version is high enough.
         list(APPEND _boost_TEST_VERSIONS "${version}")
-      elseif("${version}.99" VERSION_EQUAL "${_Boost_FIND_VERSION_SHORT}.99")
-        # This version is a short-form for the requested version with
-        # the patch level dropped.
-        list(APPEND _boost_TEST_VERSIONS "${version}")
+      else()
+        COMPARE_VERSION("${version}.99" VERSION_EQUAL "${_Boost_FIND_VERSION_SHORT}.99")
+        if(COMPARE_VERSION_EVAL)
+            # This version is a short-form for the requested version with
+            # the patch level dropped.
+            list(APPEND _boost_TEST_VERSIONS "${version}")
+        endif()
       endif()
     endforeach(version)
   else(Boost_FIND_VERSION)
@@ -333,7 +422,8 @@ IF(Boost_INCLUDE_DIR)
   if(Boost_VERSION AND Boost_FIND_COMPONENTS)
      math(EXPR _boost_maj "${Boost_VERSION} / 100000")
      math(EXPR _boost_min "${Boost_VERSION} / 100 % 1000")
-     if(${_boost_maj}.${_boost_min} VERSION_LESS 1.35)
+     COMPARE_VERSION(${_boost_maj}.${_boost_min} VERSION_LESS 1.35)
+     if(COMPARE_VERSION_EVAL)
        list(REMOVE_ITEM Boost_FIND_COMPONENTS system)
      endif()
   endif()
@@ -501,18 +591,26 @@ ELSE (_boost_IN_CACHE)
                      "  _boost_PATH_SUFFIXES = ${_boost_PATH_SUFFIXES}")
     endif()
 
-    # Look for a standard boost header file.
+    # First check the default ones 
     FIND_PATH(Boost_INCLUDE_DIR
       NAMES         boost/config.hpp
-      HINTS         ${_boost_INCLUDE_SEARCH_DIRS}
-      PATH_SUFFIXES ${_boost_PATH_SUFFIXES}
-      )
+      PATHS         ${_boost_INCLUDE_SEARCH_DIRS}
+      NO_DEFAULT_PATH
+    )
+
+    # Look for a standard boost header file.
+    if(NOT Boost_INCLUDE_DIR)
+        FIND_PATH(Boost_INCLUDE_DIR
+          NAMES         boost/config.hpp
+          HINTS         ${_boost_INCLUDE_SEARCH_DIRS}
+          PATH_SUFFIXES ${_boost_PATH_SUFFIXES}
+    )
+    endif()
   ENDIF( NOT Boost_INCLUDE_DIR )
   
   # ------------------------------------------------------------------------
   #  Extract version information from version.hpp
   # ------------------------------------------------------------------------
-
   IF(Boost_INCLUDE_DIR)
     # Extract Boost_VERSION and Boost_LIB_VERSION from version.hpp
     # Read the whole file:
@@ -595,7 +693,8 @@ ELSE (_boost_IN_CACHE)
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "SunPro")
       set(_boost_COMPILER "-sw")
     elseif (MINGW)
-      if(${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION} VERSION_LESS 1.34)
+      COMPARE_VERSION(${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION} VERSION_LESS 1.34)
+      if(COMPARE_VERSION_EVAL)
           SET(_boost_COMPILER "-mgw") # no GCC version encoding prior to 1.34
       else()
         _Boost_COMPILER_DUMPVERSION(_boost_COMPILER_VERSION)
@@ -603,7 +702,8 @@ ELSE (_boost_IN_CACHE)
       endif()
     elseif (UNIX)
       if (CMAKE_COMPILER_IS_GNUCXX)
-        if(${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION} VERSION_LESS 1.34)
+        COMPARE_VERSION(${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION} VERSION_LESS 1.34)
+        if(COMPARE_VERSION_EVAL)
           SET(_boost_COMPILER "-gcc") # no GCC version encoding prior to 1.34
         else()
           _Boost_COMPILER_DUMPVERSION(_boost_COMPILER_VERSION)
@@ -923,6 +1023,7 @@ ELSE (_boost_IN_CACHE)
       IF (NOT Boost_FIND_QUIETLY)
         MESSAGE(STATUS "Boost version: ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
         if(Boost_FIND_COMPONENTS)
+          message(STATUS "Using the following Boost include directory: ${Boost_INCLUDE_DIR}")
           message(STATUS "Found the following Boost libraries:")
         endif()
       ENDIF(NOT Boost_FIND_QUIETLY)
