@@ -26,6 +26,13 @@ class TC_Eigen_Quaternion < Test::Unit::TestCase
         assert(q.approx?(result, 0.0001))
     end
 
+    def test_angle_axis
+	q = Eigen::Quaternion.from_angle_axis( Math::PI, Eigen::Vector3.new( 1, 0, 0 ) )
+	v = Eigen::Vector3.new(0, 1, 0)
+	
+	assert( Eigen::Vector3.new(0, -1, 0).approx?( q*v, 0.0001 ) )
+    end
+
     def test_inverse
 	q = Eigen::Quaternion.from_euler( Eigen::Vector3.new(0.1, 0, 0), 2, 1, 0)
 	q1 = Eigen::Quaternion.from_euler( Eigen::Vector3.new(-0.1, 0, 0), 2, 1, 0)

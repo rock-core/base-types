@@ -135,6 +135,13 @@ module Eigen
             Quaternion.new(1, 0, 0, 0)
         end
 
+	# Creates a quaternion from an angle and axis description 
+	def self.from_angle_axis(*args)
+            q = new(0, 0, 0, 0)
+	    q.from_angle_axis(*args)
+	    q
+	end
+
         # Creates a quaternion from a set of euler angles.
         #
         # See Quaternion#from_euler for details

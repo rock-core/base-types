@@ -29,7 +29,7 @@ struct Vector3
 
     double norm() const { return v->norm(); }
     Vector3* normalize() const { return new Vector3(v->normalized()); }
-    void normalize_bang() const { v->normalize(); }
+    void normalizeBang() const { v->normalize(); }
 
     double get(int i) const { return (*v)[i]; }
     void set(int i, double value) { (*v)[i] = value; }
@@ -48,6 +48,8 @@ struct Vector3
     { return new Vector3(this->v->cross(*other.v)); }
     bool operator ==(Vector3 const& other) const
     { return (*this->v) == (*other.v); }
+    bool isApprox(Vector3 const& other, double tolerance)
+    { return v->isApprox(*other.v, tolerance); }
 };
 
 struct Quaternion
@@ -81,7 +83,7 @@ struct Quaternion
     { return new Vector3((*q) * (*v.v)); }
     Quaternion* inverse() const
     { return new Quaternion(q->inverse()); }
-    void normalize_bang()
+    void normalizeBang()
     { q->normalize(); }
     Quaternion* normalize() const
     { 
@@ -90,7 +92,13 @@ struct Quaternion
         return new Quaternion(q);
     }
 
-    void from_euler(Vector3 const& angles, int axis0, int axis1, int axis2)
+    void fromAngleAxis(double angle, Vector3 const& axis)
+    {
+	*(this->q) = 
+            Eigen::AngleAxisd(angle, *axis.v);
+    }
+
+    void fromEuler(Vector3 const& angles, int axis0, int axis1, int axis2)
     {
         *(this->q) =
             Eigen::AngleAxisd(angles.x(), Eigen::Vector3d::Unit(axis0)) *
@@ -103,7 +111,7 @@ struct Quaternion
         return q->isApprox(*other.q, tolerance);
     }
 
-    Vector3* to_euler(int axis0, int axis1, int axis2)
+    Vector3* toEuler(int axis0, int axis1, int axis2)
     {
         return new Vector3(q->toRotationMatrix().eulerAngles(axis0, axis1, axis2));
     }
@@ -121,7 +129,7 @@ void Init_eigen_ext()
                Arg("z") = static_cast<double>(0)))
        .define_method("__equal__",  &Vector3::operator ==)
        .define_method("norm",  &Vector3::norm)
-       .define_method("normalize!",  &Vector3::normalize_bang)
+       .define_method("normalize!",  &Vector3::normalizeBang)
        .define_method("normalize",  &Vector3::normalize)
        .define_method("[]",  &Vector3::get)
        .define_method("[]=",  &Vector3::set)
@@ -136,7 +144,8 @@ void Init_eigen_ext()
        .define_method("-@", &Vector3::negate)
        .define_method("*",  &Vector3::scale)
        .define_method("cross", &Vector3::cross)
-       .define_method("dot",  &Vector3::dot);
+       .define_method("dot",  &Vector3::dot)
+       .define_method("approx?", &Vector3::isApprox);
 
      Data_Type<Quaternion> rb_Quaternion = define_class_under<Quaternion>(rb_mEigen, "Quaternion")
        .define_constructor(Constructor<Quaternion,double,double,double,double>())
@@ -152,10 +161,11 @@ void Init_eigen_ext()
        .define_method("concatenate", &Quaternion::concatenate)
        .define_method("inverse", &Quaternion::inverse)
        .define_method("transform", &Quaternion::transform)
-       .define_method("normalize!", &Quaternion::normalize_bang)
+       .define_method("normalize!", &Quaternion::normalizeBang)
        .define_method("normalize", &Quaternion::normalize)
        .define_method("approx?", &Quaternion::isApprox)
-       .define_method("to_euler", &Quaternion::to_euler)
-       .define_method("from_euler", &Quaternion::from_euler);
+       .define_method("to_euler", &Quaternion::toEuler)
+       .define_method("from_euler", &Quaternion::fromEuler)
+       .define_method("from_angle_axis", &Quaternion::fromAngleAxis);
 }
 
