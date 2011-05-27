@@ -130,9 +130,15 @@ module Eigen
         # Returns the quaternion as [w, x, y, z]
         def to_a; [w, x, y, z] end
 
-        # Returns the unit quaternion (identity rotation)
-        def self.Unit
+        # Returns the identity unit quaternion (identity rotation)
+	def self.Identity
             Quaternion.new(1, 0, 0, 0)
+	end
+
+        # DEPRECATED: please use identity instead. Returns the unit quaternion (identity rotation)
+        def self.Unit
+	    warn "[DEPRECATED] Quaternion.unit, please use Quaternion.identity."
+	    self.identity
         end
 
 	# Creates a quaternion from an angle and axis description 
