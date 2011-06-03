@@ -4,8 +4,10 @@
 #include <sys/time.h>
 #include <time.h>
 #include <stdint.h>
+#include <cstdlib>
 #include <math.h>
 #include <ostream>
+#include <iomanip>
 
 namespace base
 {
@@ -63,10 +65,10 @@ namespace base
         double toSeconds() const
         { return static_cast<double>(microseconds) / UsecPerSec; }
         /** Returns this time as an integer number of milliseconds (thus dropping the microseconds) */
-        uint64_t toMilliseconds() const
+        int64_t toMilliseconds() const
         { return microseconds / 1000; }
         /** Returns this time as an integer number of microseconds */
-        uint64_t toMicroseconds() const
+        int64_t toMicroseconds() const
         { return microseconds; }
         static Time fromMicroseconds(uint64_t value)
         { return Time(value); }
@@ -83,7 +85,14 @@ namespace base
 
 inline std::ostream& operator << (std::ostream& io, base::Time const& time)
 {
-    io << time.toMicroseconds();
+    const int64_t microsecs = time.toMicroseconds();
+
+    io << (microsecs / 1000000)
+        << std::setfill('0')
+	<< "." << std::setw(3) << (std::abs(microsecs) / 1000) % 1000 
+	<< "." << std::setw(3) << (std::abs(microsecs) % 1000)
+	<< std::setfill(' ');
+
     return io;
 }
 

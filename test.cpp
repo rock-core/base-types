@@ -18,6 +18,12 @@
 
 using namespace std;
 
+BOOST_AUTO_TEST_CASE( time_test )
+{
+    std::cout << base::Time::fromSeconds( 35.553 ) << std::endl;
+    std::cout << base::Time::fromSeconds( -5.553 ) << std::endl;
+}
+
 BOOST_AUTO_TEST_CASE( pose_test )
 {
     Eigen::Vector3d pos( 10, -1, 20.5 );
