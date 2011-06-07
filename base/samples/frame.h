@@ -277,6 +277,42 @@ namespace base { namespace samples { namespace frame {
 		attributes.clear();
 	    }
 
+            void swap(Frame &frame)
+            {
+                //swap vector
+                image.swap(frame.image);
+                attributes.swap(frame.attributes);
+
+                //copy values to temp
+	        base::Time temp_time = frame.time;
+	        base::Time temp_received_time = frame.received_time;
+                frame_size_t temp_size = frame.size;
+                uint32_t temp_data_depth = frame.data_depth;
+                uint32_t temp_pixel_size = frame.pixel_size;
+                uint32_t temp_row_size = frame.row_size;
+                frame_mode_t temp_frame_mode = frame.frame_mode;
+                frame_status_t temp_frame_status = frame.frame_status;
+
+                //copy values
+                frame.time = time;
+                frame.received_time = received_time;
+                frame.size = size;
+                frame.data_depth = data_depth;
+                frame.pixel_size = pixel_size;
+                frame.row_size = row_size;
+                frame.frame_mode = frame_mode;
+                frame.frame_status = frame_status;
+
+                time = temp_time;
+                received_time = temp_received_time;
+                size = temp_size;
+                data_depth = temp_data_depth;
+                pixel_size = temp_pixel_size;
+                row_size = temp_row_size;
+                frame_mode = temp_frame_mode;
+                frame_status = temp_frame_status;
+            }
+
 	    inline bool isHDR()const       
 	    {
 		return (hasAttribute("hdr")&&getAttribute<bool>("hdr"));
