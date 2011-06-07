@@ -46,6 +46,26 @@ protected:
     }
 
 public:
+    /**
+     * static conversion from radians to degree
+     * @param rad angle in radians
+     * @result angle in degree
+     */
+    static inline double rad2Deg( double rad )
+    {
+	return rad / M_PI * 180.0;
+    }
+
+    /**
+     * static conversion from degree to radians
+     * @param deg angle in degree
+     * @result angle in radians
+     */
+    static inline double deg2Rad( double deg )
+    {
+	return deg / 180.0 * M_PI;
+    }
+
     /** 
      * use this method to get an angle from radians.
      * @return representation of the given angle.
