@@ -152,6 +152,7 @@ void Init_spline_ext(Rice::Module& base_m)
         .define_method("coordinates", &RubySpline::do_coordinates)
         .define_method("knots", &RubySpline::do_knots)
         .define_method("do_length", &RubySpline::do_length)
+        .define_method("do_find_one_closest_point", &RubySpline::do_findOneClosestPoint)
         .define_method("do_find_closest_points", &RubySpline::do_findClosestPoints)
         .define_method("reset", &RubySpline::do_reset, (Arg("coordinates"), Arg("knots"), Arg("kind") = -1))
         .define_method("get", &RubySpline::do_getPoint, (Arg("parameter"), Arg("with_tangent") = false));

@@ -1,4 +1,5 @@
 require 'base_types_ext'
+require 'eigen'
 
 module Types
 module Base
@@ -255,7 +256,29 @@ module Base
             end
 
             ##
-            # :method: find_closest_points
+            # call-seq:
+            #   distance_to(reference_point, guess, geometric_resolution) => value
+            #
+            # Return sthe distance of the given point to the curve, i.e. the
+            # distance between that point and the closest point of the curve
+            def distance_to(reference_point, guess, geometric_resolution)
+                closest = do_find_one_closest_point(reference_point.to_a, guess, geometric_resolution)
+                (get(closest) - reference_point).norm
+            end
+
+            ##
+            # call-seq:
+            #   find_one_closest_point(reference_point, guess, geometric_resolution) => point
+            #
+            # Finds one point that is the closest to the curve, with a tolerance
+            # of +geometric_resolution+
+            #
+            # The returned value is a parameter on the curve
+            def find_one_closest_point(reference_point, guess, geometric_resolution)
+                do_find_one_closest_point(reference_point.to_a, guess, geometric_resolution)
+            end
+
+            ##
             # call-seq:
             #   find_closest_points(reference_point, geometric_resolution, guess = 0) => points, segments
             #

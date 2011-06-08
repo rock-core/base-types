@@ -5,7 +5,7 @@ require 'base/geometry/spline'
 
 class TC_Geometry_Spline < Test::Unit::TestCase
     def test_base
-        v = BaseTypes::Geometry::Spline.new(3)
+        v = Types::Base::Geometry::Spline.new(3)
         assert_equal 3, v.dimension
         assert_equal 0.1, v.geometric_resolution
         assert_equal 3, v.order
@@ -16,10 +16,10 @@ class TC_Geometry_Spline < Test::Unit::TestCase
     end
 
     def test_concat
-        v1 = BaseTypes::Geometry::Spline.new(3)
+        v1 = Types::Base::Geometry::Spline.new(3)
         v1.interpolate([0, 0, 0, 1, 2, 3])
 
-        v2 = BaseTypes::Geometry::Spline.new(3)
+        v2 = Types::Base::Geometry::Spline.new(3)
         v2.interpolate([2, 2, 2, 4, 6, 8])
 
         result = v1.dup
@@ -31,12 +31,12 @@ class TC_Geometry_Spline < Test::Unit::TestCase
     end
 
     def test_join_singletons
-        v1 = BaseTypes::Geometry::Spline.new(3)
+        v1 = Types::Base::Geometry::Spline.new(3)
         v1.interpolate([0, 0, 0])
-        v2 = BaseTypes::Geometry::Spline.new(3)
+        v2 = Types::Base::Geometry::Spline.new(3)
         v2.interpolate([4, 4, 4])
 
-        expected = BaseTypes::Geometry::Spline.new(3)
+        expected = Types::Base::Geometry::Spline.new(3)
         expected.interpolate([0, 0, 0, 4, 4, 4])
 
         result = v1.dup
@@ -45,9 +45,9 @@ class TC_Geometry_Spline < Test::Unit::TestCase
     end
 
     def test_join_curve_and_singleton
-        v1 = BaseTypes::Geometry::Spline.new(3)
+        v1 = Types::Base::Geometry::Spline.new(3)
         v1.interpolate([0, 0, 0])
-        v2 = BaseTypes::Geometry::Spline.new(3)
+        v2 = Types::Base::Geometry::Spline.new(3)
         v2.interpolate([4, 4, 4, 6, 6, 6])
 
         result = v1.dup
@@ -56,9 +56,9 @@ class TC_Geometry_Spline < Test::Unit::TestCase
     end
 
     def test_join_singleton_and_curve
-        v1 = BaseTypes::Geometry::Spline.new(3)
+        v1 = Types::Base::Geometry::Spline.new(3)
         v1.interpolate([0, 0, 0, 4, 4, 4])
-        v2 = BaseTypes::Geometry::Spline.new(3)
+        v2 = Types::Base::Geometry::Spline.new(3)
         v2.interpolate([6, 6, 6])
 
         result = v1.dup
@@ -67,10 +67,10 @@ class TC_Geometry_Spline < Test::Unit::TestCase
     end
 
     def test_join
-        v1 = BaseTypes::Geometry::Spline.new(3)
+        v1 = Types::Base::Geometry::Spline.new(3)
         v1.interpolate([0, 0, 0, 1, 2, 3])
 
-        v2 = BaseTypes::Geometry::Spline.new(3)
+        v2 = Types::Base::Geometry::Spline.new(3)
         v2.interpolate([4, 4, 4, 4, 6, 8])
 
         result = v1.dup
@@ -78,6 +78,22 @@ class TC_Geometry_Spline < Test::Unit::TestCase
         assert_equal(v1.start_param, result.start_param)
         assert_equal([0, 0, 0], result.start_point)
         assert_equal([4, 6, 8], result.end_point)
+    end
+
+    def test_distance_to
+        v1 = Types::Base::Geometry::Spline3.new
+        v1.interpolate([Eigen::Vector3.new(0, 0, 0), Eigen::Vector3.new(1, 1, 1)])
+
+        assert(v1.distance_to(Eigen::Vector3.new(0.5, 0.5, 0.5), 0, 1e-9) < 1e-9)
+    end
+
+    def test_find_one_closest_point
+        v1 = Types::Base::Geometry::Spline3.new
+        v1.interpolate([Eigen::Vector3.new(0, 0, 0), Eigen::Vector3.new(1, 1, 1)])
+
+        test_p = Eigen::Vector3.new(0.5, 0.5, 0.5)
+        t = v1.find_one_closest_point(test_p, 0, 1e-9)
+        assert((v1.get(t) - test_p).norm < 1e-9)
     end
 end
 
