@@ -22,6 +22,10 @@ module Base
                 spline
             end
 
+            def self.singleton(point)
+                interpolate([point])
+            end
+
             # Returns a copy of this curve
             def dup
                 result = self.class.new(dimension, geometric_resolution, order)
@@ -67,6 +71,10 @@ module Base
 
                     do_interpolate(coordinates, parameters || [])
                 end
+            end
+
+            def singleton(point)
+                interpolate([point])
             end
 
             # Returns the point at the start of the curve
@@ -240,8 +248,12 @@ module Base
             # Spline#interpolate for details on +parameters+
             def self.interpolate(points, parameters = nil)
                 spline = Spline3.new
-                spline.interpolate(points, coordinates)
+                spline.interpolate(points, parameters)
                 spline
+            end
+
+            def self.singleton(point)
+                interpolate([point])
             end
 
             def initialize(geometric_resolution = 0.1, order = 3)
@@ -308,6 +320,10 @@ module Base
                     coordinates << p.x << p.y << p.z
                 end
                 super(coordinates, parameters)
+            end
+
+            def singleton(point)
+                interpolate([point])
             end
 
             # Returns the point at the given parameter.
