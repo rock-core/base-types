@@ -294,8 +294,11 @@ function(rock_library TARGET_NAME)
     if (${TARGET_NAME}_INSTALL)
         install(TARGETS ${TARGET_NAME}
             LIBRARY DESTINATION lib)
-        install(FILES ${${TARGET_NAME}_HEADERS}
-            DESTINATION include/${PROJECT_NAME})
+        # Install headers and keep directory structure
+        foreach(HEADER ${${TARGET_NAME}_HEADERS})
+            string(REGEX MATCH "(.*)[/\\]" DIR ${HEADER})
+            install(FILES ${HEADER} DESTINATION include/${PROJECT_NAME}/${DIR})
+        endforeach(HEADER)
     endif()
 endfunction()
 
