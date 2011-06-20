@@ -39,7 +39,12 @@ module Base
             def sample(delta_t)
                 result = []
                 start_param.step(end_param, delta_t) do |t|
-                    result << get(t)
+                    if t <= end_param
+                        result << get(t)
+                    else
+                        result << get(end_param)
+                        break
+                    end
                 end
                 result
             end
