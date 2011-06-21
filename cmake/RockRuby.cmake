@@ -66,6 +66,7 @@ ELSEIF(NOT RUBY_EXTENSIONS_AVAILABLE)
         if (GEM_FOUND)
             ROCK_RUBY_EXTENSION(${target} ${ARGN})
 	    include_directories(${GEM_INCLUDE_DIRS})
+	    target_link_libraries(${target} ${GEM_LIBRARIES})
 	    target_link_libraries(${GEM_LIBRARIES})
 
 	    install(TARGETS ${target} LIBRARY DESTINATION ${RUBY_EXTENSIONS_INSTALL_DIR})
