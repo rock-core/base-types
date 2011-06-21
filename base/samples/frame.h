@@ -61,6 +61,7 @@ namespace base { namespace samples { namespace frame {
 	    MODE_RGB       = 2,
 	    MODE_UYVY	   = 3,
 	    MODE_BGR	   = 4,
+            MODE_RGB32     = 5,
 	    RAW_MODES = 128,
 	    MODE_BAYER = RAW_MODES + 0,
 	    MODE_BAYER_RGGB = RAW_MODES + 1,
@@ -356,6 +357,8 @@ namespace base { namespace samples { namespace frame {
 		case MODE_RGB:
 		case MODE_BGR:
 		    return 3;
+                case MODE_RGB32:
+                    return 4;
 		default:
                     throw std::runtime_error("Frame::getChannelCount: Unknown frame_mode");
 		    return 0;
@@ -388,6 +391,9 @@ namespace base { namespace samples { namespace frame {
                 return MODE_BAYER_BGGR;
               else if (str == "MODE_BAYER_GBRG")
                 return MODE_BAYER_GBRG;
+              else if (str == "MODE_RGB32")
+                return MODE_RGB32;
+
               else
                 return MODE_UNDEFINED;
             };
