@@ -46,7 +46,7 @@ namespace base { namespace samples {
         SonarScan()
             : angle(0), time_beetween_bins(0){}
 	
-	double getScale(double sonicVelocityinWater = 1500.0){
+	double getScale(double sonicVelocityinWater = 1500.0) const{
 		if(scanData.size() == 0){
 			return 0;
 		}
