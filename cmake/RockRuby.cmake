@@ -60,5 +60,21 @@ ELSEIF(NOT RUBY_EXTENSIONS_AVAILABLE)
             LINK_FLAGS "-z noexecstack")
 	SET_TARGET_PROPERTIES(${target} PROPERTIES PREFIX "")
     endfunction()
+
+    function(ROCK_RUBY_RICE_EXTENSION target)
+        find_package(Gem COMPONENTS rice)
+        if (GEM_FOUND)
+            ROCK_RUBY_EXTENSION(${target} ${ARGN})
+	    include_directories(${GEM_INCLUDE_DIRS})
+	    target_link_libraries(${target} ${GEM_LIBRARIES})
+	    target_link_libraries(${GEM_LIBRARIES})
+
+	    install(TARGETS ${target} LIBRARY DESTINATION ${RUBY_EXTENSIONS_INSTALL_DIR})
+        else()
+            message(STATUS "cannot find the rice gem")
+        endif()
+
+    endfunction()
+
 ENDIF(NOT RUBY_INCLUDE_PATH)
 
