@@ -11,6 +11,7 @@
 #include <time.h>
 #include <vector>
 #include "logging.h"
+#include "terminal_colors.h"
 
 namespace base {
 namespace logging { 
@@ -26,6 +27,22 @@ Logger::Logger() : mStream(stderr), mPriorityNames(10)
     mPriorityNames[UNKNOWN] = "UNKNOWN";
 
     mPriority = getLogLevelFromEnv();
+
+    if (getLogColorFromEnv()){
+    	mpLogColor[INFO] = COLOR_NORMAL;
+    	mpLogColor[DEBUG] = COLOR_FG_WHITE;
+    	mpLogColor[WARN] = COLOR_FG_LIGHTYELLOW;
+    	mpLogColor[ERROR] = COLOR_FG_DARKRED;
+    	mpLogColor[FATAL] = COLOR_BG_DARKRED;
+    	mpLogColor[UNKNOWN] = COLOR_NORMAL;
+    	mpColorEnd = COLOR_NORMAL;
+
+    }else{
+        for (int i = 0;i < ENDPRIORITIES;i++){
+        	mpLogColor[i] = "";
+        }
+        mpColorEnd = "";
+    }
 
     // Per default enable ERROR logging
     if(mPriority == UNKNOWN)
@@ -74,7 +91,17 @@ Priority Logger::getLogLevelFromEnv()
 
 }
 
-void Logger::log(Priority priority, const char* file, int line, const char* format, ...)
+bool Logger::getLogColorFromEnv()
+{
+    char* color = getenv("BASE_LOG_COLOR");
+    if(color){
+        return true;
+    }
+    return false;
+}
+
+
+void Logger::log(Priority priority, const char* function, const char* file, int line, const char* format, ...)
 {
         if(priority <= mPriority)
         {
@@ -96,8 +123,9 @@ void Logger::log(Priority priority, const char* file, int line, const char* form
             int milliSecs = tv.tv_usec/1000;
 
             strftime(currentTime, 25, "%Y%m%d-%H:%M:%S", current);
-             
-            fprintf(mStream, "[%s:%03d][%s] - %s (%s:%d)\n", currentTime, milliSecs,  mPriorityNames[priority].c_str(), buffer, file, line);
+
+            //fprintf(mStream, "[%s:%03d][%s] - %s (%s:%d)\n", currentTime, milliSecs,  mPriorityNames[priority].c_str(), buffer, file, line);
+            fprintf(mStream, "[%s:%03d]%s[%s] - %s%s \n\t in %s \n\t%s:%d\n", currentTime, milliSecs, mpLogColor[priority], mPriorityNames[priority].c_str(), buffer, mpColorEnd, function, file, line);
         }
 }
 

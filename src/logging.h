@@ -3,6 +3,21 @@
  * @author Thomas Roehr, thomas.roehr@dfki.de
  *
  * @brief Plain logging class
+ * @details Logging can be enable by linking to base-lib and including <base/logging.h>
+ * At compile time the following defines can be set: 
+ * Setting the namespace to facilitate associating the debug with a library
+ * BASE_LOG_NAMESPACE
+ * 
+ * Disabling logs lower or equal to a certain level:
+ * BASE_LOG_<log-level>, e.g. BASE_LOG_FATAL
+ * 
+ * Existing log levels are: FATAL, ERROR, WARN, INFO, DEBUG
+ *
+ * At runtime the enviroment variable BASE_LOG_LEVEL can be set to any of the 
+ * given log levels, e.g. export BASE_LOG_LEVEL="info" to show debug of 
+ * INFO and higher log statements
+ * 
+ *
  */
 
 #ifndef _BASE_LOGGING_H_
@@ -59,8 +74,7 @@
 #warning "BASE_LOG_NAMESPACE is not set - will be using empty namespaces"
 #define BASE_LOG_NAMESPACE ""
 #endif // BASE_LOG_NAMESPACE
-
-// The debug flag __BASE_LOG_NAMESPACE__ needs to be converted to a string
+// The debug flag BASE_LOG_NAMESPACE needs to be converted to a string
 // Stringify element
 #define __STRINGIFY_(X) #X
 // expand x before being stringified
@@ -69,9 +83,14 @@
 // Depending on the globally set log level insert log statements by preprocessor
 //
 // The namespace represents the library name and should be set via definitions, e.g. in
-// your CMakeLists.txt -D__BASE_LOG_NAMESPACE__=yournamespace
+// your CMakeLists.txt -DBASE_LOG_NAMESPACE=yournamespace
 //
-#define __LOG(PRIO, FORMAT, ARGS ...) { using namespace base::logging; Logger::getInstance()->log(PRIO, __FILE__, __LINE__, "%s::" FORMAT, __STRINGIFY(BASE_LOG_NAMESPACE), ## ARGS); }
+// Using __PRETTY_FUNCTION__ when using gcc otherwise __func__ to show current function
+#ifdef __GNUC__
+#define __LOG(PRIO, FORMAT, ARGS ...) { using namespace base::logging; Logger::getInstance()->log(PRIO,__PRETTY_FUNCTION__, __FILE__, __LINE__, "%s::" FORMAT, __STRINGIFY(BASE_LOG_NAMESPACE), ## ARGS); }
+#else
+#define __LOG(PRIO, FORMAT, ARGS ...) { using namespace base::logging; Logger::getInstance()->log(PRIO,__func__, __FILE__, __LINE__, "%s::" FORMAT, __STRINGIFY(BASE_LOG_NAMESPACE), ## ARGS); }
+#endif
 
 #ifdef BASE_LONG_NAMES
 
@@ -140,6 +159,9 @@
 #endif // Release
 
 
+
+
+
 #include <string>
 #include <stdio.h>
 #include <stdarg.h>
@@ -152,7 +174,7 @@ namespace base {
 
 namespace logging {
 
-	enum Priority	{ UNKNOWN = 0, FATAL , ERROR, WARN, INFO, DEBUG  };
+	enum Priority	{ UNKNOWN = 0, FATAL , ERROR, WARN, INFO, DEBUG, ENDPRIORITIES  };
 
 	/**
 	 * @class Logger
@@ -204,7 +226,7 @@ namespace logging {
  		* @param format printf like format string
  		* @param ... variable argument list
  		*/
-		void log(Priority priority, const char* filename, int line, const char* format, ...);
+		void log(Priority priority, const char* function, const char* filename, int line, const char* format, ...);
 
 	private:
                 /**
@@ -212,9 +234,15 @@ namespace logging {
                 */
                 Priority getLogLevelFromEnv();
 
+                bool getLogColorFromEnv();
+
                 FILE* mStream;
                 std::vector<std::string> mPriorityNames;
                 Priority mPriority;
+
+                const char* mpLogColor[ENDPRIORITIES];
+                const char* mpColorEnd;
+
 
 	};
 
