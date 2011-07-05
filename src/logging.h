@@ -6,7 +6,8 @@
  * @details Logging can be enable by linking to base-lib and including <base/logging.h>
  * At compile time the following defines can be set: 
  * Setting the namespace to facilitate associating the debug with a library
- * BASE_LOG_NAMESPACE
+ * BASE_LOG_NAMESPACE, e.g. 
+ * in your CMakeLists.txt add_defitions(-DBASE_LOG_NAMESPACE=$PROJECT_NAME)
  * 
  * Disabling logs lower or equal to a certain level:
  * BASE_LOG_<log-level>, e.g. BASE_LOG_FATAL
@@ -16,7 +17,9 @@
  * At runtime the enviroment variable BASE_LOG_LEVEL can be set to any of the 
  * given log levels, e.g. export BASE_LOG_LEVEL="info" to show debug of 
  * INFO and higher log statements
- * 
+ *
+ * Setting of BASE_LOG_COLOR enables a color scheme for the log message, that 
+ * is best viewed in a terminal with dark background color
  *
  */
 
@@ -174,77 +177,89 @@ namespace base {
 
 namespace logging {
 
-	enum Priority	{ UNKNOWN = 0, FATAL , ERROR, WARN, INFO, DEBUG, ENDPRIORITIES  };
+enum Priority	{ UNKNOWN = 0, FATAL , ERROR, WARN, INFO, DEBUG, ENDPRIORITIES  };
 
+enum LogFormat	{ DEFAULT = 0, MULTILINE, SHORT};
+
+/**
+ * @class Logger
+ * @brief Logger is a logger that allows priority based logging
+ * with minimal impact on performance and minimal configuration
+ * requirements
+ * 
+ * The logger will be only active in an application compiled 
+ * not with 'Release' Flag 
+ *
+ * Use the enviroment variable BASE_LOG_LEVEL to define the 
+ * requested logging level, e.g. 
+ * export BASE_LOG_LEVEL="WARN" 
+ * 
+ * A library designer can decide using the BASE_LOG_xxx flag at compile time which log level
+ * should be available. 
+ * 
+ * If a different output stream is requested BASE_LOG_CONFIGURE(priority,ostream)
+ * can be used.
+ * Ostream request a FILE* ptr 
+ * 
+ */
+class Logger : public Singleton<Logger>
+{
+    friend class Singleton<Logger>;
+
+protected:
 	/**
-	 * @class Logger
-	 * @brief Logger is a logger that allows priority based logging
-         * with minimal impact on performance and minimal configuration
-         * requirements
-         * 
-         * The logger will be only active in an application compiled 
-         * not with 'Release' Flag 
-         *
-         * Use the enviroment variable BASE_LOG_LEVEL to define the 
-         * requested logging level, e.g. 
-         * export BASE_LOG_LEVEL="WARN" 
-         * 
-         * A library designer can decide using the BASE_LOG_xxx flag at compile time which log level
-         * should be available. 
-         * 
-         * If a different output stream is requested BASE_LOG_CONFIGURE(priority,ostream)
-         * can be used.
-         * Ostream request a FILE* ptr 
-         * 
+	 * Construct the logger
 	 */
-	class Logger : public Singleton<Logger>
-	{
-            friend class Singleton<Logger>;
+	Logger();
+public:
 
-        protected:
-		/**
-		 * Construct the logger
-		 */
-		Logger();
-	public:
+	virtual ~Logger();
 
-		virtual ~Logger();
+        /** 
+        * Configure logger - this is for the library developer so he can set a maximum log
+        * level, which cannot be further limited to higher log priorities via setting BASE_LOG_LEVEL
+        * If no previous configuration is given, no output logging will be done
+        */
+        void configure(Priority priority, FILE* outputStream);
+	
+	/**
+	* Logs a message with a given priority, can be used with printf style format
+	* @param priority priority level
+        * @param ns namespace to be used
+        * @param filename Filename
+        * @param line Linenumber
+	* @param format printf like format string
+	* @param ... variable argument list
+	*/
+	void log(Priority priority, const char* function, const char* filename, int line, const char* format, ...);
 
-                /** 
-                * Configure logger - this is for the library developer so he can set a maximum log
-                * level, which cannot be further limited to higher log priorities via setting BASE_LOG_LEVEL
-                * If no previous configuration is given, no output logging will be done
-                */
-                void configure(Priority priority, FILE* outputStream);
-		
-		/**
- 		* Logs a message with a given priority, can be used with printf style format
- 		* @param priority priority level
-                * @param ns namespace to be used
-                * @param filename Filename
-                * @param line Linenumber
- 		* @param format printf like format string
- 		* @param ... variable argument list
- 		*/
-		void log(Priority priority, const char* function, const char* filename, int line, const char* format, ...);
+private:
+        /**
+        * Retrieve the log level from the enviroment
+        */
+        Priority getLogLevelFromEnv();
 
-	private:
-                /**
-                * Retrieve the log level from the enviroment
-                */
-                Priority getLogLevelFromEnv();
+        /**
+        * Retrieve log level from the enviroment variable BASE_LOG_TYPE
+        * Get log color from enviroment
+        */
+        bool getLogColorFromEnv();
 
-                bool getLogColorFromEnv();
+        /** 
+        * Retrieve log level from the enviroment variable BASE_LOG_FORMAT
+        */
+        LogFormat getLogFormatFromEnv();
 
-                FILE* mStream;
-                std::vector<std::string> mPriorityNames;
-                Priority mPriority;
+        FILE* mStream;
+        std::vector<std::string> mPriorityNames;
+        Priority mPriority;
 
-                const char* mpLogColor[ENDPRIORITIES];
-                const char* mpColorEnd;
+        const char* mpLogColor[ENDPRIORITIES];
+        const char* mpColorEnd;
 
-
-	};
+        std::vector<std::string> mLogFormatNames;
+        LogFormat mLogFormat;
+};
 
 } // end namespace
 } // end namespace

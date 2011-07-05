@@ -16,8 +16,7 @@
 namespace base {
 namespace logging { 
 
-Logger::Logger() : mStream(stderr), mPriorityNames(10)
-
+Logger::Logger() : mStream(stderr), mPriorityNames(10), mLogFormatNames(3)
 {
     mPriorityNames[INFO] = "INFO";
     mPriorityNames[DEBUG] = "DEBUG";
@@ -26,19 +25,26 @@ Logger::Logger() : mStream(stderr), mPriorityNames(10)
     mPriorityNames[FATAL] = "FATAL";
     mPriorityNames[UNKNOWN] = "UNKNOWN";
 
+    mLogFormatNames[DEFAULT] = "DEFAULT";
+    mLogFormatNames[MULTILINE] = "MULTILINE";
+    mLogFormatNames[SHORT] = "SHORT";
+    mLogFormat = getLogFormatFromEnv();
+
     mPriority = getLogLevelFromEnv();
 
-    if (getLogColorFromEnv()){
-    	mpLogColor[INFO] = COLOR_NORMAL;
-    	mpLogColor[DEBUG] = COLOR_FG_WHITE;
+    if (getLogColorFromEnv())
+    {
+    	mpLogColor[DEBUG] =  COLOR_BIG;
+    	mpLogColor[INFO] = COLOR_FG_WHITE;
     	mpLogColor[WARN] = COLOR_FG_LIGHTYELLOW;
     	mpLogColor[ERROR] = COLOR_FG_DARKRED;
     	mpLogColor[FATAL] = COLOR_BG_DARKRED;
     	mpLogColor[UNKNOWN] = COLOR_NORMAL;
     	mpColorEnd = COLOR_NORMAL;
 
-    }else{
-        for (int i = 0;i < ENDPRIORITIES;i++){
+    } else {
+        for (int i = 0;i < ENDPRIORITIES;i++)
+        {
         	mpLogColor[i] = "";
         }
         mpColorEnd = "";
@@ -75,8 +81,8 @@ Priority Logger::getLogLevelFromEnv()
     std::string priority(loglevel);
     std::transform(priority.begin(), priority.end(),priority.begin(), (int(*)(int)) std::toupper);
     
-    std::vector<std::string>::iterator it = mPriorityNames.begin();
     int index = 0;
+    std::vector<std::string>::iterator it = mPriorityNames.begin();
     for(;it != mPriorityNames.end(); it++)
     {
         if(*it != priority)
@@ -94,39 +100,76 @@ Priority Logger::getLogLevelFromEnv()
 bool Logger::getLogColorFromEnv()
 {
     char* color = getenv("BASE_LOG_COLOR");
-    if(color){
+    if(color)
         return true;
-    }
+
     return false;
+}
+
+
+LogFormat Logger::getLogFormatFromEnv()
+{
+    char* logtype = getenv("BASE_LOG_FORMAT");
+    if(!logtype)
+        return DEFAULT;
+
+    std::string logtype_str(logtype);
+    std::transform(logtype_str.begin(), logtype_str.end(),logtype_str.begin(), (int(*)(int)) std::toupper);
+
+    std::vector<std::string>::iterator it = mLogFormatNames.begin();
+    int index = 0;
+    for(;it != mLogFormatNames.end(); it++)
+    {
+        if(*it != logtype_str)
+        {
+            index++;
+        } else {
+            return (LogFormat) index;
+        }
+    }
+
+    return DEFAULT;
 }
 
 
 void Logger::log(Priority priority, const char* function, const char* file, int line, const char* format, ...)
 {
-        if(priority <= mPriority)
+    if(priority <= mPriority)
+    {
+        int n;	
+        char buffer[1024];
+        va_list arguments;
+
+        va_start(arguments, format);
+        n = vsnprintf(buffer, sizeof(buffer), format, arguments);
+        va_end(arguments);
+
+        time_t now;
+        time(&now);
+        struct tm* current = localtime(&now);
+        char currentTime[25];
+
+        struct timeval tv;
+        gettimeofday(&tv,0);
+        int milliSecs = tv.tv_usec/1000;
+
+        strftime(currentTime, 25, "%Y%m%d-%H:%M:%S", current);
+
+        //Todo: optional log pattern, e.g. %t(ime) %p(rio) %f(unc) %m(sg) %F(ile) %L(ine)
+        //could be optimized to a jumplist, so no performance issue
+        switch (mLogFormat)
         {
-            int n;	
-            char buffer[1024];
-            va_list arguments;
-
-            va_start(arguments, format);
-            n = vsnprintf(buffer, sizeof(buffer), format, arguments);
-            va_end(arguments);
-
-            time_t now;
-            time(&now);
-            struct tm* current = localtime(&now);
-            char currentTime[25];
-
-            struct timeval tv;
-            gettimeofday(&tv,0);
-            int milliSecs = tv.tv_usec/1000;
-
-            strftime(currentTime, 25, "%Y%m%d-%H:%M:%S", current);
-
-            //fprintf(mStream, "[%s:%03d][%s] - %s (%s:%d)\n", currentTime, milliSecs,  mPriorityNames[priority].c_str(), buffer, file, line);
-            fprintf(mStream, "[%s:%03d]%s[%s] - %s%s \n\t in %s \n\t%s:%d\n", currentTime, milliSecs, mpLogColor[priority], mPriorityNames[priority].c_str(), buffer, mpColorEnd, function, file, line);
-        }
+            case DEFAULT:
+                fprintf(mStream, "[%s:%03d] %s[%5s] - %s%s (%s:%d - %s)\n", currentTime, milliSecs, mpLogColor[priority], mPriorityNames[priority].c_str(), buffer, mpColorEnd, file, line, function);
+                break;
+            case MULTILINE:
+                fprintf(mStream, "[%s:%03d] in %s\n\t%s:%d\n\t%s[%5s] - %s%s \n", currentTime, milliSecs, function, file, line, mpLogColor[priority], mPriorityNames[priority].c_str(), buffer, mpColorEnd);
+                break;
+            case SHORT:
+                fprintf(mStream, "%s[%5s] - %s%s\n", mpLogColor[priority], mPriorityNames[priority].c_str(), buffer, mpColorEnd);
+                break;
+       }
+    }
 }
 
 } // end namespace logging
