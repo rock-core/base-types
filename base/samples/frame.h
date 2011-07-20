@@ -67,7 +67,8 @@ namespace base { namespace samples { namespace frame {
 	    MODE_BAYER_RGGB = RAW_MODES + 1,
 	    MODE_BAYER_GRBG = RAW_MODES + 2,
 	    MODE_BAYER_BGGR = RAW_MODES + 3,
-	    MODE_BAYER_GBRG = RAW_MODES + 4
+	    MODE_BAYER_GBRG = RAW_MODES + 4,
+	    MODE_PJPG = RAW_MODES 	+ 5
 	};
 
 
