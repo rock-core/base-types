@@ -10,7 +10,7 @@
     </copyright>
     <license>LGPL v2 or later</license>
 
-    <depend package="external/sisl" />
+    <depend package="external/sisl" optional="1" />
     <rosdep name="eigen3" />
     <rosdep name="boost" />
     <tags>stable</tags>
