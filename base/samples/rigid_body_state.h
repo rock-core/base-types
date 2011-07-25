@@ -123,31 +123,31 @@ namespace base { namespace samples {
 	}
 	
 	bool hasValidPosition() const {
-	    return !isinf(cov_position(0,0)) && !isinf(cov_position(1,1)) && !isinf(cov_position(2,2));
+	    return !std::isinf(cov_position(0,0)) && !std::isinf(cov_position(1,1)) && !std::isinf(cov_position(2,2));
 	}
         bool hasValidPosition(int idx) const {
-            return !isinf(cov_position(idx, idx));
+            return !std::isinf(cov_position(idx, idx));
         }
 	
 	bool hasValidOrientation() const {
-	    return !isinf(cov_orientation(0,0)) && !isinf(cov_orientation(1,1)) && !isinf(cov_orientation(2,2));
+	    return !std::isinf(cov_orientation(0,0)) && !std::isinf(cov_orientation(1,1)) && !std::isinf(cov_orientation(2,2));
 	}
         bool hasValidOrientation(int idx) const {
-            return !isinf(cov_orientation(idx, idx));
+            return !std::isinf(cov_orientation(idx, idx));
         }
 	
 	bool hasValidVelocity() const {
-	    return !isinf(cov_velocity(0,0)) && !isinf(cov_velocity(1,1)) && !isinf(cov_velocity(2,2));
+	    return !std::isinf(cov_velocity(0,0)) && !std::isinf(cov_velocity(1,1)) && !std::isinf(cov_velocity(2,2));
 	}
         bool hasValidVelocity(int idx) const {
-            return !isinf(cov_velocity(idx, idx));
+            return !std::isinf(cov_velocity(idx, idx));
         }
 	
 	bool hasValidRotationVelocity() const {
-	    return !isinf(cov_angular_velocity(0,0)) && !isinf(cov_angular_velocity(1,1)) && !isinf(cov_angular_velocity(2,2));
+	    return !std::isinf(cov_angular_velocity(0,0)) && !std::isinf(cov_angular_velocity(1,1)) && !std::isinf(cov_angular_velocity(2,2));
 	}
         bool hasValidRotationVelocity(int idx) const {
-            return !isinf(cov_angular_velocity(idx, idx));
+            return !std::isinf(cov_angular_velocity(idx, idx));
         }
 	
 	void invalidatePosition() {
