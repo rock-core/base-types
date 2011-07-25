@@ -294,7 +294,11 @@ function(rock_library TARGET_NAME)
 
     if (${TARGET_NAME}_INSTALL)
         install(TARGETS ${TARGET_NAME}
-            LIBRARY DESTINATION lib)
+            LIBRARY DESTINATION lib
+            # On Windows the dll part of a library is treated as RUNTIME target
+            # and the corresponding import library is treated as ARCHIVE target
+            ARCHIVE DESTINATION lib
+            RUNTIME DESTINATION bin)
         # Install headers and keep directory structure
         foreach(HEADER ${${TARGET_NAME}_HEADERS})
             string(REGEX MATCH "(.*)[/\\]" DIR ${HEADER})
