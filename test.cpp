@@ -87,10 +87,21 @@ BOOST_AUTO_TEST_CASE( logging_test )
 {
         FILE* s = fopen("test.out", "w");
 #ifdef BASE_LONG_NAMES
+
+#ifdef WIN32
+        BASE_LOG_CONFIGURE(INFO_P, s);
+#else
         BASE_LOG_CONFIGURE(INFO, s);
+#endif
         BASE_LOG_INFO("info-message")
 #else
-        LOG_CONFIGURE(INFO, s);
+
+#ifdef WIN32
+        LOG_CONFIGURE(INFO_P, s);
+#else 
+	LOG_CONFIGURE(INFO, s);
+#endif
+
         LOG_INFO("info-message")
 #endif
 
