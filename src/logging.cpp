@@ -4,7 +4,6 @@
  *
  */
 
-
 #include <stdio.h>
 #include <algorithm>
 #include <sys/time.h>
@@ -18,12 +17,12 @@ namespace logging {
 
 Logger::Logger() : mStream(stderr), mPriorityNames(10), mLogFormatNames(3)
 {
-    mPriorityNames[INFO] = "INFO";
-    mPriorityNames[DEBUG] = "DEBUG";
-    mPriorityNames[WARN] = "WARN";
-    mPriorityNames[ERROR] = "ERROR";
-    mPriorityNames[FATAL] = "FATAL";
-    mPriorityNames[UNKNOWN] = "UNKNOWN";
+    mPriorityNames[INFO_P] = "INFO";
+    mPriorityNames[DEBUG_P] = "DEBUG";
+    mPriorityNames[WARN_P] = "WARN";
+    mPriorityNames[ERROR_P] = "ERROR";
+    mPriorityNames[FATAL_P] = "FATAL";
+    mPriorityNames[UNKNOWN_P] = "UNKNOWN";
 
     mLogFormatNames[DEFAULT] = "DEFAULT";
     mLogFormatNames[MULTILINE] = "MULTILINE";
@@ -34,12 +33,12 @@ Logger::Logger() : mStream(stderr), mPriorityNames(10), mLogFormatNames(3)
 
     if (getLogColorFromEnv())
     {
-    	mpLogColor[DEBUG] =  COLOR_BIG;
-    	mpLogColor[INFO] = COLOR_FG_WHITE;
-    	mpLogColor[WARN] = COLOR_FG_LIGHTYELLOW;
-    	mpLogColor[ERROR] = COLOR_FG_DARKRED;
-    	mpLogColor[FATAL] = COLOR_BG_DARKRED;
-    	mpLogColor[UNKNOWN] = COLOR_NORMAL;
+    	mpLogColor[DEBUG_P] =  COLOR_BIG;
+    	mpLogColor[INFO_P] = COLOR_FG_WHITE;
+    	mpLogColor[WARN_P] = COLOR_FG_LIGHTYELLOW;
+    	mpLogColor[ERROR_P] = COLOR_FG_DARKRED;
+    	mpLogColor[FATAL_P] = COLOR_BG_DARKRED;
+    	mpLogColor[UNKNOWN_P] = COLOR_NORMAL;
     	mpColorEnd = COLOR_NORMAL;
 
     } else {
@@ -51,8 +50,8 @@ Logger::Logger() : mStream(stderr), mPriorityNames(10), mLogFormatNames(3)
     }
 
     // Per default enable ERROR logging
-    if(mPriority == UNKNOWN)
-        mPriority = ERROR;
+    if(mPriority == UNKNOWN_P)
+        mPriority = ERROR_P;
 }
 
 Logger::~Logger()
@@ -63,7 +62,7 @@ void Logger::configure(Priority priority, FILE* outputStream)
 {
     Priority envPriority = getLogLevelFromEnv();
     // Only limit to higher (close to FATAL) priorities
-    if(envPriority < priority && envPriority != UNKNOWN)
+    if(envPriority < priority && envPriority != UNKNOWN_P)
         mPriority = envPriority;
     else
         mPriority = priority;
@@ -76,7 +75,7 @@ Priority Logger::getLogLevelFromEnv()
 {
     char* loglevel = getenv("BASE_LOG_LEVEL");
     if(!loglevel)
-        return UNKNOWN;
+        return UNKNOWN_P;
 
     std::string priority(loglevel);
     std::transform(priority.begin(), priority.end(),priority.begin(), (int(*)(int)) std::toupper);
@@ -93,8 +92,7 @@ Priority Logger::getLogLevelFromEnv()
         }
     }
 
-    return UNKNOWN;
-
+    return UNKNOWN_P;
 }
 
 bool Logger::getLogColorFromEnv()

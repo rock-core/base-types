@@ -99,27 +99,27 @@
 
 #if BASE_LOG_PRIORITY >= 1 
 #undef BASE_LOG_FATAL
-#define BASE_LOG_FATAL(FORMAT, ARGS...) __LOG(FATAL, FORMAT, ## ARGS)
+#define BASE_LOG_FATAL(FORMAT, ARGS...) __LOG(FATAL_P, FORMAT, ## ARGS)
 #endif
 
 #if BASE_LOG_PRIORITY >= 2
 #undef BASE_LOG_ERROR
-#define BASE_LOG_ERROR(FORMAT, ARGS...) __LOG(ERROR, FORMAT, ## ARGS)
+#define BASE_LOG_ERROR(FORMAT, ARGS...) __LOG(ERROR_P, FORMAT, ## ARGS)
 #endif
  
 #if BASE_LOG_PRIORITY >= 3
 #undef BASE_LOG_WARN
-#define BASE_LOG_WARN(FORMAT, ARGS...) __LOG(WARN, FORMAT, ## ARGS)
+#define BASE_LOG_WARN(FORMAT, ARGS...) __LOG(WARN_P, FORMAT, ## ARGS)
 #endif
 
 #if BASE_LOG_PRIORITY >= 4 
 #undef BASE_LOG_INFO
-#define BASE_LOG_INFO(FORMAT, ARGS...) __LOG(INFO, FORMAT, ## ARGS)
+#define BASE_LOG_INFO(FORMAT, ARGS...) __LOG(INFO_P, FORMAT, ## ARGS)
 #endif
 
 #if BASE_LOG_PRIORITY >= 5
 #undef BASE_LOG_DEBUG
-#define BASE_LOG_DEBUG(FORMAT, ARGS...) __LOG(DEBUG, FORMAT, ## ARGS)  
+#define BASE_LOG_DEBUG(FORMAT, ARGS...) __LOG(DEBUG_P, FORMAT, ## ARGS)  
 #endif
 
 #undef BASE_LOG_CONFIGURE
@@ -134,27 +134,27 @@
 
 #if BASE_LOG_PRIORITY >= 1 
 #undef LOG_FATAL
-#define LOG_FATAL(FORMAT, ARGS...) __LOG(FATAL, FORMAT, ## ARGS)
+#define LOG_FATAL(FORMAT, ARGS...) __LOG(FATAL_P, FORMAT, ## ARGS)
 #endif
 
 #if BASE_LOG_PRIORITY >= 2
 #undef LOG_ERROR
-#define LOG_ERROR(FORMAT, ARGS...) __LOG(ERROR, FORMAT, ## ARGS)
+#define LOG_ERROR(FORMAT, ARGS...) __LOG(ERROR_P, FORMAT, ## ARGS)
 #endif
  
 #if BASE_LOG_PRIORITY >= 3
 #undef LOG_WARN
-#define LOG_WARN(FORMAT, ARGS...) __LOG(WARN, FORMAT, ## ARGS)
+#define LOG_WARN(FORMAT, ARGS...) __LOG(WARN_P, FORMAT, ## ARGS)
 #endif
 
 #if BASE_LOG_PRIORITY >= 4 
 #undef LOG_INFO
-#define LOG_INFO(FORMAT, ARGS...) __LOG(INFO, FORMAT, ## ARGS)
+#define LOG_INFO(FORMAT, ARGS...) __LOG(INFO_P, FORMAT, ## ARGS)
 #endif
 
 #if BASE_LOG_PRIORITY >= 5
 #undef LOG_DEBUG
-#define LOG_DEBUG(FORMAT, ARGS...) __LOG(DEBUG, FORMAT, ## ARGS)  
+#define LOG_DEBUG(FORMAT, ARGS...) __LOG(DEBUG_P, FORMAT, ## ARGS)  
 #endif
 
 #endif // BASE_LONG_NAMES
@@ -177,7 +177,15 @@ namespace base {
 
 namespace logging {
 
-enum Priority	{ UNKNOWN = 0, FATAL , ERROR, WARN, INFO, DEBUG, ENDPRIORITIES  };
+/**
+* To avoid clashes on WIN32 platform we use a _P suffix for the priorities
+* Still allowing to use without prefix on other systems
+*/
+#ifdef WIN32
+enum Priority	{ UNKNOWN_P = 0, FATAL_P , ERROR_P, WARN_P, INFO_P, DEBUG_P, ENDPRIORITIES };
+#else
+enum Priority	{ UNKNOWN = 0, UNKNOWN_P = 0, FATAL = 1, FATAL_P =1, ERROR = 2, ERROR_P = 2, WARN = 3, WARN_P = 3, INFO = 4, INFO_P = 4, DEBUG = 5, DEBUG_P = 5, ENDPRIORITIES };
+#endif
 
 enum LogFormat	{ DEFAULT = 0, MULTILINE, SHORT};
 
