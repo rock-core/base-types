@@ -1,5 +1,5 @@
 /*
- * @file Logger.cpp
+ * @file logging_printf_style.cpp
  * @author Thomas Roehr, thomas.roehr@rock.de
  *
  */
@@ -9,8 +9,8 @@
 #include <sys/time.h>
 #include <time.h>
 #include <vector>
-#include "logging.h"
 #include "terminal_colors.h"
+#include "logging_printf_style.h"
 
 namespace base {
 namespace logging { 
@@ -130,7 +130,7 @@ LogFormat Logger::getLogFormatFromEnv()
 }
 
 
-void Logger::log(Priority priority, const char* function, const char* file, int line, const char* format, ...)
+void Logger::log(Priority priority, const char* function, const char* file, int line, const char* name_space, const char* format, ...)
 {
     if(priority <= mPriority)
     {
@@ -142,6 +142,14 @@ void Logger::log(Priority priority, const char* function, const char* file, int 
         n = vsnprintf(buffer, sizeof(buffer), format, arguments);
         va_end(arguments);
 
+        logBuffer(priority,function,file,line,name_space,buffer);
+    }
+}
+
+void Logger::logBuffer(Priority priority, const char* function, const char* file, int line, const char* name_space, const char* buffer)
+{
+    if(priority <= mPriority)
+    {
         time_t now;
         time(&now);
         struct tm* current = localtime(&now);
@@ -158,15 +166,16 @@ void Logger::log(Priority priority, const char* function, const char* file, int 
         switch (mLogFormat)
         {
             case DEFAULT:
-                fprintf(mStream, "[%s:%03d] %s[%5s] - %s%s (%s:%d - %s)\n", currentTime, milliSecs, mpLogColor[priority], mPriorityNames[priority].c_str(), buffer, mpColorEnd, file, line, function);
+                fprintf(mStream, "[%s:%03d] %s[%5s] - %s::%s%s (%s:%d - %s)\n", currentTime, milliSecs, mpLogColor[priority], mPriorityNames[priority].c_str(), name_space, buffer, mpColorEnd, file, line, function);
                 break;
             case MULTILINE:
-                fprintf(mStream, "[%s:%03d] in %s\n\t%s:%d\n\t%s[%5s] - %s%s \n", currentTime, milliSecs, function, file, line, mpLogColor[priority], mPriorityNames[priority].c_str(), buffer, mpColorEnd);
+                fprintf(mStream, "[%s:%03d] in %s\n\t%s:%d\n\t%s[%5s] - %s::%s%s \n", currentTime, milliSecs, function, file, line, mpLogColor[priority], mPriorityNames[priority].c_str(), name_space, buffer, mpColorEnd);
                 break;
             case SHORT:
-                fprintf(mStream, "%s[%5s] - %s%s\n", mpLogColor[priority], mPriorityNames[priority].c_str(), buffer, mpColorEnd);
+                fprintf(mStream, "%s[%5s] - %s::%s%s\n", mpLogColor[priority], mPriorityNames[priority].c_str(), name_space, buffer, mpColorEnd);
                 break;
        }
+        fflush(mStream);
     }
 }
 
