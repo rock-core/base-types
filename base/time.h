@@ -3,6 +3,7 @@
 
 #include <sys/time.h>
 #include <time.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <cstdlib>
 #include <math.h>
@@ -60,6 +61,23 @@ namespace base
             timeval tv = { microseconds / UsecPerSec, microseconds % UsecPerSec };
             return tv;
         }
+
+	/** Convert his time into a string object */
+	std::string toString() const
+	{
+            struct timeval tv = toTimeval();
+            int milliSecs = tv.tv_usec/1000;
+
+	    time_t when = tv.tv_sec;
+	    struct tm *tm = localtime(&when); 
+
+            char time[25];
+            strftime(time, 25, "%Y%m%d-%H:%M:%S", tm);
+
+	    char buffer[25];
+	    sprintf(buffer,"%s:%03d", time, milliSecs);
+	    return std::string(buffer);
+	}
 
         /** Returns this time as a fractional number of seconds */
         double toSeconds() const
