@@ -123,6 +123,24 @@ module Eigen
         # 
         # Returns a vector that has the same direction than +self+ but unit
         # length
+        
+        ##
+        # Computes the signed angle between two vectors, using the provided
+        # vector as "positive" rotation direction
+        #
+        # The returned angle A is so that the rotation defined by A and axis
+        # will transform +self+ into +v+
+        def signed_angle_to(v, axis)
+            dot_p   = self.dot(v)
+            dir = self.cross(v).dot(axis)
+
+            unsigned = Math.acos(dot_p / norm / v.norm)
+            if dir > 0
+                return unsigned
+            else
+                return -unsigned
+            end
+        end
     end
 
     # Representation and manipulation of a quaternion
