@@ -123,3 +123,50 @@ BOOST_AUTO_TEST_CASE( logging_test )
         printf("Estimated time per log msg %f seconds", seconds);
 }
 
+#include <base/float.h>
+
+BOOST_AUTO_TEST_CASE( test_inf_nan )
+{
+    {
+        float inf = base::infinity<float>();
+        BOOST_REQUIRE( base::isInfinity(inf) );
+        BOOST_REQUIRE( base::isInfinity(inf * 10) );
+        BOOST_REQUIRE(inf == inf);
+    }
+
+    {
+        double inf = base::infinity<double>();
+        BOOST_REQUIRE( base::isInfinity(inf) );
+        BOOST_REQUIRE( base::isInfinity(inf * 10) );
+        BOOST_REQUIRE(inf == inf);
+    }
+
+    {
+        float nan = base::unset<float>();
+        BOOST_REQUIRE( base::isUnset(nan) );
+        BOOST_REQUIRE( base::isUnset(nan * 10) );
+        BOOST_REQUIRE(nan != nan);
+    }
+
+    {
+        double nan = base::unset<double>();
+        BOOST_REQUIRE( base::isUnset(nan) );
+        BOOST_REQUIRE( base::isUnset(nan * 10) );
+        BOOST_REQUIRE(nan != nan);
+    }
+
+    {
+        float nan = base::unknown<float>();
+        BOOST_REQUIRE( base::isUnknown(nan) );
+        BOOST_REQUIRE( base::isUnknown(nan * 10) );
+        BOOST_REQUIRE(nan != nan);
+    }
+
+    {
+        double nan = base::unknown<double>();
+        BOOST_REQUIRE( base::isUnknown(nan) );
+        BOOST_REQUIRE( base::isUnknown(nan * 10) );
+        BOOST_REQUIRE(nan != nan);
+    }
+}
+
