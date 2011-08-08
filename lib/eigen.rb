@@ -156,7 +156,7 @@ module Eigen
         # DEPRECATED: please use identity instead. Returns the unit quaternion (identity rotation)
         def self.Unit
 	    warn "[DEPRECATED] Quaternion.unit, please use Quaternion.identity."
-	    self.identity
+	    self.Identity
         end
 
 	# Creates a quaternion from an angle and axis description 
