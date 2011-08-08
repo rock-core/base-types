@@ -4,7 +4,11 @@ RUBY = RbConfig::CONFIG['RUBY_INSTALL_NAME']
 desc "build ruby Eigen extension"
 task :setup do
      Dir.chdir("ext") do   
-        if !system("#{RUBY} extconf.rb") || !system("make")
+        if !system("#{RUBY} extconf.rb")
+	    raise "cannot configure the C extension"
+	end
+        system("make", "clean")
+        if !system("make")
 	    raise "cannot build the C extension"
 	end
     end
