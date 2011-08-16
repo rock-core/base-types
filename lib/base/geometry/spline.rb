@@ -240,6 +240,29 @@ module Base
                 do_split(result, position)
                 result
             end
+
+            def _dump(level = -1)
+                Marshal.dump([self.dimension,
+                    self.geometric_resolution,
+                    self.order,
+                    self.coordinates,
+                    self.knots,
+                    self.sisl_curve_type])
+            end
+
+            def self._load(info, level = -1)
+                dimension, resolution, order,
+                    knots, coordinates, kind = Marshal.load(info)
+
+                if dimension == 3
+                    result = Spline3.new(resolution, order)
+                else
+                    result = Spline.new(dimension, resolution, order)
+                end
+
+                result.reset(coordinates, knots, kind)
+                result
+            end
         end
 
         # Specialization of Spline for 3D splines
