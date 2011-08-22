@@ -310,6 +310,13 @@ module Eigen
         # note that 
         #
         #   self == Quaternion.from_euler(to_euler(axis0, axis1, axis2), axis0, axis1, axis2)
+        
+        ## 
+        # :method: inverse
+        # :call-seq:
+        #   inverse => quaternion
+        #
+        # Computes the quaternion that is inverse of this one
     end
 end
 
