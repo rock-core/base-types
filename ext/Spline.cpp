@@ -4,6 +4,7 @@
 #include "rice/Enum.hpp"
 
 #include <base/geometry/spline.h>
+#include <sisl/sisl.h>
 
 using namespace Rice;
 using base::geometry::SplineBase;
