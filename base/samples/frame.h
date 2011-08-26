@@ -248,7 +248,7 @@ namespace base { namespace samples { namespace frame {
 	    void init(uint16_t width, uint16_t height, uint8_t depth, frame_mode_t mode, int const val = 0, bool hdr = false)
 	    {
                //change size if the frame does not fit
-	       if(size.height != height || size.width !=  width || this->frame_mode != frame_mode || 
+	       if(size.height != height || size.width !=  width || this->frame_mode != mode || 
                  this->data_depth != depth)
                {
                 //check if depth = 0
