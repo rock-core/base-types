@@ -8,14 +8,17 @@
 
 using namespace Rice;
 
+typedef Eigen::Matrix<double, 3, 1, Eigen::DontAlign>     Vector3d;
+typedef Eigen::Quaternion<double, Eigen::DontAlign>    Quaterniond;
+
 struct Vector3
 {
-    Eigen::Vector3d* v;
+    Vector3d* v;
 
     Vector3(double x, double y, double z)
-        : v(new Eigen::Vector3d(x, y, z)) {}
-    Vector3(Eigen::Vector3d const& _v)
-        : v(new Eigen::Vector3d(_v)) {}
+        : v(new Vector3d(x, y, z)) {}
+    Vector3(Vector3d const& _v)
+        : v(new Vector3d(_v)) {}
     ~Vector3()
     { delete v; }
 
@@ -54,13 +57,13 @@ struct Vector3
 
 struct Quaternion
 {
-    Eigen::Quaterniond* q;
+    Quaterniond* q;
 
     Quaternion(double w, double x, double y, double z)
-        : q(new Eigen::Quaterniond(w, x, y, z)) { }
+        : q(new Quaterniond(w, x, y, z)) { }
 
-    Quaternion(Eigen::Quaterniond const& _q)
-        : q(new Eigen::Quaterniond(_q)) {}
+    Quaternion(Quaterniond const& _q)
+        : q(new Quaterniond(_q)) {}
 
     ~Quaternion()
     { delete q; }
@@ -87,7 +90,7 @@ struct Quaternion
     { q->normalize(); }
     Quaternion* normalize() const
     { 
-        Eigen::Quaterniond q = *this->q;
+        Quaterniond q = *this->q;
         q.normalize();
         return new Quaternion(q);
     }
