@@ -66,6 +66,13 @@ public:
 	return deg / 180.0 * M_PI;
     }
 
+    /** Normalize an angular value in [-pi; pi] and returns it as double
+     */
+    static inline double normalizeRad( double rad )
+    {
+        return Angle(rad).rad;
+    }
+
     /** 
      * use this method to get an angle from radians.
      * @return representation of the given angle.
