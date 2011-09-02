@@ -67,8 +67,7 @@ namespace base { namespace samples { namespace frame {
 	    MODE_BAYER_RGGB = RAW_MODES + 1,
 	    MODE_BAYER_GRBG = RAW_MODES + 2,
 	    MODE_BAYER_BGGR = RAW_MODES + 3,
-	    MODE_BAYER_GBRG = RAW_MODES + 4,
-	    MODE_PJPG = RAW_MODES 	+ 5
+	    MODE_BAYER_GBRG = RAW_MODES + 4
 	};
 
 
@@ -360,8 +359,6 @@ namespace base { namespace samples { namespace frame {
 		    return 3;
                 case MODE_RGB32:
                     return 4;
-		case MODE_PJPG:
-				return 1; //Only for memoy allocation size is dynamic
 		default:
                     throw std::runtime_error("Frame::getChannelCount: Unknown frame_mode");
 		    return 0;
@@ -396,8 +393,6 @@ namespace base { namespace samples { namespace frame {
                 return MODE_BAYER_GBRG;
               else if (str == "MODE_RGB32")
                 return MODE_RGB32;
-              else if (str == "MODE_PJPG")
-                return MODE_PJPG;
               else
                 return MODE_UNDEFINED;
             };
