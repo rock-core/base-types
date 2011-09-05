@@ -67,7 +67,8 @@ namespace base { namespace samples { namespace frame {
 	    MODE_BAYER_RGGB = RAW_MODES + 1,
 	    MODE_BAYER_GRBG = RAW_MODES + 2,
 	    MODE_BAYER_BGGR = RAW_MODES + 3,
-	    MODE_BAYER_GBRG = RAW_MODES + 4
+            MODE_BAYER_GBRG = RAW_MODES + 4,
+	    MODE_COMPRESSED = 255, //See Compressed mode Types and compressed frame, needded otherwise client camera driver could'nt separae between modes in switch/cases
 	};
 
 
