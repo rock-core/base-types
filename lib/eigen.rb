@@ -182,6 +182,14 @@ module Eigen
         def yaw
             to_euler(2, 1, 0)[0]
         end
+        
+        def pitch
+            to_euler(2, 1, 0)[1]
+        end
+
+        def roll
+            to_euler(2, 1, 0)[2]
+        end
 
         # The inverse of #yaw
         def self.from_yaw(yaw)
