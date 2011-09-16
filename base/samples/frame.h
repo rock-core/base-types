@@ -25,17 +25,14 @@ namespace base { namespace samples { namespace frame {
 	{
 	    std::string data_;
 	    std::string name_;
-	    #ifndef __orogen
 	    inline void set(const std::string &name,const std::string &data)
 	    {
 		name_ = name;
 		data_ = data;
 	    }
-	    #endif
 	};
 
 	struct frame_size_t {
-	#ifndef __orogen
 	    frame_size_t() : width(0), height(0) {}
 	    frame_size_t(uint16_t w, uint16_t h) : width(w), height(h) {}
 
@@ -50,7 +47,6 @@ namespace base { namespace samples { namespace frame {
             {
               return !(*this == other);
             };
-	#endif
 	    uint16_t width;
 	    uint16_t height;
 	};
@@ -68,9 +64,10 @@ namespace base { namespace samples { namespace frame {
 	    MODE_BAYER_GRBG = RAW_MODES + 2,
 	    MODE_BAYER_BGGR = RAW_MODES + 3,
 	    MODE_BAYER_GBRG = RAW_MODES + 4,
-	    MODE_PJPG = RAW_MODES 	+ 5
+            COMPRESSED_MODES = 256,                      //if an image is compressed it has no relationship
+                                                         //between number of pixels and number of bytes
+	    MODE_PJPG = COMPRESSED_MODES + 0
 	};
-
 
 	enum frame_status_t {
 	    STATUS_EMPTY,
@@ -78,123 +75,9 @@ namespace base { namespace samples { namespace frame {
 	    STATUS_INVALID
 	};
 
-	#ifndef __orogen
-	template<int pixel_size> struct PixelTraits;
-	template<>
-	struct PixelTraits<8>
-	{
-	    typedef uint8_t channel_t;
-	};
-
-	template<>
-	struct PixelTraits<16>
-	{
-	    typedef uint16_t channel_t;
-	};
-	#endif
-	
-	#ifndef __orogen
-
-	//iterates over one specific column
-	//this is index save
-        //at the moment only 8 Bit data depth is supported 
-	class ConstColumnIterator: public std::iterator<std::input_iterator_tag, char>
-	{
-	  private:
-	    uint32_t row_size;
-	    const uint8_t* pdata;
-	    const uint8_t* pend;
-	    const uint8_t* pstart;
-	  public:
-          ConstColumnIterator(const ConstColumnIterator &other )
-	    :row_size(other.row_size),pdata(other.pdata),pend(other.pend),pstart(other.pstart){};
-
-	  ConstColumnIterator(uint32_t _row_size,const uint8_t* _pdata, const uint8_t* _pend)
-	    :row_size(_row_size),pdata(_pdata),pend(_pend),pstart(_pdata){};
-
-	  ConstColumnIterator()  //end iterator
-	  {row_size =0;pdata = NULL;pend = NULL;pstart=NULL;};
-	  
-	  ConstColumnIterator &operator++()
-	  {
-	    pdata += row_size;
-	    if(pdata > pend)
-	    {
-	      pdata = NULL;
-	      pend = NULL;
-              pstart = NULL;
-	    }
-	    return *this;
-	  }
-          
-          ConstColumnIterator &operator--()
-	  {
-	    pdata -= row_size;
-	    if(pdata < pstart)
-	    {
-	      pdata = NULL;
-	      pend = NULL;
-              pstart = NULL;
-	    }
-	    return *this;
-	  }
-
-          ConstColumnIterator& operator+=(unsigned int rows)
-	  {
-            //calc new position 
-            pdata += row_size*rows;
-	    if(pdata > pend)
-	    {
-	      pdata = NULL;
-	      pend = NULL;
-              pstart = NULL;
-	    }
-	    return *this;
-	  }
-
-          //calc distance between to iterators
-          int operator-(const ConstColumnIterator &other)const
-          {
-            if(pend == NULL)
-            {
-              if(other.pend != NULL)
-                return (other.pend -other.pdata)/row_size; 
-              else
-                return 0;
-            }
-
-            //check if iterator belongs to the same column
-            if(pend != other.pend)
-              throw std::runtime_error("Iterator mismatch. Iterators belong to different columns!");
-
-            if(pdata < other.pdata)
-              return -(other.pdata-pdata)/row_size;
-
-            return (pdata-other.pdata)/row_size;
-          }
-
-          const ConstColumnIterator operator+(unsigned int rows)const
-	  {
-            //make a copy
-            ConstColumnIterator result(*this);
-            result += rows;
-	    return result;
-	  }
-
-	  bool operator==(const ConstColumnIterator &other)const{ return (pdata == other.pdata);}
-	  uint8_t operator*()const{return *pdata;}
-	  bool operator==(uint8_t* p)const{return (pdata == p);}
-	  bool operator!=(uint8_t* p)const{return !(pdata == p);}
-	  bool operator!=(const ConstColumnIterator &other)const{return !(pdata == other.pdata);}
-	  void operator=(const ConstColumnIterator &other)
-	  {row_size = other.row_size;pdata = other.pdata;pend = other.pend;pstart = other.pstart;}
-	};
-	#endif
-	
 	/* A single image frame */
 	struct Frame
 	{
-	#ifndef __orogen
 	public:
 	    /**
 	     * Initialize the frame
@@ -212,9 +95,15 @@ namespace base { namespace samples { namespace frame {
 	    }
 	    
             //@depth number of bits per pixel and channel
-	    Frame(uint16_t width, uint16_t height, uint8_t depth, frame_mode_t mode, uint8_t const val = 0, bool hdr = false)
+	    Frame(uint16_t width, uint16_t height, uint8_t depth=8, frame_mode_t mode=MODE_GRAYSCALE,size_t size=0, uint8_t const val = 0)
 	    {
-		init(width,height,depth,mode,val,hdr);
+		init(width,height,depth,mode,size,val);
+	    }
+
+	    Frame(uint16_t width, uint16_t height, uint8_t depth, frame_mode_t mode,size_t size,uint8_t*data)
+	    {
+		init(width,height,depth,mode,size,-1);
+                setImage((const char*)data,size);
 	    }
 	    
 	    //makes a copy of other
@@ -239,17 +128,17 @@ namespace base { namespace samples { namespace frame {
 	    void init(const Frame &other,bool bcopy = true)
 	    {
 	       //hdr is copied by attributes = other.attributes;
-	       init(other.getWidth(),other.getHeight(),other.getDataDepth(), other.getFrameMode(),-1);
+	       init(other.getWidth(),other.getHeight(),other.getDataDepth(), other.getFrameMode(),other.getNumberOfBytes(),-1);
 	       if(bcopy)
 		  setImage(other.getImage());
 	       copyImageIndependantAttributes(other);
 	    }
-	    
-	    void init(uint16_t width, uint16_t height, uint8_t depth, frame_mode_t mode, int const val = 0, bool hdr = false)
+
+	    void init(uint16_t width, uint16_t height, uint8_t depth=8, frame_mode_t mode=MODE_GRAYSCALE, size_t size=0, const uint8_t val = 0)
 	    {
                //change size if the frame does not fit
-	       if(size.height != height || size.width !=  width || this->frame_mode != mode || 
-                 this->data_depth != depth)
+	       if(this->size.height != height || this->size.width !=  width || this->frame_mode != mode || 
+                 this->data_depth != depth || (size != 0 && size != image.size()))
                {
                 //check if depth = 0
                 //this might be a programmer error 
@@ -259,15 +148,19 @@ namespace base { namespace samples { namespace frame {
 		this->frame_mode = mode;
 		this->size = frame_size_t(width, height);
 		setDataDepth(depth);
-		image.resize(getPixelSize() * getPixelCount());
+                
+                //calculate size if not given 
+                if(!size)
+                    size = getPixelSize() * getPixelCount();
+                else
+                    if(isCompressed() && size != getPixelSize()*getChannelCount())
+                        throw std::runtime_error("Frame::init: wrong image size!");
+
+		image.resize(size);
                }
 	       reset(val);
-	       if(hdr)
-	        setAttribute<bool>("hdr",true);
-               else
-	        setAttribute<bool>("hdr",false);
 	    }
-
+	    
             // if val is negative the image will not be initialized
 	    void reset(int const val = 0)
 	    {
@@ -319,6 +212,17 @@ namespace base { namespace samples { namespace frame {
 	    {
 		return (hasAttribute("hdr")&&getAttribute<bool>("hdr"));
 	    }
+
+	    inline bool setHDR(bool value)  
+	    {
+		setAttribute<bool>("hdr",true);
+	    }
+
+            inline bool isCompressed()const
+            {
+                return frame_mode >= COMPRESSED_MODES;
+            }
+
 	    inline bool isGrayscale()const {
 		return this->frame_mode == MODE_GRAYSCALE;
 	    }
@@ -360,6 +264,8 @@ namespace base { namespace samples { namespace frame {
 		    return 3;
                 case MODE_RGB32:
                     return 4;
+                case MODE_PJPG:
+                    return 1;
 		default:
                     throw std::runtime_error("Frame::getChannelCount: Unknown frame_mode");
 		    return 0;
@@ -394,6 +300,10 @@ namespace base { namespace samples { namespace frame {
                 return MODE_BAYER_GBRG;
               else if (str == "MODE_RGB32")
                 return MODE_RGB32;
+              else if (str == "COMPRESSED_MODES")
+                  return COMPRESSED_MODES;
+              else if (str == "MODE_PJPG")
+                return MODE_PJPG;
 
               else
                 return MODE_UNDEFINED;
@@ -416,17 +326,19 @@ namespace base { namespace samples { namespace frame {
 	     * Returns the size of a row (in bytes). This takes into account the image
 	     * mode as well as the data depth.
 	     * @return Number of channels * width * bytes used to represent one colour
+             * @return 0 if the image is compressed
 	     */
 	    inline int getRowSize() const {
+                if(isCompressed())
+                    throw std::runtime_error("Frame::getRowSize: There is no raw size for an compressed image!");
 		return this->row_size;
 	    }
 
 	     /**
-	     * Returns the total count of pixels in this frame * data depth
-	     * @return Returns the overall number of pixels *data depth
+	     * Returns the total number of bytes for the image
 	     */
 	    inline uint32_t getNumberOfBytes() const {
-		return getPixelSize()*getPixelCount();
+		return image.size();
 	    }
 
 	    /**
@@ -447,7 +359,13 @@ namespace base { namespace samples { namespace frame {
 		// Update pixel size
 		uint32_t comp_size = ((this->data_depth + 7) / 8);
 		this->pixel_size = getChannelCount(this->frame_mode) * comp_size;
-		this->row_size = this->pixel_size * getWidth();
+
+                //update row size
+                if(isCompressed())
+                    this->row_size = 0;                         //disable row size
+                else
+		    this->row_size = this->pixel_size * getWidth();
+
 	    }
 
 	    inline frame_size_t getSize() const {
@@ -562,26 +480,6 @@ namespace base { namespace samples { namespace frame {
 		return ;
 	    }
 	    
-	    ConstColumnIterator getColumnBegin(uint16_t column)const
-	    {
-	      if(column >= getWidth())
-	      {
-		 std::cerr << "Frame: "
-		              << __FUNCTION__ << " (" << __FILE__ << ", line "
-		              << __LINE__ << "): " << "out of index!"
-		              << std::endl;
-		return ConstColumnIterator();
-	      }
-	      const uint8_t *pdata = getImageConstPtr()+column*getPixelSize();
-	      return ConstColumnIterator(getRowSize(),pdata,pdata+getRowSize()*(getHeight()-1));
-	    }
-	    
-	    ConstColumnIterator end()const
-	    {
-	      static ConstColumnIterator iter;
-	      return iter;
-	    }
-	    
 	    template <typename Tp> Tp& at(unsigned int column,unsigned int row)
 		{
 	    	if(column >= size.width || row >= size.height )
@@ -640,7 +538,6 @@ namespace base { namespace samples { namespace frame {
 	    #else
 	      #define convertToCvMat If_you_want_to_use_convertToCvMat_include_opencv_2_first
 	    #endif
-	 #endif
 
 	    /** The time at which this frame has been captured
              *
@@ -672,6 +569,7 @@ namespace base { namespace samples { namespace frame {
              * encoded on 2 bytes), it would be 6.
              */
 	    uint32_t                pixel_size;
+
             /** The size of a complete row in bytes
              */
 	    uint32_t 		    row_size;
