@@ -4,6 +4,7 @@
 #include <vector>
 #include <boost/cstdint.hpp>
 #include <base/time.h>
+#include <base/angle.h>
 #include <limits>
 
 namespace base { namespace samples {
@@ -16,7 +17,7 @@ namespace base { namespace samples {
 
         //direction of the sonar beam in radians [-pi,+pi]
         //zero is at the front 
-        float bearing;
+        Angle bearing;
 
         //sampling interval of each range bin in secs
         double sampling_interval;
@@ -35,7 +36,6 @@ namespace base { namespace samples {
         std::vector<uint8_t> beam;
 
         SonarBeam(): 
-            bearing(std::numeric_limits<float>::signaling_NaN()), 
             sampling_interval(std::numeric_limits<double>::signaling_NaN()), 
             speed_of_sound(std::numeric_limits<float>::signaling_NaN()), 
             beamwidth_horizontal(std::numeric_limits<float>::signaling_NaN()), 
@@ -43,7 +43,7 @@ namespace base { namespace samples {
             
         //calculates the spatial resolution of the sonar beam in meter
         //this takes the sampling_interval and the speed of sound into account
-        double getSpatialResolution()
+        double getSpatialResolution()const
         {
             //the sampling interval includes the time for 
             //the sound traveling from the transiter to the target an back
