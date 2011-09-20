@@ -115,7 +115,7 @@ public:
      * @param prec - precision interval in deg
      * @return true if angle is approximately equal 
      */
-    bool inline isApprox( Angle other, double prec = 1e-5 )
+    bool inline isApprox( Angle other, double prec = 1e-5 ) const
     {
 	return fabs( other.rad - rad ) < prec;
     }
