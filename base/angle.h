@@ -119,6 +119,11 @@ public:
     {
 	return fabs( other.rad - rad ) < prec;
     }
+
+    void operator=(const Angle &other)
+    {
+        rad = other.rad;
+    }
 };
 
 static inline Angle operator+( Angle a, Angle b )
