@@ -110,6 +110,10 @@ public:
     }
 
     /**
+     * @return true if the angle is insight the given interval
+     */
+    bool inline isInRange(const Angle &left_limit,const Angle &right_limit) const;
+    /**
      * compare two angles for approximate equality
      * @param other - angle to compare
      * @param prec - precision interval in deg
@@ -146,10 +150,26 @@ static inline Angle operator*( double a, Angle b )
     return Angle::fromRad( a * b.getRad() );
 }
 
+
 static inline std::ostream& operator << (std::ostream& os, Angle angle)
 {
     os << angle.getRad() << boost::format("[%3.1fdeg]") % angle.getDeg();
     return os;
+}
+
+bool Angle::isInRange(const Angle &left_limit, const Angle &right_limit) const
+{
+    Angle angle1 = (right_limit-left_limit);
+    //if we have a range bigger than 180 degree 
+    if(angle1.rad < 0)
+        return !isInRange(right_limit,left_limit);
+
+    Angle angle2 = *this - left_limit;
+    Angle angle3 = right_limit - *this;
+    if(angle2.rad >= 0 && angle3.rad >= 0 && 
+      (angle2+angle3).isApprox(angle1))
+        return true;
+    return false;
 }
 
 }
