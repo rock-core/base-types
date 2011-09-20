@@ -159,15 +159,9 @@ static inline std::ostream& operator << (std::ostream& os, Angle angle)
 
 bool Angle::isInRange(const Angle &left_limit, const Angle &right_limit) const
 {
-    Angle angle1 = (right_limit-left_limit);
-    //if we have a range bigger than 180 degree 
-    if(angle1.rad < 0)
+    if((right_limit-left_limit).rad < 0)
         return !isInRange(right_limit,left_limit);
-
-    Angle angle2 = *this - left_limit;
-    Angle angle3 = right_limit - *this;
-    if(angle2.rad >= 0 && angle3.rad >= 0 && 
-      (angle2+angle3).isApprox(angle1))
+    if((*this -left_limit).getRad() >= 0 && (right_limit -*this).getRad() >= 0) 
         return true;
     return false;
 }
