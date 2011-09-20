@@ -57,6 +57,19 @@ BOOST_AUTO_TEST_CASE( angle_test )
     BOOST_CHECK( (2*a).isApprox( Angle::fromDeg( 180 )) );
     BOOST_CHECK_CLOSE( (Angle::fromDeg(45)+Angle::fromDeg(-45)).getRad(), Angle::fromRad(0).getRad(), 1e-3 );
     std::cout << a << std::endl;
+
+    BOOST_CHECK( a.isInRange(Angle::fromDeg(89),Angle::fromDeg(91)));
+    BOOST_CHECK( a.isInRange(Angle::fromDeg(89),Angle::fromDeg(180)));
+    BOOST_CHECK( a.isInRange(Angle::fromDeg(89),Angle::fromDeg(190)));
+    BOOST_CHECK( a.isInRange(Angle::fromDeg(89),Angle::fromDeg(360)));
+    BOOST_CHECK( !a.isInRange(Angle::fromDeg(91),Angle::fromDeg(89)));
+
+    a = Angle::fromDeg( 190 );
+    BOOST_CHECK( a.isInRange(Angle::fromDeg(170),Angle::fromDeg(200)));
+    BOOST_CHECK( a.isInRange(Angle::fromDeg(185),Angle::fromDeg(200)));
+    BOOST_CHECK( a.isInRange(Angle::fromDeg(170),Angle::fromDeg(160)));
+    BOOST_CHECK( a.isInRange(Angle::fromDeg(170),Angle::fromDeg(350)));
+    BOOST_CHECK( !a.isInRange(Angle::fromDeg(200),Angle::fromDeg(380)));
 }
 
 BOOST_AUTO_TEST_CASE( yaw_test )
