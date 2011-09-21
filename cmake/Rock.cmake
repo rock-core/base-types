@@ -352,6 +352,10 @@ function(rock_vizkit_plugin TARGET_NAME)
             LIBRARY DESTINATION lib)
         install(FILES ${${TARGET_NAME}_HEADERS}
             DESTINATION include/vizkit)
+        install(FILES vizkit_plugin.rb
+            DESTINATION lib/qt/designer/widgets
+            RENAME ${PROJECT_NAME}_vizkit.rb
+            OPTIONAL)
     endif()
 endfunction()
 
@@ -407,6 +411,10 @@ function(rock_vizkit_widget TARGET_NAME)
             DESTINATION include/${PROJECT_NAME})
         install(FILES ${TARGET_NAME}.rb
             DESTINATION share/vizkit/ext
+            OPTIONAL)
+        install(FILES vizkit_widget.rb
+            DESTINATION lib/qt/designer/cplusplus_extensions
+            RENAME ${PROJECT_NAME}_vizkit.rb
             OPTIONAL)
     endif()
 endfunction()
