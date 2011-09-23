@@ -5,6 +5,7 @@
 #include "base/time.h"
 #include "base/timemark.h"
 #include "base/pose.h"
+#include "base/samples/frame.h"
 #include "base/samples/imu.h"
 #include "base/samples/laser_scan.h"
 #include "base/samples/sonar_scan.h"
@@ -170,3 +171,66 @@ BOOST_AUTO_TEST_CASE( test_inf_nan )
     }
 }
 
+
+BOOST_AUTO_TEST_CASE( frame_test )
+{
+    using namespace base::samples::frame;
+
+    Frame frame;
+    frame.init(200,300,8,MODE_GRAYSCALE);
+    BOOST_CHECK(frame.getNumberOfBytes() == 200*300*1);
+    BOOST_CHECK(frame.getPixelSize() == 1);
+    BOOST_CHECK(frame.getPixelCount() == 200*300);
+    BOOST_CHECK(frame.getChannelCount() == 1);
+    BOOST_CHECK(frame.isCompressed() == false);
+    BOOST_CHECK(frame.getHeight() == 300);
+    BOOST_CHECK(frame.getWidth() == 200);
+
+    frame.init(200,300,9,MODE_GRAYSCALE);
+    BOOST_CHECK(frame.getNumberOfBytes() == 200*300*2);
+    BOOST_CHECK(frame.getPixelSize() == 2);
+    BOOST_CHECK(frame.getPixelCount() == 200*300);
+    BOOST_CHECK(frame.getChannelCount() == 1);
+    BOOST_CHECK(frame.isCompressed() == false);
+    BOOST_CHECK(frame.getHeight() == 300);
+    BOOST_CHECK(frame.getWidth() == 200);
+
+    frame.init(200,300,8,MODE_RGB);
+    BOOST_CHECK(frame.getNumberOfBytes() == 200*300*3);
+    BOOST_CHECK(frame.getPixelSize() == 3);
+    BOOST_CHECK(frame.getPixelCount() == 200*300);
+    BOOST_CHECK(frame.getChannelCount() == 3);
+    BOOST_CHECK(frame.isCompressed() == false);
+    BOOST_CHECK(frame.getHeight() == 300);
+    BOOST_CHECK(frame.getWidth() == 200);
+
+    frame.init(200,300,8,MODE_GRAYSCALE,200*300*1,-1);
+    BOOST_CHECK(frame.getNumberOfBytes() == 200*300*1);
+    BOOST_CHECK(frame.getPixelSize() == 1);
+    BOOST_CHECK(frame.getPixelCount() == 200*300);
+    BOOST_CHECK(frame.getChannelCount() == 1);
+    BOOST_CHECK(frame.isCompressed() == false);
+    BOOST_CHECK(frame.getHeight() == 300);
+    BOOST_CHECK(frame.getWidth() == 200);
+
+    frame.init(200,300,8,MODE_PJPG,0.5*200*300,-1);
+    BOOST_CHECK(frame.getNumberOfBytes() == 0.5*200*300);
+    BOOST_CHECK(frame.getPixelSize() == 1);
+    BOOST_CHECK(frame.getPixelCount() == 200*300);
+    BOOST_CHECK(frame.getChannelCount() == 1);
+    BOOST_CHECK(frame.isCompressed() == true);
+    BOOST_CHECK(frame.getHeight() == 300);
+    BOOST_CHECK(frame.getWidth() == 200);
+
+    BOOST_CHECK_THROW(frame.init(200,300,8,MODE_RGB,0.5*200*300,-1),std::runtime_error);
+
+    frame.init(200,300,8,MODE_GRAYSCALE);
+    Frame frame2(frame);
+    BOOST_CHECK(frame2.getNumberOfBytes() == 200*300);
+    BOOST_CHECK(frame2.getPixelSize() == 1);
+    BOOST_CHECK(frame2.getPixelCount() == 200*300);
+    BOOST_CHECK(frame2.getChannelCount() == 1);
+    BOOST_CHECK(frame2.isCompressed() == false);
+    BOOST_CHECK(frame2.getHeight() == 300);
+    BOOST_CHECK(frame2.getWidth() == 200);
+}
