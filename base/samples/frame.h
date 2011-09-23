@@ -213,7 +213,7 @@ namespace base { namespace samples { namespace frame {
 		return (hasAttribute("hdr")&&getAttribute<bool>("hdr"));
 	    }
 
-	    inline bool setHDR(bool value)  
+	    inline void setHDR(bool value)  
 	    {
 		setAttribute<bool>("hdr",true);
 	    }
@@ -242,10 +242,10 @@ namespace base { namespace samples { namespace frame {
 		return frame_status;
 	    }
 
-	    inline int getChannelCount() const {
+	    inline uint32_t getChannelCount() const {
 		return getChannelCount(this->frame_mode);
 	    }
-	    static int getChannelCount(frame_mode_t mode)
+	    static uint32_t getChannelCount(frame_mode_t mode)
 	    {
 		switch (mode)
 		{
@@ -318,7 +318,7 @@ namespace base { namespace samples { namespace frame {
 	     * mode as well as the data depth.
 	     * @return Number of channels * bytes used to represent one colour
 	     */
-	    inline int getPixelSize() const {
+	    inline uint32_t getPixelSize() const {
 		return this->pixel_size;
 	    }
 	    
@@ -328,7 +328,7 @@ namespace base { namespace samples { namespace frame {
 	     * @return Number of channels * width * bytes used to represent one colour
              * @return 0 if the image is compressed
 	     */
-	    inline int getRowSize() const {
+	    inline uint32_t getRowSize() const {
                 if(isCompressed())
                     throw std::runtime_error("Frame::getRowSize: There is no raw size for an compressed image!");
 		return this->row_size;
