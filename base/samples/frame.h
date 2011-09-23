@@ -95,17 +95,11 @@ namespace base { namespace samples { namespace frame {
 	    }
 	    
             //@depth number of bits per pixel and channel
-	    Frame(uint16_t width, uint16_t height, uint8_t depth=8, frame_mode_t mode=MODE_GRAYSCALE,size_t size=0, uint8_t const val = 0)
+	    Frame(uint16_t width, uint16_t height, uint8_t depth=8, frame_mode_t mode=MODE_GRAYSCALE, uint8_t const val = 0,size_t size=0)
 	    {
-		init(width,height,depth,mode,size,val);
+		init(width,height,depth,mode,val,size);
 	    }
 
-	    Frame(uint16_t width, uint16_t height, uint8_t depth, frame_mode_t mode,size_t size,uint8_t*data)
-	    {
-		init(width,height,depth,mode,size,-1);
-                setImage((const char*)data,size);
-	    }
-	    
 	    //makes a copy of other
 	    Frame(const Frame &other,bool bcopy = true)
 	    {
@@ -128,13 +122,13 @@ namespace base { namespace samples { namespace frame {
 	    void init(const Frame &other,bool bcopy = true)
 	    {
 	       //hdr is copied by attributes = other.attributes;
-	       init(other.getWidth(),other.getHeight(),other.getDataDepth(), other.getFrameMode(),other.getNumberOfBytes(),-1);
+	       init(other.getWidth(),other.getHeight(),other.getDataDepth(), other.getFrameMode(),-1,other.getNumberOfBytes());
 	       if(bcopy)
 		  setImage(other.getImage());
 	       copyImageIndependantAttributes(other);
 	    }
 
-	    void init(uint16_t width, uint16_t height, uint8_t depth=8, frame_mode_t mode=MODE_GRAYSCALE, size_t size=0, const uint8_t val = 0)
+	    void init(uint16_t width, uint16_t height, uint8_t depth=8, frame_mode_t mode=MODE_GRAYSCALE, const uint8_t val = 0,size_t size=0)
 	    {
                //change size if the frame does not fit
 	       if(this->size.height != height || this->size.width !=  width || this->frame_mode != mode || 

@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE( frame_test )
     BOOST_CHECK(frame.getHeight() == 300);
     BOOST_CHECK(frame.getWidth() == 200);
 
-    frame.init(200,300,8,MODE_GRAYSCALE,200*300*1,-1);
+    frame.init(200,300,8,MODE_GRAYSCALE,-1,200*300*1);
     BOOST_CHECK(frame.getNumberOfBytes() == 200*300*1);
     BOOST_CHECK(frame.getPixelSize() == 1);
     BOOST_CHECK(frame.getPixelCount() == 200*300);
@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE( frame_test )
     BOOST_CHECK(frame.getHeight() == 300);
     BOOST_CHECK(frame.getWidth() == 200);
 
-    frame.init(200,300,8,MODE_PJPG,0.5*200*300,-1);
+    frame.init(200,300,8,MODE_PJPG,-1,0.5*200*300);
     BOOST_CHECK(frame.getNumberOfBytes() == 0.5*200*300);
     BOOST_CHECK(frame.getPixelSize() == 1);
     BOOST_CHECK(frame.getPixelCount() == 200*300);
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE( frame_test )
     BOOST_CHECK(frame.getHeight() == 300);
     BOOST_CHECK(frame.getWidth() == 200);
 
-    BOOST_CHECK_THROW(frame.init(200,300,8,MODE_RGB,0.5*200*300,-1),std::runtime_error);
+    BOOST_CHECK_THROW(frame.init(200,300,8,MODE_RGB,-1,0.5*200*300),std::runtime_error);
 
     frame.init(200,300,8,MODE_GRAYSCALE);
     Frame frame2(frame);
