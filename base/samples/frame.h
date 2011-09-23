@@ -153,7 +153,7 @@ namespace base { namespace samples { namespace frame {
                 if(!size)
                     size = getPixelSize() * getPixelCount();
                 else
-                    if(isCompressed() && size != getPixelSize()*getChannelCount())
+                    if(!isCompressed() && size != getPixelSize()*getPixelCount())
                         throw std::runtime_error("Frame::init: wrong image size!");
 
 		image.resize(size);
