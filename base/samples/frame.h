@@ -66,7 +66,7 @@ namespace base { namespace samples { namespace frame {
 	    MODE_BAYER_GBRG = RAW_MODES + 4,
             COMPRESSED_MODES = 256,                      //if an image is compressed it has no relationship
                                                          //between number of pixels and number of bytes
-	    MODE_PJPG = COMPRESSED_MODES + 0
+	    MODE_PJPG = COMPRESSED_MODES + 1 
 	};
 
 	enum frame_status_t {
