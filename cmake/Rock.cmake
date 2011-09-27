@@ -105,10 +105,22 @@ endmacro()
 ## Like pkg_check_modules, but calls include_directories and link_directories
 # using the resulting information
 macro (rock_find_pkgconfig VARIABLE)
-    pkg_check_modules(${VARIABLE} ${ARGN})
+    if (NOT ${VARIABLE}_FOUND)
+        pkg_check_modules(${VARIABLE} ${ARGN})
+        foreach(${VARIABLE}_lib ${${VARIABLE}_LIBRARIES})
+          set(_${VARIABLE}_lib NOTFOUND)
+          find_library(_${VARIABLE}_lib NAMES ${${VARIABLE}_lib} HINTS ${${VARIABLE}_LIBRARY_DIRS})
+          if (NOT _${VARIABLE}_lib)
+            set(_${VARIABLE}_lib ${${VARIABLE}_lib})
+          endif()
+          list(APPEND _${VARIABLE}_LIBRARIES ${_${VARIABLE}_lib})
+        endforeach()
+        list(APPEND _${VARIABLE}_LIBRARIES ${${VARIABLE}_LDFLAGS_OTHER})
+        set(${VARIABLE}_LIBRARIES ${_${VARIABLE}_LIBRARIES} CACHE INTERNAL "")
+    endif()
+
     add_definitions(${${VARIABLE}_CFLAGS})
     include_directories(${${VARIABLE}_INCLUDE_DIRS})
-    link_directories(${${VARIABLE}_LIBRARY_DIRS})
 endmacro()
 
 ## Like find_package, but calls include_directories and link_directories using
