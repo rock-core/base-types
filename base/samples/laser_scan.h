@@ -12,6 +12,12 @@
 #include <stdexcept>
 #endif
 
+#ifdef __GNUC__
+    #define DEPRICATED __attribute__ ((deprecated))
+#else
+    #define DEPRICATED
+#endif 
+
 #include <base/time.h>
 
 namespace base { namespace samples {
@@ -91,8 +97,40 @@ namespace base { namespace samples {
           ranges.clear();
           remission.clear();
         }
+
+        /** converts the laser scan into a point cloud according to the given transformation matrix,
+         *  the start_angle and the angular_resolution. If the transformation matrix is set to 
+         *  identity the laser scan is converted into the coordinate system of the sensor (x-axis = forward,
+         *  y-axis = to the left, z-axis = upwards)
+         */
+	void convertScanToPointCloud(std::vector<Eigen::Vector3d> &points,
+                                     const Eigen::Affine3d& transform = Eigen::Affine3d::Identity())const
+        {
+            float angle = start_angle;
+            double val;
+
+	    points.resize(ranges.size());
+            std::vector<Eigen::Vector3d>::iterator point_iter = points.begin();
+            std::vector<uint32_t>::const_iterator range_iter = ranges.begin();
+	    for(;range_iter != ranges.end();++point_iter,++range_iter) 
+            {
+                //convert from millimeters to meter
+                val = 0.001*(*range_iter);
+                //rotate because of the scan line angle
+                //this is a very special rotation (y = 0, z = 0)
+                point_iter->x() = val*cos(angle);
+                point_iter->y() = val*sin(angle);
+                point_iter->z() = 0;
+                //transform
+		*point_iter = transform * (*point_iter);
+                angle += angular_resolution;
+	    }
+	}
             
-        bool getPointFromScanBeam(const unsigned int i, Eigen::Vector3d &point) const
+        /** \deprecated
+         * returns the points in a wrong coordinate system
+         */
+        bool getPointFromScanBeam(const unsigned int i, Eigen::Vector3d &point) const DEPRICATED
 	{
 	    if(!isValidBeam(i))
 		return false;
@@ -104,8 +142,11 @@ namespace base { namespace samples {
 	    
 	    return true;
 	}
-	
-	std::vector<Eigen::Vector3d> convertScanToPointCloud(const Eigen::Affine3d& transform) const
+
+        /** \deprecated - 
+         * returns the points in a wrong coordinate system
+         */
+	std::vector<Eigen::Vector3d> convertScanToPointCloud(const Eigen::Affine3d& transform) const DEPRICATED
 	{
 	    std::vector<Eigen::Vector3d> pointCloud;
 	    

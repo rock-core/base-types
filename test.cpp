@@ -25,6 +25,52 @@ BOOST_AUTO_TEST_CASE( time_test )
     std::cout << base::Time::fromSeconds( -5.553 ) << std::endl;
 }
 
+BOOST_AUTO_TEST_CASE( laser_scan_test )
+{
+    //configure laser scan
+    base::samples::LaserScan laser_scan;
+    laser_scan.start_angle = M_PI*0.25;
+    laser_scan.angular_resolution = M_PI*0.01;
+    laser_scan.speed = 330;
+    laser_scan.minRange = 1000;
+    laser_scan.maxRange = 20000;
+
+    //add some points
+    laser_scan.ranges.push_back(1000);
+    laser_scan.ranges.push_back(1000);
+    laser_scan.ranges.push_back(2000);
+
+    Eigen::Affine3d trans;
+    trans.setIdentity();
+    trans.translation() = Eigen::Vector3d(-1.0,0.0,0.0);
+    std::vector<Eigen::Vector3d> points;
+    laser_scan.convertScanToPointCloud(points,trans);
+
+    //check translation
+    BOOST_CHECK(points.size() == 3);
+    BOOST_CHECK(abs(points[0].x()-( -1+cos(M_PI*0.25))) < 0.000001);
+    BOOST_CHECK(abs(points[0].y()-( sin(M_PI*0.25))) < 0.000001);
+    BOOST_CHECK(abs(points[1].x()-( -1+cos(M_PI*0.25+laser_scan.angular_resolution))) < 0.000001);
+    BOOST_CHECK(abs(points[1].y()-( sin(M_PI*0.25+laser_scan.angular_resolution))) < 0.000001);
+    BOOST_CHECK(abs(points[2].x()-( -1+2.0*cos(M_PI*0.25+laser_scan.angular_resolution*2))) < 0.000001);
+    BOOST_CHECK(abs(points[2].y()-( 2.0*sin(M_PI*0.25+laser_scan.angular_resolution*2))) < 0.000001);
+
+    //check rotation and translation
+    trans.setIdentity();
+    trans.translation() = Eigen::Vector3d(-1.0,0.0,0.0);
+    trans.rotate(Eigen::AngleAxisd(0.1*M_PI,Eigen::Vector3d::UnitZ()));
+    laser_scan.convertScanToPointCloud(points,trans);
+    BOOST_CHECK(points.size() == 3);
+    double x = cos(M_PI*0.25);
+    double y = sin(M_PI*0.25);
+    BOOST_CHECK(abs(points[0].x()-(-1+x*cos(0.1*M_PI)-y*sin(0.1*M_PI))) < 0.0000001);
+    BOOST_CHECK(abs(points[0].y()-(x*sin(0.1*M_PI)+y*cos(0.1*M_PI))) < 0.0000001);
+    x = cos(M_PI*0.25+laser_scan.angular_resolution);
+    y = sin(M_PI*0.25+laser_scan.angular_resolution);
+    BOOST_CHECK(abs(points[1].x()-(-1+x*cos(0.1*M_PI)-y*sin(0.1*M_PI))) < 0.0000001);
+    BOOST_CHECK(abs(points[1].y()-(x*sin(0.1*M_PI)+y*cos(0.1*M_PI))) < 0.0000001);
+}
+
 BOOST_AUTO_TEST_CASE( pose_test )
 {
     Eigen::Vector3d pos( 10, -1, 20.5 );
@@ -39,6 +85,7 @@ BOOST_AUTO_TEST_CASE( pose_test )
     cout << Eigen::Quaterniond(t.rotation()).coeffs().transpose() << endl;
     cout << orientation.coeffs().transpose() << endl;
 }
+
 
 base::Angle rand_angle()
 {
