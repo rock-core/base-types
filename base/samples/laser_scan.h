@@ -114,6 +114,10 @@ namespace base { namespace samples {
             std::vector<uint32_t>::const_iterator range_iter = ranges.begin();
 	    for(;range_iter != ranges.end();++point_iter,++range_iter) 
             {
+                //check if point is valid
+	        if(*range_iter < minRange || *range_iter > maxRange)
+		    continue;
+
                 //convert from millimeters to meter
                 val = 0.001*(*range_iter);
                 //rotate because of the scan line angle
