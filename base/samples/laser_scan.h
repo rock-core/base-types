@@ -153,7 +153,7 @@ namespace base { namespace samples {
         /** \deprecated
          * returns the points in a wrong coordinate system
          */
-        bool getPointFromScanBeam(const unsigned int i, Eigen::Vector3d &point) const DEPRICATED
+        bool getPointFromScanBeam(const unsigned int i, Eigen::Vector3d &point) const 
 	{
 	    if(!isValidBeam(i))
 		return false;
