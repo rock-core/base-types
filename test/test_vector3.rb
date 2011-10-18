@@ -31,6 +31,11 @@ class TC_Eigen_Vector3 < Test::Unit::TestCase
         assert_equal([2, 4, 6], (v0 * 2).to_a)
     end
 
+    def test_div_by_scalar
+        v0 = Eigen::Vector3.new(2, 4, 6)
+        assert_equal([1, 2, 3], (v0 / 2.0).to_a)
+    end
+
     def test_dump_load
         v = Eigen::Vector3.new(0.2, 0.5, 0.1)
         dumped = Marshal.dump(v)

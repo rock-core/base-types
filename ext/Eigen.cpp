@@ -41,6 +41,10 @@ struct Vector3
     { return new Vector3(*v + *other.v); }
     Vector3* operator - (Vector3 const& other) const
     { return new Vector3(*v - *other.v); }
+
+    Vector3* operator / (double scalar) const
+    { return new Vector3(*v / scalar); }
+
     Vector3* negate() const
     { return new Vector3(-*v); }
     Vector3* scale(double value) const
@@ -144,6 +148,7 @@ void Init_eigen_ext()
        .define_method("z=", &Vector3::setZ)
        .define_method("+",  &Vector3::operator +)
        .define_method("-",  &Vector3::operator -)
+       .define_method("/",  &Vector3::operator /)
        .define_method("-@", &Vector3::negate)
        .define_method("*",  &Vector3::scale)
        .define_method("cross", &Vector3::cross)
