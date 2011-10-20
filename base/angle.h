@@ -128,6 +128,21 @@ public:
     {
         rad = other.rad;
     }
+    
+    inline bool operator==(const Angle &other ) const
+    {
+        return this->rad == other.rad;
+    }
+    
+    inline bool operator<(const Angle &other ) const
+    {
+        return this->rad < other.rad;
+    }
+    
+    inline bool operator>(const Angle &other ) const
+    {
+        return this->rad > other.rad;
+    }
 };
 
 static inline Angle operator+( Angle a, Angle b )
@@ -149,6 +164,7 @@ static inline Angle operator*( double a, Angle b )
 {
     return Angle::fromRad( a * b.getRad() );
 }
+
 
 
 static inline std::ostream& operator << (std::ostream& os, Angle angle)
