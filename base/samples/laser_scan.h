@@ -80,12 +80,7 @@ namespace base { namespace samples {
         bool isValidBeam(const unsigned int i) const {
 	    if(i > ranges.size())
 		throw std::out_of_range("Invalid beam index given");
-
-	    uint32_t range = ranges[i];
-	    if(range > minRange && range < maxRange)
-		return true;
-	    
-	    return false;
+            return isRangeValid(ranges[i]);
 	}
         
         //resets the sample
@@ -97,6 +92,13 @@ namespace base { namespace samples {
           maxRange = 0;
           ranges.clear();
           remission.clear();
+        }
+
+        inline bool isRangeValid(uint32_t range) const
+        {
+	    if(range > minRange && range < maxRange)
+		return true;
+	    return false;
         }
 
         /** converts the laser scan into a point cloud according to the given transformation matrix,
@@ -120,7 +122,7 @@ namespace base { namespace samples {
 	    for(;range_iter != ranges.end();++range_iter) 
             {
                 //check if point is valid
-	        if(*range_iter < minRange || *range_iter > maxRange)
+	        if(!isRangeValid(*range_iter))
                 {
                     if(skip_invalid_points)
                     {
