@@ -162,16 +162,13 @@ public:
      */
     static Angle vectorToVector(const base::Vector3d& a, const base::Vector3d& b, const base::Vector3d& positive)
     {
-        double dot = a.dot(b);
-        double norm = a.norm() * b.norm();
-        double cos = dot / norm;
+        double cos = a.dot(b) / (a.norm() * b.norm());
 
-        Eigen::Vector3d cross = a.cross(b);
-        double sin = cross.norm() / norm;
-        if (cross.dot(positive) < 0)
-            sin = -sin;
-
-        return fromRad(atan2(sin, cos));
+        bool is_positive = (a.cross(b).dot(positive) > 0);
+        if (is_positive)
+            return fromRad(cos);
+        else
+            return fromRad(-cos);
     }
 };
 
