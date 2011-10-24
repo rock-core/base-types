@@ -3,6 +3,7 @@
 
 #include <boost/format.hpp>
 #include <math.h>
+#include <base/eigen.h>
 
 namespace base
 {
@@ -142,6 +143,35 @@ public:
     inline bool operator>(const Angle &other ) const
     {
         return this->rad > other.rad;
+    }
+
+    /** Computes the unsigned angle of the rotation that makes +a+ colinear with +b+
+     */
+    static Angle vectorToVector(const base::Vector3d& a, const base::Vector3d& b)
+    {
+        double dot = a.dot(b);
+        double norm = a.norm() * b.norm();
+        return fromRad(acos(dot / norm));
+    }
+
+    /** Computes the angle of the rotation that makes +a+ colinear with +b+
+     *
+     * Unlike vectorToVector(a, b), this method computes a signed angle, with the
+     * @c positive vector defining the positive rotation direction. @c positive
+     * is required to be of unit length.
+     */
+    static Angle vectorToVector(const base::Vector3d& a, const base::Vector3d& b, const base::Vector3d& positive)
+    {
+        double dot = a.dot(b);
+        double norm = a.norm() * b.norm();
+        double cos = dot / norm;
+
+        Eigen::Vector3d cross = a.cross(b);
+        double sin = cross.norm() / norm;
+        if (cross.dot(positive) < 0)
+            sin = -sin;
+
+        return fromRad(atan2(sin, cos));
     }
 };
 
