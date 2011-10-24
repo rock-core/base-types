@@ -22,10 +22,14 @@ task :clean do
     FileUtils.rm_f File.join('ext', 'Eigen.o')
 end
 
-require 'rdoc/task'
-RDoc::Task.new("docs") do |rdoc|
-    rdoc.rdoc_dir = 'doc'
-    rdoc.title    = "REigen"
-    rdoc.options << '--show-hash'
-    rdoc.rdoc_files.include('lib/**/*.rb', 'ext/**/*.cc')
+begin
+    require 'rdoc/task'
+    RDoc::Task.new("docs") do |rdoc|
+        rdoc.rdoc_dir = 'doc'
+        rdoc.title    = "REigen"
+        rdoc.options << '--show-hash'
+        rdoc.rdoc_files.include('lib/**/*.rb', 'ext/**/*.cc')
+    end
+rescue LoadError
+    STDERR.puts "INFO: documentation targets are disabled as the rdoc gem is not installed"
 end
