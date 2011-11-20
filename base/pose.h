@@ -29,6 +29,57 @@ namespace base
 	return Eigen::AngleAxisd( -getYaw(orientation), Eigen::Vector3d::UnitZ()) * orientation;
     }
 
+
+    /** 
+     * Represents a pose update threshold, with a number of test methods to see
+     * of the threshold was met.
+     */
+    struct PoseUpdateThreshold
+    {
+	PoseUpdateThreshold() {};
+
+	/** 
+	 * constructor with distance and angle thresholds
+	 */
+	PoseUpdateThreshold( double distance, double angle )
+	    : distance( distance ), angle( angle ) {};
+
+	/** 
+	 * test if distance or angle is greater than the 
+	 * stored threshold.
+	 */
+	bool test( double distance, double angle )
+	{
+	    return distance > this->distance || angle > this->angle;
+	}
+
+	/** 
+	 * test if the provided delta transformation is greater in 
+	 * either distance or angle than the threshold
+	 */
+	bool test( const Eigen::Affine3d& pdelta )
+	{
+	    return test( Eigen::AngleAxisd( pdelta.linear() ).angle(), pdelta.translation().norm() );
+	}
+
+	/** 
+	 * test if the delta of the provided transformations is greater in 
+	 * either distance or angle than the threshold.
+	 *
+	 * @param a2b the initial transformation from A to B
+	 * @param aprime2b the next transformation from A' to B
+	 *
+	 * @result true if the transformation A' to A is greater than the stored thresholds
+	 */
+	bool test( const Eigen::Affine3d& a2b, const Eigen::Affine3d& aprime2b )
+	{
+	    return test( a2b.inverse() * aprime2b );
+	}
+
+	double distance;
+	double angle;
+    };
+
     /**
      * Representation for a pose in 3D
      */
