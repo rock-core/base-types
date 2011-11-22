@@ -29,6 +29,8 @@ SplineBase::SplineBase (int dim, double _geometric_resolution, int _curve_order)
     , has_curve_length(false), curve_length(-1)
     , has_curvature_max(false), curvature_max(-1)
 {
+    if (dimension <= 0)
+        throw std::runtime_error("dimension must be strictly positive");
 }
 
 SplineBase::SplineBase(double geometric_resolution, SISLCurve* curve)
@@ -38,6 +40,9 @@ SplineBase::SplineBase(double geometric_resolution, SISLCurve* curve)
     , has_curve_length(false), curve_length(-1)
     , has_curvature_max(false), curvature_max(-1)
 {
+    if (dimension <= 0)
+        throw std::runtime_error("dimension must be strictly positive");
+
     int status;
 
     s1363(curve, &start_param, &end_param, &status);

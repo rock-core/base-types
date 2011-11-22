@@ -258,11 +258,20 @@ namespace geometry {
         double curvature_max;
     };
 
+    /** Intermediate base class to add functionality that is specific to 3D
+     * curves
+     */
     class Spline3Base : public SplineBase
     {
     public:
+        /** Pass-through constructor for Spline<3>. The check on dimensionality
+         * is done by Spline<>
+         */
         explicit Spline3Base(int dimension, double geometric_resolution, int order)
-            : SplineBase(dimension, geometric_resolution, order) {}
+            : SplineBase(3, geometric_resolution, order) {}
+        /** Pass-through constructor for Spline<3>. The check on dimensionality
+         * is done by Spline<>
+         */
         explicit Spline3Base(double geometric_resolution, SISLCurve* curve)
             : SplineBase(geometric_resolution, curve) {}
         Spline3Base(SplineBase const& source)
@@ -307,7 +316,11 @@ namespace geometry {
         explicit Spline(double geometric_resolution = 0.1, int order = 3)
             : base_t(DIM, geometric_resolution, order) {}
         explicit Spline(double geometric_resolution, SISLCurve* curve)
-            : base_t(geometric_resolution, curve) {}
+            : base_t(geometric_resolution, curve)
+        {
+            if (this->getDimension() != DIM)
+                throw std::runtime_error("trying to initialize a Spline<> class with a curve of wrong dimension");
+        }
         Spline(SplineBase const& base)
             : base_t(base) {}
 
