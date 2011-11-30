@@ -473,7 +473,7 @@ void SplineBase::findClosestPoints(double const* ref_point, vector<double>& _res
     free(points);
 }
 
-double SplineBase::localClosestPointSearch(double* ref_point, double _guess, double _start, double _end, double  _geores) const
+double SplineBase::localClosestPointSearch(double const* ref_point, double _guess, double _start, double _end, double  _geores) const
 {
     if (!curve)
         return getStartParam();
@@ -485,7 +485,7 @@ double SplineBase::localClosestPointSearch(double* ref_point, double _guess, dou
 
     // Finds the closest point on the curve
     int status;
-    s1774(curve, ref_point, dimension, _geores, _start, _end, _guess, &param, &status);
+    s1774(curve, const_cast<double*>(ref_point), dimension, _geores, _start, _end, _guess, &param, &status);
     if (status < 0)
         throw std::runtime_error("failed to find the closest points");
 
