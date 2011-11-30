@@ -22,6 +22,7 @@ namespace base
     typedef Eigen::Matrix<double, 2, 2, Eigen::DontAlign>     Matrix2d;
     typedef Eigen::Matrix<double, 3, 3, Eigen::DontAlign>     Matrix3d;
     typedef Eigen::Matrix<double, 4, 4, Eigen::DontAlign>     Matrix4d;
+    typedef Eigen::Matrix<double, 6, 6, Eigen::DontAlign>     Matrix6d;
 
     typedef Eigen::Quaternion<double, Eigen::DontAlign>    Quaterniond;
     typedef Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign>	      

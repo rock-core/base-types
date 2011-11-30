@@ -86,6 +86,16 @@ namespace base { namespace samples {
             return base::getYaw(orientation);
         }
 	
+        double getPitch() const
+        {
+            return base::getPitch(orientation);
+        }
+	
+        double getRoll() const
+        {
+            return base::getRoll(orientation);
+        }
+	
 	operator Eigen::Affine3d() const
 	{
 	    Eigen::Affine3d ret;

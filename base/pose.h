@@ -23,11 +23,33 @@ namespace base
     {
         return orientation.toRotationMatrix().eulerAngles(2,1,0)[0];
     }
+    
+    static double getPitch(const base::Orientation& orientation)
+    {
+        return orientation.toRotationMatrix().eulerAngles(2,1,0)[1];
+    }
+    
+    static double getRoll(const base::Orientation& orientation)
+    {
+        return orientation.toRotationMatrix().eulerAngles(2,1,0)[2];
+    }
+
 
     static inline base::Orientation removeYaw(const base::Orientation& orientation)
     {
 	return Eigen::AngleAxisd( -getYaw(orientation), Eigen::Vector3d::UnitZ()) * orientation;
     }
+    
+    static inline base::Orientation removePitch(const base::Orientation& orientation)
+    {
+	return Eigen::AngleAxisd( -getPitch(orientation), Eigen::Vector3d::UnitY()) * orientation;
+    }
+
+    static inline base::Orientation removeRoll(const base::Orientation& orientation)
+    {
+	return Eigen::AngleAxisd( -getRoll(orientation), Eigen::Vector3d::UnitX()) * orientation;
+    }
+
 
 
     /** 
