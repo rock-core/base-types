@@ -570,6 +570,10 @@ void SplineBase::findLineIntersections(double const* _point, double const* _norm
             getDimension(), 0, _geores,
             &points_count, &points, &curves_count, &curves,
             &status);
+
+    if (status == -158) // no intersection
+        return;
+
     if (status != 0)
         throw std::runtime_error("error computing intersection between curve and line/plane");
 
