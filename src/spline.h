@@ -204,7 +204,7 @@ namespace geometry {
                 std::vector< std::pair<double, double> >& _result_curves,
                 double _geores) const;
 
-        double localClosestPointSearch(double* ref_point,
+        double localClosestPointSearch(double const* ref_point,
                 double _guess, double _start, double _end,
                 double  _geores) const;
 
