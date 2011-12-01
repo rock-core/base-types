@@ -5,6 +5,7 @@
 #include <vector>
 #include <Eigen/Core>
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <limits>
 
 namespace base
 {
@@ -45,6 +46,14 @@ namespace samples
 
 	/// distance values stored in row major order. NaN is used as the no value type.
 	std::vector<scalar> data;
+
+	/** 
+	 * resets all values in the distance image to nan
+	 */
+	void clear()
+	{
+	    std::fill( data.begin(), data.end(), std::numeric_limits<float>::quiet_NaN() );
+	}
 
 	/** 
 	 * Transforms a x, y pixel coordinates into a 3d scene point, using the distance
