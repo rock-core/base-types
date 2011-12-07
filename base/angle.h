@@ -166,9 +166,9 @@ public:
 
         bool is_positive = (a.cross(b).dot(positive) > 0);
         if (is_positive)
-            return fromRad(cos);
+            return fromRad(acos(cos));
         else
-            return fromRad(-cos);
+            return fromRad(-acos(cos));
     }
 };
 
