@@ -552,8 +552,8 @@ namespace base { namespace samples { namespace frame {
 	    /** The image size in pixels */
 	    frame_size_t            size;
 
-	    /** The number of effective bits per pixel. The number
-	     * of actual bits per pixels is always a multiple of
+	    /** The number of effective bits per channel. The number
+	     * of actual bits per channel is always a multiple of
 	     * height (i.e. a 12-bit effective depth is represented
 	     * using 16-bits per channels). The number of greyscale
 	     * levels is 2^(this_number)
