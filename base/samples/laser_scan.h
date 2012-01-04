@@ -116,16 +116,28 @@ namespace base { namespace samples {
 	    
 	    //give the vector a hint about the size it might be
 	    points.reserve(ranges.size());
-	    
-	    for(unsigned int i = 0; i < ranges.size(); i++) {
-		Eigen::Vector3d point;
-		if(getPointFromScanBeamXForward(i, point)) {
-		    point = transform * point;
-		    points.push_back(point);
-		} else {
-		    if(!skip_invalid_points)
-		    {
+
+	    //this is optimized for runtime
+	    //moving the check for skip_invalid_points
+	    //out of the loop speeds up the execution 
+	    //time by ~25 %
+	    if(!skip_invalid_points)
+	    {
+		for(unsigned int i = 0; i < ranges.size(); i++) {
+		    Eigen::Vector3d point;
+		    if(getPointFromScanBeamXForward(i, point)) {
+			point = transform * point;
+			points.push_back(point);
+		    } else {
 			points.push_back(Eigen::Vector3d(std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()));
+		    }
+		}
+	    } else {
+		for(unsigned int i = 0; i < ranges.size(); i++) {
+		    Eigen::Vector3d point;
+		    if(getPointFromScanBeamXForward(i, point)) {
+			point = transform * point;
+			points.push_back(point);
 		    }
 		}
 	    }
