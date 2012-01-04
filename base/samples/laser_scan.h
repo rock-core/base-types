@@ -14,9 +14,9 @@
 #endif
 
 #ifdef __GNUC__
-    #define DEPRICATED __attribute__ ((deprecated))
+    #define DEPRECATED __attribute__ ((deprecated))
 #else
-    #define DEPRICATED
+    #define DEPRECATED
 #endif 
 
 #include <base/time.h>
@@ -112,47 +112,43 @@ namespace base { namespace samples {
                                      const Eigen::Affine3d& transform = Eigen::Affine3d::Identity(),
                                      bool skip_invalid_points = true)const
         {
-            float angle = start_angle;
-            double val;
-            int invalid_count=0;
-
-	    points.resize(ranges.size());
-            std::vector<Eigen::Vector3d>::iterator point_iter = points.begin();
-            std::vector<uint32_t>::const_iterator range_iter = ranges.begin();
-	    for(;range_iter != ranges.end();++range_iter) 
-            {
-                //check if point is valid
-	        if(!isRangeValid(*range_iter))
-                {
-                    if(skip_invalid_points)
-                    {
-                        ++invalid_count;
-                        continue;
-                    }
-                    point_iter->x() = std::numeric_limits<double>::signaling_NaN();
-                    point_iter->y() = std::numeric_limits<double>::signaling_NaN();
-                    point_iter->z() = std::numeric_limits<double>::signaling_NaN();
-                    ++point_iter;
-                }
-                else
-                {
-                    //convert from millimeters to meter
-                    val = 0.001*(*range_iter);
-                    //rotate because of the scan line angle
-                    //this is a very special rotation (y = 0, z = 0)
-                    point_iter->x() = val*cos(angle);
-                    point_iter->y() = val*sin(angle);
-                    point_iter->z() = 0;
-                    //transform
-                    *point_iter = transform * (*point_iter);
-                    angle += angular_resolution;
-                    ++point_iter;
-                }
+	    points.clear();
+	    
+	    //give the vector a hint about the size it might be
+	    points.reserve(ranges.size());
+	    
+	    for(unsigned int i = 0; i < ranges.size(); i++) {
+		Eigen::Vector3d point;
+		if(getPointFromScanBeamXForward(i, point)) {
+		    point = transform * point;
+		    points.push_back(point);
+		} else {
+		    if(!skip_invalid_points)
+		    {
+			points.push_back(Eigen::Vector3d(std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()));
+		    }
+		}
 	    }
-            points.resize(points.size()-invalid_count);
 	}
             
-        /** \deprecated
+        /**
+         * Helper function that converts range 'i' to a point.
+	 * The origin ot the point will be the laserScanner
+         */
+        bool getPointFromScanBeamXForward(const unsigned int i, Eigen::Vector3d &point) const 
+	{
+	    if(!isValidBeam(i))
+		return false;
+	    
+	    //get a vector with the right length
+	    point = Eigen::Vector3d(ranges[i] / 1000.0, 0.0, 0.0);
+	    //rotate
+	    point = Eigen::Quaterniond(Eigen::AngleAxisd(start_angle + i * angular_resolution, Eigen::Vector3d::UnitZ())) * point;
+	    
+	    return true;
+	}
+
+        /** \deprecated - 
          * returns the points in a wrong coordinate system
          */
         bool getPointFromScanBeam(const unsigned int i, Eigen::Vector3d &point) const 
@@ -171,7 +167,7 @@ namespace base { namespace samples {
         /** \deprecated - 
          * returns the points in a wrong coordinate system
          */
-	std::vector<Eigen::Vector3d> convertScanToPointCloud(const Eigen::Affine3d& transform) const DEPRICATED
+	std::vector<Eigen::Vector3d> convertScanToPointCloud(const Eigen::Affine3d& transform) const DEPRECATED
 	{
 	    std::vector<Eigen::Vector3d> pointCloud;
 	    
