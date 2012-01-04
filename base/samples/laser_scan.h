@@ -96,7 +96,7 @@ namespace base { namespace samples {
 
         inline bool isRangeValid(uint32_t range) const
         {
-	    if(range > minRange && range < maxRange)
+	    if(range >= minRange && range <= maxRange)
 		return true;
 	    return false;
         }
