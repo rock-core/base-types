@@ -51,6 +51,8 @@ namespace base
         { return Time(microseconds + ts.microseconds); }
         Time operator / (int divider) const
         { return Time(microseconds / divider); }
+        Time operator * (double factor) const
+        { return Time(microseconds * factor); }
 
         /** True if this time is zero */
         bool isNull() const { return microseconds == 0; }
