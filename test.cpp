@@ -25,6 +25,24 @@ BOOST_AUTO_TEST_CASE( time_test )
     std::cout << base::Time::fromSeconds( -5.553 ) << std::endl;
 }
 
+BOOST_AUTO_TEST_CASE( time_fromSeconds )
+{
+    base::Time seconds;
+
+    seconds = base::Time::fromSeconds( 35.553 );
+    BOOST_REQUIRE_EQUAL( 35553000, seconds.toMicroseconds() );
+    seconds = base::Time::fromSeconds( -5.553 );
+    BOOST_REQUIRE_EQUAL( -5553000, seconds.toMicroseconds() );
+    seconds = base::Time::fromSeconds( 0.01 );
+    BOOST_REQUIRE_EQUAL( 10000, seconds.toMicroseconds() );
+}
+
+BOOST_AUTO_TEST_CASE( time_multiply )
+{
+    base::Time t = base::Time::fromSeconds( 35 );
+    BOOST_REQUIRE_EQUAL( 35 * 1e6 * 0.025, (t * 0.025).toMicroseconds() );
+}
+
 BOOST_AUTO_TEST_CASE( laser_scan_test )
 {
     //configure laser scan

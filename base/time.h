@@ -20,7 +20,7 @@ namespace base
     public:
         int64_t microseconds;
 
-	static const int UsecPerSec = 1000000;
+	static const int UsecPerSec = 1000000LL;
 
         Time()
             : microseconds(0) {}
@@ -99,7 +99,10 @@ namespace base
         static Time fromSeconds(int64_t value, int microseconds)
         { return Time(value * UsecPerSec + static_cast<int64_t>(microseconds)); }
         static Time fromSeconds(double value)
-        { return Time(int64_t(value * 1000000)); }
+        {
+            int64_t seconds = value;
+            return Time(seconds * UsecPerSec + static_cast<int64_t>(round((value - seconds) * UsecPerSec)));
+        }
     };
 }
 
