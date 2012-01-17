@@ -31,9 +31,18 @@ ELSEIF(NOT RUBY_EXTENSIONS_AVAILABLE)
        OUTPUT_VARIABLE RUBY_CFLAGS)
     STRING(REPLACE "\n" "" RUBY_CFLAGS ${RUBY_CFLAGS})
 
-    function(ROCK_RUBY_LIBRARY)
-        install(FILES ${ARGN}
-            DESTINATION ${RUBY_LIBRARY_INSTALL_DIR}/${dirname})
+    function(ROCK_RUBY_LIBRARY libname)
+        if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${libname}.rb)
+            install(FILES ${libname}.rb
+                DESTINATION ${RUBY_LIBRARY_INSTALL_DIR})
+            list(REMOVE_ITEM ARGN ${libname}.rb)
+        endif()
+
+        list(LENGTH ARGN FILE_COUNT)
+        if (FILE_COUNT GREATER 0)
+            install(FILES ${ARGN}
+                DESTINATION ${RUBY_LIBRARY_INSTALL_DIR}/${libname})
+        endif()
     endfunction()
 
     function(ROCK_TYPELIB_RUBY_PLUGIN)
