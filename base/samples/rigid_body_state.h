@@ -11,6 +11,7 @@
 
 #include <base/pose.h>
 #include <base/time.h>
+#include <base/float.h>
 
 #include <Eigen/Core>
 #include <Eigen/LU>
@@ -57,8 +58,8 @@ namespace base { namespace samples {
 
 	void setTransform(const Eigen::Affine3d& transform)
 	{
-	    orientation = Eigen::Quaterniond( transform.linear() );
 	    position = transform.translation();
+	    orientation = Eigen::Quaterniond( transform.linear() );
 	}
 
 	 Eigen::Affine3d getTransform() const 
@@ -131,54 +132,70 @@ namespace base { namespace samples {
 	    orientation = Eigen::Quaterniond::Identity();
 	    angular_velocity.setZero();
 	}
-	
-	bool hasValidPosition() const {
-	    return !std::isinf(cov_position(0,0)) && !std::isinf(cov_position(1,1)) && !std::isinf(cov_position(2,2));
-	}
-        bool hasValidPosition(int idx) const {
-            return !std::isinf(cov_position(idx, idx));
+
+        /** Helper method that checks if the value whose covariance is
+         * represented by the given matrix is a valid value
+         */
+        static bool isValidValue(Eigen::Matrix3d const& cov)
+        {
+            return !base::isInfinity(cov(0,0)) &&
+                !base::isInfinity(cov(1,1)) &&
+                !base::isInfinity(cov(2,2));
+        }
+
+        /** Helper method that checks if the covariance represented by the given
+         * matrix is valid
+         */
+        static bool isValidCovariance(base::Matrix3d const& cov)
+        {
+            for (int i = 0; i < 3; ++i)
+                for (int j = 0; j < 3; ++j)
+                    if (base::isNaN(cov(i, j)))
+                        return false;
+            return true;
+        }
+
+        /** Helper method that checks if the dimension of the value whose
+         * covariance is represented by the given matrix is a valid value
+         */
+        static bool isValidValue(base::Matrix3d const& cov, int dim)
+        {
+            return !base::isInfinity(cov(dim,dim));
+        }
+
+        static base::Matrix3d invalidValue()
+        {
+            return Eigen::Matrix3d::Ones() * base::infinity<double>();
+        }
+
+        static base::Matrix3d invalidCovariance()
+        {
+            return base::Matrix3d::Ones() * base::NaN<double>();
         }
 	
-	bool hasValidOrientation() const {
-	    return !std::isinf(cov_orientation(0,0)) && !std::isinf(cov_orientation(1,1)) && !std::isinf(cov_orientation(2,2));
-	}
-        bool hasValidOrientation(int idx) const {
-            return !std::isinf(cov_orientation(idx, idx));
-        }
+	bool hasValidPosition() const { return isValidValue(cov_position); }
+        bool hasValidPosition(int idx) const { return isValidValue(cov_position, idx); }
+	bool hasValidPositionCovariance() const { return isValidCovariance(cov_position); }
+	void invalidatePosition() { cov_position = invalidValue(); }
+	void invalidatePositionCovariance() { cov_position = invalidCovariance(); }
 	
-	bool hasValidVelocity() const {
-	    return !std::isinf(cov_velocity(0,0)) && !std::isinf(cov_velocity(1,1)) && !std::isinf(cov_velocity(2,2));
-	}
-        bool hasValidVelocity(int idx) const {
-            return !std::isinf(cov_velocity(idx, idx));
-        }
+	bool hasValidOrientation() const { return isValidValue(cov_orientation); }
+        bool hasValidOrientation(int idx) const { return isValidValue(cov_orientation, idx); }
+	bool hasValidOrientationCovariance() const { return isValidCovariance(cov_orientation); }
+	void invalidateOrientation() { cov_orientation = invalidValue(); }
+	void invalidateOrientationCovariance() { cov_orientation = invalidCovariance(); }
 	
-	bool hasValidRotationVelocity() const {
-	    return !std::isinf(cov_angular_velocity(0,0)) && !std::isinf(cov_angular_velocity(1,1)) && !std::isinf(cov_angular_velocity(2,2));
-	}
-        bool hasValidRotationVelocity(int idx) const {
-            return !std::isinf(cov_angular_velocity(idx, idx));
-        }
+	bool hasValidVelocity() const { return isValidValue(cov_velocity); }
+        bool hasValidVelocity(int idx) const { return isValidValue(cov_velocity, idx); }
+	bool hasValidVelocityCovariance() const { return isValidCovariance(cov_velocity); }
+	void invalidateVelocity() { cov_velocity = invalidValue(); }
+	void invalidateVelocityCovariance() { cov_velocity = invalidCovariance(); }
 	
-	void invalidatePosition() {
-	    cov_position = Eigen::Matrix3d::Identity();
-	    cov_position *= INFINITY;	  
-	}
-	
-	void invalidateOrientation() {
-	    cov_orientation = Eigen::Matrix3d::Identity();
-	    cov_orientation *= INFINITY;
-	}
-	
-	void invalidateVelocity() {
-	    cov_velocity = Eigen::Matrix3d::Identity();
-	    cov_velocity *= INFINITY;	  
-	}
-	
-	void invalidateAngularVelocity() {
-	    cov_angular_velocity = Eigen::Matrix3d::Identity();
-	    cov_angular_velocity *= INFINITY;
-	}
+	bool hasValidAngularVelocity() const { return isValidValue(cov_angular_velocity); }
+        bool hasValidAngularVelocity(int idx) const { return isValidValue(cov_angular_velocity, idx); }
+	bool hasValidAngularVelocityCovariance() const { return isValidCovariance(cov_angular_velocity); }
+	void invalidateAngularVelocity() { cov_angular_velocity = invalidValue(); }
+	void invalidateAngularVelocityCovariance() { cov_angular_velocity = invalidCovariance(); }
     };
 }}
 

@@ -363,3 +363,43 @@ BOOST_AUTO_TEST_CASE( frame_test )
     BOOST_CHECK(frame2.getHeight() == 300);
     BOOST_CHECK(frame2.getWidth() == 200);
 }
+
+BOOST_AUTO_TEST_CASE( rbs_validity )
+{
+    base::samples::RigidBodyState rbs;
+    rbs.invalidate();
+    BOOST_CHECK(!rbs.hasValidPosition());
+    BOOST_CHECK(rbs.hasValidPositionCovariance());
+    BOOST_CHECK(!rbs.hasValidOrientation());
+    BOOST_CHECK(rbs.hasValidOrientationCovariance());
+    BOOST_CHECK(!rbs.hasValidAngularVelocity());
+    BOOST_CHECK(rbs.hasValidAngularVelocityCovariance());
+
+    rbs.invalidate();
+    rbs.invalidatePositionCovariance();
+    BOOST_CHECK(rbs.hasValidPosition());
+    BOOST_CHECK(!rbs.hasValidPositionCovariance());
+    BOOST_CHECK(!rbs.hasValidOrientation());
+    BOOST_CHECK(rbs.hasValidOrientationCovariance());
+    BOOST_CHECK(!rbs.hasValidAngularVelocity());
+    BOOST_CHECK(rbs.hasValidAngularVelocityCovariance());
+
+    rbs.invalidate();
+    rbs.invalidateOrientationCovariance();
+    BOOST_CHECK(!rbs.hasValidPosition());
+    BOOST_CHECK(rbs.hasValidPositionCovariance());
+    BOOST_CHECK(rbs.hasValidOrientation());
+    BOOST_CHECK(!rbs.hasValidOrientationCovariance());
+    BOOST_CHECK(!rbs.hasValidAngularVelocity());
+    BOOST_CHECK(rbs.hasValidAngularVelocityCovariance());
+
+    rbs.invalidate();
+    rbs.invalidateAngularVelocityCovariance();
+    BOOST_CHECK(!rbs.hasValidPosition());
+    BOOST_CHECK(rbs.hasValidPositionCovariance());
+    BOOST_CHECK(!rbs.hasValidOrientation());
+    BOOST_CHECK(rbs.hasValidOrientationCovariance());
+    BOOST_CHECK(rbs.hasValidAngularVelocity());
+    BOOST_CHECK(!rbs.hasValidAngularVelocityCovariance());
+}
+
