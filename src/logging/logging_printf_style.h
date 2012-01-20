@@ -9,8 +9,11 @@
  * BASE_LOG_NAMESPACE, e.g. 
  * in your CMakeLists.txt add_defitions(-DBASE_LOG_NAMESPACE=$PROJECT_NAME)
  * 
- * Disabling logs lower or equal to a certain level:
+ * Allow only logs of a certain level or higher
  * BASE_LOG_<log-level>, e.g. BASE_LOG_FATAL
+ *
+ * Disable loging
+ * BASE_LOG_DISABLE
  * 
  * Existing log levels are: FATAL, ERROR, WARN, INFO, DEBUG
  *
@@ -31,7 +34,9 @@
 // Setting the enviroment variable BASE_LOG_LEVEL does only have any effect if the compiled
 // level is equal or higher (closer to FATAL) than the one request
 //
-#if defined(BASE_LOG_FATAL)
+#if defined(BASE_LOG_DISABLE)
+#define BASE_LOG_PRIORITY 0
+#elif defined(BASE_LOG_FATAL)
 #define BASE_LOG_PRIORITY 1
 #undef BASE_LOG_FATAL
 #elif defined(BASE_LOG_ERROR)
