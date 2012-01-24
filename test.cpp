@@ -130,6 +130,14 @@ BOOST_AUTO_TEST_CASE( pose_test )
     cout << orientation.coeffs().transpose() << endl;
 }
 
+BOOST_AUTO_TEST_CASE( rbs_to_transform )
+{
+    // test casting operator from rigid body state to eigen::Transform
+    base::samples::RigidBodyState rbs;
+
+    Eigen::Affine3d r1( rbs );
+    base::Affine3d r2( rbs );
+}
 
 base::Angle rand_angle()
 {

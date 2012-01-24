@@ -97,9 +97,10 @@ namespace base { namespace samples {
             return base::getRoll(orientation);
         }
 	
-	operator Eigen::Affine3d() const
+	template <int _Options>
+	operator Eigen::Transform<double, 3, Eigen::Affine, _Options>() const
 	{
-	    Eigen::Affine3d ret;
+	    Eigen::Transform<double, 3, Eigen::Affine, _Options> ret;
 	    ret.setIdentity();
 	    ret.rotate(this->orientation);
 	    ret.translation() = this->position;
