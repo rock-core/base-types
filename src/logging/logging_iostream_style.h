@@ -3,13 +3,14 @@
  * @author Jan Vogelgesang, jan.vogelgesang@dfki.de
  *
  * @brief Wrapper for logging.h, adds iostream-style logging
+ *
  * @details adds an iostream-style interface to logging.h, appends trailing '_S' for the
  *          iostream interafce. Example:
  *
  *          LOG_WARN_S << "some warning message";
  *
- *          no trailling endl is required (as in LOG_*). Configuration is done through
- *          LOG_CONFIGURE from logging.h.
+ *          no trailing endl is required (similar to logging_printf_style.h).
+ *          Configuration is done through LOG_CONFIGURE from logging_printf_style.h.
  *
  *          based on an idea from Petru Marginean, presented at http://drdobbs.com/cpp/201804215
  */
@@ -39,7 +40,7 @@
 
 // MACROS for general usage of streaming logging
 // Example usage:
-// LOGS_WARN << "this is a message on level warn";
+// LOG_WARN_S << "this is a message on level warn";
 //
 // NOTE:'std::endl' is inserted automatically at the end of the statement 
 //
