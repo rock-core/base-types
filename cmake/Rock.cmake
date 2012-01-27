@@ -137,6 +137,10 @@ endmacro()
 # the resulting information
 macro (rock_find_cmake VARIABLE)
     find_package(${VARIABLE} ${ARGN})
+    rock_add_plain_dependency(${VARIABLE})
+endmacro()
+
+macro (rock_add_plain_dependency VARIABLE)
     string(TOUPPER ${VARIABLE} UPPER_VARIABLE)
     add_definitions(${${VARIABLE}_CFLAGS})
     add_definitions(${${UPPER_VARIABLE}_CFLAGS})
@@ -160,7 +164,7 @@ endmacro()
 ## Common parsing of parameters for all the C/C++ target types
 macro(rock_target_definition TARGET_NAME)
     set(${TARGET_NAME}_INSTALL ON)
-    set(ROCK_TARGET_AVAILABLE_MODES "SOURCES;HEADERS;DEPS;DEPS_PKGCONFIG;DEPS_CMAKE;MOC;LIBS")
+    set(ROCK_TARGET_AVAILABLE_MODES "SOURCES;HEADERS;DEPS;DEPS_PKGCONFIG;DEPS_CMAKE;DEPS_PLAIN;MOC;LIBS")
 
     set(${TARGET_NAME}_MODE "SOURCES")
     foreach(ELEMENT ${ARGN})
@@ -177,16 +181,40 @@ macro(rock_target_definition TARGET_NAME)
     endforeach()
 
     foreach (internal_dep ${${TARGET_NAME}_DEPS})
-        get_property(internal_dep_DEPS TARGET ${internal_dep}
-            PROPERTY DEPS_PKGCONFIG)
-        list(APPEND ${TARGET_NAME}_DEPS_PKGCONFIG ${internal_dep_DEPS})
+        foreach(dep_mode PLAIN CMAKE PKGCONFIG)
+            get_property(internal_dep_DEPS TARGET ${internal_dep}
+                PROPERTY DEPS_PUBLIC_${dep_mode})
+
+            if (internal_dep_DEPS)
+                list(APPEND ${TARGET_NAME}_DEPS_${dep_mode} ${internal_dep_DEPS})
+            else()
+                get_property(internal_dep_DEPS TARGET ${internal_dep}
+                    PROPERTY DEPS_${dep_mode})
+                list(APPEND ${TARGET_NAME}_DEPS_${dep_mode} ${internal_dep_DEPS})
+            endif()
+        endforeach()
     endforeach()
     
-    foreach (pkgconfig_pkg ${${TARGET_NAME}_DEPS_PKGCONFIG})
+    foreach (plain_pkg ${${TARGET_NAME}_DEPS_PLAIN} ${${TARGET_NAME}_PUBLIC_PLAIN})
+        rock_add_plain_dependency(${plain_pkg})
+    endforeach()
+    foreach (pkgconfig_pkg ${${TARGET_NAME}_DEPS_PKGCONFIG} ${${TARGET_NAME}_PUBLIC_PKGCONFIG})
         rock_find_pkgconfig(${pkgconfig_pkg}_PKGCONFIG REQUIRED ${pkgconfig_pkg})
     endforeach()
-    foreach (cmake_pkg ${${TARGET_NAME}_DEPS_CMAKE})
+    foreach (cmake_pkg ${${TARGET_NAME}_DEPS_CMAKE} ${${TARGET_NAME}_PUBLIC_CMAKE})
         rock_find_cmake(${cmake_pkg} REQUIRED)
+    endforeach()
+
+    # Export public dependencies to pkg-config
+    set(${TARGET_NAME}_PKGCONFIG_REQUIRES
+        "${${TARGET_NAME}_PKGCONFIG_REQUIRES} ${${TARGET_NAME}_PUBLIC_PKGCONFIG}")
+    foreach(dep_mode PLAIN CMAKE)
+        foreach(dep_name ${${TARGET_NAME}_PUBLIC_${dep_mode}})
+            rock_libraries_for_pkgconfig(${TARGET_NAME}_PKGCONFIG_LIBS
+                ${${__dep}_LIBRARIES})
+            set(${TARGET_NAME}_PKGCONFIG_CFLAGS
+                "${${TARGET_NAME}_PKGCONFIG_CFLAGS} ${${__dep}_CFLAGS}")
+        endforeach()
     endforeach()
 
     list(LENGTH ${TARGET_NAME}_MOC QT_SOURCE_LENGTH)
@@ -202,9 +230,20 @@ endmacro()
 macro(rock_target_setup TARGET_NAME)
     set_property(TARGET ${TARGET_NAME}
         PROPERTY DEPS_PKGCONFIG ${${TARGET_NAME}_DEPS_PKGCONFIG})
+    set_property(TARGET ${TARGET_NAME}
+        PROPERTY DEPS_PUBLIC_PLAIN ${${TARGET_NAME}_PUBLIC_PLAIN})
+    set_property(TARGET ${TARGET_NAME}
+        PROPERTY DEPS_PUBLIC_CMAKE ${${TARGET_NAME}_PUBLIC_CMAKE})
 
+    foreach (plain_dep ${${TARGET_NAME}_DEPS_PLAIN})
+        target_link_libraries(${TARGET_NAME} ${${plain_dep}_LIBRARIES}
+            ${${plain_dep}_LIBRARY})
+    endforeach()
     foreach (pkgconfig_pkg ${${TARGET_NAME}_DEPS_PKGCONFIG})
         target_link_libraries(${TARGET_NAME} ${${pkgconfig_pkg}_PKGCONFIG_LIBRARIES})
+    endforeach()
+    foreach (imported_dep ${${TARGET_NAME}_IMPORTED_DEPS})
+        target_link_libraries(${TARGET_NAME} ${${imported_dep}_LIBRARIES})
     endforeach()
     target_link_libraries(${TARGET_NAME} ${${TARGET_NAME}_DEPS})
     target_link_libraries(${TARGET_NAME} ${${TARGET_NAME}_DEPENDENT_LIBS})
@@ -473,4 +512,48 @@ function(rock_testsuite TARGET_NAME)
     target_link_libraries(${TARGET_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
     add_test(RockTestSuite ${EXECUTABLE_OUTPUT_PATH}/${TARGET_NAME})
 endfunction()
+
+macro(rock_libraries_for_pkgconfig VARNAME)
+    foreach(__lib ${ARGN})
+        get_filename_component(__lib_path ${__lib} PATH)
+        get_filename_component(__lib_name ${__lib} NAME_WE)
+        string(REGEX REPLACE "^lib" "" __lib_name "${__lib_name}")
+        set(${VARNAME} "${${VARNAME}} -L${__lib_path} -l${__lib_name}")
+    endforeach()
+endmacro()
+
+## Defines a new vizkit widget
+#
+# rock_add_public_dependencies(TARGET
+#     [PLAIN] dep0 dep1 dep2
+#     [CMAKE cmake_dep0 cmake_dep1 cmake_dep2]
+#     [PKGCONFIG pkg_dep0 pkg_dep1 pkg_dep2])
+#
+# Declares a list of dependencies for the users of TARGET. It must be called
+# before TARGET is defined
+#
+# These dependencies are going to be used automatically in the definition of
+# TARGET, i.e. there is no need to repeat them in e.g. the rock_library call.
+# This method also update the following variables:
+#
+#   ${TARGET_NAME}_PKGCONFIG_REQUIRES
+#   ${TARGET_NAME}_PKGCONFIG_CFLAGS
+#   ${TARGET_NAME}_PKGCONFIG_LIBS
+#
+# Which can be used in pkg-config files to automatically add the necessary
+# information from these dependencies in the target's pkg-config file
+macro(rock_add_public_dependencies TARGET_NAME)
+    set(MODE PLAIN)
+    foreach(__dep ${ARGN})
+        if ("${__dep}" STREQUAL "CMAKE")
+            set(MODE CMAKE)
+        elseif ("${__dep}" STREQUAL "PLAIN")
+            set(MODE PLAIN)
+        elseif ("${__dep}" STREQUAL "PKGCONFIG")
+            set(MODE PLAIN)
+        else()
+            list(APPEND ${TARGET_NAME}_PUBLIC_${MODE} "${__dep}")
+        endif()
+    endforeach()
+endmacro()
 
