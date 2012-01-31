@@ -117,9 +117,8 @@ namespace base { namespace samples {
             invalidate();
         }
 
-        /** Initializes the rigid body state with arbitrary values for the
-         * position, velocity, orientation and angular velocity, and with
-         * infinite covariance matrices
+        /** Initializes the rigid body state with NaN for the
+         * position, velocity, orientation and angular velocity.
          */
 	void invalidate() {
 	    invalidateOrientation();
@@ -133,10 +132,27 @@ namespace base { namespace samples {
 	    angular_velocity.setZero();
 	}
 
+        /** Helper method that checks if a value is valid (not NaN anywhere). */
+        static bool isValidValue(base::Vector3d const& vec)
+        {
+            return !base::isNaN(vec(0)) &&
+                !base::isNaN(vec(1)) &&
+                !base::isNaN(vec(2));
+        }
+        
+        /** Helper method that checks if an orientation is valid (not NaN anywhere). */
+        static bool isValidValue(base::Orientation const& ori)
+        {
+            return !base::isNaN(ori.w()) &&
+                !base::isNaN(ori.x()) &&
+                !base::isNaN(ori.y()) &&
+                !base::isNaN(ori.z());
+        }
+        
         /** Helper method that checks if the value whose covariance is
-         * represented by the given matrix is a valid value
+         * represented by the given matrix is a known value (not Inf in the diagonal).
          */
-        static bool isValidValue(Eigen::Matrix3d const& cov)
+        static bool isKnownValue(base::Matrix3d const& cov)
         {
             return !base::isInfinity(cov(0,0)) &&
                 !base::isInfinity(cov(1,1)) &&
@@ -155,17 +171,37 @@ namespace base { namespace samples {
             return true;
         }
 
-        /** Helper method that checks if the dimension of the value whose
-         * covariance is represented by the given matrix is a valid value
-         */
-        static bool isValidValue(base::Matrix3d const& cov, int dim)
+        /** Checks if a given dimension of a vector is valid. */
+        static bool isValidValue(base::Vector3d const& vec, int dim)
+        {
+            return !base::isNaN(vec(dim));
+        }
+        
+        /** Checks if a given dimension of a covariance matrix is valid. */
+        static bool isValidCovariance(base::Matrix3d const& cov, int dim)
+        {
+            return !base::isNaN(cov(dim,dim));
+        }
+        
+        /** Checks if the dimension of a vector given by a covariance is known. */
+        static bool isKnownValue(base::Matrix3d const& cov, int dim)
         {
             return !base::isInfinity(cov(dim,dim));
         }
 
-        static base::Matrix3d invalidValue()
+        static base::Vector3d invalidValue()
         {
-            return Eigen::Matrix3d::Ones() * base::infinity<double>();
+            return base::Vector3d::Ones() * base::NaN<double>();
+        }
+        
+        static base::Orientation invalidOrientation()
+        {
+            return base::Orientation(Eigen::Vector4d::Ones() * base::NaN<double>());
+        }
+
+        static base::Matrix3d setValueUnknown()
+        {
+            return base::Matrix3d::Ones() * base::infinity<double>();
         }
 
         static base::Matrix3d invalidCovariance()
@@ -173,29 +209,43 @@ namespace base { namespace samples {
             return base::Matrix3d::Ones() * base::NaN<double>();
         }
 	
-	bool hasValidPosition() const { return isValidValue(cov_position); }
-        bool hasValidPosition(int idx) const { return isValidValue(cov_position, idx); }
-	bool hasValidPositionCovariance() const { return isValidCovariance(cov_position); }
-	void invalidatePosition() { cov_position = invalidValue(); }
-	void invalidatePositionCovariance() { cov_position = invalidCovariance(); }
-	
-	bool hasValidOrientation() const { return isValidValue(cov_orientation); }
-        bool hasValidOrientation(int idx) const { return isValidValue(cov_orientation, idx); }
-	bool hasValidOrientationCovariance() const { return isValidCovariance(cov_orientation); }
-	void invalidateOrientation() { cov_orientation = invalidValue(); }
-	void invalidateOrientationCovariance() { cov_orientation = invalidCovariance(); }
-	
-	bool hasValidVelocity() const { return isValidValue(cov_velocity); }
-        bool hasValidVelocity(int idx) const { return isValidValue(cov_velocity, idx); }
-	bool hasValidVelocityCovariance() const { return isValidCovariance(cov_velocity); }
-	void invalidateVelocity() { cov_velocity = invalidValue(); }
-	void invalidateVelocityCovariance() { cov_velocity = invalidCovariance(); }
-	
-	bool hasValidAngularVelocity() const { return isValidValue(cov_angular_velocity); }
-        bool hasValidAngularVelocity(int idx) const { return isValidValue(cov_angular_velocity, idx); }
-	bool hasValidAngularVelocityCovariance() const { return isValidCovariance(cov_angular_velocity); }
-	void invalidateAngularVelocity() { cov_angular_velocity = invalidValue(); }
-	void invalidateAngularVelocityCovariance() { cov_angular_velocity = invalidCovariance(); }
+        bool hasValidPosition() const { return isValidValue(position); }
+        bool hasValidPosition(int idx) const { return isValidValue(position, idx); }
+        bool hasValidPositionCovariance() const { return isValidCovariance(cov_position); }
+        void invalidatePosition() { position = invalidValue(); }
+        void invalidatePositionCovariance() { cov_position = invalidCovariance(); }
+        
+        bool hasValidOrientation() const { return isValidValue(orientation); }
+        bool hasValidOrientationCovariance() const { return isValidCovariance(cov_orientation); }
+        void invalidateOrientation() { orientation = invalidOrientation(); }
+        void invalidateOrientationCovariance() { cov_orientation = invalidCovariance(); }
+        
+        bool hasValidVelocity() const { return isValidValue(velocity); }
+        bool hasValidVelocity(int idx) const { return isValidValue(velocity, idx); }
+        bool hasValidVelocityCovariance() const { return isValidCovariance(cov_velocity); }
+        void invalidateVelocity() { velocity = invalidValue(); }
+        void invalidateVelocityCovariance() { cov_velocity = invalidCovariance(); }
+        
+        bool hasValidAngularVelocity() const { return isValidValue(angular_velocity); }
+        bool hasValidAngularVelocity(int idx) const { return isValidValue(angular_velocity, idx); }
+        bool hasValidAngularVelocityCovariance() const { return isValidCovariance(cov_angular_velocity); }
+        void invalidateAngularVelocity() { angular_velocity = invalidValue(); }
+        void invalidateAngularVelocityCovariance() { cov_angular_velocity = invalidCovariance(); }
+
+        void invalidateValues ( bool position, bool orientation, bool velocity = true, bool angular_velocity = true ) {
+            if ( position ) invalidatePosition();
+            if ( orientation ) invalidateOrientation();
+            if ( velocity ) invalidateVelocity();
+            if ( angular_velocity ) invalidateAngularVelocity();
+        }
+        
+        void invalidateCovariances ( bool position = true, bool orientation = true, bool velocity = true, bool angular_velocity = true ) {
+            if ( position ) invalidatePositionCovariance();
+            if ( orientation ) invalidateOrientationCovariance();
+            if ( velocity ) invalidateVelocityCovariance();
+            if ( angular_velocity ) invalidateAngularVelocityCovariance();
+        }
+
     };
 }}
 
