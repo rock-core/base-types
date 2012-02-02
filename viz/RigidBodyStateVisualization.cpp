@@ -13,13 +13,6 @@ RigidBodyStateVisualization::RigidBodyStateVisualization()
     : covariance(false), covariance_with_samples(false), color(1, 1, 1), main_size(0.1),
     forcePositionDisplay(false), forceOrientationDisplay(false)
 {
-    VizPluginRubyAdapter(RigidBodyStateVisualization, base::samples::RigidBodyState, RigidBodyState)
-    VizPluginRubyMethod(RigidBodyStateVisualization, double, resetModel);
-    VizPluginRubyMethod(RigidBodyStateVisualization, double, resetModelSphere);
-    VizPluginRubyMethod(RigidBodyStateVisualization, double, setMainSphereSize);
-    VizPluginRubyMethod(RigidBodyStateVisualization, bool, displayCovariance);
-    VizPluginRubyMethod(RigidBodyStateVisualization, bool, displayCovarianceWithSamples);
-    VizPluginRubyMethod(RigidBodyStateVisualization, base::Vector3d, setColor);
 }
 
 RigidBodyStateVisualization::~RigidBodyStateVisualization()

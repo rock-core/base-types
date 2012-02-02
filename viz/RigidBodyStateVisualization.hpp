@@ -20,6 +20,9 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
 	RigidBodyStateVisualization();	
 	virtual ~RigidBodyStateVisualization();
 
+        Q_INVOKABLE void updateRigidBodyState( const base::samples::RigidBodyState& state )
+        { return updateData(state); }
+
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
 	virtual void updateMainNode(osg::Node* node);
