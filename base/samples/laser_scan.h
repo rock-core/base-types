@@ -108,7 +108,8 @@ namespace base { namespace samples {
          *  If a scan point is outside of valid range all its coordinates are set to NaN.
          *  Unfortunately invalid scan points can not be skipped because this would invalidate the remission association
          */
-	void convertScanToPointCloud(std::vector<Eigen::Vector3d> &points,
+        template<typename T>
+	void convertScanToPointCloud(std::vector<T> &points,
                                      const Eigen::Affine3d& transform = Eigen::Affine3d::Identity(),
                                      bool skip_invalid_points = true)const
         {
