@@ -1,5 +1,5 @@
 #include "RigidBodyStateVisualization.hpp"
-#include "Uncertainty.hpp"
+#include <vizkit/Uncertainty.hpp>
 #include <osg/Geode>
 #include <osg/ShapeDrawable>
 #include <osg/PositionAttitudeTransform>
