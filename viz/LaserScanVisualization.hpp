@@ -13,9 +13,12 @@ namespace vizkit {
 
 class LaserScanVisualization : public Vizkit3DPlugin<base::samples::LaserScan>, public VizPluginAddType<base::samples::RigidBodyState>
 {
+    Q_OBJECT
+
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     LaserScanVisualization();
+    ~LaserScanVisualization();
     virtual void updateDataIntern(const base::samples::LaserScan& data);
     virtual void updateDataIntern(const base::samples::RigidBodyState& data);
     virtual void updateMainNode(osg::Node* node);

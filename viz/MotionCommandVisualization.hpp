@@ -12,8 +12,11 @@ namespace vizkit
 
 class MotionCommandVisualization : public Vizkit3DPlugin< std::pair<base::MotionCommand2D, base::Pose> >
 {
+    Q_OBJECT
+
     public:
 	MotionCommandVisualization();	
+        ~MotionCommandVisualization();
 
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();

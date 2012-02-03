@@ -16,6 +16,10 @@ MotionCommandVisualization::MotionCommandVisualization()
     VizPluginRubyAdapter(MotionCommandVisualization, base::MotionCommand2D, MotionCommand)
 }
 
+MotionCommandVisualization::~MotionCommandVisualization()
+{
+}
+
 osg::ref_ptr< osg::Node > MotionCommandVisualization::createMainNode()
 {
     positionTransformation = new osg::PositionAttitudeTransform();

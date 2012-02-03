@@ -18,6 +18,10 @@ TrajectoryVisualization::TrajectoryVisualization()
     pointsOSG = new osg::Vec3Array;
 }
 
+TrajectoryVisualization::~TrajectoryVisualization()
+{
+}
+
 osg::ref_ptr<osg::Node> TrajectoryVisualization::createMainNode()
 {
     geom->setVertexArray(pointsOSG);

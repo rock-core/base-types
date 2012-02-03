@@ -11,6 +11,10 @@ vizkit::LaserScanVisualization::LaserScanVisualization()
     VizPluginRubyAdapter(LaserScanVisualization, base::samples::RigidBodyState, Pose)
 }
 
+vizkit::LaserScanVisualization::~LaserScanVisualization()
+{
+}
+
 void vizkit::LaserScanVisualization::updateDataIntern(const base::samples::LaserScan& data)
 {
     scan = data;

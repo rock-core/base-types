@@ -2,8 +2,8 @@
 #define TRAJECTORYVISUALISATION_H
 #include <Eigen/Geometry>
 #include <vector>
-#include <vizkit/VizPlugin.hpp>
 #include <osg/Geometry>
+#include <vizkit/VizPlugin.hpp>
 #include <base/geometry/spline.h>
 
 namespace vizkit 
@@ -11,8 +11,11 @@ namespace vizkit
 
 class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>, public VizPluginAddType<base::geometry::Spline3>
 {
+    Q_OBJECT
+
     public:
 	TrajectoryVisualization();
+        ~TrajectoryVisualization();
         void setColor(const base::Vector3d& color); 
 	void setColor(double r, double g, double b, double a);
 	void clear();
