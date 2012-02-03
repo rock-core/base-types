@@ -9,6 +9,8 @@ vizkit::LaserScanVisualization::LaserScanVisualization()
 {
     VizPluginRubyAdapter(LaserScanVisualization, base::samples::LaserScan, LaserScan)
     VizPluginRubyAdapter(LaserScanVisualization, base::samples::RigidBodyState, Pose)
+    scanOrientation = Eigen::Quaterniond::Identity();
+    scanPosition.setZero();
 }
 
 vizkit::LaserScanVisualization::~LaserScanVisualization()
