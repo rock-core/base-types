@@ -212,6 +212,14 @@ macro(rock_target_definition TARGET_NAME)
         rock_find_cmake(${cmake_pkg} REQUIRED)
     endforeach()
 
+    # At this stage, if the user did not set public dependency lists
+    # explicitely, pass on everything
+    foreach(__depmode PLAIN CMAKE PKGCONFIG)
+        if (NOT ${TARGET_NAME}_PUBLIC_${__depmode})
+            set(${TARGET_NAME}_PUBLIC_${__depmode} ${${TARGET_NAME}_${__depmode}})
+        endif()
+    endforeach()
+
     # Export public dependencies to pkg-config
     set(${TARGET_NAME}_PKGCONFIG_REQUIRES
         "${${TARGET_NAME}_PKGCONFIG_REQUIRES} ${${TARGET_NAME}_PUBLIC_PKGCONFIG}")
