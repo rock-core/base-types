@@ -1,7 +1,7 @@
 #ifndef __RIGID_BODY_STATE_VISUALIZATION_HPP__
 #define __RIGID_BODY_STATE_VISUALIZATION_HPP__
 
-#include <vizkit/VizPlugin.hpp>
+#include <vizkit/Vizkit3DPlugin.hpp>
 #include <Eigen/Geometry>
 #include <base/samples/rigid_body_state.h>
 

@@ -1,7 +1,7 @@
 #ifndef WAYPOINTVISUALIZATION_H
 #define WAYPOINTVISUALIZATION_H
 
-#include <vizkit/VizPlugin.hpp>
+#include <vizkit/Vizkit3DPlugin.hpp>
 #include <base/waypoint.h>
 #include <osg/PositionAttitudeTransform>
 #include <osg/Geometry>

@@ -3,7 +3,7 @@
 #include <Eigen/Geometry>
 #include <vector>
 #include <osg/Geometry>
-#include <vizkit/VizPlugin.hpp>
+#include <vizkit/Vizkit3DPlugin.hpp>
 #include <base/geometry/spline.h>
 
 namespace vizkit 

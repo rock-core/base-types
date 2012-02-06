@@ -1,6 +1,6 @@
 #ifndef MOTIONCOMMANDVISUALIZATION_H
 #define MOTIONCOMMANDVISUALIZATION_H
-#include <vizkit/VizPlugin.hpp>
+#include <vizkit/Vizkit3DPlugin.hpp>
 #include <base/motion_command.h>
 #include <base/pose.h>
 #include <osg/Shape>
