@@ -236,6 +236,30 @@ macro(rock_target_definition TARGET_NAME)
     if (QT_SOURCE_LENGTH GREATER 0)
         rock_find_qt4()
         list(APPEND ${TARGET_NAME}_DEPENDENT_LIBS ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY}) 
+
+        set(__${TARGET_NAME}_MOC "${${TARGET_NAME}_MOC}")
+        set(${TARGET_NAME}_MOC "")
+
+        set(__cpp_extensions ".c" ".cpp" ".cxx" ".cc")
+
+        # If a source file (*.c*) is listed in MOC, add it to the list of
+        # sources and moc the corresponding header
+        foreach(__moced_file ${__${TARGET_NAME}_MOC})
+            get_filename_component(__file_ext ${__moced_file} EXT)
+            list(FIND __cpp_extensions "${__file_ext}" __file_is_source)
+            if (__file_is_source GREATER -1)
+                list(APPEND ${TARGET_NAME}_SOURCES ${__moced_file})
+                get_filename_component(__file_wext ${__moced_file} NAME_WE)
+                get_filename_component(__file_dir ${__moced_file} PATH)
+                if ("${__file_dir}" STREQUAL "")
+                    file(GLOB __file_header "${__file_wext}.h*")
+                else()
+                    file(GLOB __file_header "${__file_dir}/${__file_wext}.h*")
+                endif()
+                set(__moced_file ${__file_header})
+            endif()
+            list(APPEND ${TARGET_NAME}_MOC ${__moced_file})
+        endforeach()
         QT4_WRAP_CPP(${TARGET_NAME}_MOC_SRCS ${${TARGET_NAME}_MOC})
         list(APPEND ${TARGET_NAME}_SOURCES ${${TARGET_NAME}_MOC_SRCS})
     endif()
@@ -293,8 +317,11 @@ endmacro()
 # DEPS_CMAKE: list of packages which can be found with CMake's find_package,
 # that the library depends upon. It is assumed that the Find*.cmake scripts
 # follow the cmake accepted standard for variable naming
-# MOC: if the library is Qt-based, a list of headers that should be processed by
-# moc. The resulting implementation files are built into the library
+# MOC: if the library is Qt-based, a list of either source or header files.
+# If headers are listed, these headers should be processed by moc, with the
+# resulting implementation files are built into the library. If they are source
+# files, they get added to the library and the corresponding header file is
+# passed to moc.
 function(rock_executable TARGET_NAME)
     rock_target_definition(${TARGET_NAME} ${ARGN})
 
@@ -361,8 +388,11 @@ endmacro()
 # follow the cmake accepted standard for variable naming
 # HEADERS: a list of headers that should be installed with the library. They get
 # installed in include/project_name
-# MOC: if the library is Qt-based, a list of headers that should be processed by
-# moc. The resulting implementation files are built into the library
+# MOC: if the library is Qt-based, a list of either source or header files.
+# If headers are listed, these headers should be processed by moc, with the
+# resulting implementation files are built into the library. If they are source
+# files, they get added to the library and the corresponding header file is
+# passed to moc.
 # NOINSTALL: by default, the library gets installed on 'make install'. If this
 # argument is given, this is turned off
 function(rock_library TARGET_NAME)
@@ -417,12 +447,19 @@ endfunction()
 # follow the cmake accepted standard for variable naming
 # HEADERS: a list of headers that should be installed with the library. They get
 # installed in include/project_name
-# MOC: if the library is Qt-based, a list of headers that should be processed by
-# moc. The resulting implementation files are built into the library
+# MOC: if the library is Qt-based, a list of either source or header files.
+# If headers are listed, these headers should be processed by moc, with the
+# resulting implementation files are built into the library. If they are source
+# files, they get added to the library and the corresponding header file is
+# passed to moc.
 # NOINSTALL: by default, the library gets installed on 'make install'. If this
 # argument is given, this is turned off
 function(rock_vizkit_plugin TARGET_NAME)
-    rock_library_common(${TARGET_NAME} ${ARGN} DEPS_PKGCONFIG vizkit)
+    if (${PROJECT_NAME} STREQUAL "vizkit")
+    else()
+        list(APPEND additional_deps DEPS_PKGCONFIG vizkit)
+    endif()
+    rock_library_common(${TARGET_NAME} ${ARGN} ${additional_deps})
     if (${TARGET_NAME}_INSTALL)
         install(TARGETS ${TARGET_NAME}
             LIBRARY DESTINATION lib)
@@ -462,8 +499,11 @@ endfunction()
 # The following arguments are mandatory:
 #
 # SOURCES: list of the C++ sources that should be built into that library
-# MOC:     a list of headers that should be processed by moc. The resulting 
-#          implementation files are built into the library
+# MOC: if the library is Qt-based, a list of either source or header files.
+# If headers are listed, these headers should be processed by moc, with the
+# resulting implementation files are built into the library. If they are source
+# files, they get added to the library and the corresponding header file is
+# passed to moc.
 #
 # The following optional arguments are available:
 #
@@ -519,8 +559,11 @@ endfunction()
 # DEPS_CMAKE: list of packages which can be found with CMake's find_package,
 # that the library depends upon. It is assumed that the Find*.cmake scripts
 # follow the cmake accepted standard for variable naming
-# MOC: if the library is Qt-based, a list of headers that should be processed by
-# moc. The resulting implementation files are built into the library
+# MOC: if the library is Qt-based, a list of either source or header files.
+# If headers are listed, these headers should be processed by moc, with the
+# resulting implementation files are built into the library. If they are source
+# files, they get added to the library and the corresponding header file is
+# passed to moc.
 function(rock_testsuite TARGET_NAME)
     rock_executable(${TARGET_NAME} ${ARGN}
         NOINSTALL)
