@@ -176,8 +176,6 @@
 #include <vector>
 #include <base/singleton.h>
 
-using namespace std;
-
 namespace base {
 
 namespace logging {
