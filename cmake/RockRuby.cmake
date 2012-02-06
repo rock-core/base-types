@@ -72,7 +72,7 @@ ELSEIF(NOT RUBY_EXTENSIONS_AVAILABLE)
         endif()
 
 	SET_SOURCE_FILES_PROPERTIES(${ARGN} PROPERTIES COMPILE_FLAGS "${RUBY_CFLAGS}")
-	ADD_LIBRARY(${target} MODULE ${ARGN})
+        rock_library_common(${target} MODULE ${ARGN})
         target_link_libraries(${target} ${RUBY_LIBRARY})
         set_target_properties(${target} PROPERTIES
             LINK_FLAGS "-z noexecstack")
