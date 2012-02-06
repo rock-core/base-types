@@ -158,10 +158,14 @@ macro (rock_add_plain_dependency VARIABLE)
 endmacro()
 
 macro (rock_find_qt4) 
-    find_package(Qt4 REQUIRED QtCore QtGui)
-    add_definitions(${QT_DEFINITIONS})
-    include_directories(${QT_INCLUDE_DIR})
-    link_directories(${QT_LIBRARY_DIR})
+    find_package(Qt4 REQUIRED QtCore QtGui ${ARGN})
+    include_directories(${QT_HEADERS_DIR})
+    foreach(__qtmodule__ QtCore QtGui ${ARGN})
+        string(TOUPPER ${__qtmodule__} __qtmodule__)
+        add_definitions(${QT_${__qtmodule__}_DEFINITIONS})
+        include_directories(${QT_${__qtmodule__}_INCLUDE_DIR})
+        link_directories(${QT_${__qtmodule__}_LIBRARY_DIR})
+    endforeach()
 endmacro()
 
 ## Common parsing of parameters for all the C/C++ target types
