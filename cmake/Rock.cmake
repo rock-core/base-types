@@ -224,7 +224,7 @@ macro(rock_target_definition TARGET_NAME)
     set(${TARGET_NAME}_PKGCONFIG_REQUIRES
         "${${TARGET_NAME}_PKGCONFIG_REQUIRES} ${${TARGET_NAME}_PUBLIC_PKGCONFIG}")
     foreach(dep_mode PLAIN CMAKE)
-        foreach(dep_name ${${TARGET_NAME}_PUBLIC_${dep_mode}})
+        foreach(__dep ${${TARGET_NAME}_PUBLIC_${dep_mode}})
             rock_libraries_for_pkgconfig(${TARGET_NAME}_PKGCONFIG_LIBS
                 ${${__dep}_LIBRARIES})
             set(${TARGET_NAME}_PKGCONFIG_CFLAGS
