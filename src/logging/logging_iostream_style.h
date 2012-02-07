@@ -35,7 +35,7 @@
 
 #else
 //disable all logging if Release is defined
-#define LOG_STREAM(PRIO) 
+#define LOG_STREAM(PRIO) if(true) ; else base::logging::LogStream().get(PRIO,"", "" , 0 , "")
 #endif // Release
 
 // MACROS for general usage of streaming logging
