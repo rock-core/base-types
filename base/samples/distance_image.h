@@ -22,6 +22,12 @@ namespace samples
      * giving the distance value d of the image points.  The relation is such
      * that for a point on the projection plane, the 3D point z can be calculated
      * as (p_x,p_y,1)*d = z.
+     *
+     * NOTE: unfortunately the scale and center is directly inverse to the convention
+     * used in:
+     * http://opencv.willowgarage.com/documentation/camera_calibration_and_3d_reconstruction.html
+     * for the time being, scale_x and scale_y are kept public for legacy code.
+     * It is recommended to use the functions operating on it instead.
      */
     struct DistanceImage
     {
@@ -113,7 +119,13 @@ namespace samples
 	 * | 0    0    1   |
 	 *
 	 * where f_x and f_y are the focal length expressed in pixel
-	 * and c_x and c_y are the center in pixel.
+	 * and c_x and c_y are the center in pixel. This matrix can be 
+	 * used to convert screen coordinates (x, y, z) into homogenous
+	 * image coordinates (u, v, w) in the following way:
+	 *
+	 * (u,v,w) = F * (x, y, z)
+	 *
+	 * Note, that f and c are the inverse of the center and scale parameters.
 	 *
 	 * @return the intrinsic camera matrix
 	 */
@@ -129,6 +141,38 @@ namespace samples
 		0, 0, 1;
 
 	    return result;
+	}
+
+	/** @brief set the intrinsic camera parameters.
+	 *
+	 * see getIntrinsic() for a more detailed explanation.
+	 *
+	 * @param f_x focal length in x
+	 * @param f_y focal length in y
+	 * @param c_x center point in x
+	 * @param c_y center point in y
+	 */
+	void setIntrinsic( double f_x, double f_y, double c_x, double c_y )
+	{
+	    scale_x = 1.0 / f_x;
+	    scale_y = 1.0 / f_y;
+	    center_x = -c_x / f_x;
+	    center_y = -c_y / f_y;
+	}
+
+	/** @brief set the size of the distance image
+	 *
+	 * This will also rescale the internal data array to 
+	 * hold the appropriate number of pixels.
+	 *
+	 * @param width width of the image
+	 * @param height height of the image
+	 */
+	void setSize( double width, double height )
+	{
+	    this->width = width;
+	    this->height = height;
+	    data.resize( width * height );
 	}
     };
 }
