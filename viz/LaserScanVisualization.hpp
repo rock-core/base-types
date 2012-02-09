@@ -15,6 +15,9 @@ class LaserScanVisualization : public Vizkit3DPlugin<base::samples::LaserScan>, 
 {
     Q_OBJECT
 
+    Q_PROPERTY(bool YForward READ isYForwardModeEnabled WRITE setYForwardMode);
+    bool mYForward;
+
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     LaserScanVisualization();
@@ -23,6 +26,10 @@ public:
     virtual void updateDataIntern(const base::samples::RigidBodyState& data);
     virtual void updateMainNode(osg::Node* node);
     virtual osg::ref_ptr< osg::Node > createMainNode();
+
+public slots:
+    bool isYForwardModeEnabled() const;
+    void setYForwardMode(bool enabled);
 
 private:
     base::samples::LaserScan scan;

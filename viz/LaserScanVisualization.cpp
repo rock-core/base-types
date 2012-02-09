@@ -5,7 +5,10 @@
 #include <iostream>
 #include <vizkit/Vizkit3DHelper.hpp>
 
+using namespace vizkit;
+
 vizkit::LaserScanVisualization::LaserScanVisualization()
+    : mYForward(false)
 {
     VizPluginRubyAdapter(LaserScanVisualization, base::samples::LaserScan, LaserScan)
     VizPluginRubyAdapter(LaserScanVisualization, base::samples::RigidBodyState, Pose)
@@ -57,6 +60,13 @@ osg::ref_ptr< osg::Node > vizkit::LaserScanVisualization::createMainNode()
     return transformNode;
 }
 
+bool LaserScanVisualization::isYForwardModeEnabled() const { return mYForward; }
+void LaserScanVisualization::setYForwardMode(bool enabled)
+{
+    std::cout << "SET " << enabled << std::endl;
+    mYForward = enabled;
+}
+
 void vizkit::LaserScanVisualization::updateMainNode(osg::Node* node)
 {
     transformNode->setPosition(eigenVectorToOsgVec3(scanPosition));
@@ -66,6 +76,13 @@ void vizkit::LaserScanVisualization::updateMainNode(osg::Node* node)
 
     std::vector<Eigen::Vector3d> points;
     scan.convertScanToPointCloud(points);
+    if (mYForward)
+    {
+        base::Quaterniond rot;
+        rot = Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ());
+        for(std::vector<Eigen::Vector3d>::iterator it = points.begin(); it != points.end(); it++)
+            *it = rot * (*it);
+    }
 
     scanVertices->reserve(points.size() + 1);
     
@@ -84,6 +101,5 @@ void vizkit::LaserScanVisualization::updateMainNode(osg::Node* node)
     scanGeom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POLYGON,0,scanVertices->size()));
 
     scanGeom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS,0,scanVertices->size()));
-    
-    
 }
+
