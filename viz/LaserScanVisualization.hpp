@@ -27,6 +27,11 @@ public:
     virtual void updateMainNode(osg::Node* node);
     virtual osg::ref_ptr< osg::Node > createMainNode();
 
+    Q_INVOKABLE void updateLaserScan(const base::samples::LaserScan& data)
+    { updateData(data); }
+    Q_INVOKABLE void updatePose(const base::samples::RigidBodyState& data)
+    { updateData(data); }
+
 public slots:
     bool isYForwardModeEnabled() const;
     void setYForwardMode(bool enabled);
