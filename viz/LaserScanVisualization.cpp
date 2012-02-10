@@ -59,11 +59,7 @@ osg::ref_ptr< osg::Node > vizkit::LaserScanVisualization::createMainNode()
 }
 
 bool LaserScanVisualization::isYForwardModeEnabled() const { return mYForward; }
-void LaserScanVisualization::setYForwardMode(bool enabled)
-{
-    std::cout << "SET " << enabled << std::endl;
-    mYForward = enabled;
-}
+void LaserScanVisualization::setYForwardMode(bool enabled) { mYForward = enabled; }
 
 void vizkit::LaserScanVisualization::updateMainNode(osg::Node* node)
 {
