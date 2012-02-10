@@ -92,6 +92,8 @@ namespace base
         { return microseconds; }
         static Time fromMicroseconds(uint64_t value)
         { return Time(value); }
+	static Time fromMilliseconds(uint64_t value)
+        { return Time(value * 1000); }
         static Time fromSeconds(int64_t value)
         { return Time(value * UsecPerSec); }
         static Time fromSeconds(int value)
