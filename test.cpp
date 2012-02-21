@@ -9,6 +9,7 @@
 #include "base/samples/imu.h"
 #include "base/samples/laser_scan.h"
 #include "base/samples/sonar_beam.h"
+#include "base/samples/sonar_scan.h"
 #include "base/samples/rigid_body_state.h"
 
 #define BASE_LOG_DEBUG
@@ -18,6 +19,93 @@
 #include <Eigen/LU>
 
 using namespace std;
+
+BOOST_AUTO_TEST_CASE(sonar_scan)
+{
+    base::samples::SonarScan sonar_scan;
+    base::samples::SonarBeam sonar_beam;
+
+    sonar_scan.init(50,100,base::Angle::fromDeg(20),base::Angle::fromDeg(1));
+    BOOST_CHECK(sonar_scan.data.size() == 50*100);
+    BOOST_CHECK(sonar_scan.getNumberOfBytes() == 50*100);
+    BOOST_CHECK(sonar_scan.getBinCount() == 50*100);
+    BOOST_CHECK(sonar_scan.number_of_beams == 50);
+    BOOST_CHECK(sonar_scan.number_of_bins == 100);
+    BOOST_CHECK(sonar_scan.speed_of_sound == 0);
+    BOOST_CHECK(sonar_scan.sampling_interval == 0);
+    BOOST_CHECK(sonar_scan.angular_resolution == base::Angle::fromDeg(1));
+    BOOST_CHECK(sonar_scan.start_bearing == base::Angle::fromDeg(20));
+    BOOST_CHECK(sonar_scan.beamwidth_vertical == base::Angle::fromRad(0));
+    BOOST_CHECK(sonar_scan.beamwidth_horizontal == base::Angle::fromRad(0));
+    BOOST_CHECK(sonar_scan.time_beams.empty() == true);
+    BOOST_CHECK(sonar_scan.polar_coordinates == true);
+
+    //all should be valid because no seperate time stamp for each beam was set
+    for(int i=20;i>-30;--i)
+        BOOST_CHECK(sonar_scan.hasSonarBeam(base::Angle::fromDeg(i)));
+
+    //wrong memory layout
+    BOOST_REQUIRE_THROW(sonar_scan.addSonarBeam(sonar_beam),std::runtime_error);
+    BOOST_REQUIRE_THROW(sonar_scan.getSonarBeam(base::Angle::fromRad(0),sonar_beam),std::runtime_error);
+
+    sonar_beam.beam.resize(101);
+    sonar_scan.toggleMemoryLayout();
+    //too many bins 
+    BOOST_REQUIRE_THROW(sonar_scan.addSonarBeam(sonar_beam),std::runtime_error);
+
+    sonar_beam.beam.resize(100);
+    sonar_beam.bearing = base::Angle::fromDeg(25);
+    //wrong bearing  
+    BOOST_REQUIRE_THROW(sonar_scan.addSonarBeam(sonar_beam,false),std::runtime_error);
+
+    //add sonar beam
+    sonar_beam.bearing = base::Angle::fromDeg(20);
+    sonar_beam.speed_of_sound = 1500;
+    sonar_beam.beamwidth_horizontal = 0.1;
+    sonar_beam.beamwidth_vertical = 0.2;
+    sonar_beam.sampling_interval = 0.01;
+    sonar_beam.time = base::Time::now();
+    for(int i=0;i<100;++i)
+        sonar_beam.beam[i]=i;
+    sonar_scan.addSonarBeam(sonar_beam,false);
+
+    sonar_beam.bearing = base::Angle::fromDeg(-29);
+    sonar_scan.addSonarBeam(sonar_beam,false);
+
+    BOOST_CHECK(sonar_scan.hasSonarBeam(base::Angle::fromDeg(20)));
+    for(int i=19;i>-29;--i)
+        BOOST_CHECK(!sonar_scan.hasSonarBeam(base::Angle::fromDeg(i)));
+    BOOST_CHECK(sonar_scan.hasSonarBeam(base::Angle::fromDeg(-29)));
+
+    base::samples::SonarBeam temp_beam;
+    BOOST_CHECK_THROW(sonar_scan.getSonarBeam(base::Angle::fromDeg(21),temp_beam),std::runtime_error);
+    sonar_scan.getSonarBeam(base::Angle::fromDeg(20),temp_beam);
+
+    BOOST_CHECK_SMALL(temp_beam.bearing.rad,sonar_beam.bearing.rad);
+    BOOST_CHECK(temp_beam.speed_of_sound == sonar_beam.speed_of_sound);
+    BOOST_CHECK(temp_beam.beamwidth_horizontal == sonar_beam.beamwidth_horizontal);
+    BOOST_CHECK(temp_beam.beamwidth_vertical == sonar_beam.beamwidth_vertical);
+    BOOST_CHECK(temp_beam.sampling_interval == sonar_beam.sampling_interval);
+    BOOST_CHECK(temp_beam.time == sonar_beam.time);
+    BOOST_CHECK(temp_beam.beam == sonar_beam.beam);
+
+    //toggleMemoryLayout
+    sonar_scan.toggleMemoryLayout();
+    for(int i=0;i<sonar_scan.number_of_bins;++i)
+        BOOST_CHECK(sonar_scan.data[i*sonar_scan.number_of_beams] == i);
+    for(int i=0;i<sonar_scan.number_of_bins;++i)
+        BOOST_CHECK(sonar_scan.data[sonar_scan.number_of_beams-1+i*sonar_scan.number_of_beams] == i);
+
+    sonar_scan.toggleMemoryLayout();
+    sonar_scan.getSonarBeam(base::Angle::fromDeg(20),temp_beam);
+    BOOST_CHECK_SMALL(temp_beam.bearing.rad,sonar_beam.bearing.rad);
+    BOOST_CHECK(temp_beam.speed_of_sound == sonar_beam.speed_of_sound);
+    BOOST_CHECK(temp_beam.beamwidth_horizontal == sonar_beam.beamwidth_horizontal);
+    BOOST_CHECK(temp_beam.beamwidth_vertical == sonar_beam.beamwidth_vertical);
+    BOOST_CHECK(temp_beam.sampling_interval == sonar_beam.sampling_interval);
+    BOOST_CHECK(temp_beam.time == sonar_beam.time);
+    BOOST_CHECK(temp_beam.beam == sonar_beam.beam);
+}
 
 BOOST_AUTO_TEST_CASE( time_test )
 {
@@ -410,4 +498,5 @@ BOOST_AUTO_TEST_CASE( rbs_validity )
     BOOST_CHECK(rbs.hasValidAngularVelocity());
     BOOST_CHECK(!rbs.hasValidAngularVelocityCovariance());
 }
+
 
