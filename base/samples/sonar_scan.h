@@ -14,6 +14,8 @@
 #include <stdexcept>
 
 #include "base/time.h"
+#include "base/angle.h"
+#include "base/samples/sonar_beam.h"
 
 namespace base { namespace samples { 
 
@@ -38,6 +40,12 @@ namespace base { namespace samples {
             SonarScan(const SonarScan &other,bool bcopy = true)
             {
                 init(other,bcopy);
+            }
+
+            SonarScan &operator=(const SonarScan &other)
+            {
+                init(other,true);
+                return *this;
             }
 
             //makes a copy of other
@@ -95,7 +103,8 @@ namespace base { namespace samples {
             {
                 return hasSonarBeam(sonar_beam.bearing);
             }
-            bool hasSonarBeam(const base::Angle bearing)const
+
+            bool hasSonarBeam(const Angle bearing)const
             {
                int index = beamIndexForBearing(bearing);
                if(index < 0)
@@ -110,6 +119,7 @@ namespace base { namespace samples {
                    return true;
                return false;
             }
+
 
             //adds a sonar beam to the sonar scan
             //throws an exception if the sonar scan cannot hold the sonar beam and resize is set to false
@@ -249,6 +259,22 @@ namespace base { namespace samples {
 
             inline const std::vector<uint8_t> &getData() const {
                 return this->data;
+            }
+
+
+            Angle getEndBearing()
+            {
+                return start_bearing+angular_resolution*number_of_beams;
+            }
+
+            Angle getStartBearing()
+            {
+                return start_bearing;
+            }
+
+            Angle getAngularResolution()
+            {
+                return angular_resolution;
             }
 
             //calculates the spatial resolution of the sonar scan in meter
