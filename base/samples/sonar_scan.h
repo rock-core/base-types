@@ -70,6 +70,7 @@ namespace base { namespace samples {
                 }
                 this->start_bearing = start_bearing;
                 this->angular_resolution = angular_resolution;
+                this->memory_layout_column = memory_layout_column;
                 reset(val);
             }
 
@@ -89,8 +90,10 @@ namespace base { namespace samples {
             //returns -1 if the sonar scan has no sonar beam for the given bearing 
             int beamIndexForBearing(const Angle bearing,bool range_check=true)const
             {
-               Angle temp_angle = start_bearing-bearing;
-               int index = round(temp_angle.rad/angular_resolution.rad);
+               double temp_rad = (start_bearing-bearing).rad;
+               if(temp_rad<0)
+                   temp_rad+=2.0*M_PI;
+               int index = round(temp_rad/angular_resolution.rad);
                if(range_check && (index < 0 || index >=(int) data.size()))
                    return -1;
                return index;
@@ -262,17 +265,17 @@ namespace base { namespace samples {
             }
 
 
-            Angle getEndBearing()
+            Angle getEndBearing()const
             {
-                return start_bearing+angular_resolution*number_of_beams;
+                return start_bearing-angular_resolution*(number_of_beams-1);
             }
 
-            Angle getStartBearing()
+            Angle getStartBearing()const
             {
                 return start_bearing;
             }
 
-            Angle getAngularResolution()
+            Angle getAngularResolution()const
             {
                 return angular_resolution;
             }
