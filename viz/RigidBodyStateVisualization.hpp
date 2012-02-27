@@ -29,7 +29,7 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
 	void updateDataIntern( const base::samples::RigidBodyState& state );
         base::samples::RigidBodyState state;
     
-    public: 
+    public slots: 
         bool isPositionDisplayForced() const;
         void setPositionDisplayForceFlag(bool flag);
         bool isOrientationDisplayForced() const;
