@@ -94,6 +94,17 @@ namespace odometry
 	 * as an axis angle vector on a manifold. 
 	 */
 	virtual Eigen::Matrix3d getOrientationError() = 0;
+
+        Matrix6d getPoseError()
+        {
+            Matrix6d cov;
+            cov << 
+                getOrientationError(), Eigen::Matrix3d::Zero(),
+                Eigen::Matrix3d::Zero(), getPositionError();
+
+            return cov; 
+        }
+
     };
 
     class Gaussian2D
