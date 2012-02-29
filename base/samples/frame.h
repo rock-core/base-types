@@ -36,14 +36,14 @@ namespace base { namespace samples { namespace frame {
 	    frame_size_t() : width(0), height(0) {}
 	    frame_size_t(uint16_t w, uint16_t h) : width(w), height(h) {}
 
-            bool operator==(const frame_size_t &other)
+            bool operator==(const frame_size_t &other) const
             {
               if(width == other.width && height==other.height)
                 return true;
               return false;
             };
 
-            bool operator!=(const frame_size_t &other)
+            bool operator!=(const frame_size_t &other) const
             {
               return !(*this == other);
             };
