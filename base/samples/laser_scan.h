@@ -5,13 +5,11 @@
 #define EIGEN_DONT_VECTORIZE
 #endif
 
-#ifndef __orogen
 #include <vector>
 #include <boost/cstdint.hpp>
 #include <Eigen/Geometry>
 #include <stdexcept>
 #include <limits>
-#endif
 
 #ifdef __GNUC__
     #define DEPRECATED __attribute__ ((deprecated))
@@ -33,9 +31,7 @@ namespace base { namespace samples {
     };
 
     struct LaserScan {
-#ifndef __orogen
         typedef boost::uint32_t uint32_t;
-#endif
 
         /** The timestamp of this reading. The timestamp is the time at which the
          * laser passed the zero step (i.e. the step at the back of the device,
@@ -73,7 +69,6 @@ namespace base { namespace samples {
          */
         std::vector<float> remission;
 
-#ifndef __orogen
         LaserScan()
             : start_angle(0), angular_resolution(0), speed(0) {}
             
@@ -195,7 +190,6 @@ namespace base { namespace samples {
 	    
 	    return pointCloud;
 	}
-#endif
     };
 }} // namespaces
 
