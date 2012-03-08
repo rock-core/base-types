@@ -9,7 +9,7 @@
 #include <boost/cstdint.hpp>
 #include <Eigen/Geometry>
 #include <stdexcept>
-#include <limits>
+#include <base/float.h>
 
 #ifdef __GNUC__
     #define DEPRECATED __attribute__ ((deprecated))
