@@ -130,7 +130,7 @@ namespace base { namespace samples {
 			point = transform * point;
 			points.push_back(point);
 		    } else {
-			points.push_back(Eigen::Vector3d(std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()));
+			points.push_back(Eigen::Vector3d(base::unknown<double>(), base::unknown<double>(), base::unknown<double>()));
 		    }
 		}
 	    } else {
