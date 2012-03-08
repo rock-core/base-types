@@ -183,6 +183,7 @@ namespace base { namespace samples {
 	std::vector<Eigen::Vector3d> convertScanToPointCloud(const Eigen::Affine3d& transform) const DEPRECATED
 	{
 	    std::vector<Eigen::Vector3d> pointCloud;
+            pointCloud.reserve(ranges.size());
 	    
 	    for(unsigned int i = 0; i < ranges.size(); i++) {
 		Eigen::Vector3d point;
