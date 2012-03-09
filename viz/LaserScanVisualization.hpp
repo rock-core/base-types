@@ -17,8 +17,6 @@ class LaserScanVisualization : public Vizkit3DPlugin<base::samples::LaserScan>, 
 
     Q_PROPERTY(bool YForward READ isYForwardModeEnabled WRITE setYForwardMode)
     Q_PROPERTY(bool Colorize READ isColorizeEnabled WRITE setColorize)
-    Q_PROPERTY(bool KeepOldData READ isKeepOldDataEnabled WRITE setKeepOldData)
-    Q_PROPERTY(int MaxOldData READ getMaxOldData WRITE setMaxOldData)
     Q_PROPERTY(double ColorizeInterval READ getColorizeInterval WRITE setColorizeInterval)
     Q_PROPERTY(bool ShowPolygon READ isShowPolygonEnabled WRITE setShowPolygon)
     bool mYForward;

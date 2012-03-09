@@ -145,11 +145,11 @@ osg::ref_ptr<osg::Node> LaserScanVisualization::cloneCurrentViz()
 bool LaserScanVisualization::isYForwardModeEnabled() const { return mYForward; }
 void LaserScanVisualization::setYForwardMode(bool enabled) { mYForward = enabled; }
 
-void LaserScanVisualization::setColorize(bool value){colorize = value;}
+void LaserScanVisualization::setColorize(bool value){colorize = value;emit propertyChanged("Colorize");}
 bool LaserScanVisualization::isColorizeEnabled()const { return colorize; }
 
-void LaserScanVisualization::setShowPolygon(bool value){show_polygon = value;}
+void LaserScanVisualization::setShowPolygon(bool value){show_polygon = value;emit propertyChanged("ShowPolygon");}
 bool LaserScanVisualization::isShowPolygonEnabled()const { return show_polygon; }
 
-void LaserScanVisualization::setColorizeInterval(double value){colorize_interval = 1.0/value;}
+void LaserScanVisualization::setColorizeInterval(double value){colorize_interval = 1.0/value;emit propertyChanged("ColorizeInterval");}
 double LaserScanVisualization::getColorizeInterval()const { return 1.0/colorize_interval; }
