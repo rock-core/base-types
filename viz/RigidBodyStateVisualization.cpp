@@ -128,7 +128,7 @@ void RigidBodyStateVisualization::loadModel(std::string const& path)
         {
             str = str.substr(0,found);
             if(!str.empty())
-                setPluginName(str);
+                setPluginName(QString::fromStdString(str));
         }
     }
 }
