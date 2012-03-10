@@ -113,6 +113,24 @@ void RigidBodyStateVisualization::loadModel(std::string const& path)
 {
     osg::ref_ptr<osg::Node> model = osgDB::readNodeFile(path);
     body_model = model;
+    //set plugin name
+    if(vizkit3d_plugin_name.isEmpty())
+    {
+        size_t found;
+        std::string str;
+        found = path.find_last_of("/\\");
+        if(found == std::string::npos)
+            str = path;
+        else
+            str = path.substr(found+1);
+        found = str.find_last_of(".");
+        if(found != std::string::npos)
+        {
+            str = str.substr(0,found);
+            if(!str.empty())
+                setPluginName(str);
+        }
+    }
 }
 
 void RigidBodyStateVisualization::displayCovariance(bool enable)
