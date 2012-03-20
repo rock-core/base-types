@@ -79,7 +79,7 @@ osg::ref_ptr<osg::Group> RigidBodyStateVisualization::createSimpleBody(double si
     c2->setRotation(osg::Quat(M_PI/2.0, osg::Vec3d(1,0,0)));
     osg::ref_ptr<osg::ShapeDrawable> c2d = new osg::ShapeDrawable(c2);
     c2g->addDrawable(c2d);
-    setColor(osg::Vec4f(1.0, 0, 0, 1.0), c2g);
+    setColor(osg::Vec4f(0.0, 1.0, 0, 1.0), c2g);
     group->addChild(c2g);
 
     //east
@@ -88,7 +88,7 @@ osg::ref_ptr<osg::Group> RigidBodyStateVisualization::createSimpleBody(double si
     c3->setRotation(osg::Quat(M_PI/2.0, osg::Vec3d(0,1,0)));
     osg::ref_ptr<osg::ShapeDrawable> c3d = new osg::ShapeDrawable(c3);
     c3g->addDrawable(c3d);
-    setColor(osg::Vec4f(0.0, 1.0, 0, 1.0), c3g);
+    setColor(osg::Vec4f(1.0, 0.0, 0, 1.0), c3g);
     group->addChild(c3g);
 
     return group;
