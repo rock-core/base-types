@@ -21,7 +21,7 @@
 #include <base/logging/logging_printf_style.h>
 #include <sstream>
 
-#ifndef Release
+#if !defined(Release) && !defined(NDEBUG)
 // To allow for the streaming syntax, relying on 'dead code elimination'
 // of the compiler, i.e. given the if prio > BASE_LOG_PRIORITY then the else branch
 // is never reachable. Compilers with 'dead code elimination'

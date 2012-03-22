@@ -76,7 +76,7 @@
 #define LOG_CONFIGURE(PRIO, STREAM)
 #endif // BASE_LONG_NAMES
 
-#ifndef Release
+#if !defined(Release) && !defined(NDEBUG)
 
 #ifndef BASE_LOG_NAMESPACE
 #warning "BASE_LOG_NAMESPACE is not set - will be using empty namespaces"
