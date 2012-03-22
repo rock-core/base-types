@@ -154,12 +154,12 @@
 
 #if BASE_LOG_PRIORITY >= 4 
 #undef LOG_INFO
-#define LOG_INFO(FORMAT, ARGS...) __LOG(INFO, FORMAT, ## ARGS)
+#define LOG_INFO(FORMAT, ARGS...) __LOG(INFO_P, FORMAT, ## ARGS)
 #endif
 
 #if BASE_LOG_PRIORITY >= 5
 #undef LOG_DEBUG
-#define LOG_DEBUG(FORMAT, ARGS...) __LOG(DEBUG, FORMAT, ## ARGS)  
+#define LOG_DEBUG(FORMAT, ARGS...) __LOG(DEBUG_P, FORMAT, ## ARGS)  
 #endif
 
 #endif // BASE_LONG_NAMES
