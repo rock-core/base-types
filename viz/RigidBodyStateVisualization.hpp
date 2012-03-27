@@ -20,6 +20,8 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
 	RigidBodyStateVisualization();	
 	virtual ~RigidBodyStateVisualization();
 
+        Q_INVOKABLE void updateData( const base::samples::RigidBodyState& state )
+        { return Vizkit3DPlugin<base::samples::RigidBodyState>::updateData(state); }
         Q_INVOKABLE void updateRigidBodyState( const base::samples::RigidBodyState& state )
         { return updateData(state); }
 

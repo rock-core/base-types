@@ -18,6 +18,8 @@ class WaypointVisualization: public Vizkit3DPlugin<base::Waypoint>
     public:
 	WaypointVisualization();
 	Q_INVOKABLE void updateWp(const base::Waypoint &wp);
+	Q_INVOKABLE void updateData(const base::Waypoint &wp)
+	{Vizkit3DPlugin<base::Waypoint>::updateData(wp);};
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
 	virtual void updateMainNode( osg::Node* node );
