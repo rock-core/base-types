@@ -55,19 +55,22 @@ macro(add_python_library TARGET_NAME)
         set(LIB_TARGET_NAME _${TARGET_NAME})
     endif()
 
-    # Add the shared library imported into python
-    ADD_LIBRARY(${LIB_TARGET_NAME} SHARED ${${TARGET_NAME}_SOURCES} ${TARGET_NAME}_PyBuild)
-    TARGET_LINK_LIBRARIES(${LIB_TARGET_NAME} ${${TARGET_NAME}_DEPS} ${Boost_LIBRARIES})
-    SET_TARGET_PROPERTIES(${LIB_TARGET_NAME} PROPERTIES PREFIX "")
-
-    # Installation of shared library
-    if(NOT ${${TARGET_NAME}_NOINSTALL_FOUND})
-        if(${${TARGET_NAME}_PREFIX_FOUND})
-            INSTALL( TARGETS ${LIB_TARGET_NAME} LIBRARY DESTINATION ${PREFIX}/${TARGET_NAME})
-        else()
-            INSTALL( TARGETS ${LIB_TARGET_NAME} LIBRARY DESTINATION ${PYTHON_SITE_PATH}/${TARGET_NAME})
+    # Only if sources are there
+    if(${${TARGET_NAME}_SOURCES})
+        # Add the shared library imported into python
+        ADD_LIBRARY(${LIB_TARGET_NAME} SHARED ${${TARGET_NAME}_SOURCES} ${TARGET_NAME}_PyBuild)
+        TARGET_LINK_LIBRARIES(${LIB_TARGET_NAME} ${${TARGET_NAME}_DEPS} ${Boost_LIBRARIES})
+        SET_TARGET_PROPERTIES(${LIB_TARGET_NAME} PROPERTIES PREFIX "")
+        # Installation of shared library
+        if(NOT ${${TARGET_NAME}_NOINSTALL_FOUND})
+            if(${${TARGET_NAME}_PREFIX_FOUND})
+                INSTALL( TARGETS ${LIB_TARGET_NAME} LIBRARY DESTINATION ${PREFIX}/${TARGET_NAME})
+            else()
+                INSTALL( TARGETS ${LIB_TARGET_NAME} LIBRARY DESTINATION ${PYTHON_SITE_PATH}/${TARGET_NAME})
+            endif()
         endif()
     endif()
+    
 
     # The package install command
     SET(${TARGET_NAME}_PYINSTALLCMD 
