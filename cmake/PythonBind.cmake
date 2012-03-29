@@ -40,6 +40,9 @@ include(ListMacros)
 # ${TARGET_NAME}
 macro(add_python_library TARGET_NAME)
     list_keys_split(${TARGET_NAME} "SOURCES;PYSCRIPTS;DEPS;PREFIX;PYDIR;NOINSTALL;NOPRE" ${ARGN})
+
+    cmake_policy(PUSH)
+    cmake_policy(SET CMP0012 NEW)
    
     # Command to build the python package script wise
     ADD_CUSTOM_COMMAND(OUTPUT ${TARGET_NAME}_PyBuild
@@ -55,19 +58,24 @@ macro(add_python_library TARGET_NAME)
         set(LIB_TARGET_NAME _${TARGET_NAME})
     endif()
 
-    # Add the shared library imported into python
-    ADD_LIBRARY(${LIB_TARGET_NAME} SHARED ${${TARGET_NAME}_SOURCES} ${TARGET_NAME}_PyBuild)
-    TARGET_LINK_LIBRARIES(${LIB_TARGET_NAME} ${${TARGET_NAME}_DEPS} ${Boost_LIBRARIES})
-    SET_TARGET_PROPERTIES(${LIB_TARGET_NAME} PROPERTIES PREFIX "")
-
-    # Installation of shared library
-    if(NOT ${${TARGET_NAME}_NOINSTALL_FOUND})
-        if(${${TARGET_NAME}_PREFIX_FOUND})
-            INSTALL( TARGETS ${LIB_TARGET_NAME} LIBRARY DESTINATION ${PREFIX}/${TARGET_NAME})
-        else()
-            INSTALL( TARGETS ${LIB_TARGET_NAME} LIBRARY DESTINATION ${PYTHON_SITE_PATH}/${TARGET_NAME})
+    # Only if sources are there
+    if(${${TARGET_NAME}_SOURCES_FOUND})
+        # Add the shared library imported into python
+        ADD_LIBRARY(${LIB_TARGET_NAME} SHARED ${${TARGET_NAME}_SOURCES} ${TARGET_NAME}_PyBuild)
+        TARGET_LINK_LIBRARIES(${LIB_TARGET_NAME} ${${TARGET_NAME}_DEPS} ${Boost_LIBRARIES})
+        SET_TARGET_PROPERTIES(${LIB_TARGET_NAME} PROPERTIES PREFIX "")
+        # Installation of shared library
+        if(NOT ${${TARGET_NAME}_NOINSTALL_FOUND})
+            if(${${TARGET_NAME}_PREFIX_FOUND})
+                INSTALL( TARGETS ${LIB_TARGET_NAME} LIBRARY DESTINATION ${PREFIX}/${TARGET_NAME})
+            else()
+                INSTALL( TARGETS ${LIB_TARGET_NAME} LIBRARY DESTINATION ${PYTHON_SITE_PATH}/${TARGET_NAME})
+            endif()
         endif()
-    endif()
+    else(${${TARGET_NAME}_SOURCES_FOUND})
+        message(STATUS "PythonBind: No lib generated.")
+    endif(${${TARGET_NAME}_SOURCES_FOUND})
+    
 
     # The package install command
     SET(${TARGET_NAME}_PYINSTALLCMD 
@@ -78,6 +86,8 @@ macro(add_python_library TARGET_NAME)
         INSTALL(CODE "execute_process(COMMAND ${${TARGET_NAME}_PYINSTALLCMD} 
                WORKING_DIRECTORY ${${TARGET_NAME}_PYDIR})")
     endif()
+    
+    cmake_policy(POP)
 
 endmacro(add_python_library)
 
