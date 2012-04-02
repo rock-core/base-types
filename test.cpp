@@ -70,6 +70,8 @@ BOOST_AUTO_TEST_CASE(sonar_scan)
     sonar_scan.addSonarBeam(sonar_beam,false);
 
     sonar_beam.bearing = base::Angle::fromDeg(-29);
+    for(int i=0;i<100;++i)
+        sonar_beam.beam[i]=23+i;
     sonar_scan.addSonarBeam(sonar_beam,false);
 
     BOOST_CHECK(sonar_scan.hasSonarBeam(base::Angle::fromDeg(20)));
@@ -79,9 +81,9 @@ BOOST_AUTO_TEST_CASE(sonar_scan)
 
     base::samples::SonarBeam temp_beam;
     BOOST_CHECK_THROW(sonar_scan.getSonarBeam(base::Angle::fromDeg(21),temp_beam),std::runtime_error);
-    sonar_scan.getSonarBeam(base::Angle::fromDeg(20),temp_beam);
+    sonar_scan.getSonarBeam(base::Angle::fromDeg(-29),temp_beam);
 
-    BOOST_CHECK_SMALL(temp_beam.bearing.rad,sonar_beam.bearing.rad);
+    BOOST_CHECK_SMALL(temp_beam.bearing.rad-sonar_beam.bearing.rad,0.0001);
     BOOST_CHECK(temp_beam.speed_of_sound == sonar_beam.speed_of_sound);
     BOOST_CHECK(temp_beam.beamwidth_horizontal == sonar_beam.beamwidth_horizontal);
     BOOST_CHECK(temp_beam.beamwidth_vertical == sonar_beam.beamwidth_vertical);
@@ -94,11 +96,10 @@ BOOST_AUTO_TEST_CASE(sonar_scan)
     for(int i=0;i<sonar_scan.number_of_bins;++i)
         BOOST_CHECK(sonar_scan.data[i*sonar_scan.number_of_beams] == i);
     for(int i=0;i<sonar_scan.number_of_bins;++i)
-        BOOST_CHECK(sonar_scan.data[sonar_scan.number_of_beams-1+i*sonar_scan.number_of_beams] == i);
+        BOOST_CHECK(sonar_scan.data[sonar_scan.number_of_beams-1+i*sonar_scan.number_of_beams] == i+23);
 
     sonar_scan.toggleMemoryLayout();
-    sonar_scan.getSonarBeam(base::Angle::fromDeg(20),temp_beam);
-    BOOST_CHECK_SMALL(temp_beam.bearing.rad,sonar_beam.bearing.rad);
+    sonar_scan.getSonarBeam(base::Angle::fromDeg(-29),temp_beam);
     BOOST_CHECK(temp_beam.speed_of_sound == sonar_beam.speed_of_sound);
     BOOST_CHECK(temp_beam.beamwidth_horizontal == sonar_beam.beamwidth_horizontal);
     BOOST_CHECK(temp_beam.beamwidth_vertical == sonar_beam.beamwidth_vertical);
