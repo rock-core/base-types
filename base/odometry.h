@@ -9,8 +9,6 @@
 #include <base/time.h>
 #include <base/pose.h>
 
-//namespace base 
-//{
 namespace odometry
 {
 
@@ -136,6 +134,10 @@ namespace odometry
     };
 
 }
-//}
+
+namespace base
+{
+    namespace odometry = ::odometry;
+}
 
 #endif
