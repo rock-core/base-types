@@ -114,7 +114,7 @@ void SplineBase::getPointAndTangentHelper(double* result, double _param, bool wi
 
     if (curve)
     {
-        int leftknot; // Not needed
+        int leftknot = 0; // Not needed
         int status;
         s1227(curve, (with_tangent ? 1 : 0), _param,
                 &leftknot, result, &status); // Gets the point
@@ -453,10 +453,10 @@ void SplineBase::findClosestPoints(double const* ref_point, vector<double>& _res
         return;
     }
 
-    int points_count;
-    double* points;
-    int curves_count;
-    SISLIntcurve** curves;
+    int points_count = 0;
+    double* points = NULL;
+    int curves_count = 0;
+    SISLIntcurve** curves = NULL;
 
     // Finds the closest point on the curve
     int status;
@@ -690,6 +690,10 @@ double SplineBase::join(SplineBase const& other, double tolerance, bool with_tan
     if (other.getDimension() != dim)
         throw std::runtime_error("incompatible dimensions in #join. 'this' is of dimension " + lexical_cast<string>(getDimension()) + " while 'other' is of dimension " + lexical_cast<string>(other.getDimension()));
 
+    
+    if(&other == this)
+	throw std::runtime_error("Joining Spline with itself");
+    
     std::vector<double> joining_points;
     int joining_types[4] = { 0, 0, 0, 0 };
 
@@ -788,6 +792,10 @@ double SplineBase::join(SplineBase const& other, double tolerance, bool with_tan
     double* gpar = NULL;
     int jnbpar;
     int ret;
+    
+    //be shure joining_Types has the right size
+    assert(joining_points.size() / dim <= 4);
+
     s1356(&joining_points[0], joining_points.size() / dim, dim, joining_types, 0, 0, 1, getCurveOrder(), 0,
             &end_par, &raw_intermediate_curve, &gpar, &jnbpar, &ret);
     if (ret != 0)
@@ -906,12 +914,12 @@ base::Matrix3d SplineBase::getFrenetFrame(double _param)
     if (!curve)
         throw std::runtime_error("getFrenetFrame() called on an empty or degenerate curve");
 
-    double p;    // does nothing
+    double p[3];    // does nothing
     double t[3], n[3], b[3]; // Frame axis
 
     // Finds the frenet frame
     int status;
-    s2559(curve, &_param, 1, &p, t, n, b, &status);
+    s2559(curve, &_param, 1, p, t, n, b, &status);
 
     // Writes the frame to a matrix
     Matrix3d frame;
