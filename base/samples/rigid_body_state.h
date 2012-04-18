@@ -123,15 +123,31 @@ namespace base { namespace samples {
          */
 	void invalidate() {
 	    invalidateOrientation();
+            invalidateOrientationCovariance();
 	    invalidatePosition();
+            invalidatePositionCovariance();
 	    invalidateVelocity();
+            invalidateVelocityCovariance();
 	    invalidateAngularVelocity();
-	    
-	    position.setZero();
-	    velocity.setZero();
-	    orientation = Eigen::Quaterniond::Identity();
-	    angular_velocity.setZero();
+            invalidateAngularVelocityCovariance();
 	}
+	
+	/**
+         * Initializes the rigid body state unknown with Zero for the
+         * position, velocity and angular velocity, Identity for the orientation
+         * and infinity for all covariances.
+         */
+	void initUnknown()
+        {
+            position.setZero();
+            velocity.setZero();
+            orientation = Eigen::Quaterniond::Identity();
+            angular_velocity.setZero();
+            cov_position = setValueUnknown();
+            cov_orientation = setValueUnknown();
+            cov_velocity = setValueUnknown();
+            cov_angular_velocity = setValueUnknown();
+        }
 
         /** Helper method that checks if a value is valid (not NaN anywhere). */
         static bool isValidValue(base::Vector3d const& vec)

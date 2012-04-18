@@ -498,39 +498,37 @@ BOOST_AUTO_TEST_CASE( frame_test )
 BOOST_AUTO_TEST_CASE( rbs_validity )
 {
     base::samples::RigidBodyState rbs;
-    rbs.invalidate();
-    BOOST_CHECK(!rbs.hasValidPosition());
-    BOOST_CHECK(rbs.hasValidPositionCovariance());
-    BOOST_CHECK(!rbs.hasValidOrientation());
-    BOOST_CHECK(rbs.hasValidOrientationCovariance());
-    BOOST_CHECK(!rbs.hasValidAngularVelocity());
-    BOOST_CHECK(rbs.hasValidAngularVelocityCovariance());
-
-    rbs.invalidate();
-    rbs.invalidatePositionCovariance();
+    rbs.initUnknown();
+    // check if values are unknown
+    BOOST_CHECK(!rbs.isKnownValue(rbs.cov_position));
+    BOOST_CHECK(!rbs.isKnownValue(rbs.cov_velocity));
+    BOOST_CHECK(!rbs.isKnownValue(rbs.cov_orientation));
+    BOOST_CHECK(!rbs.isKnownValue(rbs.cov_angular_velocity));
+    BOOST_CHECK(rbs.position == Eigen::Vector3d::Zero());
+    BOOST_CHECK(rbs.velocity == Eigen::Vector3d::Zero());
+    BOOST_CHECK(rbs.angular_velocity == Eigen::Vector3d::Zero());
+    BOOST_CHECK(rbs.orientation.x() == 0 && rbs.orientation.y() == 0 && 
+                rbs.orientation.z() == 0 && rbs.orientation.w() == 1);
+    
+    // check if values are valid
     BOOST_CHECK(rbs.hasValidPosition());
-    BOOST_CHECK(!rbs.hasValidPositionCovariance());
-    BOOST_CHECK(!rbs.hasValidOrientation());
-    BOOST_CHECK(rbs.hasValidOrientationCovariance());
-    BOOST_CHECK(!rbs.hasValidAngularVelocity());
-    BOOST_CHECK(rbs.hasValidAngularVelocityCovariance());
-
-    rbs.invalidate();
-    rbs.invalidateOrientationCovariance();
-    BOOST_CHECK(!rbs.hasValidPosition());
     BOOST_CHECK(rbs.hasValidPositionCovariance());
     BOOST_CHECK(rbs.hasValidOrientation());
-    BOOST_CHECK(!rbs.hasValidOrientationCovariance());
-    BOOST_CHECK(!rbs.hasValidAngularVelocity());
-    BOOST_CHECK(rbs.hasValidAngularVelocityCovariance());
-
-    rbs.invalidate();
-    rbs.invalidateAngularVelocityCovariance();
-    BOOST_CHECK(!rbs.hasValidPosition());
-    BOOST_CHECK(rbs.hasValidPositionCovariance());
-    BOOST_CHECK(!rbs.hasValidOrientation());
     BOOST_CHECK(rbs.hasValidOrientationCovariance());
+    BOOST_CHECK(rbs.hasValidVelocity());
+    BOOST_CHECK(rbs.hasValidVelocityCovariance());
     BOOST_CHECK(rbs.hasValidAngularVelocity());
+    BOOST_CHECK(rbs.hasValidAngularVelocityCovariance());
+    
+    rbs.invalidate();
+    // check if values are invalid
+    BOOST_CHECK(!rbs.hasValidPosition());
+    BOOST_CHECK(!rbs.hasValidPositionCovariance());
+    BOOST_CHECK(!rbs.hasValidOrientation());
+    BOOST_CHECK(!rbs.hasValidOrientationCovariance());
+    BOOST_CHECK(!rbs.hasValidVelocity());
+    BOOST_CHECK(!rbs.hasValidVelocityCovariance());
+    BOOST_CHECK(!rbs.hasValidAngularVelocity());
     BOOST_CHECK(!rbs.hasValidAngularVelocityCovariance());
 }
 
