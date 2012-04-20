@@ -79,7 +79,6 @@
 #if !defined(Release) && !defined(NDEBUG)
 
 #ifndef BASE_LOG_NAMESPACE
-#warning "BASE_LOG_NAMESPACE is not set - will be using empty namespaces"
 #define BASE_LOG_NAMESPACE ""
 #endif // BASE_LOG_NAMESPACE
 // The debug flag BASE_LOG_NAMESPACE needs to be converted to a string
