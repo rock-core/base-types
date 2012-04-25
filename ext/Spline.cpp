@@ -119,6 +119,7 @@ public:
 void Init_spline_ext(Rice::Module& base_m)
 {
     typedef std::vector<double>(RubySpline::*SimplifySelector)(double);
+    typedef void(SplineBase::*Append)(SplineBase const&,double);
     Data_Type<SplineBase> rb_SplineBase = define_class_under<SplineBase>(base_m, "SplineBase")
         .define_constructor(Constructor<SplineBase,int,double,int>(),
                 (Arg("dimension"), Arg("geometric_resolution") = 0.1, Arg("order") = 3))
@@ -143,7 +144,7 @@ void Init_spline_ext(Rice::Module& base_m)
         .define_method("coordinate_stride", &SplineBase::getCoordinatesStride)
         .define_method("join", &SplineBase::join, (Arg("curve"), Arg("tolerance") = static_cast<double>(0), Arg("with_tangents") = true))
         .define_method("do_split", &SplineBase::split)
-        .define_method("append", &SplineBase::append);
+        .define_method("append", static_cast<Append>(&SplineBase::append), Arg("tolerance") = static_cast<double>(1e-6));
 
     Data_Type<RubySpline> rb_Spline = define_class_under<RubySpline, SplineBase>(base_m, "Spline")
         .define_constructor(Constructor<RubySpline,int,double,int>(),
