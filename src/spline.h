@@ -136,7 +136,7 @@ namespace geometry {
          *
          * @see join
          */
-        void append(SplineBase const& other);
+        void append(SplineBase const& other, double tolerance = 1e-6);
 
         /** Joins \c this and \c other
          *
