@@ -632,6 +632,11 @@ static double point_distance(double const* p0, double const* p1, int dim)
     return sqrt(result);
 }
 
+void SplineBase::append(SplineBase const& other)
+{
+    append(other, 1e-6);
+}
+
 void SplineBase::append(SplineBase const& other, double tolerance)
 {
     if (isEmpty())

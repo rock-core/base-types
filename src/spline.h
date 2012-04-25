@@ -129,6 +129,8 @@ namespace geometry {
          */
         void reverse();
 
+        void append(SplineBase const& other);
+
         /** Appends @c other at the end of @c this.
          *
          * \c other is translated so that other's start point is equal to \c
@@ -136,7 +138,7 @@ namespace geometry {
          *
          * @see join
          */
-        void append(SplineBase const& other, double tolerance = 1e-6);
+        void append(SplineBase const& other, double tolerance);
 
         /** Joins \c this and \c other
          *
