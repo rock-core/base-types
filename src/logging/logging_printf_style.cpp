@@ -134,12 +134,11 @@ void Logger::log(Priority priority, const char* function, const char* file, int 
 {
     if(priority <= mPriority)
     {
-        int n;	
         char buffer[1024];
         va_list arguments;
 
         va_start(arguments, format);
-        n = vsnprintf(buffer, sizeof(buffer), format, arguments);
+        vsnprintf(buffer, sizeof(buffer), format, arguments);
         va_end(arguments);
 
         logBuffer(priority,function,file,line,name_space,buffer);

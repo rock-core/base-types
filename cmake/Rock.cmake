@@ -45,19 +45,23 @@ function(rock_add_source_dir DIR TARGET_DIR)
     add_subdirectory(${DIR})
 endfunction()
 
+macro(rock_doxygen)
+    find_package(Doxygen)
+    if (DOXYGEN_FOUND)
+        if (DOXYGEN_DOT_EXECUTABLE)
+            SET(DOXYGEN_DOT_FOUND YES)
+        elSE(DOXYGEN_DOT_EXECUTABLE)
+            SET(DOXYGEN_DOT_FOUND NO)
+            SET(DOXYGEN_DOT_EXECUTABLE "")
+        endif(DOXYGEN_DOT_EXECUTABLE)
+        configure_file(Doxyfile.in Doxyfile @ONLY)
+        add_custom_target(doc doxygen Doxyfile)
+    endif(DOXYGEN_FOUND)
+endmacro()
+
 macro(rock_standard_layout)
     if (EXISTS ${PROJECT_SOURCE_DIR}/Doxyfile.in)
-        find_package(Doxygen)
-        if (DOXYGEN_FOUND)
-            if (DOXYGEN_DOT_EXECUTABLE)
-                SET(DOXYGEN_DOT_FOUND YES)
-            elSE(DOXYGEN_DOT_EXECUTABLE)
-                SET(DOXYGEN_DOT_FOUND NO)
-                SET(DOXYGEN_DOT_EXECUTABLE "")
-            endif(DOXYGEN_DOT_EXECUTABLE)
-            configure_file(Doxyfile.in Doxyfile @ONLY)
-            add_custom_target(doc doxygen Doxyfile)
-        endif(DOXYGEN_FOUND)
+        rock_doxygen()
     endif()
 
     if(IS_DIRECTORY ${PROJECT_SOURCE_DIR}/src)
@@ -321,11 +325,12 @@ endmacro()
 # DEPS_CMAKE: list of packages which can be found with CMake's find_package,
 # that the library depends upon. It is assumed that the Find*.cmake scripts
 # follow the cmake accepted standard for variable naming
-# MOC: if the library is Qt-based, a list of either source or header files.
-# If headers are listed, these headers should be processed by moc, with the
-# resulting implementation files are built into the library. If they are source
-# files, they get added to the library and the corresponding header file is
-# passed to moc.
+# MOC: if the library is Qt-based, this is a list of either source or header
+# files of classes that need to be passed through Qt's moc compiler.  If headers
+# are listed, these headers should be processed by moc, with the resulting
+# implementation files are built into the library. If they are source files,
+# they get added to the library and the corresponding header file is passed to
+# moc.
 function(rock_executable TARGET_NAME)
     rock_target_definition(${TARGET_NAME} ${ARGN})
 

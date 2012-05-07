@@ -9,8 +9,6 @@
 #include <base/time.h>
 #include <base/pose.h>
 
-namespace base 
-{
 namespace odometry
 {
 
@@ -82,7 +80,7 @@ namespace odometry
 	 * return the pose delta in the body fixed frame of the previous
 	 * state. 
 	 */
-	virtual Pose getPoseDelta() = 0;
+	virtual base::Pose getPoseDelta() = 0;
 	
 	/**
 	 * returns the covariance matrix of the linear velocity 
@@ -94,12 +92,23 @@ namespace odometry
 	 * as an axis angle vector on a manifold. 
 	 */
 	virtual Eigen::Matrix3d getOrientationError() = 0;
+
+        base::Matrix6d getPoseError()
+        {
+            base::Matrix6d cov;
+            cov << 
+                getOrientationError(), Eigen::Matrix3d::Zero(),
+                Eigen::Matrix3d::Zero(), getPositionError();
+
+            return cov; 
+        }
+
     };
 
     class Gaussian2D
     {
     public:
-	virtual Pose2D getPoseDelta2D() = 0;
+	virtual base::Pose2D getPoseDelta2D() = 0;
 	virtual Eigen::Matrix2d getPositionError2D() = 0;
 	virtual double getOrientationError2D() = 0;
     };
@@ -111,7 +120,7 @@ namespace odometry
     class Sampling2D
     {
     public:
-	virtual Pose2D getPoseDeltaSample2D() = 0;
+	virtual base::Pose2D getPoseDeltaSample2D() = 0;
     };
 
     /** 
@@ -121,10 +130,14 @@ namespace odometry
     class Sampling3D
     {
     public:
-	virtual Pose getPoseDeltaSample() = 0;
+	virtual base::Pose getPoseDeltaSample() = 0;
     };
 
 }
+
+namespace base
+{
+    namespace odometry = ::odometry;
 }
 
 #endif

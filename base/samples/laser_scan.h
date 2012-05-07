@@ -5,13 +5,11 @@
 #define EIGEN_DONT_VECTORIZE
 #endif
 
-#ifndef __orogen
 #include <vector>
 #include <boost/cstdint.hpp>
 #include <Eigen/Geometry>
 #include <stdexcept>
-#include <limits>
-#endif
+#include <base/float.h>
 
 #ifdef __GNUC__
     #define DEPRECATED __attribute__ ((deprecated))
@@ -33,9 +31,7 @@ namespace base { namespace samples {
     };
 
     struct LaserScan {
-#ifndef __orogen
         typedef boost::uint32_t uint32_t;
-#endif
 
         /** The timestamp of this reading. The timestamp is the time at which the
          * laser passed the zero step (i.e. the step at the back of the device,
@@ -73,7 +69,6 @@ namespace base { namespace samples {
          */
         std::vector<float> remission;
 
-#ifndef __orogen
         LaserScan()
             : start_angle(0), angular_resolution(0), speed(0) {}
             
@@ -130,7 +125,7 @@ namespace base { namespace samples {
 			point = transform * point;
 			points.push_back(point);
 		    } else {
-			points.push_back(Eigen::Vector3d(std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()));
+			points.push_back(Eigen::Vector3d(base::unknown<double>(), base::unknown<double>(), base::unknown<double>()));
 		    }
 		}
 	    } else {
@@ -183,6 +178,7 @@ namespace base { namespace samples {
 	std::vector<Eigen::Vector3d> convertScanToPointCloud(const Eigen::Affine3d& transform) const DEPRECATED
 	{
 	    std::vector<Eigen::Vector3d> pointCloud;
+            pointCloud.reserve(ranges.size());
 	    
 	    for(unsigned int i = 0; i < ranges.size(); i++) {
 		Eigen::Vector3d point;
@@ -194,7 +190,6 @@ namespace base { namespace samples {
 	    
 	    return pointCloud;
 	}
-#endif
     };
 }} // namespaces
 

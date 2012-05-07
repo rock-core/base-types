@@ -76,10 +76,9 @@
 #define LOG_CONFIGURE(PRIO, STREAM)
 #endif // BASE_LONG_NAMES
 
-#ifndef Release
+#if !defined(Release) && !defined(NDEBUG)
 
 #ifndef BASE_LOG_NAMESPACE
-#warning "BASE_LOG_NAMESPACE is not set - will be using empty namespaces"
 #define BASE_LOG_NAMESPACE ""
 #endif // BASE_LOG_NAMESPACE
 // The debug flag BASE_LOG_NAMESPACE needs to be converted to a string
@@ -95,9 +94,9 @@
 //
 // Using __PRETTY_FUNCTION__ when using gcc otherwise __func__ to show current function
 #ifdef __GNUC__
-#define __LOG(PRIO, FORMAT, ARGS ...) { using namespace base::logging; Logger::getInstance()->log(PRIO,__PRETTY_FUNCTION__, __FILE__, __LINE__, __STRINGIFY(BASE_LOG_NAMESPACE), FORMAT, ## ARGS); }
+#define __LOG(PRIO, FORMAT, ARGS ...) { ::base::logging::Logger::getInstance()->log(::base::logging::PRIO,__PRETTY_FUNCTION__, __FILE__, __LINE__, __STRINGIFY(BASE_LOG_NAMESPACE), FORMAT, ## ARGS); }
 #else
-#define __LOG(PRIO, FORMAT, ARGS ...) { using namespace base::logging; Logger::getInstance()->log(PRIO,__func__, __FILE__, __LINE__, __STRINGIFY(BASE_LOG_NAMESPACE),  FORMAT, ## ARGS); }
+#define __LOG(PRIO, FORMAT, ARGS ...) { ::base::logging::Logger::getInstance()->log(::base::logging::PRIO,__func__, __FILE__, __LINE__, __STRINGIFY(BASE_LOG_NAMESPACE),  FORMAT, ## ARGS); }
 #endif
 
 #ifdef BASE_LONG_NAMES
@@ -128,14 +127,14 @@
 #endif
 
 #undef BASE_LOG_CONFIGURE
-#define BASE_LOG_CONFIGURE(PRIO,STREAM) { using namespace base::logging; Logger::getInstance()->configure(PRIO, STREAM); }
+#define BASE_LOG_CONFIGURE(PRIO,STREAM) { ::base::logging::Logger::getInstance()->configure(::base::logging::PRIO, STREAM); }
 
 #else // #ifdef BASE_LONG_NAMES
 
 // If there should be conflicts with other libraries, switch to long names
 // Other wise short names will be available as only
 #undef LOG_CONFIGURE
-#define LOG_CONFIGURE(PRIO,STREAM) { using namespace base::logging; Logger::getInstance()->configure(PRIO, STREAM); }
+#define LOG_CONFIGURE(PRIO,STREAM) { ::base::logging::Logger::getInstance()->configure(::base::logging::PRIO, STREAM); }
 
 #if BASE_LOG_PRIORITY >= 1 
 #undef LOG_FATAL
@@ -154,12 +153,12 @@
 
 #if BASE_LOG_PRIORITY >= 4 
 #undef LOG_INFO
-#define LOG_INFO(FORMAT, ARGS...) __LOG(INFO, FORMAT, ## ARGS)
+#define LOG_INFO(FORMAT, ARGS...) __LOG(INFO_P, FORMAT, ## ARGS)
 #endif
 
 #if BASE_LOG_PRIORITY >= 5
 #undef LOG_DEBUG
-#define LOG_DEBUG(FORMAT, ARGS...) __LOG(DEBUG, FORMAT, ## ARGS)  
+#define LOG_DEBUG(FORMAT, ARGS...) __LOG(DEBUG_P, FORMAT, ## ARGS)  
 #endif
 
 #endif // BASE_LONG_NAMES

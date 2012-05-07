@@ -91,10 +91,8 @@ namespace base { namespace samples {
             int beamIndexForBearing(const Angle bearing,bool range_check=true)const
             {
                double temp_rad = (start_bearing-bearing).rad;
-               if(temp_rad<0)
-                   temp_rad+=2.0*M_PI;
                int index = round(temp_rad/angular_resolution.rad);
-               if(range_check && (index < 0 || index >=(int) data.size()))
+               if(range_check && (index < 0 || index >= number_of_beams))
                    return -1;
                return index;
             }

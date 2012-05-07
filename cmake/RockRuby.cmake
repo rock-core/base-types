@@ -27,7 +27,7 @@ ELSEIF(NOT RUBY_EXTENSIONS_AVAILABLE)
     STRING(REGEX MATCH "^1\\.9\\.1" RUBY_191 ${RUBY_VERSION})
     message(STATUS "found Ruby version ${RUBY_VERSION}")
 
-    EXECUTE_PROCESS(COMMAND ${RUBY_EXECUTABLE} -r rbconfig -e "puts Config::CONFIG['CFLAGS']"
+    EXECUTE_PROCESS(COMMAND ${RUBY_EXECUTABLE} -r rbconfig -e "puts RbConfig::CONFIG['CFLAGS']"
        OUTPUT_VARIABLE RUBY_CFLAGS)
     STRING(REPLACE "\n" "" RUBY_CFLAGS ${RUBY_CFLAGS})
 
@@ -36,13 +36,21 @@ ELSEIF(NOT RUBY_EXTENSIONS_AVAILABLE)
             install(FILES ${libname}.rb
                 DESTINATION ${RUBY_LIBRARY_INSTALL_DIR})
             list(REMOVE_ITEM ARGN ${libname}.rb)
+        elseif (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${libname})
+            install(DIRECTORY ${libname}
+                DESTINATION ${RUBY_LIBRARY_INSTALL_DIR})
+            list(REMOVE_ITEM ARGN ${libname})
         endif()
 
-        list(LENGTH ARGN FILE_COUNT)
-        if (FILE_COUNT GREATER 0)
-            install(FILES ${ARGN}
-                DESTINATION ${RUBY_LIBRARY_INSTALL_DIR}/${libname})
-        endif()
+        foreach(to_install ${ARGN})
+            if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${to_install})
+                install(DIRECTORY ${to_install}
+                    DESTINATION ${RUBY_LIBRARY_INSTALL_DIR}/${libname})
+            else()
+                install(FILES ${to_install}
+                    DESTINATION ${RUBY_LIBRARY_INSTALL_DIR}/${libname})
+            endif()
+        endforeach()
     endfunction()
 
     function(ROCK_TYPELIB_RUBY_PLUGIN)
