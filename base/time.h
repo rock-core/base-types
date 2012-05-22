@@ -106,19 +106,20 @@ namespace base
             return Time(seconds * UsecPerSec + static_cast<int64_t>(round((value - seconds) * UsecPerSec)));
         }
     };
+
+    inline std::ostream& operator << (std::ostream& io, base::Time const& time)
+    {
+	const int64_t microsecs = time.toMicroseconds();
+
+	io << (microsecs / 1000000)
+	   << std::setfill('0')
+	   << "." << std::setw(3) << (std::abs(microsecs) / 1000) % 1000 
+	   << "." << std::setw(3) << (std::abs(microsecs) % 1000)
+	   << std::setfill(' ');
+
+	return io;
+    }
 }
 
-inline std::ostream& operator << (std::ostream& io, base::Time const& time)
-{
-    const int64_t microsecs = time.toMicroseconds();
-
-    io << (microsecs / 1000000)
-        << std::setfill('0')
-	<< "." << std::setw(3) << (std::abs(microsecs) / 1000) % 1000 
-	<< "." << std::setw(3) << (std::abs(microsecs) % 1000)
-	<< std::setfill(' ');
-
-    return io;
-}
 
 #endif
