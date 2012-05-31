@@ -24,7 +24,14 @@ module Eigen
         # Returns the angle formed by +self+ and +v+, oriented from +self+ to
         # +v+
         def angle_to(v)
-            Math.atan2(v.y, v.x) - Math.atan2(y, x)
+            ret = Math.atan2(v.y, v.x) - Math.atan2(y, x)
+            if ret > Math::PI
+                ret -= 2*Math::PI
+            end
+            if ret < -Math::PI
+                ret += 2*Math::PI
+            end
+            ret
         end
 
         # Tests for equality
