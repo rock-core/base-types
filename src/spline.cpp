@@ -1025,6 +1025,36 @@ void SplineBase::setSingleton(double const* coordinates)
 
 void SplineBase::split(SplineBase& second_part, double _param)
 {
+    if(fabs(_param - start_param) < 0.001)
+    {
+	//get start point
+	double result[3];
+	getPoint(result, start_param);
+	
+	//set second curve to this curve
+	second_part.reset(curve);
+	
+	//be shure that we don't delete the curve now belonging
+	//to second_part
+	curve = NULL;
+	
+	//make this curve a single point curve
+	setSingleton(result);
+
+	return; 
+    }
+
+    if(fabs(_param - end_param) < 0.001)
+    {
+	//get end point
+	double result[3];
+	getPoint(result, end_param);
+	
+	//the second curve is only the end point
+	second_part.setSingleton(result);
+	return; 
+    }
+
     if (_param < start_param || _param > end_param) 
     {
         string msg = "_param=" + lexical_cast<string>(_param) + " is not in the accepted range [" + lexical_cast<string>(start_param) + ", " + lexical_cast<string>(end_param) + "]";
