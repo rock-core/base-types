@@ -10,18 +10,28 @@
 namespace vizkit 
 {
 
-class MotionCommandVisualization : public Vizkit3DPlugin< std::pair<base::MotionCommand2D, base::Pose> >
+class MotionCommandVisualization : public Vizkit3DPlugin<base::MotionCommand2D>, public VizPluginAddType<base::Pose>
 {
     Q_OBJECT
 
     public:
 	MotionCommandVisualization();	
         ~MotionCommandVisualization();
+        
+        Q_INVOKABLE void updateData(const base::MotionCommand2D& data)
+        { Vizkit3DPlugin<base::MotionCommand2D>::updateData(data); }
+        Q_INVOKABLE void updateMotionCommand(const base::MotionCommand2D& data)
+        { updateData(data); }
+        Q_INVOKABLE void updateData(const base::Pose& data)
+        { Vizkit3DPlugin<base::MotionCommand2D>::updateData(data); }
+        Q_INVOKABLE void updatePose(const base::Pose& data)
+        { updateData(data); }
 
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
         virtual void updateMainNode( osg::Node* node );
-	void updateDataIntern ( const std::pair<base::MotionCommand2D, base::Pose>& data );
+	void updateDataIntern ( const base::MotionCommand2D& data );
+        void updateDataIntern ( const base::Pose& data );
 
     private:
 	double tv;

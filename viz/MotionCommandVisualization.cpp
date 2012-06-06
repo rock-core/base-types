@@ -13,7 +13,6 @@ MotionCommandVisualization::MotionCommandVisualization()
 {
     tv = 0;
     rv = 0;
-    VizPluginRubyAdapter(MotionCommandVisualization, base::MotionCommand2D, MotionCommand)
 }
 
 MotionCommandVisualization::~MotionCommandVisualization()
@@ -95,13 +94,16 @@ void MotionCommandVisualization::updateMainNode( osg::Node* node )
     drawRotation();
 }
 
-void MotionCommandVisualization::updateDataIntern ( const std::pair< base::MotionCommand2D, base::Pose >& data )
+void MotionCommandVisualization::updateDataIntern ( const base::MotionCommand2D& data )
 {
-    tv = data.first.translation;
-    rv = data.first.rotation;
-    
-    robotPosition = osg::Vec3(data.second.position.x(), data.second.position.y(), data.second.position.z());
-    robotOrientation = osg::Quat(data.second.orientation.x(), data.second.orientation.y(), data.second.orientation.z(), data.second.orientation.w());
+    tv = data.translation;
+    rv = data.rotation;
+}
+
+void MotionCommandVisualization::updateDataIntern ( const base::Pose& data )
+{
+    robotPosition = osg::Vec3(data.position.x(), data.position.y(), data.position.z());
+    robotOrientation = osg::Quat(data.orientation.x(), data.orientation.y(), data.orientation.z(), data.orientation.w());
 }
 
 
