@@ -104,9 +104,24 @@ void SplineBase::getPoint(double* result, double _param) const
 void SplineBase::getPointAndTangent(double* result, double _param) const
 { return getPointAndTangentHelper(result, _param, true); }
 
+bool base::geometry::SplineBase::checkAndNormalizeParam(double& _param, double equalDistance) const
+{
+    if(_param < start_param && start_param - _param < equalDistance)
+	_param = start_param;
+    
+    if(_param > end_param && _param - end_param < equalDistance)
+	_param = end_param;
+    
+    if (_param < start_param || _param > end_param) 
+    {
+	return false;
+    }
+    return true;
+}
+
 void SplineBase::getPointAndTangentHelper(double* result, double _param, bool with_tangent) const
 {
-    if (_param < start_param || _param > end_param) 
+    if(checkAndNormalizeParam(_param)) 
     {
         string msg = "_param=" + lexical_cast<string>(_param) + " is not in the accepted range [" + lexical_cast<string>(start_param) + ", " + lexical_cast<string>(end_param) + "]";
         throw std::out_of_range(msg);
@@ -140,7 +155,7 @@ void SplineBase::getPointAndTangentHelper(double* result, double _param, bool wi
 double SplineBase::getCurvature(double _param)
 {
     // Limits the input paramter to the curve limit
-    if (_param < start_param || _param > end_param) 
+    if(checkAndNormalizeParam(_param)) 
         throw std::out_of_range("_param is not in the [start_param, end_param] range");
     else if (!singleton.empty())
         throw std::runtime_error("getCurvature() called on a singleton");
@@ -158,7 +173,7 @@ double SplineBase::getCurvature(double _param)
 
 double SplineBase::getVariationOfCurvature(double _param)  // Variation of Curvature
 {
-    if (_param < start_param || _param > end_param) 
+    if(checkAndNormalizeParam(_param)) 
         throw std::out_of_range("_param is not in the [start_param, end_param] range");
     else if (!singleton.empty())
         throw std::runtime_error("getVariationOfCurvature() called on a singleton");
