@@ -7,8 +7,6 @@ namespace vizkit
 
 TrajectoryVisualization::TrajectoryVisualization()
 {
-    //VizPluginRubyAdapter(TrajectoryVisualization, base::geometry::Spline<3>, Trajectory);
-    VizPluginRubyAdapter(TrajectoryVisualization, base::Vector3d, Trajectory);
     VizPluginRubyMethod(TrajectoryVisualization, base::Vector3d, setColor);
 
     // initialize here so that setColor can be called event

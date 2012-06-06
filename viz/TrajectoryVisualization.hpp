@@ -19,6 +19,15 @@ class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>, public Viz
         void setColor(const base::Vector3d& color); 
 	void setColor(double r, double g, double b, double a);
 	void clear();
+        
+        Q_INVOKABLE void updateData(const base::geometry::Spline<3>& data)
+        { Vizkit3DPlugin<base::Vector3d>::updateData(data); }
+        Q_INVOKABLE void updateSpline(const base::geometry::Spline<3>& data)
+        { updateData(data); }
+        Q_INVOKABLE void updateData(const base::Vector3d& data)
+        { Vizkit3DPlugin<base::Vector3d>::updateData(data); }
+        Q_INVOKABLE void updateTrajectory(const base::Vector3d& data)
+        { updateData(data); }
 
     protected:
 	virtual osg::ref_ptr<osg::Node> createMainNode();
