@@ -133,6 +133,39 @@ BOOST_AUTO_TEST_CASE( time_multiply )
     BOOST_REQUIRE_EQUAL( 35 * 1e6 * 0.025, (t * 0.025).toMicroseconds() );
 }
 
+BOOST_AUTO_TEST_CASE(time_fromString)
+{
+    base::Time now = base::Time::now();
+    std::string nowString = now.toString(base::Time::Microseconds);
+
+    base::Time expectedNow = base::Time::fromString(nowString);
+
+    BOOST_REQUIRE_EQUAL(nowString, expectedNow.toString());
+    BOOST_REQUIRE_EQUAL(now.toMicroseconds(),expectedNow.toMicroseconds());
+
+    base::Time formatNow = base::Time::fromString("2012-06-14--12.05.06Z:001001", base::Time::Microseconds,"%Y-%m-%d--%H.%M.%S%Z");
+    BOOST_REQUIRE_EQUAL(formatNow.toMicroseconds(),1339668306001001);
+
+    base::Time expectedSecondResolutionOnly = base::Time::fromString(formatNow.toString(), base::Time::Seconds);
+    BOOST_REQUIRE_EQUAL(expectedSecondResolutionOnly.toMicroseconds(), 1339668306000000);
+
+    base::Time expectedMillisecondResolutionOnly = base::Time::fromString(formatNow.toString(), base::Time::Milliseconds);
+    BOOST_REQUIRE_EQUAL(expectedMillisecondResolutionOnly.toMicroseconds(), 1339668306001000);
+
+    std::string secondResolutionFormat = formatNow.toString(base::Time::Seconds);
+    BOOST_REQUIRE_EQUAL(secondResolutionFormat,"20120614-12:05:06");
+
+    std::string millisecondResolutionFormat = formatNow.toString(base::Time::Milliseconds);
+    BOOST_REQUIRE_EQUAL(millisecondResolutionFormat,"20120614-12:05:06:001");
+
+    std::string microsecondResolutionFormat = formatNow.toString(base::Time::Microseconds);
+    BOOST_REQUIRE_EQUAL(microsecondResolutionFormat,"20120614-12:05:06:001001");
+
+    std::string defaultResolutionFormat = formatNow.toString();
+    BOOST_REQUIRE_EQUAL(microsecondResolutionFormat,defaultResolutionFormat);
+
+}
+
 BOOST_AUTO_TEST_CASE( laser_scan_test )
 {
     //configure laser scan
