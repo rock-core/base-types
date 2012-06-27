@@ -19,6 +19,12 @@
 namespace base { namespace samples {
     struct RigidBodyState
     {
+
+        RigidBodyState(bool doInvalidation=true){
+            if(doInvalidation)
+                    invalidate();
+        };
+
         base::Time time;
 
 	/** name of the source reference frame */
@@ -107,11 +113,16 @@ namespace base { namespace samples {
 	    return ret;
 	}
 
-        static RigidBodyState invalid() {
-            RigidBodyState result;
-            result.invalidate();
+        static RigidBodyState unknown(){
+            RigidBodyState result(false);
+            result.initUnknown();
             return result;
-        }
+        };
+
+        static RigidBodyState invalid() {
+            RigidBodyState result(true);
+            return result;
+        };
 	
         /** For backward compatibility only. Use invalidate() */
         void initSane() {
