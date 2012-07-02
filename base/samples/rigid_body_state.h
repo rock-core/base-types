@@ -168,13 +168,15 @@ namespace base { namespace samples {
                 !base::isNaN(vec(2));
         }
         
-        /** Helper method that checks if an orientation is valid (not NaN anywhere). */
+        /** Helper method that checks if an orientation is valid (not NaN anywhere)
+         *  and that the orientation is an unit quaternion. */
         static bool isValidValue(base::Orientation const& ori)
         {
             return !base::isNaN(ori.w()) &&
                 !base::isNaN(ori.x()) &&
                 !base::isNaN(ori.y()) &&
-                !base::isNaN(ori.z());
+                !base::isNaN(ori.z()) &&
+                fabs(ori.squaredNorm()-1.0) < 1e-6;     //assuming at least single precision 
         }
         
         /** Helper method that checks if the value whose covariance is
