@@ -110,11 +110,12 @@ void vizkit::LaserScanVisualization::updateMainNode(osg::Node* node)
         color->push_back(osg::Vec4(0.0,0.0,0.0,0.0));
         float col;
         int interval = colorize_interval*1000;
-        for(std::vector<uint32_t>::const_iterator it = scan.ranges.begin(); it != scan.ranges.end(); it++) 
+        double angle = scan.start_angle;
+        for(std::vector<uint32_t>::const_iterator it = scan.ranges.begin(); it != scan.ranges.end(); it++,angle+=scan.angular_resolution)
         {
             if(scan.isRangeValid(*it))
             {
-                col  = ((float)((*it)%interval))/interval;
+                col  = ((float)(((int)(*it*cos(angle))%interval)))/interval;
                 color->push_back(hslToRgb(col,1.0,0.5));
             }
         }
