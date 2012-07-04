@@ -11,7 +11,10 @@
 #include "base/samples/sonar_beam.h"
 #include "base/samples/sonar_scan.h"
 #include "base/samples/rigid_body_state.h"
+
+#ifdef SISL_FOUND
 #include <base/trajectory.h>
+#endif
 
 #define BASE_LOG_DEBUG
 #include "base/logging.h"
@@ -532,6 +535,7 @@ BOOST_AUTO_TEST_CASE( rbs_validity )
     BOOST_CHECK(!rbs.hasValidAngularVelocityCovariance());
 }
 
+#ifdef SISL_FOUND
 BOOST_AUTO_TEST_CASE( trajectory )
 {
     base::Trajectory tr;
@@ -542,3 +546,4 @@ BOOST_AUTO_TEST_CASE( trajectory )
     tr.speed = -5;    
     BOOST_CHECK(!tr.driveForward());
 }
+#endif 

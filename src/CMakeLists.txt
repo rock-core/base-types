@@ -12,6 +12,7 @@ if(SISL_FOUND)
     rock_library(base ${SOURCES} spline.cpp
 	    DEPS_CMAKE SISL
 	    HEADERS ${HEADERS})
+    add_definitions(-DSISL_FOUND)
 else(SISL_FOUND)
     message(STATUS "Compiling ${PROJECT_NAME} without 'spline' support")
     rock_library(base ${SOURCES}
