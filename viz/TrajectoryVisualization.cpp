@@ -5,7 +5,7 @@
 namespace vizkit 
 {
 
-TrajectoryVisualization::TrajectoryVisualization()
+TrajectoryVisualization::TrajectoryVisualization():max_number_of_points(1800)
 {
     VizPluginRubyMethod(TrajectoryVisualization, base::Vector3d, setColor);
 
@@ -60,7 +60,7 @@ void TrajectoryVisualization::clear()
 
 void TrajectoryVisualization::updateMainNode( osg::Node* node )
 {   
-    std::vector<Eigen::Vector3d>::const_iterator it = points.begin();
+    std::list<Eigen::Vector3d>::const_iterator it = points.begin();
     
     pointsOSG->clear();
     for(; it != points.end(); it++) {
@@ -86,12 +86,13 @@ void TrajectoryVisualization::updateDataIntern(const base::geometry::Spline3& da
     for(double p = spline.getStartParam(); p <= spline.getEndParam(); p += stepSize )
     {
 	points.push_back(spline.getPoint(p));
+        while(points.size() > max_number_of_points)
+            points.pop_front();
     }
 }
 
 void TrajectoryVisualization::updateDataIntern( const base::Vector3d& data )
 {
-    
     if(doClear)
     {
 	points.clear();
@@ -99,5 +100,7 @@ void TrajectoryVisualization::updateDataIntern( const base::Vector3d& data )
     }
     Eigen::Vector3d d = data;
     points.push_back(d);
+    while(points.size() > max_number_of_points)
+        points.pop_front();
 }
 }
