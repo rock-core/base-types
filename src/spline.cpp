@@ -1018,6 +1018,8 @@ void SplineBase::crop(double start_t, double end_t)
 
 void SplineBase::setSingleton(double const* coordinates)
 {
+    start_param = 0;
+    end_param = 0;
     clear();
     singleton.resize(getDimension());
     copy(coordinates, coordinates + getDimension(), &singleton[0]);
