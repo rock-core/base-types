@@ -124,6 +124,29 @@ namespace base
             return Time(seconds * UsecPerSec + static_cast<int64_t>(round((value - seconds) * UsecPerSec)));
         }
 
+
+        static Time fromTimeValues(int year, int month, int day, int hour, int minute, int seconds, int millis, int micros){
+
+            struct tm timeobj;
+	    timeobj.tm_year = year - 1900;
+            timeobj.tm_mon = month - 1;
+            timeobj.tm_mday = day;
+            timeobj.tm_hour = hour;
+            timeobj.tm_min = minute;
+            timeobj.tm_sec = seconds;
+
+            time_t tTime;
+            mktime(&timeobj);
+            
+            int64_t timeVal =  static_cast<int64_t>(tTime);
+
+            timeVal = timeVal * UsecPerSec;
+            timeVal += millis * 1000 + micros;
+
+            return Time(timeVal); 
+
+        }
+
         /**
         * Create a time object from an input string, by default all parameters are set to convert the string returned
         * by toString back to a Time object. 
@@ -141,7 +164,7 @@ namespace base
                 size_t pos = stringTime.find_last_of(':');
                 std::string mainTime = stringTime.substr(0,pos-1);
                 std::string usecsString = stringTime.substr(pos+1);
-                if(usecsString.size() != 6)
+                if((usecsString.size() != 6 && resolution == Microseconds) or ((usecsString.size() != 3) && resolution == Microseconds))
                 { 
                     throw std::runtime_error("base::Time::fromString failed - Time-String does not contain usecs-field as expected");
                 }
