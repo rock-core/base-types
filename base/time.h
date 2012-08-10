@@ -125,6 +125,21 @@ namespace base
         }
 
 
+        /**
+          * \brief Create time from int Time Values.
+          * Creates a time object from the time values (year, month, day ...) given as integer values. This function can be used
+          * when the time values are only available as seperated values in numerical form.
+          * \param year The year as integer value. (should be 4 digits)
+          * \param month The month of the year (1..12).
+          * \param day Day of the month (1..31).
+          * \param hour The hour of the day (since midnight 0..23).
+          * \param minute The minutes after the hour (0..59). 
+          * \param seconds The seconds after the minute (0..59)
+          * \param millis Milliseconds after the last second (0..999)
+          * \param micros Microseconds additional to the milliseconds (0..999)
+          * \returns a Time object generated from the parameters.
+          *
+          */
         static Time fromTimeValues(int year, int month, int day, int hour, int minute, int seconds, int millis, int micros){
 
             struct tm timeobj;
