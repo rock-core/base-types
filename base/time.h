@@ -136,16 +136,18 @@ namespace base
             timeobj.tm_sec = seconds;
 
             time_t tTime;
-            mktime(&timeobj);
-            
+            tTime = mktime(&timeobj);
+
             int64_t timeVal =  static_cast<int64_t>(tTime);
 
             timeVal = timeVal * UsecPerSec;
             timeVal += millis * 1000 + micros;
 
+
             return Time(timeVal); 
 
         }
+        
 
         /**
         * Create a time object from an input string, by default all parameters are set to convert the string returned
