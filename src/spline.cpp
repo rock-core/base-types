@@ -104,9 +104,24 @@ void SplineBase::getPoint(double* result, double _param) const
 void SplineBase::getPointAndTangent(double* result, double _param) const
 { return getPointAndTangentHelper(result, _param, true); }
 
+bool base::geometry::SplineBase::checkAndNormalizeParam(double& _param, double equalDistance) const
+{
+    if(_param < start_param && start_param - _param < equalDistance)
+	_param = start_param;
+    
+    if(_param > end_param && _param - end_param < equalDistance)
+	_param = end_param;
+    
+    if (_param < start_param || _param > end_param) 
+    {
+	return false;
+    }
+    return true;
+}
+
 void SplineBase::getPointAndTangentHelper(double* result, double _param, bool with_tangent) const
 {
-    if (_param < start_param || _param > end_param) 
+    if(!checkAndNormalizeParam(_param)) 
     {
         string msg = "_param=" + lexical_cast<string>(_param) + " is not in the accepted range [" + lexical_cast<string>(start_param) + ", " + lexical_cast<string>(end_param) + "]";
         throw std::out_of_range(msg);
@@ -140,7 +155,7 @@ void SplineBase::getPointAndTangentHelper(double* result, double _param, bool wi
 double SplineBase::getCurvature(double _param)
 {
     // Limits the input paramter to the curve limit
-    if (_param < start_param || _param > end_param) 
+    if(!checkAndNormalizeParam(_param)) 
         throw std::out_of_range("_param is not in the [start_param, end_param] range");
     else if (!singleton.empty())
         throw std::runtime_error("getCurvature() called on a singleton");
@@ -158,7 +173,7 @@ double SplineBase::getCurvature(double _param)
 
 double SplineBase::getVariationOfCurvature(double _param)  // Variation of Curvature
 {
-    if (_param < start_param || _param > end_param) 
+    if(!checkAndNormalizeParam(_param)) 
         throw std::out_of_range("_param is not in the [start_param, end_param] range");
     else if (!singleton.empty())
         throw std::runtime_error("getVariationOfCurvature() called on a singleton");
@@ -1003,6 +1018,8 @@ void SplineBase::crop(double start_t, double end_t)
 
 void SplineBase::setSingleton(double const* coordinates)
 {
+    start_param = 0;
+    end_param = 0;
     clear();
     singleton.resize(getDimension());
     copy(coordinates, coordinates + getDimension(), &singleton[0]);
@@ -1010,6 +1027,36 @@ void SplineBase::setSingleton(double const* coordinates)
 
 void SplineBase::split(SplineBase& second_part, double _param)
 {
+    if(fabs(_param - start_param) < 0.001)
+    {
+	//get start point
+	double result[3];
+	getPoint(result, start_param);
+	
+	//set second curve to this curve
+	second_part.reset(curve);
+	
+	//be shure that we don't delete the curve now belonging
+	//to second_part
+	curve = NULL;
+	
+	//make this curve a single point curve
+	setSingleton(result);
+
+	return; 
+    }
+
+    if(fabs(_param - end_param) < 0.001)
+    {
+	//get end point
+	double result[3];
+	getPoint(result, end_param);
+	
+	//the second curve is only the end point
+	second_part.setSingleton(result);
+	return; 
+    }
+
     if (_param < start_param || _param > end_param) 
     {
         string msg = "_param=" + lexical_cast<string>(_param) + " is not in the accepted range [" + lexical_cast<string>(start_param) + ", " + lexical_cast<string>(end_param) + "]";

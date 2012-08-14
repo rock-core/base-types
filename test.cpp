@@ -12,6 +12,10 @@
 #include "base/samples/sonar_scan.h"
 #include "base/samples/rigid_body_state.h"
 
+#ifdef SISL_FOUND
+#include <base/trajectory.h>
+#endif
+
 #define BASE_LOG_DEBUG
 #include "base/logging.h"
 
@@ -130,6 +134,39 @@ BOOST_AUTO_TEST_CASE( time_multiply )
 {
     base::Time t = base::Time::fromSeconds( 35 );
     BOOST_REQUIRE_EQUAL( 35 * 1e6 * 0.025, (t * 0.025).toMicroseconds() );
+}
+
+BOOST_AUTO_TEST_CASE(time_fromString)
+{
+    base::Time now = base::Time::now();
+    std::string nowString = now.toString(base::Time::Microseconds);
+
+    base::Time expectedNow = base::Time::fromString(nowString);
+
+    BOOST_REQUIRE_EQUAL(nowString, expectedNow.toString());
+    BOOST_REQUIRE_EQUAL(now.toMicroseconds(),expectedNow.toMicroseconds());
+
+    base::Time formatNow = base::Time::fromString("2012-06-14--12.05.06Z:001001", base::Time::Microseconds,"%Y-%m-%d--%H.%M.%S%Z");
+    BOOST_REQUIRE_EQUAL(formatNow.toMicroseconds(),1339668306001001);
+
+    base::Time expectedSecondResolutionOnly = base::Time::fromString(formatNow.toString(), base::Time::Seconds);
+    BOOST_REQUIRE_EQUAL(expectedSecondResolutionOnly.toMicroseconds(), 1339668306000000);
+
+    base::Time expectedMillisecondResolutionOnly = base::Time::fromString(formatNow.toString(), base::Time::Milliseconds);
+    BOOST_REQUIRE_EQUAL(expectedMillisecondResolutionOnly.toMicroseconds(), 1339668306001000);
+
+    std::string secondResolutionFormat = formatNow.toString(base::Time::Seconds);
+    BOOST_REQUIRE_EQUAL(secondResolutionFormat,"20120614-12:05:06");
+
+    std::string millisecondResolutionFormat = formatNow.toString(base::Time::Milliseconds);
+    BOOST_REQUIRE_EQUAL(millisecondResolutionFormat,"20120614-12:05:06:001");
+
+    std::string microsecondResolutionFormat = formatNow.toString(base::Time::Microseconds);
+    BOOST_REQUIRE_EQUAL(microsecondResolutionFormat,"20120614-12:05:06:001001");
+
+    std::string defaultResolutionFormat = formatNow.toString();
+    BOOST_REQUIRE_EQUAL(microsecondResolutionFormat,defaultResolutionFormat);
+
 }
 
 BOOST_AUTO_TEST_CASE( laser_scan_test )
@@ -464,40 +501,49 @@ BOOST_AUTO_TEST_CASE( frame_test )
 BOOST_AUTO_TEST_CASE( rbs_validity )
 {
     base::samples::RigidBodyState rbs;
-    rbs.invalidate();
-    BOOST_CHECK(!rbs.hasValidPosition());
-    BOOST_CHECK(rbs.hasValidPositionCovariance());
-    BOOST_CHECK(!rbs.hasValidOrientation());
-    BOOST_CHECK(rbs.hasValidOrientationCovariance());
-    BOOST_CHECK(!rbs.hasValidAngularVelocity());
-    BOOST_CHECK(rbs.hasValidAngularVelocityCovariance());
-
-    rbs.invalidate();
-    rbs.invalidatePositionCovariance();
+    rbs.initUnknown();
+    // check if values are unknown
+    BOOST_CHECK(!rbs.isKnownValue(rbs.cov_position));
+    BOOST_CHECK(!rbs.isKnownValue(rbs.cov_velocity));
+    BOOST_CHECK(!rbs.isKnownValue(rbs.cov_orientation));
+    BOOST_CHECK(!rbs.isKnownValue(rbs.cov_angular_velocity));
+    BOOST_CHECK(rbs.position == Eigen::Vector3d::Zero());
+    BOOST_CHECK(rbs.velocity == Eigen::Vector3d::Zero());
+    BOOST_CHECK(rbs.angular_velocity == Eigen::Vector3d::Zero());
+    BOOST_CHECK(rbs.orientation.x() == 0 && rbs.orientation.y() == 0 && 
+                rbs.orientation.z() == 0 && rbs.orientation.w() == 1);
+    
+    // check if values are valid
     BOOST_CHECK(rbs.hasValidPosition());
-    BOOST_CHECK(!rbs.hasValidPositionCovariance());
-    BOOST_CHECK(!rbs.hasValidOrientation());
-    BOOST_CHECK(rbs.hasValidOrientationCovariance());
-    BOOST_CHECK(!rbs.hasValidAngularVelocity());
-    BOOST_CHECK(rbs.hasValidAngularVelocityCovariance());
-
-    rbs.invalidate();
-    rbs.invalidateOrientationCovariance();
-    BOOST_CHECK(!rbs.hasValidPosition());
     BOOST_CHECK(rbs.hasValidPositionCovariance());
     BOOST_CHECK(rbs.hasValidOrientation());
-    BOOST_CHECK(!rbs.hasValidOrientationCovariance());
-    BOOST_CHECK(!rbs.hasValidAngularVelocity());
-    BOOST_CHECK(rbs.hasValidAngularVelocityCovariance());
-
-    rbs.invalidate();
-    rbs.invalidateAngularVelocityCovariance();
-    BOOST_CHECK(!rbs.hasValidPosition());
-    BOOST_CHECK(rbs.hasValidPositionCovariance());
-    BOOST_CHECK(!rbs.hasValidOrientation());
     BOOST_CHECK(rbs.hasValidOrientationCovariance());
+    BOOST_CHECK(rbs.hasValidVelocity());
+    BOOST_CHECK(rbs.hasValidVelocityCovariance());
     BOOST_CHECK(rbs.hasValidAngularVelocity());
+    BOOST_CHECK(rbs.hasValidAngularVelocityCovariance());
+    
+    rbs.invalidate();
+    // check if values are invalid
+    BOOST_CHECK(!rbs.hasValidPosition());
+    BOOST_CHECK(!rbs.hasValidPositionCovariance());
+    BOOST_CHECK(!rbs.hasValidOrientation());
+    BOOST_CHECK(!rbs.hasValidOrientationCovariance());
+    BOOST_CHECK(!rbs.hasValidVelocity());
+    BOOST_CHECK(!rbs.hasValidVelocityCovariance());
+    BOOST_CHECK(!rbs.hasValidAngularVelocity());
     BOOST_CHECK(!rbs.hasValidAngularVelocityCovariance());
 }
 
-
+#ifdef SISL_FOUND
+BOOST_AUTO_TEST_CASE( trajectory )
+{
+    base::Trajectory tr;
+    
+    tr.speed = 5;    
+    BOOST_CHECK(tr.driveForward());
+    
+    tr.speed = -5;    
+    BOOST_CHECK(!tr.driveForward());
+}
+#endif 

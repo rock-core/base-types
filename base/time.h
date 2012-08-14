@@ -9,6 +9,8 @@
 #include <math.h>
 #include <ostream>
 #include <iomanip>
+#include <stdexcept>
+#include <assert.h>
 
 namespace base
 {
@@ -22,8 +24,11 @@ namespace base
 
 	static const int UsecPerSec = 1000000LL;
 
+        enum Resolution { Seconds = 1, Milliseconds = 1000, Microseconds = 1000000 };
+
         Time()
             : microseconds(0) {}
+
 
     public:
         /** Returns the current time */
@@ -64,20 +69,33 @@ namespace base
             return tv;
         }
 
-	/** Convert his time into a string object */
-	std::string toString() const
+	/** Convert his time into a string object **/
+	std::string toString(base::Time::Resolution resolution = Microseconds) const
 	{
             struct timeval tv = toTimeval();
-            int milliSecs = tv.tv_usec/1000;
+            int uSecs = tv.tv_usec;
 
 	    time_t when = tv.tv_sec;
 	    struct tm *tm = localtime(&when); 
 
             char time[25];
             strftime(time, 25, "%Y%m%d-%H:%M:%S", tm);
-
+		
 	    char buffer[25];
-	    sprintf(buffer,"%s:%03d", time, milliSecs);
+            switch(resolution)
+            {
+                case Seconds:
+                    return std::string(time);
+                case Milliseconds:
+                    sprintf(buffer,"%s:%03d", time, (int) (uSecs/1000.0));
+                    break;
+                case Microseconds:
+                    sprintf(buffer,"%s:%06d", time, uSecs);
+                    break;
+                default: 
+                    assert(-1);
+            }
+
 	    return std::string(buffer);
 	}
 
@@ -105,20 +123,68 @@ namespace base
             int64_t seconds = value;
             return Time(seconds * UsecPerSec + static_cast<int64_t>(round((value - seconds) * UsecPerSec)));
         }
+
+        /**
+        * Create a time object from an input string, by default all parameters are set to convert the string returned
+        * by toString back to a Time object. 
+        * \param stringTime String describing the time
+        * \param resolution Set to a resolution higher than Secs if a (non-standard) msec or usec field is present, i.e. the non standard field is separated by ':'
+        * \param mainFormat valid format for strptime, e.g."%Y%m%d-%H:%M:%S" which the given time string has
+        * \throws std::runtime_error on failure such as a mismatching format
+        */
+        static Time fromString(const std::string& stringTime, Resolution resolution = Microseconds, const std::string& mainFormat = "%Y%m%d-%H:%M:%S")
+        {
+            std::string mainTime = stringTime;
+            int usecs = 0;
+            if(resolution > Seconds)
+            {
+                size_t pos = stringTime.find_last_of(':');
+                std::string mainTime = stringTime.substr(0,pos-1);
+                std::string usecsString = stringTime.substr(pos+1);
+                if(usecsString.size() != 6)
+                { 
+                    throw std::runtime_error("base::Time::fromString failed - Time-String does not contain usecs-field as expected");
+                }
+
+                switch(resolution)
+                {
+                    case Milliseconds:
+                        sscanf(usecsString.c_str(), "%03d", &usecs);
+                        usecs = usecs*1000;
+                        break;
+                    case Microseconds:
+                        sscanf(usecsString.c_str(), "%06d", &usecs);
+                        break;
+                    default:
+                        assert(-1);
+                }
+            }
+
+            struct tm tm;
+            if(NULL == strptime(mainTime.c_str(), mainFormat.c_str(), &tm))
+            {
+                throw std::runtime_error("base::Time::fromString failed- Time-String '" + mainTime + "' did not match the given format '" + mainFormat +"'");
+            }
+            time_t time = mktime(&tm);
+
+            return Time(static_cast<int64_t>(time* UsecPerSec + usecs));
+        }
+
     };
+
+    inline std::ostream& operator << (std::ostream& io, base::Time const& time)
+    {
+	const int64_t microsecs = time.toMicroseconds();
+
+	io << (microsecs / 1000000)
+	   << std::setfill('0')
+	   << "." << std::setw(3) << (std::abs(microsecs) / 1000) % 1000 
+	   << "." << std::setw(3) << (std::abs(microsecs) % 1000)
+	   << std::setfill(' ');
+
+	return io;
+    }
 }
 
-inline std::ostream& operator << (std::ostream& io, base::Time const& time)
-{
-    const int64_t microsecs = time.toMicroseconds();
-
-    io << (microsecs / 1000000)
-        << std::setfill('0')
-	<< "." << std::setw(3) << (std::abs(microsecs) / 1000) % 1000 
-	<< "." << std::setw(3) << (std::abs(microsecs) % 1000)
-	<< std::setfill(' ');
-
-    return io;
-}
 
 #endif

@@ -19,6 +19,7 @@ namespace base
     typedef Eigen::Matrix<double, 2, 1, Eigen::DontAlign>     Vector2d;
     typedef Eigen::Matrix<double, 3, 1, Eigen::DontAlign>     Vector3d;
     typedef Eigen::Matrix<double, 4, 1, Eigen::DontAlign>     Vector4d;
+    typedef Eigen::Matrix<double, 6, 1, Eigen::DontAlign>     Vector6d;
 
     typedef Eigen::Matrix<double, 2, 2, Eigen::DontAlign>     Matrix2d;
     typedef Eigen::Matrix<double, 3, 3, Eigen::DontAlign>     Matrix3d;

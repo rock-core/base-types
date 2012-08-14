@@ -55,6 +55,7 @@ namespace base { namespace samples {
                 beamwidth_vertical = other.beamwidth_vertical;
                 beamwidth_horizontal = other.beamwidth_horizontal;
                 sampling_interval = other.sampling_interval;
+                speed_of_sound = other.speed_of_sound;
                 if(bcopy)
                     setData(other.getData());
             }
@@ -71,6 +72,7 @@ namespace base { namespace samples {
                 this->start_bearing = start_bearing;
                 this->angular_resolution = angular_resolution;
                 this->memory_layout_column = memory_layout_column;
+                speed_of_sound = 0;
                 reset(val);
             }
 
@@ -221,6 +223,7 @@ namespace base { namespace samples {
                 Angle temp_angular_resolution = sonar_scan.angular_resolution;
                 bool temp_memory_layout_column = sonar_scan.memory_layout_column;
                 bool temp_polar_coordinates = sonar_scan.polar_coordinates;
+                float temp_speed_of_sound = sonar_scan.speed_of_sound;
 
                 //copy values
                 sonar_scan.time = time;
@@ -233,6 +236,7 @@ namespace base { namespace samples {
                 sonar_scan.angular_resolution = angular_resolution;
                 sonar_scan.memory_layout_column = memory_layout_column;
                 sonar_scan.polar_coordinates = polar_coordinates;
+                sonar_scan.speed_of_sound = speed_of_sound;
 
                 time = temp_time;
                 beamwidth_vertical = temp_beamwidth_vertical;
@@ -244,6 +248,7 @@ namespace base { namespace samples {
                 angular_resolution = temp_angular_resolution;
                 memory_layout_column = temp_memory_layout_column;
                 polar_coordinates = temp_polar_coordinates;
+                speed_of_sound = temp_speed_of_sound;
             }
 
             inline uint32_t getNumberOfBytes() const {

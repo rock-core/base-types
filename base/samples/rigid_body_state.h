@@ -19,6 +19,12 @@
 namespace base { namespace samples {
     struct RigidBodyState
     {
+
+        RigidBodyState(bool doInvalidation=true){
+            if(doInvalidation)
+                    invalidate();
+        };
+
         base::Time time;
 
 	/** name of the source reference frame */
@@ -107,11 +113,16 @@ namespace base { namespace samples {
 	    return ret;
 	}
 
-        static RigidBodyState invalid() {
-            RigidBodyState result;
-            result.invalidate();
+        static RigidBodyState unknown(){
+            RigidBodyState result(false);
+            result.initUnknown();
             return result;
-        }
+        };
+
+        static RigidBodyState invalid() {
+            RigidBodyState result(true);
+            return result;
+        };
 	
         /** For backward compatibility only. Use invalidate() */
         void initSane() {
@@ -123,15 +134,31 @@ namespace base { namespace samples {
          */
 	void invalidate() {
 	    invalidateOrientation();
+            invalidateOrientationCovariance();
 	    invalidatePosition();
+            invalidatePositionCovariance();
 	    invalidateVelocity();
+            invalidateVelocityCovariance();
 	    invalidateAngularVelocity();
-	    
-	    position.setZero();
-	    velocity.setZero();
-	    orientation = Eigen::Quaterniond::Identity();
-	    angular_velocity.setZero();
+            invalidateAngularVelocityCovariance();
 	}
+	
+	/**
+         * Initializes the rigid body state unknown with Zero for the
+         * position, velocity and angular velocity, Identity for the orientation
+         * and infinity for all covariances.
+         */
+	void initUnknown()
+        {
+            position.setZero();
+            velocity.setZero();
+            orientation = Eigen::Quaterniond::Identity();
+            angular_velocity.setZero();
+            cov_position = setValueUnknown();
+            cov_orientation = setValueUnknown();
+            cov_velocity = setValueUnknown();
+            cov_angular_velocity = setValueUnknown();
+        }
 
         /** Helper method that checks if a value is valid (not NaN anywhere). */
         static bool isValidValue(base::Vector3d const& vec)
@@ -141,13 +168,15 @@ namespace base { namespace samples {
                 !base::isNaN(vec(2));
         }
         
-        /** Helper method that checks if an orientation is valid (not NaN anywhere). */
+        /** Helper method that checks if an orientation is valid (not NaN anywhere)
+         *  and that the orientation is an unit quaternion. */
         static bool isValidValue(base::Orientation const& ori)
         {
             return !base::isNaN(ori.w()) &&
                 !base::isNaN(ori.x()) &&
                 !base::isNaN(ori.y()) &&
-                !base::isNaN(ori.z());
+                !base::isNaN(ori.z()) &&
+                fabs(ori.squaredNorm()-1.0) < 1e-6;     //assuming at least single precision 
         }
         
         /** Helper method that checks if the value whose covariance is

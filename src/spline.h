@@ -180,6 +180,16 @@ namespace geometry {
         void setSingleton(double const* coordinates);
 
     protected:
+	/**
+	 * This function checks weather param is smaler or bigger
+	 * than end and start param. It also sets param to start 
+	 * or end, if the difference between param and start/end
+	 * is smaler than equalDistance.
+	 * 
+	 * returns true if param is inside start/end.
+	 * */
+	bool checkAndNormalizeParam(double &param, double equalDistance = 0.001) const;
+
         void reset(SISLCurve* curve);
         void getPoint(double* result, double _param) const;
         void getPointAndTangent(double* result, double _param) const;

@@ -36,7 +36,8 @@ ELSEIF(NOT RUBY_EXTENSIONS_AVAILABLE)
             install(FILES ${libname}.rb
                 DESTINATION ${RUBY_LIBRARY_INSTALL_DIR})
             list(REMOVE_ITEM ARGN ${libname}.rb)
-        elseif (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${libname})
+        endif()
+        if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${libname})
             install(DIRECTORY ${libname}
                 DESTINATION ${RUBY_LIBRARY_INSTALL_DIR})
             list(REMOVE_ITEM ARGN ${libname})
