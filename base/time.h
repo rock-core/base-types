@@ -182,9 +182,13 @@ namespace base
                 size_t pos = stringTime.find_last_of(':');
                 std::string mainTime = stringTime.substr(0,pos-1);
                 std::string usecsString = stringTime.substr(pos+1);
-                if((usecsString.size() != 6 && resolution == Microseconds) or ((usecsString.size() != 3) && resolution == Microseconds))
+                size_t usecsStringLength = usecsString.size();
+                if( (usecsStringLength == 3 || usecsStringLength == 6) && !(usecsStringLength == 3 && resolution > Milliseconds))
+                {
+                    // string matches resolutions
+                } else
                 { 
-                    throw std::runtime_error("base::Time::fromString failed - Time-String does not contain usecs-field as expected");
+                    throw std::runtime_error("base::Time::fromString failed - resolution does not match provided Time-String");
                 }
 
                 switch(resolution)
