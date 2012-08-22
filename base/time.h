@@ -140,7 +140,8 @@ namespace base
           * \returns a Time object generated from the parameters.
           *
           */
-        static Time fromTimeValues(int year, int month, int day, int hour, int minute, int seconds, int millis, int micros){
+        static Time fromTimeValues(int year, int month, int day, int hour, int minute, int seconds, int millis, int micros)
+        {
 
             struct tm timeobj;
 	    timeobj.tm_year = year - 1900;
