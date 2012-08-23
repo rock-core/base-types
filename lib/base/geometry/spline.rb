@@ -263,6 +263,20 @@ module Base
                 result.reset(coordinates, knots, kind)
                 result
             end
+	    
+	    def pretty_print(pp)
+		if(empty?)
+		    pp.text "Curve is empty"
+		    pp.breakable		
+		else
+		    pp.text "dimensions=[#{start_point}, #{end_point}]"
+		    pp.breakable		
+		    pp.text "lenght=[#{curve_length}]"
+		    pp.breakable
+		    pp.text "params=[#{start_param}, #{end_param}]"
+		end
+	    end
+	    
         end
 
         # Specialization of Spline for 3D splines
