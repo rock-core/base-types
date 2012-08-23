@@ -811,6 +811,16 @@ namespace geometry {
     };
     typedef base::geometry::Spline<1> Spline1;
     typedef base::geometry::Spline<3> Spline3;
+    
+    inline std::ostream& operator << (std::ostream& io, base::geometry::Spline<3> const& s)
+    {
+	io << "Lenght " << s.getCurveLength() 
+	    << " start " << s.getStartPoint().transpose() << " end " << s.getEndPoint().transpose()
+	    << " startParam " << s.getStartParam() << " endParam " << s.getEndParam();
+
+	return io;
+    }
+    
 } // geometry
 } // base
 #endif
