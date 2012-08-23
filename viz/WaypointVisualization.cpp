@@ -1,6 +1,4 @@
 #include "WaypointVisualization.hpp"
-#include <osg/Geometry>
-#include <osg/Geode>
 #include <iostream>
 
 namespace vizkit 
@@ -8,43 +6,38 @@ namespace vizkit
 
 WaypointVisualization::WaypointVisualization()
 {    
-    VizPluginRubyAdapter(WaypointVisualization, base::Waypoint, Waypoint)
+    color = osg::Vec4( 1, 0, 0, 1 );
+    
+    waypoint.tol_position = 0.0;
 }
 
 void WaypointVisualization::updateWp(const base::Waypoint& wp)
 {
-    std::cout << "called " << wp.position.transpose() << std::endl;
     updateData(wp);
 }
 
 osg::ref_ptr< osg::Node > WaypointVisualization::createMainNode()
 {
-    //draw a cycle
-    geom = new osg::Geometry;
-    pointsOSG = new osg::Vec3Array;
-   
-    drawArrays = new osg::DrawArrays( osg::PrimitiveSet::LINES, 0, pointsOSG->size() );
-    // Draw a four-vertex quad from the stored data.
-    geom->addPrimitiveSet(drawArrays.get());
+    geode = new osg::Geode;
 
-    osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array();
-    color->push_back( osg::Vec4( 0, 1, 1, 1 ) );
-    geom->setColorArray( color.release() );
-    geom->setColorBinding( osg::Geometry::BIND_OVERALL );
-    
-    // Add the Geometry (Drawable) to a Geode and
-    //   return the Geode.
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-    geode->addDrawable( geom.get() );
-
-    osg::StateSet* stategeode = geode->getOrCreateStateSet();
-    stategeode->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
+//     osg::StateSet* stategeode = geode->getOrCreateStateSet();
+//     stategeode->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
 
     waypointPosition = new osg::PositionAttitudeTransform();
     
-    waypointPosition->addChild(geode.release());
+    sphere = new osg::Sphere(osg::Vec3f(0,0,0),0.3);
+    sphere->setDataVariance(osg::Object::DYNAMIC);
+    sphereDrawable = new osg::ShapeDrawable(sphere);
+    sphereDrawable->setColor(color);
+    sphereDrawable->setDataVariance(osg::Object::DYNAMIC);
     
-    return waypointPosition;
+    return geode;
+}
+
+void WaypointVisualization::setColor(const base::Vector3d& color)
+{
+    this->color = osg::Vec4d(color.x(), color.y(), color.z(), 1);
+    setDirty();
 }
 
 void WaypointVisualization::updateDataIntern ( const base::Waypoint& data )
@@ -54,24 +47,16 @@ void WaypointVisualization::updateDataIntern ( const base::Waypoint& data )
 
 void WaypointVisualization::updateMainNode( osg::Node* node )
 {
-    double radiusX = waypoint.tol_position;
-    double radiusY = waypoint.tol_position;
-    int stepsize = 100;
+    sphere->setRadius(waypoint.tol_position);
+    sphere->setCenter(osg::Vec3(waypoint.position.x(), waypoint.position.y(), waypoint.position.z()));
     
-    double step = 2*M_PI / stepsize;
-    osg::Vec3 startPoint = osg::Vec3(0, radiusY, 0);
-    for(int i = 0; i < stepsize; i++) {
-        osg::Vec3 endPoint;
-        endPoint.x() = -sin(step * i) * radiusX;
-        endPoint.y() = cos(step * i) * radiusY;
-        pointsOSG->push_back(startPoint);
-        pointsOSG->push_back(endPoint);
-        startPoint = endPoint;
-    }
-    drawArrays->setCount(pointsOSG->size());
-    geom->setVertexArray(pointsOSG.get());
-
-    waypointPosition->setPosition(osg::Vec3(waypoint.position.x(), waypoint.position.y(), waypoint.position.z()));
+    sphereDrawable->setColor(color);
+    sphereDrawable->dirtyDisplayList();
+    sphereDrawable->dirtyBound();
+    
+    geode->removeDrawable(sphereDrawable);
+    geode->addDrawable(sphereDrawable);
+    geode->dirtyBound();
 }
 
 }
