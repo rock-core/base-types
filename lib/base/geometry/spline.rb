@@ -373,6 +373,9 @@ module Base
             # If +with_tangent+ is true, it returns a pair of Eigen::Vector3,
             # where the first one is the point and the second the tangent.
             def get(param, with_tangent = false)
+		if(empty?)
+		    return nil
+		end
                 result = super
                 p = Eigen::Vector3.new(*result[0, 3])
                 if with_tangent
