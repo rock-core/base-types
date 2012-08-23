@@ -189,20 +189,28 @@ double SplineBase::getVariationOfCurvature(double _param)  // Variation of Curva
     return VoC;
 }
 
-double SplineBase::getCurveLength()
+double base::geometry::SplineBase::getCurveLength() const
 {
-    if (has_curve_length)
-        return curve_length;
-
     if (isSingleton())
         return 0;
     if (isEmpty())
         throw std::runtime_error("getCurveLength() called on an empty curve");
 
     int status;
-    s1240(curve, geometric_resolution, &curve_length, &status);
+    double length;
+    s1240(curve, geometric_resolution, &length, &status);
     if (status != 0)
         throw std::runtime_error("cannot get the curve length");
+    
+    return length;
+}
+
+double SplineBase::getCurveLength()
+{
+    if (has_curve_length)
+        return curve_length;
+
+    curve_length = ((const SplineBase *) this)->getCurveLength();
 
     has_curve_length = true;
     return curve_length;

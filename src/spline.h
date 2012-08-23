@@ -51,6 +51,10 @@ namespace geometry {
         int    getCurveOrder() const { return curve_order; }
         /** Returns the length of the curve in geometric space */
         double getCurveLength();
+	
+        /** Returns the length of the curve in geometric space 
+	 * noncaching const version */
+        double getCurveLength() const;
         /** Returns the maximum curvature of the curve */
         double getCurvatureMax();
         double getStartParam() const { return start_param; };
