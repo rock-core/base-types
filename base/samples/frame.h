@@ -484,58 +484,6 @@ namespace base { namespace samples { namespace frame {
 	    	return *((Tp*)(getImagePtr()+row*getRowSize()+column*getPixelSize()));
 		}
 
-	    //check if opencv is present
-	    #if defined( __OPENCV_CV_H__) ||defined (__OPENCV_CV_HPP__) || defined(_CV_H_) || defined(_CV_HPP_) || defined(__OPENCV_ALL_HPP__) ||defined(__OPENCV_OLD_CV_H__)
-            int getOpenCvType()const
-            {
-		int itype = 0;
-		switch (getChannelCount())
-		{
-		case 1:
-		    switch (getPixelSize())
-		    {
-		    case 1:
-		        itype = CV_8UC1;
-		        break;
-		    case 2:
-		        itype = CV_16UC1;
-		        break;
-		    default:
-		        throw "Unknown format. Can not convert Frame "
-		        "to cv::Mat.";
-		    }
-		    break;
-		case 3:
-		    switch (getPixelSize())
-		    {
-		    case 3:
-		        itype = CV_8UC3;
-		        break;
-		    case 6:
-		        itype = CV_16UC3;
-		        break;
-		        throw "Unknown format. Can not convert Frame "
-		        "to cv::Mat.";
-		    }
-		    break;
-		    throw "Unknown format. Can not convert Frame "
-		    "to cv::Mat.";
-		}
-                return itype;
-            }
-
-	    inline cv::Mat convertToCvMat()
-	    {
-		return cv::Mat(size.height,size.width, getOpenCvType(), getImagePtr());
-	    }
-	    inline const cv::Mat convertToCvMat()const
-	    {
-		return cv::Mat(size.height,size.width, getOpenCvType(), (void*)getImageConstPtr());
-	    }
-	    #else
-	      #define convertToCvMat If_you_want_to_use_convertToCvMat_include_opencv_2_first
-	    #endif
-
 	    /** The time at which this frame has been captured
              *
              * This is obviously an estimate
