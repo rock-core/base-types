@@ -52,12 +52,17 @@ namespace base { namespace samples {
             void init(const SonarScan &other,bool bcopy = true)
             {
                 init(other.number_of_beams,other.number_of_bins,other.start_bearing,other.angular_resolution,other.memory_layout_column);
+                time = other.time;
+
                 beamwidth_vertical = other.beamwidth_vertical;
                 beamwidth_horizontal = other.beamwidth_horizontal;
                 sampling_interval = other.sampling_interval;
                 speed_of_sound = other.speed_of_sound;
-                if(bcopy)
+                polar_coordinates = other.polar_coordinates;
+                if(bcopy){
                     setData(other.getData());
+                    time_beams = other.time_beams;
+                }
             }
 
             void init(uint16_t number_of_beams, uint16_t number_of_bins, Angle start_bearing, Angle angular_resolution,bool memory_layout_column = true, int val=-1)
