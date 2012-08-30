@@ -533,7 +533,7 @@ namespace base { namespace samples { namespace frame {
 		return cv::Mat(size.height,size.width, getOpenCvType(), (void*)getImageConstPtr());
 	    }
 	    #else
-	      #define convertToCvMat If_you_want_to_use_convertToCvMat_include_opencv_2_first
+	      #warning If_you_want_to_use_convertToCvMat_include_opencv_2_first
 	    #endif
 
 	    /** The time at which this frame has been captured
