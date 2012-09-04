@@ -37,10 +37,10 @@ public:
 		public: 
 			~CGuard()
 			{
-				if(msInstance != NULL)
+				if(msInstance != 0)
 				{
 					delete msInstance;
-					msInstance = NULL;
+					msInstance = 0;
 				}
 			}
 
