@@ -140,11 +140,23 @@ BOOST_AUTO_TEST_CASE(time_fromString)
 {
     base::Time now = base::Time::now();
     std::string nowString = now.toString(base::Time::Microseconds);
-
     base::Time expectedNow = base::Time::fromString(nowString);
 
     BOOST_REQUIRE_EQUAL(nowString, expectedNow.toString());
     BOOST_REQUIRE_EQUAL(now.toMicroseconds(),expectedNow.toMicroseconds());
+
+    // Timezone conversion check -- since it depends on the current local time, either summer or winter check would
+    // fail in case of an error
+    // Summer
+    base::Time tzOrig = base::Time::fromString("20120601-10:00:00", base::Time::Seconds);
+    base::Time tzConverted = base::Time::fromString(tzOrig.toString());
+    BOOST_REQUIRE_MESSAGE(tzOrig == tzConverted, "summer time: orig: " << tzOrig.toString() << " vs. converted: " << tzConverted.toString());
+
+    // Winter
+    tzOrig = base::Time::fromString("20121201-10:00:00", base::Time::Seconds);
+    tzConverted = base::Time::fromString(tzOrig.toString());
+    BOOST_REQUIRE_MESSAGE(tzOrig == tzConverted, "winter time: " << tzOrig.toString() << " vs. converted: " << tzConverted.toString());
+    // End time zone check
 
     base::Time formatNow = base::Time::fromString("2012-06-14--12.05.06Z:001001", base::Time::Microseconds,"%Y-%m-%d--%H.%M.%S%Z");
     BOOST_REQUIRE_EQUAL(formatNow.toMicroseconds(),1339668306001001);

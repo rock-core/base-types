@@ -150,6 +150,7 @@ namespace base
             timeobj.tm_hour = hour;
             timeobj.tm_min = minute;
             timeobj.tm_sec = seconds;
+            timeobj.tm_isdst = -1;
 
             time_t tTime;
             tTime = mktime(&timeobj);
@@ -210,6 +211,11 @@ namespace base
             {
                 throw std::runtime_error("base::Time::fromString failed- Time-String '" + mainTime + "' did not match the given format '" + mainFormat +"'");
             }
+            // " ... not set by strptime(); tells mktime() to determine 
+            // whether daylight saving time is in effect ..."
+            // (http://pubs.opengroup.org/onlinepubs/007904975/functions/strptime.html)
+              
+            tm.tm_isdst = -1; 
             time_t time = mktime(&tm);
 
             return Time(static_cast<int64_t>(time* UsecPerSec + usecs));
