@@ -17,3 +17,16 @@ configure_file(base-types.pc.in base-types.pc @ONLY)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/base DESTINATION include)
 install(FILES ${CMAKE_BINARY_DIR}/base-types.pc DESTINATION lib/pkgconfig)
 
+install(FILES
+    cmake/FindBoost.cmake
+    cmake/FindGem.cmake
+    cmake/FindNumpy.cmake
+    cmake/FindRuby.cmake
+    cmake/FindSISL.cmake
+    cmake/ListMacros.cmake
+    cmake/PythonBind.cmake
+    cmake/PythonInstallPath.cmake
+    cmake/Rock.cmake
+    cmake/RockRuby.cmake
+    DESTINATION share/cmake/rock)
+
