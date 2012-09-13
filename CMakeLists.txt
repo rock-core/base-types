@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
+set(ENV{ROCK_CMAKE_MACROS} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include($ENV{ROCK_CMAKE_MACROS}/Rock.cmake)
 rock_init(base 1.0)
 
