@@ -149,7 +149,7 @@ namespace base { namespace samples { namespace frame {
                     size = getPixelSize() * getPixelCount();
                 else
                     if(!isCompressed() && size != getPixelSize()*getPixelCount()){
-                        printf("Expect image size: %i, got: %i\n",getPixelSize()*getPixelCount(),size);
+			std::cout << "Expect image size: " << getPixelSize()*getPixelCount() << ", got: " << size << std::endl;
                         throw std::runtime_error("Frame::init: wrong image size!");
                     }
 
