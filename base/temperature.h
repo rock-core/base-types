@@ -3,6 +3,7 @@
 
 #include <boost/format.hpp>
 #include <base/eigen.h>
+#include <base/time.h>
 
 namespace base
 {
@@ -15,9 +16,7 @@ namespace base
 class Temperature
 {
 public:
-    
-    base::Time time;
-    
+        
     /** 
      * temperature in kelvins
      * 
