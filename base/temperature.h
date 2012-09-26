@@ -15,6 +15,9 @@ namespace base
 class Temperature
 {
 public:
+    
+    base::Time time;
+    
     /** 
      * temperature in kelvins
      * 
