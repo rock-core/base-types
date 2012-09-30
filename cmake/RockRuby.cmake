@@ -10,27 +10,10 @@
 # 
 
 FIND_PACKAGE(Ruby)
-IF(NOT RUBY_INCLUDE_PATH)
-    MESSAGE(STATUS "Ruby library not found. Cannot build Ruby extensions")
-    SET(RUBY_EXTENSIONS_AVAILABLE FALSE)
-ELSEIF(NOT RUBY_EXTENSIONS_AVAILABLE)
-    SET(RUBY_EXTENSIONS_AVAILABLE TRUE)
-    STRING(REGEX REPLACE ".*lib(32|64)?/?" "lib/" RUBY_EXTENSIONS_INSTALL_DIR ${RUBY_ARCH_DIR})
-    STRING(REGEX REPLACE ".*lib(32|64)?/?" "lib/" RUBY_LIBRARY_INSTALL_DIR ${RUBY_RUBY_LIB_PATH})
-
-    FIND_PROGRAM(RDOC_EXECUTABLE NAMES rdoc1.9 rdoc1.8 rdoc)
-
-    EXECUTE_PROCESS(COMMAND ${RUBY_EXECUTABLE} -r rbconfig -e "puts RUBY_VERSION"
-       OUTPUT_VARIABLE RUBY_VERSION)
-    STRING(REPLACE "\n" "" RUBY_VERSION ${RUBY_VERSION})
-    STRING(REGEX MATCH "^1\\.9" RUBY_19 ${RUBY_VERSION})
-    STRING(REGEX MATCH "^1\\.9\\.1" RUBY_191 ${RUBY_VERSION})
-    message(STATUS "found Ruby version ${RUBY_VERSION}")
-
-    EXECUTE_PROCESS(COMMAND ${RUBY_EXECUTABLE} -r rbconfig -e "puts RbConfig::CONFIG['CFLAGS']"
-       OUTPUT_VARIABLE RUBY_CFLAGS)
-    STRING(REPLACE "\n" "" RUBY_CFLAGS ${RUBY_CFLAGS})
-
+if (NOT RUBY_FOUND)
+    MESSAGE(STATUS "Ruby library not found. Skipping Ruby parts for this package")
+else()
+    MESSAGE(STATUS "Ruby library found")
     function(ROCK_RUBY_LIBRARY libname)
         if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${libname}.rb)
             install(FILES ${libname}.rb
@@ -54,11 +37,6 @@ ELSEIF(NOT RUBY_EXTENSIONS_AVAILABLE)
         endforeach()
     endfunction()
 
-    function(ROCK_TYPELIB_RUBY_PLUGIN)
-        install(FILES ${ARGN}
-            DESTINATION share/typelib/ruby)
-    endfunction()
-
     function(ROCK_LOG_MIGRATION)
         if (EXISTS ${CMAKE_SOURCE_DIR}/src/log_migration.rb)
             configure_file(${CMAKE_SOURCE_DIR}/src/log_migration.rb
@@ -66,6 +44,33 @@ ELSEIF(NOT RUBY_EXTENSIONS_AVAILABLE)
             install(FILES ${CMAKE_BINARY_DIR}/log_migration-${PROJECT_NAME}.rb
                     DESTINATION share/rock/log/migration)
         endif()
+    endfunction()
+endif()
+
+IF(NOT RUBY_INCLUDE_PATH)
+    MESSAGE(STATUS "Ruby library not found. Cannot build Ruby extensions")
+    SET(RUBY_EXTENSIONS_AVAILABLE FALSE)
+ELSEIF(NOT RUBY_EXTENSIONS_AVAILABLE)
+    SET(RUBY_EXTENSIONS_AVAILABLE TRUE)
+    STRING(REGEX REPLACE ".*lib(32|64)?/?" "lib/" RUBY_EXTENSIONS_INSTALL_DIR ${RUBY_ARCH_DIR})
+    STRING(REGEX REPLACE ".*lib(32|64)?/?" "lib/" RUBY_LIBRARY_INSTALL_DIR ${RUBY_RUBY_LIB_PATH})
+
+    FIND_PROGRAM(RDOC_EXECUTABLE NAMES rdoc1.9 rdoc1.8 rdoc)
+
+    EXECUTE_PROCESS(COMMAND ${RUBY_EXECUTABLE} -r rbconfig -e "puts RUBY_VERSION"
+       OUTPUT_VARIABLE RUBY_VERSION)
+    STRING(REPLACE "\n" "" RUBY_VERSION ${RUBY_VERSION})
+    STRING(REGEX MATCH "^1\\.9" RUBY_19 ${RUBY_VERSION})
+    STRING(REGEX MATCH "^1\\.9\\.1" RUBY_191 ${RUBY_VERSION})
+    message(STATUS "found Ruby version ${RUBY_VERSION}")
+
+    EXECUTE_PROCESS(COMMAND ${RUBY_EXECUTABLE} -r rbconfig -e "puts RbConfig::CONFIG['CFLAGS']"
+       OUTPUT_VARIABLE RUBY_CFLAGS)
+    STRING(REPLACE "\n" "" RUBY_CFLAGS ${RUBY_CFLAGS})
+
+    function(ROCK_TYPELIB_RUBY_PLUGIN)
+        install(FILES ${ARGN}
+            DESTINATION share/typelib/ruby)
     endfunction()
 
     function(ROCK_RUBY_EXTENSION target)
@@ -101,6 +106,5 @@ ELSEIF(NOT RUBY_EXTENSIONS_AVAILABLE)
         endif()
 
     endfunction()
-
 ENDIF(NOT RUBY_INCLUDE_PATH)
 
