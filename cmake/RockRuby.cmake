@@ -73,6 +73,15 @@ ELSEIF(NOT RUBY_EXTENSIONS_AVAILABLE)
             DESTINATION share/typelib/ruby)
     endfunction()
 
+    function(ROCK_LOG_EXPORT)
+        if (EXISTS ${CMAKE_SOURCE_DIR}/src/log_export.rb)
+            configure_file(${CMAKE_SOURCE_DIR}/src/log_export.rb
+                ${CMAKE_BINARY_DIR}/log_export-${PROJECT_NAME}.rb COPYONLY)
+            install(FILES ${CMAKE_BINARY_DIR}/log_export-${PROJECT_NAME}.rb
+                    DESTINATION share/rock/log/export)
+        endif()
+    endfunction()
+
     function(ROCK_RUBY_EXTENSION target)
 	INCLUDE_DIRECTORIES(${RUBY_INCLUDE_PATH})
         list(GET ${RUBY_INCLUDE_PATH} 0 rubylib_path)
