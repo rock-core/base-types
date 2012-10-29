@@ -18,9 +18,7 @@ endmacro()
 macro (rock_init PROJECT_NAME PROJECT_VERSION)
     project(${PROJECT_NAME})
     set(PROJECT_VERSION ${PROJECT_VERSION})
-    list(APPEND CMAKE_MODULE_PATH $ENV{ROCK_CMAKE_MACROS})
     rock_use_full_rpath("${CMAKE_INSTALL_PREFIX}/lib")
-
 
     include(CheckCXXCompilerFlag)
     include(FindPkgConfig)

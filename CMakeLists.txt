@@ -17,6 +17,7 @@ configure_file(base-types.pc.in base-types.pc @ONLY)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/base DESTINATION include)
 install(FILES ${CMAKE_BINARY_DIR}/base-types.pc DESTINATION lib/pkgconfig)
 
+configure_file(cmake/rock-config.cmake.in rock-config.cmake @ONLY)
 install(FILES
     cmake/FindBoost.cmake
     cmake/FindGem.cmake
@@ -28,5 +29,6 @@ install(FILES
     cmake/PythonInstallPath.cmake
     cmake/Rock.cmake
     cmake/RockRuby.cmake
-    DESTINATION share/cmake/rock)
+    ${CMAKE_CURRENT_BINARY_DIR}/rock-config.cmake
+    DESTINATION share/rock/cmake)
 
