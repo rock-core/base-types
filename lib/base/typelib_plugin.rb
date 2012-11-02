@@ -90,6 +90,31 @@ begin
         t.im = data[1, 3]
         t
     end
+
+    Typelib.convert_to_ruby '/wrappers/MatrixX</double>', Eigen::MatrixX do |value|
+        m = Eigen::MatrixX.new(value.rows,value.cols)
+        m.from_a(value.data.to_a,value.rows,value.cols)
+        m
+    end
+    Typelib.convert_from_ruby Eigen::MatrixX, '/wrappers/MatrixX</double>' do |value, type|
+        t = type.new
+        t.rows = value.rows
+        t.cols = value.cols
+        t.data = value.to_a
+        t
+    end
+    
+    Typelib.convert_to_ruby '/std/vector</double>', Eigen::VectorX do |value|
+        m = Eigen::VectorX.new(value.size)
+        m.from_a(value.to_a)
+        m
+    end
+    Typelib.convert_from_ruby Eigen::VectorX, '/std/vector</double>' do |value, type|
+        t = type.new
+        value.to_a.each {|v| t.push(v) }
+        t
+    end
+
 rescue LoadError
     STDERR.puts "The Ruby Eigen library is not present, I am not providing extensions for the base geometry types"
 end

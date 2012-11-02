@@ -10,6 +10,10 @@ using namespace Rice;
 
 typedef Eigen::Matrix<double, 3, 1, Eigen::DontAlign>     Vector3d;
 typedef Eigen::Quaternion<double, Eigen::DontAlign>    Quaterniond;
+typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::DontAlign>
+                                                       MatrixXd;
+typedef Eigen::Matrix<double, Eigen::Dynamic, 1, Eigen::DontAlign>
+                                                       VectorXd;
 
 struct Vector3
 {
@@ -124,6 +128,114 @@ struct Quaternion
     }
 };
 
+struct VectorX {
+
+    VectorXd* v;
+    
+    VectorX()
+        : v(new VectorXd()) {}
+    VectorX(int n)
+        : v(new VectorXd(n)) {}
+    VectorX(VectorXd const& _v)
+        : v(new VectorXd(_v)) {}
+    ~VectorX()
+    { delete v; }
+    
+    void resize(int n) { v->resize(n); }
+    void conservativeResize(int n) { v->conservativeResize(n); }
+
+    double norm() const { return v->norm(); }
+    VectorX* normalize() const { return new VectorX(v->normalized()); }
+    void normalizeBang() const { v->normalize(); }
+
+    int size() { return v->size(); }
+
+    double get(int i) const { return (*v)[i]; }
+    void set(int i, double value) { (*v)[i] = value; }
+
+    VectorX* operator + (VectorX const& other) const
+    { return new VectorX(*v + *other.v); }
+    VectorX* operator - (VectorX const& other) const
+    { return new VectorX(*v - *other.v); }
+
+    VectorX* operator / (double scalar) const
+    { return new VectorX(*v / scalar); }
+    
+    VectorX* negate() const
+    { return new VectorX(-*v); }
+
+    VectorX* scale(double value) const
+    { return new VectorX(*v * value); }
+
+    double dot(VectorX const& other) const
+    { return this->v->dot(*other.v); }
+
+    bool operator ==(VectorX const& other) const
+    { return (*this->v) == (*other.v); }
+
+    bool isApprox(VectorX const& other, double tolerance)
+    { return v->isApprox(*other.v, tolerance); }
+
+};
+
+struct MatrixX {
+
+    MatrixXd* m;
+
+    MatrixX() : m(new MatrixXd()) {}
+    MatrixX(int rows, int cols) : m(new MatrixXd(rows,cols)) {}
+    MatrixX(const MatrixXd& _m) : m(new MatrixXd(_m)) {}
+    ~MatrixX() { delete m; }
+
+    void resize(int rows, int cols) { m->resize(rows,cols); }
+    void conservativeResize(int rows, int cols) { m->conservativeResize(rows,cols); }
+    
+    double norm() const { return m->norm(); }
+
+    int rows() const { return m->rows(); }
+    int cols() const { return m->cols(); }
+    int size() const { return m->size(); }
+
+    double get(int i, int j ) const { return (*m)(i,j); }
+    void set(int i, int j, double value) { (*m)(i,j) = value; }
+    
+    VectorX* getRow(int i) const { return new VectorX(m->row(i)); }
+    void setRow(int i, const VectorX& v) { m->row(i) = *(v.v); }
+
+    VectorX* getColumn(int j) const { return new VectorX(m->col(j)); }
+    void setColumn(int j, const VectorX& v) { m->col(j) = *(v.v); }
+
+    MatrixX* transpose() const
+    { return new MatrixX(m->transpose()); }
+
+    MatrixX* operator + (MatrixX const& other) const
+    { return new MatrixX(*m + *other.m); }
+
+    MatrixX* operator - (MatrixX const& other) const
+    { return new MatrixX(*m - *other.m); }
+
+    MatrixX* operator / (double scalar) const
+    { return new MatrixX(*m / scalar); }
+
+    MatrixX* negate() const
+    { return new MatrixX(-*m); }
+    
+    MatrixX* scale (double scalar) const
+    { return new MatrixX(*m * scalar); }
+
+    MatrixX* dotV (VectorX const& other) const
+    { return new MatrixX(*m * *other.v); }
+    
+    MatrixX* dotM (MatrixX const& other) const
+    { return new MatrixX(*m * (*other.m)); }
+
+    bool operator ==(MatrixX const& other) const
+    { return (*this->m) == (*other.m); }
+
+    bool isApprox(MatrixX const& other, double tolerance)
+    { return m->isApprox(*other.m, tolerance); }
+};
+
 // The initialization method for this module
 void Init_eigen_ext()
 {
@@ -175,5 +287,50 @@ void Init_eigen_ext()
        .define_method("to_euler", &Quaternion::toEuler)
        .define_method("from_euler", &Quaternion::fromEuler)
        .define_method("from_angle_axis", &Quaternion::fromAngleAxis);
+     
+     Data_Type<VectorX> rb_VectorX = define_class_under<VectorX>(rb_mEigen, "VectorX")
+       .define_constructor(Constructor<VectorX,int>(),
+               (Arg("rows") = static_cast<int>(0)))
+       .define_method("resize", &VectorX::resize)
+       .define_method("__equal__",  &VectorX::operator ==)
+       .define_method("norm",  &VectorX::norm)
+       .define_method("normalize!",  &VectorX::normalizeBang)
+       .define_method("normalize",  &VectorX::normalize)
+       .define_method("size", &VectorX::size)
+       .define_method("[]",  &VectorX::get)
+       .define_method("[]=",  &VectorX::set)
+       .define_method("+",  &VectorX::operator +)
+       .define_method("-",  &VectorX::operator -)
+       .define_method("/",  &VectorX::operator /)
+       .define_method("-@", &VectorX::negate)
+       .define_method("*",  &VectorX::scale)
+       .define_method("dot",  &VectorX::dot)
+       .define_method("approx?", &VectorX::isApprox);
+     
+     Data_Type<MatrixX> rb_MatrixX = define_class_under<MatrixX>(rb_mEigen, "MatrixX")
+       .define_constructor(Constructor<MatrixX,int,int>(),
+               (Arg("rows") = static_cast<int>(0),
+                Arg("cols") = static_cast<int>(0)))
+       .define_method("resize", &MatrixX::resize)
+       .define_method("__equal__",  &MatrixX::operator ==)
+       .define_method("T", &MatrixX::transpose)
+       .define_method("norm",  &MatrixX::norm)
+       .define_method("rows", &MatrixX::rows)
+       .define_method("cols", &MatrixX::cols)
+       .define_method("size", &MatrixX::size)
+       .define_method("[]",  &MatrixX::get)
+       .define_method("[]=",  &MatrixX::set)
+       .define_method("row", &MatrixX::getRow)
+       .define_method("setRow", &MatrixX::setRow)
+       .define_method("col", &MatrixX::getColumn)
+       .define_method("setCol", &MatrixX::setColumn)
+       .define_method("+",  &MatrixX::operator +)
+       .define_method("-",  &MatrixX::operator -)
+       .define_method("/",  &MatrixX::operator /)
+       .define_method("-@", &MatrixX::negate)
+       .define_method("*",  &MatrixX::scale)
+       .define_method("dotV",  &MatrixX::dotV)
+       .define_method("dotM",  &MatrixX::dotM)
+       .define_method("approx?", &MatrixX::isApprox);
 }
 

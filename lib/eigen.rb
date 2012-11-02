@@ -61,6 +61,14 @@ module Eigen
             "Vector3(#{x}, #{y}, #{z})"
         end
 
+        def data
+            [x, y, z]
+        end
+
+        def data=(value)
+            x,y,z = value
+        end
+
         ##
         # :method: ==
 
@@ -237,6 +245,22 @@ module Eigen
                 __equal__(q)
         end
 
+        def re
+            w
+        end
+
+        def re=(value)
+            w = value
+        end
+
+        def im
+            [x,y,z]
+        end
+
+        def im=(value)
+            x,y,z = value
+        end
+
         ##
         # :method: w
 
@@ -333,5 +357,124 @@ module Eigen
         #
         # Computes the quaternion that is inverse of this one
     end
+
+    # Abritary size vector
+    class VectorX
+
+        # Returns the array value in a vector
+        def to_a()
+            a = []
+            for i in 0..size()-1
+                    a << self[i]
+            end
+            a
+        end
+
+        def from_a(array)
+            resize(array.size())
+            for i in 0..array.size()-1
+                self[i] = array[i]
+            end
+        end
+        
+        def ==(v)
+            v.kind_of?(self.class) &&
+                __equal__(v)
+        end
+        
+        def to_s # :nodoc:
+            str = "VectorX("
+            for i in 0..size()-1
+                str += "#{self[i]} "
+            end
+            str[-1] = ")"
+            str
+        end
+        
+        def _dump(level) # :nodoc:
+            Marshal.dump(to_a)
+        end
+
+        def self._load(coordinates) # :nodoc:
+            m = new()
+            m.from_a(Marshal.load(coordinates))
+            m
+        end
+    end
+    
+    # Abritary size vector
+    class MatrixX
+
+        # Returns the array value in a vector 
+        def to_a(column_major=true)
+            a = []
+            if column_major
+                for j in 0..cols()-1
+                    for i in 0..rows()-1
+                        a << self[i,j]
+                    end
+                end
+            else
+                for i in 0..rows()-1
+                    for j in 0..cols()-1
+                        a << self[i,j]
+                    end
+                end
+            end
+            a
+        end
+
+        # sets matrix from a 1d array
+        def from_a(array,nrows=-1,mcols=-1,column_major=true)
+            if nrows == -1 && mcols == -1
+                nrows = rows
+                mcols = cols
+            elsif nrows == -1
+                nrows = array.size / mcols
+            elsif mcols == -1
+                ncols = array.size / nrows
+            end
+            resize(nrows,mcols)
+            array.each_index do |i|
+                v = array[i]
+                if !v
+                    v = 0.0
+                end
+                if column_major
+                    self[i%nrows,i/nrows] = v
+                else
+                    self[i%mcols,i/mcols] = v
+                end
+            end
+        end
+
+        def ==(m)
+            m.kind_of?(self.class) &&
+                __equal__(m)
+        end
+        
+        def to_s # :nodoc:
+            str = "MatrixX(\n"
+            for i in 0..rows()-1
+                for j in 0..cols()-1
+                    str += "#{self[i,j]} "
+                end
+                str[-1] = "\n"
+            end
+            str += ")"
+            str
+        end
+        
+        def _dump(level) # :nodoc:
+            Marshal.dump({'rows' => rows, 'cols' => cols, 'data' => to_a})
+        end
+
+        def self._load(coordinates) # :nodoc:
+            o = Marshal.load(coordinates)
+            m = new(o['rows'],o['cols'])
+            m.from_a(o['data'],o['rows'],o['cols'])
+            m
+        end
+    end     
 end
 
