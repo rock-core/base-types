@@ -104,14 +104,14 @@ begin
         t
     end
     
-    Typelib.convert_to_ruby '/std/vector</double>', Eigen::VectorX do |value|
-        m = Eigen::VectorX.new(value.size)
-        m.from_a(value.to_a)
+    Typelib.convert_to_ruby '/wrappers/VectorX</double>', Eigen::VectorX do |value|
+        m = Eigen::VectorX.new(value.data.size)
+        m.from_a(value.data.to_a)
         m
     end
-    Typelib.convert_from_ruby Eigen::VectorX, '/std/vector</double>' do |value, type|
+    Typelib.convert_from_ruby Eigen::VectorX, '/wrappers/VectorX</double>' do |value, type|
         t = type.new
-        value.to_a.each {|v| t.push(v) }
+        value.to_a.each {|v| t.data.push(v) }
         t
     end
 
