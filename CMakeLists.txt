@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
-set(ENV{ROCK_CMAKE_MACROS} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-include($ENV{ROCK_CMAKE_MACROS}/Rock.cmake)
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Rock.cmake)
 rock_init(base 1.0)
 
 rock_export_includedir(${PROJECT_SOURCE_DIR}/src base/geometry)
