@@ -14,6 +14,7 @@ typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::DontAlign>
                                                        MatrixXd;
 typedef Eigen::Matrix<double, Eigen::Dynamic, 1, Eigen::DontAlign>
                                                        VectorXd;
+typedef Eigen::Transform< double, 3, Eigen::Isometry > Isometry3d;
 
 struct Vector3
 {
@@ -236,6 +237,54 @@ struct MatrixX {
     { return m->isApprox(*other.m, tolerance); }
 };
 
+#include <iostream>
+
+struct Isometry3
+{
+    Isometry3d *t;
+
+    Isometry3() : t(new Isometry3d()) { t->setIdentity(); }
+    Isometry3(const Isometry3d& _m) : t(new Isometry3d(_m)) {}
+    ~Isometry3() { delete t; }
+
+    Isometry3* inverse() const
+    { return new Isometry3( t->inverse() ); }
+
+    Vector3* translation() const
+    { return new Vector3( t->translation() ); }
+
+    Quaternion* rotation() const
+    { return new Quaternion( Eigen::Quaterniond(t->linear()) ); }
+
+    Isometry3* concatenate(Isometry3 const& other) const
+    { return new Isometry3( *t * *other.t ); }
+
+    Vector3* transform(Vector3 const& other) const
+    { return new Vector3( *t * *other.v ); }
+
+    MatrixX* matrix() const
+    { return new MatrixX( t->matrix() ); }
+
+    void translate( Vector3 const& other ) const
+    { t->translate( *other.v ); }
+
+    void pretranslate( Vector3 const& other ) const
+    { t->pretranslate( *other.v ); }
+
+    void rotate( Quaternion const& other ) const
+    { t->rotate( *other.q ); }
+
+    void prerotate( Quaternion const& other ) const
+    { t->prerotate( *other.q ); }
+
+    bool operator ==(Isometry3 const& other) const
+    { return (*this->t).matrix() == (*other.t).matrix(); }
+
+    bool isApprox(Isometry3 const& other, double tolerance)
+    { return t->isApprox(*other.t, tolerance); }
+};
+
+
 // The initialization method for this module
 void Init_eigen_ext()
 {
@@ -332,5 +381,20 @@ void Init_eigen_ext()
        .define_method("dotV",  &MatrixX::dotV)
        .define_method("dotM",  &MatrixX::dotM)
        .define_method("approx?", &MatrixX::isApprox);
+
+     Data_Type<Isometry3> rb_Isometry3 = define_class_under<Isometry3>(rb_mEigen, "Isometry3")
+       .define_constructor(Constructor<Isometry3>())
+       .define_method("__equal__",  &Isometry3::operator ==)
+       .define_method("approx?",  &Isometry3::isApprox)
+       .define_method("inverse", &Isometry3::inverse)
+       .define_method("translation", &Isometry3::translation)
+       .define_method("rotation", &Isometry3::rotation)
+       .define_method("concatenate", &Isometry3::concatenate)
+       .define_method("transform", &Isometry3::transform)
+       .define_method("matrix", &Isometry3::matrix)
+       .define_method("translate", &Isometry3::translate)
+       .define_method("pretranslate", &Isometry3::pretranslate)
+       .define_method("rotate", &Isometry3::rotate)
+       .define_method("prerotate", &Isometry3::prerotate);
 }
 

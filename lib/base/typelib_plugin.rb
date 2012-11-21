@@ -39,6 +39,17 @@ Typelib.specialize_model '/base/samples/RigidBodyState_m' do
     end
 end
 
+Typelib.specialize '/base/samples/RigidBodyState_m' do
+    def transform
+	Eigen::Isometry3.from_position_orientation( position, orientation )
+    end
+
+    def transform= t
+	self.position = t.translation
+	self.orientation = t.rotation
+    end
+end
+
 ##
 # base/geometry/Spline to BaseTypes::Geometry::Spline convertions
 require 'base/geometry/spline'
