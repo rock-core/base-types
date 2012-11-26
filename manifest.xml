@@ -9,6 +9,7 @@
 
     <depend package="rice" />
     <depend package="eigen3" />
+    <depend package="external/sisl" />
     <depend package="base/types" />
 </package>
 
