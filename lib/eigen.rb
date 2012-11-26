@@ -21,6 +21,11 @@ module Eigen
             return Vector3.new(0, 0, 1)
         end
 
+	# returns the (0, 0, 0) vector
+	def self.Zero()
+	    return Vector3.new(0, 0, 0)
+	end
+
         # Returns the angle formed by +self+ and +v+, oriented from +self+ to
         # +v+
         def angle_to(v)
@@ -176,7 +181,7 @@ module Eigen
 
 	# Creates a quaternion from an angle and axis description 
 	def self.from_angle_axis(*args)
-            q = new(0, 0, 0, 0)
+            q = new(1, 0, 0, 0)
 	    q.from_angle_axis(*args)
 	    q
 	end
@@ -185,7 +190,7 @@ module Eigen
         #
         # See Quaternion#from_euler for details
         def self.from_euler(*args)
-            q = new(0, 0, 0, 0)
+            q = new(1, 0, 0, 0)
             q.from_euler(*args)
             q
         end
@@ -476,5 +481,36 @@ module Eigen
             m
         end
     end     
+
+    class Isometry3
+	def self.Identity
+	    Isometry3.new
+	end
+
+	def self.from_position_orientation( v, q )
+	    i = Isometry3.Identity
+	    i.prerotate( q )
+	    i.pretranslate( v )
+	    i
+	end
+
+        def ==(q)
+            q.kind_of?(self.class) &&
+                __equal__(q)
+        end
+
+        def *(obj)
+            if obj.kind_of?(Isometry3)
+                concatenate(obj)
+            else
+                transform(obj)
+            end
+        end
+
+	def to_s
+	    matrix.to_s
+	end
+    end
+
 end
 
