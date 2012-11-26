@@ -1,3 +1,4 @@
+
 macro(rock_use_full_rpath install_rpath)
     # use, i.e. don't skip the full RPATH for the build tree
     SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
@@ -346,7 +347,11 @@ endfunction()
 macro(rock_library_common TARGET_NAME)
     rock_target_definition(${TARGET_NAME} ${ARGN})
 
-    add_library(${TARGET_NAME} SHARED ${${TARGET_NAME}_SOURCES})
+    if(BUILD_STATIC)
+        add_library(${TARGET_NAME} STATIC ${${TARGET_NAME}_SOURCES})
+    else()
+        add_library(${TARGET_NAME} SHARED ${${TARGET_NAME}_SOURCES})
+    endif()
     rock_target_setup(${TARGET_NAME})
 
     foreach(pkgname ${${TARGET_NAME}_DEPS_PKGCONFIG})
@@ -572,10 +577,14 @@ endfunction()
 # files, they get added to the library and the corresponding header file is
 # passed to moc.
 function(rock_testsuite TARGET_NAME)
-    rock_executable(${TARGET_NAME} ${ARGN}
-        NOINSTALL)
-    target_link_libraries(${TARGET_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
-    add_test(RockTestSuite ${EXECUTABLE_OUTPUT_PATH}/${TARGET_NAME})
+    if(CMAKE_CROSSCOMPILING)
+        MESSAGE("Warning Testsuites are disabled for Crossdev currently bevause we are not able to generarte right linked apps, feel free to fix this, this sould not be so hard")
+    else()
+        rock_executable(${TARGET_NAME} ${ARGN}
+            NOINSTALL)
+        target_link_libraries(${TARGET_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
+        add_test(RockTestSuite ${EXECUTABLE_OUTPUT_PATH}/${TARGET_NAME})
+    endif()
 endfunction()
 
 macro(rock_libraries_for_pkgconfig VARNAME)
