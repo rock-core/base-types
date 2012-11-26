@@ -1,5 +1,5 @@
 #include "spline.h"
-#include "sisl.h"
+#include "sisl/sisl.h"
 
 #include <stdexcept>
 #include <vector>
