@@ -14,6 +14,7 @@ if !pkg_config('eigen3')
    $CXXFLAGS += " -I/usr/include/eigen3"
 end
 
+ENV['PKG_CONFIG_PATH'] = "#{ENV['AUTOPROJ_PROJECT_BASE']}/install/x86_64-linux-gnu/lib/pkgconfig/" #TODO
 if !pkg_config('base-lib')
    STDERR.puts "could not find Rock's base-lib pkg-config file"
    exit(1)
