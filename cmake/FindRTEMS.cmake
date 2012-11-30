@@ -3,25 +3,29 @@ INCLUDE(CMakeForceCompiler)
 SET(CMAKE_SYSTEM_NAME RTEMS)
 
 if(DEFINED ENV{RTEMS_INSTALL_DIR})
-    MESSAGE("OVERSIDING Setting of rtems install dir withenvoirmnment")
-    set(RTEMS_INSTALL_DIR $ENV{RTEMS_INSTALL_DIR} CACHE PATH "path to rtems installation dir" FORCE)
-    #set(RTEMS_INSTALL_DIR $ENV{RTEMS_INSTALL_DIR})
+    set(RTEMS_INSTALL_DIR $ENV{RTEMS_INSTALL_DIR} CACHE INTERNAL "path to rtems installation dir" FORCE)
+endif()
+
+if(DEFINED ENV{TARGET})
+    set(TARGET $ENV{TARGET} CACHE INTERNAL "path to rtems installation dir" FORCE)
+endif()
+
+if(DEFINED ENV{BSP})
+    set(BSP $ENV{BSP} CACHE INTERNAL "path to rtems installation dir" FORCE)
 endif()
     
-
 if(NOT RTEMS_INSTALL_DIR)
     MESSAGE(FATAL_ERROR "Please set RTEMS_INSTALL_DIR before running rock cross dev for rtems -${RTEMS_INSTALL_DIR}-")
 endif()
-if(NOT DEFINED ENV{TARGET})
+if(NOT DEFINED TARGET)
     MESSAGE(FATAL_ERROR "Please set the Enviorment variable TARGET before running rock cross dev for rtems")
 endif()
-if(NOT DEFINED ENV{BSP})
+if(NOT DEFINED BSP)
     MESSAGE(FATAL_ERROR "Please set the Enviorment variable BSP before running rock cross dev for rtems")
 endif()
 
 #set(RTEMS_INSTALL_DIR $ENV{RTEMS_INSTALL_DIR} CACHE PATH "path to rtems installation dir" FORCE)
-  set(RTEMS_CC_PREFIX $ENV{TARGET})
-  set(BSP $ENV{BSP})
+  set(RTEMS_CC_PREFIX ${TARGET})
   SET(CMAKE_CROSSCOMPILING ON)
 
   if(EXISTS ${RTEMS_INSTALL_DIR}/${RTEMS_CC_PREFIX}/${BSP}/lib/include/rtems/system.h)
@@ -107,7 +111,7 @@ endif()
     add_definitions("-lboost_math_c99f -lboost_math_tr1l -lboost_graph -lboost_prg_exec_monitor -lboost_serialization -lboost_test_exec_monitor -lboost_thread -lboost_program_options -lboost_math_tr1 -lboost_unit_test_framework -lboost_math_tr1f -lboost_math_c99 -lboost_regex -lboost_system -lboost_math_c99l -lboost_wserialization -lboost_filesystem #{ADD_DEF}")
 
   else(EXISTS ${RTEMS_INSTALL_DIR}/${RTEMS_CC_PREFIX}/${BSP}/lib/include/rtems/system.h)
-    message(FATAL_ERROR "-- Looking for RTEMS - not found (tried: ${RTEMS_INSTALL_DIR}/${RTEMS_CC_PREFIX}/${BSP}/lib/include/rtems/system.h)")
+      message(FATAL_ERROR "-${RTEMS_CC_PREFIX}- Looking for RTEMS - not found (tried: ${RTEMS_INSTALL_DIR}/${RTEMS_CC_PREFIX}/${BSP}/lib/include/rtems/system.h)")
     set(RTEMS_FOUND FALSE)
   endif(EXISTS ${RTEMS_INSTALL_DIR}/${RTEMS_CC_PREFIX}/${BSP}/lib/include/rtems/system.h)
 
