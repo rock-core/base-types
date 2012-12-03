@@ -252,7 +252,9 @@ bool SplineBase::isNURBS() const
     return curve->ikind == 2 || curve->ikind == 4;
 }
 
-void SplineBase::interpolate(std::vector<double> const& points, std::vector<double> const& parameters)
+void SplineBase::interpolate(std::vector<double> const& points, 
+	std::vector<double> const& parameters, 
+	std::vector<CoordinateType> const& coord_types )
 {
     clear();
     start_param = 0.0;
@@ -277,7 +279,15 @@ void SplineBase::interpolate(std::vector<double> const& points, std::vector<doub
 
     singleton.clear();
     vector<int> point_types;
-    point_types.resize(point_count, 1);
+    if( coord_types.empty() )
+    {
+	point_types.resize(point_count, 1);
+    }
+    else
+    {
+	assert( coord_types.size() == points.size() );
+	std::copy( coord_types.begin(), coord_types.end(), std::back_inserter( point_types ) );
+    }
 
     // Generates curve
     double* point_param;  
