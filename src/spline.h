@@ -127,6 +127,11 @@ namespace geometry {
 
         bool isNURBS() const;
 
+        /** Replaces the current internal SISLCurve by a new one that contains
+         * the given information
+         *
+         * The semantic of the three parameters is internal to SISL
+         */
         void reset(std::vector<double> const& coordinates, std::vector<double> const& knots, int kind = -1);
 
         /** Reverses the direction of the curve
@@ -194,6 +199,13 @@ namespace geometry {
 	 * */
 	bool checkAndNormalizeParam(double &param, double equalDistance = 0.001) const;
 
+        /** Replaces the current internal SISLCurve by the provided one. The
+         * SplineBase object takes ownership of the given curve.
+         *
+         * Is is used in mutating methods that need to create a new curve: i.e.
+         * create a new curve, do SISL operation, replace current curve by new
+         * curve by calling reset(new_curve)
+         */
         void reset(SISLCurve* curve);
         void getPoint(double* result, double _param) const;
         void getPointAndTangent(double* result, double _param) const;
