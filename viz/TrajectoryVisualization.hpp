@@ -14,6 +14,8 @@ class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>, public Viz
     Q_OBJECT
     //unsigned int is not supported by the property browser so far
     Q_PROPERTY(int MaxPoints READ getMaxNumberOfPoints WRITE setMaxNumberOfPoints)
+    Q_PROPERTY(double LineWidth READ getLineWidth WRITE setLineWidth)
+    Q_PROPERTY(QColor Color READ getColor WRITE setColor)
 
     public:
 	TrajectoryVisualization();
@@ -34,6 +36,10 @@ class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>, public Viz
     public slots:
         int getMaxNumberOfPoints(){return max_number_of_points;};
         void setMaxNumberOfPoints(int points){max_number_of_points = points;};
+	double getLineWidth();
+	void setLineWidth(double line_width);
+        void setColor(QColor color);
+        QColor getColor() const;
 
     protected:
 	virtual osg::ref_ptr<osg::Node> createMainNode();
@@ -42,14 +48,17 @@ class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>, public Viz
 	void updateDataIntern(const base::geometry::Spline3& data);
 	
     private:
-	osg::Vec4Array *color2; 
 	bool doClear;
-        int max_number_of_points;
+        size_t max_number_of_points;
+	double line_width;
 
+	osg::Vec4 color;
 	std::list<Eigen::Vector3d> points;
+	osg::ref_ptr<osg::Vec4Array> colorArray; 
 	osg::ref_ptr<osg::Vec3Array> pointsOSG;
 	osg::ref_ptr<osg::DrawArrays> drawArrays;
 	osg::ref_ptr<osg::Geometry> geom;
+	osg::ref_ptr<osg::Geode> geode;
 };
 
 }

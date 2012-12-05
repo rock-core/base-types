@@ -1,6 +1,7 @@
 #include "TrajectoryVisualization.hpp"
 #include <osg/Geometry>
 #include <osg/Geode>
+#include <osg/LineWidth>
 
 namespace vizkit 
 {
@@ -11,9 +12,10 @@ TrajectoryVisualization::TrajectoryVisualization():max_number_of_points(1800)
 
     // initialize here so that setColor can be called event
     doClear = false;
-    color2 = new osg::Vec4Array;
+    colorArray = new osg::Vec4Array;
     geom = new osg::Geometry;
     pointsOSG = new osg::Vec3Array;
+    setColor( 1, 0, 0, 1 ); 
 }
 
 TrajectoryVisualization::~TrajectoryVisualization()
@@ -28,7 +30,7 @@ osg::ref_ptr<osg::Node> TrajectoryVisualization::createMainNode()
 
     // Add the Geometry (Drawable) to a Geode and
     //   return the Geode.
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+    geode = new osg::Geode;
     geode->addDrawable( geom.get() );
 
     osg::StateSet* stategeode = geode->getOrCreateStateSet();
@@ -39,10 +41,12 @@ osg::ref_ptr<osg::Node> TrajectoryVisualization::createMainNode()
 
 void TrajectoryVisualization::setColor(double r, double g, double b, double a)
 {
+    color = osg::Vec4( r, g, b, a );
+
     // set colors
-    color2->clear();
-    color2->push_back( osg::Vec4( r, g, b, a ) );
-    geom->setColorArray( color2 );
+    colorArray->clear();
+    colorArray->push_back( color );
+    geom->setColorArray( colorArray );
     geom->setColorBinding( osg::Geometry::BIND_OVERALL );
 }
 
@@ -61,6 +65,9 @@ void TrajectoryVisualization::clear()
 void TrajectoryVisualization::updateMainNode( osg::Node* node )
 {   
     std::list<Eigen::Vector3d>::const_iterator it = points.begin();
+
+    osg::StateSet* stategeode = geode->getOrCreateStateSet();
+    stategeode->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
     
     pointsOSG->clear();
     for(; it != points.end(); it++) {
@@ -102,5 +109,36 @@ void TrajectoryVisualization::updateDataIntern( const base::Vector3d& data )
     points.push_back(d);
     while(points.size() > max_number_of_points)
         points.pop_front();
+}
+
+void TrajectoryVisualization::setColor(QColor color)
+{
+    setColor( color.redF(), color.greenF(), color.blueF(), color.alphaF() );
+    emit propertyChanged("color");
+}
+
+QColor TrajectoryVisualization::getColor() const
+{
+    QColor color;
+    color.setRgbF(this->color.x(), this->color.y(), this->color.z(), this->color.w());
+    return color;
+}
+
+double TrajectoryVisualization::getLineWidth()
+{
+    return line_width;
+}
+
+void TrajectoryVisualization::setLineWidth(double line_width)
+{
+    this->line_width = line_width;
+
+    osg::StateSet* stateset = geode->getOrCreateStateSet();
+    osg::LineWidth* linewidth = new osg::LineWidth();
+    linewidth->setWidth(line_width);
+    stateset->setAttributeAndModes(linewidth,osg::StateAttribute::ON);
+    stateset->setMode(GL_LIGHTING,osg::StateAttribute::OFF);
+
+    emit propertyChanged("line_width");
 }
 }
