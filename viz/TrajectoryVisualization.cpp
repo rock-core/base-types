@@ -6,7 +6,8 @@
 namespace vizkit 
 {
 
-TrajectoryVisualization::TrajectoryVisualization():max_number_of_points(1800)
+TrajectoryVisualization::TrajectoryVisualization()
+    : max_number_of_points(1800), line_width( 1.0 )
 {
     VizPluginRubyMethod(TrajectoryVisualization, base::Vector3d, setColor);
 
