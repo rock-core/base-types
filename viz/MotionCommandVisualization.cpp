@@ -13,6 +13,7 @@ MotionCommandVisualization::MotionCommandVisualization()
 {
     tv = 0;
     rv = 0;
+    mFrontAxis = FrontAxisY;
 }
 
 MotionCommandVisualization::~MotionCommandVisualization()
@@ -26,9 +27,18 @@ osg::ref_ptr< osg::Node > MotionCommandVisualization::createMainNode()
     state->setMode( GL_LIGHTING, osg::StateAttribute::ON );
 
     arrowRotation = new osg::PositionAttitudeTransform();
-    
-    motionPointer = new osg::Cylinder(osg::Vec3f(0, 0.5, 0), 0.05, 1.0);
-    motionPointer->setRotation(osg::Quat(M_PI/2.0, osg::Vec3d(1,0,0)));
+     
+    switch (mFrontAxis) {
+        case FrontAxisX: 
+            motionPointer = new osg::Cylinder(osg::Vec3f(0.5, 0, 0), 0.05, 1.0);
+            motionPointer->setRotation(osg::Quat(-M_PI/2.0, osg::Vec3d(0,1,0)));
+            break;
+        case FrontAxisY:
+            motionPointer = new osg::Cylinder(osg::Vec3f(0, 0.5, 0), 0.05, 1.0);
+            motionPointer->setRotation(osg::Quat(M_PI/2.0, osg::Vec3d(1,0,0)));
+            break;
+    }
+        
     osg::ref_ptr<osg::ShapeDrawable> c2d = new osg::ShapeDrawable(motionPointer);
     c2d->setColor(osg::Vec4f(0, 0, 1.0, 1.0));
     osg::ref_ptr<osg::Geode> c2g = new osg::Geode();
@@ -37,8 +47,17 @@ osg::ref_ptr< osg::Node > MotionCommandVisualization::createMainNode()
     arrowRotation->addChild(c2g.release());
     
     //head of the arrow
-    motionPointerHead = new osg::Cone(osg::Vec3f(0, 1.0, 0), 0.15, 0.2);
-    motionPointerHead->setRotation(osg::Quat(-M_PI/2.0, osg::Vec3d(1,0,0)));
+    switch (mFrontAxis) {
+        case FrontAxisX: 
+            motionPointerHead = new osg::Cone(osg::Vec3f(1.0, 0, 0), 0.15, 0.2);
+            motionPointerHead->setRotation(osg::Quat(M_PI/2.0, osg::Vec3d(0,1,0)));
+            break;
+        case FrontAxisY:
+            motionPointerHead = new osg::Cone(osg::Vec3f(0, 1.0, 0), 0.15, 0.2);
+            motionPointerHead->setRotation(osg::Quat(-M_PI/2.0, osg::Vec3d(1,0,0)));
+            break;
+    }
+
     osg::ref_ptr<osg::ShapeDrawable> shc = new osg::ShapeDrawable(motionPointerHead);
     shc->setColor(osg::Vec4f(0, 0, 1.0, 1.0));
     osg::ref_ptr<osg::Geode> shg = new osg::Geode();
@@ -115,17 +134,37 @@ void MotionCommandVisualization::drawRotation()
     pointsOSG->clear();
 
     double step = rv / stepsize;
-    osg::Vec3 startPoint = osg::Vec3(0, radius, 0);
+    osg::Vec3 startPoint;
+    switch (mFrontAxis) {
+        case FrontAxisX: startPoint = osg::Vec3(radius, 0, 0); break;
+        case FrontAxisY: startPoint = osg::Vec3(0, radius, 0); break;
+    }
     for(int i = 0; i < stepsize; i++) {
-	osg::Vec3 endPoint;
-	endPoint.x() = -sin(step * i) * radius;
-	endPoint.y() = cos(step * i) * radius;
-	pointsOSG->push_back(startPoint);
-	pointsOSG->push_back(endPoint);
-	startPoint = endPoint;
+	    osg::Vec3 endPoint;
+        switch (mFrontAxis) {
+            case FrontAxisX: 
+                endPoint.x() = cos(step * i) * radius;
+                endPoint.y() = sin(step * i) * radius;
+                break;
+            case FrontAxisY:
+                endPoint.x() = -sin(step * i) * radius;
+                endPoint.y() = cos(step * i) * radius;
+                break;
+        }
+	    pointsOSG->push_back(startPoint);
+	    pointsOSG->push_back(endPoint);
+	    startPoint = endPoint;
     }
     drawArrays->setCount(pointsOSG->size());
     geom->setVertexArray(pointsOSG);
+}
+
+void MotionCommandVisualization::setFrontAxis(FrontAxis front_axis) {
+    mFrontAxis = front_axis;
+}
+
+MotionCommandVisualization::FrontAxis MotionCommandVisualization::getFrontAxis() {
+    return mFrontAxis;
 }
 
 }

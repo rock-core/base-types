@@ -13,11 +13,15 @@ namespace vizkit
 class MotionCommandVisualization : public Vizkit3DPlugin<base::MotionCommand2D>, public VizPluginAddType<base::Pose>
 {
     Q_OBJECT
+    Q_PROPERTY(FrontAxis frontAxis READ getFrontAxis WRITE setFrontAxis)   
+    Q_ENUMS(FrontAxis)
 
     public:
 	MotionCommandVisualization();	
         ~MotionCommandVisualization();
         
+        enum FrontAxis {FrontAxisX, FrontAxisY};
+
         Q_INVOKABLE void updateData(const base::MotionCommand2D& data)
         { Vizkit3DPlugin<base::MotionCommand2D>::updateData(data); }
         Q_INVOKABLE void updateMotionCommand(const base::MotionCommand2D& data)
@@ -26,6 +30,10 @@ class MotionCommandVisualization : public Vizkit3DPlugin<base::MotionCommand2D>,
         { Vizkit3DPlugin<base::MotionCommand2D>::updateData(data); }
         Q_INVOKABLE void updatePose(const base::Pose& data)
         { updateData(data); }
+
+    public slots:
+        void setFrontAxis(FrontAxis front_axis);
+        FrontAxis getFrontAxis();
 
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
@@ -45,7 +53,8 @@ class MotionCommandVisualization : public Vizkit3DPlugin<base::MotionCommand2D>,
 	osg::ref_ptr<osg::Geometry> geom;
 	osg::ref_ptr<osg::PositionAttitudeTransform> arrowRotation;
 	osg::ref_ptr<osg::PositionAttitudeTransform> positionTransformation;
-	void drawRotation();
+    FrontAxis mFrontAxis; 
+    void drawRotation();
 };
 
 }
