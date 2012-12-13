@@ -15,6 +15,31 @@ class TC_Geometry_Spline < Test::Unit::TestCase
         assert_equal [1, 1, 1], v.get(v.end_param)
     end
 
+    def test_deriv
+        v = Types::Base::Geometry::Spline.new(3)
+
+        v.interpolate(
+	    [[0, 0, 0], 
+	    [0, 0, 0],
+	    [0, 0, 0], 
+	    [1, 0, 0], 
+	    [1, 0, 0], 
+	    [1, 1, 0],
+	    [1, 1, 0]], [],
+	    [:ORDINARY_POINT, 
+	    :TANGENT_POINT_FOR_NEXT,
+	    :TANGENT_POINT_FOR_PRIOR,
+	    :ORDINARY_POINT,
+	    :TANGENT_POINT_FOR_NEXT,
+	    :TANGENT_POINT_FOR_PRIOR,
+	    :ORDINARY_POINT] )
+
+        assert_equal [0, 0, 0], v.get(v.start_param)
+        assert_equal [1, 1, 0], v.get(v.end_param)
+        assert_equal [0.75, 0, 0], v.get(0.5).map {|p| p.round(6) }
+        assert_equal [1, 0.375, 0], v.get(1.5)
+    end
+
     def test_concat
         v1 = Types::Base::Geometry::Spline.new(3)
         v1.interpolate([0, 0, 0, 1, 2, 3])

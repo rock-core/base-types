@@ -11,14 +11,14 @@ module Base
             # See Spline#interpolate for details. Unlike Spline#interpolate,
             # +points+ must be a nested array so that the curve dimension can be
             # guessed.
-            def self.interpolate(points, parameters = nil)
+            def self.interpolate(points, parameters = nil, types = nil)
                 if points.first.kind_of?(Numeric)
                     raise ArgumentError, "cannot guess the curve dimensions from a flat point array"
                 end
                 dimension = points.first.to_a.size
 
                 spline = Spline.new(dimension)
-                spline.interpolate(points, parameters)
+                spline.interpolate(points, parameters, types)
                 spline
             end
 
@@ -60,22 +60,50 @@ module Base
             # If given, +parameters+ is an array of the same size than the
             # number of points. This array represents the desired parameters of
             # each of the points in the resulting spline
-            def interpolate(points, parameters = nil)
+	    #
+	    # types can be a Vector which has to bo of the same length than
+	    # points, and provides the ability to parametrize the spline curve
+	    # by giving values for tangents and/or derivatives
+	    # The Vector needs to contain a list of the following symbols:
+	    #
+	    # :ORDINARY_POINT
+	    # :KNUCKLE_POINT
+	    # :DERIVATIVE_TO_NEXT
+	    # :DERIVATIVE_TO_PRIOR
+	    # :SECOND_DERIVATIVE_TO_NEXT
+	    # :SECOND_DERIVATIVE_TO_PRIOR
+	    # :TANGENT_POINT_FOR_NEXT
+	    # :TANGENT_POINT_FOR_PRIOR
+	    #
+	    # By default types is nil, and all points are interpreted as
+	    # :ORDINARY_POINT
+	    #
+            def interpolate(points, parameters = nil, types = nil)
                 if points.empty?
                     clear
                     return
                 end
 
-                if points.first.kind_of?(Numeric)
-                    do_interpolate(points, parameters || [])
-                else
+		coordinates = points
+
+		# flatten points if required
+                if not points.first.kind_of?(Numeric)
                     coordinates = points.map(&:to_a).flatten!
                     if points.size * self.dimension != coordinates.size
                         raise ArgumentError, "point of wrong dimension given to #interpolate: got #{coordinates.size} coordinates overall, expected #{points.size * self.dimension}"
                     end
+		end
 
-                    do_interpolate(coordinates, parameters || [])
-                end
+		# check types argument size
+		if types && types.size != (coordinates.size / self.dimension)
+		    raise ArgumentError, "if types are given, it needs to be of the same size as points. " +
+			"types.size = #{types.size}, points.size = #{coordinates.size / self.dimension}"
+		end
+
+		# convert the symbols to consts from the enum
+		types = types.map {|v| CoordinateType.const_get v} 
+
+		do_interpolate(coordinates, parameters || [], types || [])
             end
 
             def singleton(point)
@@ -288,9 +316,9 @@ module Base
             #
             # +points+ is an array of Eigen::Vector3 instances. See
             # Spline#interpolate for details on +parameters+
-            def self.interpolate(points, parameters = nil)
+            def self.interpolate(points, parameters = nil, types = nil)
                 spline = Spline3.new
-                spline.interpolate(points, parameters)
+                spline.interpolate(points, parameters, types)
                 spline
             end
 
@@ -356,12 +384,12 @@ module Base
             #
             # +points+ is an array of Eigen::Vector3 instances. See
             # Spline#interpolate for details on +parameters+
-            def interpolate(points, parameters = nil)
+            def interpolate(points, parameters = nil, types = nil)
                 coordinates = []
                 for p in points
                     coordinates << p.x << p.y << p.z
                 end
-                super(coordinates, parameters)
+                super(coordinates, parameters, types)
             end
 
             def singleton(point)

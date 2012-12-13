@@ -9,13 +9,30 @@
 using namespace Rice;
 using base::geometry::SplineBase;
 
-static std::vector<double> array_to_double_vector(Array array)
+typedef SplineBase::CoordinateType CoordinateType;
+
+Rice::Enum<CoordinateType> coordinate_type_type;
+
+template<>
+CoordinateType from_ruby<CoordinateType>( Object x )
 {
-    std::vector<double> result;
+    Data_Object<CoordinateType> d( x, coordinate_type_type );
+    return *d;
+}
+
+template<class Type>
+static std::vector<Type> array_to_cpp(Array array)
+{
+    std::vector<Type> result;
     result.reserve(array.size());
     for (unsigned int i = 0; i < array.size(); ++i)
-        result.push_back(from_ruby<double>(array[i]));
+        result.push_back(from_ruby<Type>(array[i]));
     return result;
+}
+
+static std::vector<double> array_to_double_vector(Array array)
+{
+    return array_to_cpp<double>( array );
 }
 
 static Array double_vector_to_array(std::vector<double> const& v)
@@ -30,9 +47,9 @@ public:
         : SplineBase(dimension, geometric_resolution, order) {}
 
 
-    void do_interpolate(Array coordinates, Array values)
+    void do_interpolate(Array coordinates, Array values, Array coord_types)
     {
-        interpolate(array_to_double_vector(coordinates), array_to_double_vector(values));
+        interpolate(array_to_double_vector(coordinates), array_to_double_vector(values), array_to_cpp<CoordinateType>(coord_types) );
     }
 
     Array do_coordinates()
@@ -121,6 +138,18 @@ void Init_spline_ext(Rice::Module& base_m)
     typedef std::vector<double>(RubySpline::*SimplifySelector)(double);
     typedef void(SplineBase::*Append)(SplineBase const&,double);
     typedef double(SplineBase::*CurveLenght)();
+
+    coordinate_type_type =
+	define_enum<CoordinateType>("CoordinateType")
+	.define_value("ORDINARY_POINT", SplineBase::ORDINARY_POINT)
+	.define_value("KNUCKLE_POINT", SplineBase::KNUCKLE_POINT)
+	.define_value("DERIVATIVE_TO_NEXT", SplineBase::DERIVATIVE_TO_NEXT)
+	.define_value("DERIVATIVE_TO_PRIOR", SplineBase::DERIVATIVE_TO_PRIOR)
+	.define_value("SECOND_DERIVATIVE_TO_NEXT", SplineBase::SECOND_DERIVATIVE_TO_NEXT)
+	.define_value("SECOND_DERIVATIVE_TO_PRIOR", SplineBase::SECOND_DERIVATIVE_TO_PRIOR)
+	.define_value("TANGENT_POINT_FOR_NEXT", SplineBase::TANGENT_POINT_FOR_NEXT)
+	.define_value("TANGENT_POINT_FOR_PRIOR", SplineBase::TANGENT_POINT_FOR_PRIOR);
+
     Data_Type<SplineBase> rb_SplineBase = define_class_under<SplineBase>(base_m, "SplineBase")
         .define_constructor(Constructor<SplineBase,int,double,int>(),
                 (Arg("dimension"), Arg("geometric_resolution") = 0.1, Arg("order") = 3))
