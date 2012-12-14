@@ -11,8 +11,6 @@ rock_find_pkgconfig(Eigen3 eigen3 REQUIRED)
 
 rock_standard_layout()
 
-rock_testsuite(test test.cpp DEPS base)
-
 configure_file(base-types.pc.in base-types.pc @ONLY)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/base DESTINATION include)
 install(FILES ${CMAKE_BINARY_DIR}/base-types.pc DESTINATION lib/pkgconfig)
