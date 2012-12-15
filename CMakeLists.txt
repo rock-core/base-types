@@ -9,6 +9,13 @@ include_directories(BEFORE ${PROJECT_SOURCE_DIR})
 rock_find_cmake(Boost REQUIRED)
 rock_find_pkgconfig(Eigen3 eigen3 REQUIRED)
 
+# For forward compatibility. Test was a toplevel target
+if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/test)
+    if (NOT IS_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test)
+        FILE(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test)
+    endif()
+endif()
+
 rock_standard_layout()
 
 configure_file(base-types.pc.in base-types.pc @ONLY)
