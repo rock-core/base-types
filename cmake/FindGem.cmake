@@ -62,13 +62,23 @@ foreach(Gem_NAME ${Gem_FIND_COMPONENTS})
 	endif()
 
 	if("${GEM_VERSION}" STREQUAL "")
-		MESSAGE(FATAL_ERROR "No local gem found. Check your GEM_HOME setting!") 
+		MESSAGE(FATAL_ERROR "No local gem found. Check your GEM_HOME / GEM_PATH setting!") 
 	else()
-		if("$ENV{GEM_HOME}" STREQUAL "")
-			MESSAGE(FATAL_ERROR "GEM_HOME. Check your GEM_HOME setting!") 
-		endif()
+                if(NOT "$ENV{GEM_HOME}" STREQUAL "")
+                    list(APPEND GEM_SEARCH_PATH $ENV{GEM_HOME})
+                endif()
+                if(NOT "$ENV{GEM_PATH}" STREQUAL "")
+                    string(REPLACE ":" ";" GEM_PATH "$ENV{GEM_PATH}")
+                    list(APPEND GEM_SEARCH_PATH ${GEM_PATH})
+                endif()
 
-		list(APPEND GEM_INCLUDE_DIRS "$ENV{GEM_HOME}/gems/${Gem_NAME}-${GEM_VERSION}")
+                foreach(gem_dir ${GEM_SEARCH_PATH})
+                    set(gem_dir "${gem_dir}/gems/${Gem_NAME}-${GEM_VERSION}")
+                    if (EXISTS "${gem_dir}")
+                        set(GEM_INCLUDE_DIRS "${gem_dir}")
+                        break()
+                    endif()
+                endforeach()
 
 		# Our heuristic to library names available for linking
 		# since there is no real standard for where to put the 

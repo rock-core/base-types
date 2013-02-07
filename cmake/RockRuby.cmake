@@ -97,8 +97,12 @@ ELSEIF(NOT RUBY_EXTENSIONS_AVAILABLE)
 	SET_SOURCE_FILES_PROPERTIES(${ARGN} PROPERTIES COMPILE_FLAGS "${RUBY_CFLAGS}")
         rock_library_common(${target} MODULE ${ARGN})
         target_link_libraries(${target} ${RUBY_LIBRARY})
-        set_target_properties(${target} PROPERTIES
-            LINK_FLAGS "-z noexecstack")
+
+        STRING(REGEX MATCH "arm.*" ARCH ${CMAKE_SYSTEM_PROCESSOR})
+        IF("${ARCH}" STREQUAL "")
+            set_target_properties(${target} PROPERTIES
+                LINK_FLAGS "-z noexecstack")
+        ENDIF("${ARCH}" STREQUAL "")
 	SET_TARGET_PROPERTIES(${target} PROPERTIES PREFIX "")
     endfunction()
 
