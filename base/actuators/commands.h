@@ -49,6 +49,14 @@ namespace base {
                 target.resize(size);
                 std::fill(target.begin(), target.end(), 0);
             }
+            
+            void invert(int pos)
+	    {
+		if (mode[pos] == DM_POSITION)
+		    target[pos] = 2 * M_PI - target[pos];
+		else
+		    target[pos] *= -1;
+	    }
         };
 
         enum ADAPTATIVE_MODE

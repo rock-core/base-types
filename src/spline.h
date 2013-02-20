@@ -105,13 +105,37 @@ namespace geometry {
         /** Display the curve properties on the given IO object */
         void printCurveProperties(std::ostream& io);
 
+	/**
+	 *  types to be used in the interpolate() method
+	 */
+	enum CoordinateType
+	{
+	    ORDINARY_POINT = 1,
+	    KNUCKLE_POINT = 2,
+	    DERIVATIVE_TO_NEXT = 3,
+	    DERIVATIVE_TO_PRIOR = 4,
+	    SECOND_DERIVATIVE_TO_NEXT = 5,
+	    SECOND_DERIVATIVE_TO_PRIOR = 6,
+	    TANGENT_POINT_FOR_NEXT = 13,
+	    TANGENT_POINT_FOR_PRIOR = 14,
+	};
+
         /** Generates the curve
          *
          * If the \c parameters array is given, it is the desired parameter for
          * the provided points. Otherwise, an automatic parametrization is
          * generated.
+	 *
+	 * @param coordinates - list of points/derivatives
+	 * @param parameters - list of parameters. Needs to be the same size as
+	 *        the number of actual points in the coordinates list, or zero.
+	 * @param coord_types - needs to be of the same size as coordinates, or
+	 *        zero. It marks the type of coordinate/derivative given by the
+	 *        coordinates param.
          */
-        void interpolate(std::vector<double> const& coordinates, std::vector<double> const& parameters = std::vector<double>());
+        void interpolate(std::vector<double> const& coordinates, 
+		std::vector<double> const& parameters = std::vector<double>(), 
+		std::vector<CoordinateType> const& coord_types = std::vector<CoordinateType>() );
 
         /** Tests for intersection between two curves
          */
@@ -127,6 +151,11 @@ namespace geometry {
 
         bool isNURBS() const;
 
+        /** Replaces the current internal SISLCurve by a new one that contains
+         * the given information
+         *
+         * The semantic of the three parameters is internal to SISL
+         */
         void reset(std::vector<double> const& coordinates, std::vector<double> const& knots, int kind = -1);
 
         /** Reverses the direction of the curve
@@ -194,6 +223,13 @@ namespace geometry {
 	 * */
 	bool checkAndNormalizeParam(double &param, double equalDistance = 0.001) const;
 
+        /** Replaces the current internal SISLCurve by the provided one. The
+         * SplineBase object takes ownership of the given curve.
+         *
+         * Is is used in mutating methods that need to create a new curve: i.e.
+         * create a new curve, do SISL operation, replace current curve by new
+         * curve by calling reset(new_curve)
+         */
         void reset(SISLCurve* curve);
         void getPoint(double* result, double _param) const;
         void getPointAndTangent(double* result, double _param) const;
@@ -499,12 +535,14 @@ namespace geometry {
         }
 
         /** Compute the curve from the given set of points */
-        void interpolate(std::vector<vector_t> const& points, std::vector<double> const& parameters = std::vector<double>())
+        void interpolate(std::vector<vector_t> const& points, 
+		std::vector<double> const& parameters = std::vector<double>(),
+		std::vector<SplineBase::CoordinateType> const& coord_types = std::vector<SplineBase::CoordinateType>() )
         {
             std::vector<double> coordinates;
             for (size_t i = 0; i < points.size(); ++i)
                 coordinates.insert(coordinates.end(), points[i].data(), points[i].data() + DIM);
-            SplineBase::interpolate(coordinates, parameters);
+            SplineBase::interpolate(coordinates, parameters, coord_types);
         }
 
         /** Returns the distance between the given point and the curve

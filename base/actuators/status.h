@@ -2,6 +2,7 @@
 #define BASE_ACTUATORS_STATUS_HH
 
 #include <base/time.h>
+#include <base/float.h>
 #include <vector>
 
 namespace base {
@@ -31,6 +32,21 @@ namespace base {
 
             MotorState()
                 : current(0), position(0), positionExtern(0), pwm(0) {}
+                
+	    void setInvalid()
+	    {
+		current = 0;
+		position = base::unset<double>();
+		positionExtern = base::unset<double>();
+		pwm = base::unset<float>();
+	    }
+	    
+	    void invert()
+	    {
+		pwm *= -1;
+		position *= -1;
+		positionExtern *= -1;
+	    }
         };
 
         /** Synchronized set of actuator states */
