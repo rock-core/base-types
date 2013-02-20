@@ -2,6 +2,7 @@
 #define BASE_ACTUATORS_STATUS_HH
 
 #include <base/time.h>
+#include <base/float.h>
 #include <vector>
 
 namespace base {
