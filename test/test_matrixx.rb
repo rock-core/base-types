@@ -65,6 +65,23 @@ class TC_Eigen_MatrixX < Test::Unit::TestCase
         v3[1] = 20.0
         assert_equal(v3,v+v2)
     end
+
+    def test_from_a_col_row_major
+        m = Eigen::MatrixX.new(2,2)
+        a = [0,1,2,3]
+
+        m.from_a(a,2,2,true)
+        assert_equal(m[0,0],0)
+        assert_equal(m[1,0],1)
+        assert_equal(m[0,1],2)
+        assert_equal(m[1,1],3)
+
+        m.from_a(a,2,2,false)
+        assert_equal(m[0,0],0)
+        assert_equal(m[0,1],1)
+        assert_equal(m[1,0],2)
+        assert_equal(m[1,1],3)
+    end
         
     def test_matrix_dump_load
         m = Eigen::MatrixX.new(9,7)

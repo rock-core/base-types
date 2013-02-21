@@ -448,7 +448,7 @@ module Eigen
                 if column_major
                     self[i%nrows,i/nrows] = v
                 else
-                    self[i%mcols,i/mcols] = v
+                    self[i/mcols,i%mcols] = v
                 end
             end
         end
