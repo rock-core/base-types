@@ -53,6 +53,15 @@ namespace samples
 	/// distance values stored in row major order. NaN is used as the no value type.
 	std::vector<scalar> data;
 
+	DistanceImage(): width(0), height(0), scale_x(1.0), scale_y(1.0), center_x(0.0), center_y(0.0)
+	{
+	}
+
+	DistanceImage(uint16_t width, uint16_t height): width(width), height(height), scale_x(1.0), scale_y(1.0), center_x(0.0), center_y(0.0)
+	{
+	}
+
+	
 	/** 
 	 * resets all values in the distance image to nan
 	 */
