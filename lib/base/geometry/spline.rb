@@ -98,6 +98,8 @@ module Base
 		if types && types.size != (coordinates.size / self.dimension)
 		    raise ArgumentError, "if types are given, it needs to be of the same size as points. " +
 			"types.size = #{types.size}, points.size = #{coordinates.size / self.dimension}"
+                else
+                    types = [:ORDINARY_POINT] * (coordinates.size / self.dimension)
 		end
 
 		# convert the symbols to consts from the enum
