@@ -78,13 +78,10 @@ void TrajectoryVisualization::updateMainNode( osg::Node* node )
     drawArrays->setCount(pointsOSG->size());
 }
 
-void TrajectoryVisualization::updateDataIntern(const base::geometry::Spline3& data)
+void TrajectoryVisualization::addSpline(const base::geometry::Spline3& data)
 {
     //needs a copy as getCurveLength is not const
     base::geometry::Spline3 spline = data; 
-    
-    //delete old trajectory
-    points.clear();
     
     if(!data.getSISLCurve())
 	return;
@@ -98,6 +95,26 @@ void TrajectoryVisualization::updateDataIntern(const base::geometry::Spline3& da
             points.pop_front();
     }
 }
+
+void TrajectoryVisualization::updateDataIntern(const base::geometry::Spline3& data)
+{
+    //delete old trajectory
+    points.clear();
+
+    addSpline(data);
+}
+
+void TrajectoryVisualization::updateDataIntern(const std::vector<base::Trajectory>& data)
+{
+    //delete old trajectory
+    points.clear();
+
+    for(std::vector<base::Trajectory>::const_iterator it = data.begin(); it != data.end(); it++)
+    {
+	addSpline(it->spline);
+    }
+}
+
 
 void TrajectoryVisualization::updateDataIntern( const base::Vector3d& data )
 {

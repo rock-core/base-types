@@ -5,11 +5,14 @@
 #include <osg/Geometry>
 #include <vizkit/Vizkit3DPlugin.hpp>
 #include <base/geometry/spline.h>
+#include <base/trajectory.h>
 
 namespace vizkit 
 {
 
-class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>, public VizPluginAddType<base::geometry::Spline3>
+class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>
+			    , public VizPluginAddType<base::geometry::Spline3>
+			    , public VizPluginAddType<std::vector<base::Trajectory> >
 {
     Q_OBJECT
     //unsigned int is not supported by the property browser so far
@@ -23,7 +26,12 @@ class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>, public Viz
         void setColor(const base::Vector3d& color); 
 	void setColor(double r, double g, double b, double a);
 	Q_INVOKABLE void clear();
-        
+
+	Q_INVOKABLE void updateTr(const std::vector<base::Trajectory>& data)
+	{
+	    Vizkit3DPlugin<base::Vector3d>::updateData(data);
+	}
+
         Q_INVOKABLE void updateData(const base::geometry::Spline<3>& data)
         { Vizkit3DPlugin<base::Vector3d>::updateData(data); }
         Q_INVOKABLE void updateSpline(const base::geometry::Spline<3>& data)
@@ -42,11 +50,13 @@ class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>, public Viz
         QColor getColor() const;
 
     protected:
+	void addSpline(const base::geometry::Spline3& data);
 	virtual osg::ref_ptr<osg::Node> createMainNode();
 	virtual void updateMainNode( osg::Node* node );
-	void updateDataIntern( const  base::Vector3d& data );
-	void updateDataIntern(const base::geometry::Spline3& data);
-	
+	virtual void updateDataIntern( const  base::Vector3d& data );
+	virtual void updateDataIntern(const base::geometry::Spline3& data);
+	virtual void updateDataIntern(const std::vector<base::Trajectory>& data);
+    
     private:
 	bool doClear;
         size_t max_number_of_points;
