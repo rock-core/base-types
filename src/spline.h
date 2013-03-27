@@ -407,6 +407,23 @@ namespace geometry {
                 result.push_back(getPoint(parameters[i]));
             return result;
         }
+        
+        std::vector<vector_t> getPoints() const
+        {
+	    std::vector<vector_t> result;
+	    double start = SplineBase::getStartParam();
+	    double end = SplineBase::getEndParam();
+	    
+	    double geomRes = SplineBase::getGeometricResolution();
+	    double p = start;
+	    for(; p < end; p+=geomRes)
+		result.push_back(getPoint(p));
+
+	    if(p != end)
+		result.push_back(getPoint(end)); 
+
+	    return result;
+	} 
 
         /** Private helper method for advance and length
          *
