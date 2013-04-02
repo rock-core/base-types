@@ -550,6 +550,30 @@ BOOST_AUTO_TEST_CASE( rbs_validity )
 }
 
 #ifdef SISL_FOUND
+#include <base/geometry/spline.h>
+BOOST_AUTO_TEST_CASE( spline_to_points )
+{
+    std::vector<base::Vector3d> pointsIn;
+    
+    for(int i = 0; i < 10; i++)
+        pointsIn.push_back(base::Vector3d(i, i, 0));
+    
+    base::geometry::Spline3 spline;
+    spline.interpolate(pointsIn);
+    
+    std::vector<base::Vector3d> pointsOut = spline.sample(0.1);
+    for(std::vector<base::Vector3d>::iterator it = pointsOut.begin(); it != pointsOut.end(); it++)
+    {
+        BOOST_CHECK(fabs(it->x() - it->y()) < 0.001);
+    }
+    
+    BOOST_CHECK(pointsOut.begin()->x() == 0);
+    BOOST_CHECK(pointsOut.begin()->y() == 0);
+
+    BOOST_CHECK(pointsOut.rbegin()->x() == 9);
+    BOOST_CHECK(pointsOut.rbegin()->y() == 9);
+}
+
 BOOST_AUTO_TEST_CASE( trajectory )
 {
     base::Trajectory tr;
