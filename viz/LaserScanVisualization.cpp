@@ -5,36 +5,9 @@
 #include <osg/Point>
 #include <iostream>
 #include <vizkit/Vizkit3DHelper.hpp>
+#include <vizkit/ColorConversionHelper.hpp>
 
 using namespace vizkit;
-
-// TODO move this in a separate library because MLS is using this as well
-// adapted from http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript
-// 
-float hue2rgb(float p, float q, float t)
-{
-    if(t < 0.0) t += 1.0;
-    if(t > 1.0) t -= 1.0;
-    if(t < 1.0/6.0) return p + (q - p) * 6.0 * t;
-    if(t < 1.0/2.0) return q;
-    if(t < 2.0/3.0) return p + (q - p) * (2.0/3.0 - t) * 6.0;
-    return p;
-}
-osg::Vec4 hslToRgb(float h, float s, float l)
-{
-    float r, b, g;
-    if(s == 0)
-	r = g = b = l; // achromatic
-    else 
-    {
-	float q = l < 0.5 ? l * (1.0 + s) : l + s - l * s;
-	float p = 2.0 * l - q;
-	r = hue2rgb(p, q, h + 1.0/3.0);
-	g = hue2rgb(p, q, h);
-	b = hue2rgb(p, q, h - 1.0/3.0);
-    }
-    return osg::Vec4( r, g, b, 1.0 );
-}
 
 vizkit::LaserScanVisualization::LaserScanVisualization()
     : mYForward(false),colorize(false),show_polygon(true),colorize_interval(0.2)
@@ -106,8 +79,8 @@ void vizkit::LaserScanVisualization::updateMainNode(osg::Node* node)
 
     if(colorize)    
     {
-        osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;
-        color->push_back(osg::Vec4(0.0,0.0,0.0,0.0));
+        osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
+        colors->push_back(osg::Vec4(0.0,0.0,0.0,0.0));
         float col;
         int interval = colorize_interval*1000;
         double angle = scan.start_angle;
@@ -116,10 +89,12 @@ void vizkit::LaserScanVisualization::updateMainNode(osg::Node* node)
             if(scan.isRangeValid(*it))
             {
                 col  = ((float)(((int)(*it*cos(angle))%interval)))/interval;
-                color->push_back(hslToRgb(col,1.0,0.5));
+                osg::Vec4 color( 1.0, 1.0, 1.0, 1.0 );
+                hslToRgb(col, 1.0, 0.5, color.r(), color.g(), color.b());
+                colors->push_back(color);
             }
         }
-        scanGeom->setColorArray(color.get());
+        scanGeom->setColorArray(colors.get());
         scanGeom->setColorBinding( osg::Geometry::BIND_PER_VERTEX );
     }
     else
