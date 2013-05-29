@@ -2,6 +2,7 @@
 #define BASE_JOINT_STATE_HPP
 
 #include <base/Float.hpp>
+#include <stdexcept>
 
 namespace base
 {
