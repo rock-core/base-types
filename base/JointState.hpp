@@ -126,7 +126,7 @@ namespace base
          * structure is a valid command for said controller (e.g. a torque
          * controller would throw if isEffort() returns false)
          */
-        bool isTorque() const { return !hasPosition() && !hasSpeed() && hasEffort() && !hasRaw(); }
+        bool isEffort() const { return !hasPosition() && !hasSpeed() && hasEffort() && !hasRaw(); }
         /** Tests whether the raw field is the only field set
          *
          * This is commonly used in controllers to test whether this data
