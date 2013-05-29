@@ -20,7 +20,7 @@
 #include <base/samples/IMUSensors.hpp>
 #include <base/samples/Joints.hpp>
 #include <base/samples/LaserScan.hpp>
-#include <base/samples/PointCloud.hpp>
+#include <base/samples/Pointcloud.hpp>
 #include <base/samples/RigidBodyAcceleration.hpp>
 #include <base/samples/RigidBodyState.hpp>
 #include <base/samples/SonarBeam.hpp>
