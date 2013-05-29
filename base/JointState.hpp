@@ -17,6 +17,9 @@ namespace base
      */
     struct JointState
     {
+        enum MODE
+        { POSITION, SPEED, EFFORT, RAW, UNSET };
+
         /** Current position of the actuator, in radians for angular
          * joints, in m/s for linear ones
          *
@@ -135,6 +138,66 @@ namespace base
          * false)
          */
         bool isRaw() const { return !hasPosition() && !hasSpeed() && !hasEffort() && hasRaw(); }
+
+        /** Returns the field that matches the given mode
+         *
+         * @see MODE
+         */
+        float getField(int mode) const
+        {
+            switch(mode)
+            {
+                case POSITION: return position;
+                case SPEED: return speed;
+                case EFFORT: return effort;
+                case RAW: return raw;
+                default: throw std::runtime_error("invalid mode given to getField");
+            }
+        }
+
+        /** Sets the given field to the given value
+         *
+         * @see MODE
+         */
+        void setField(int mode, float value)
+        {
+            switch(mode)
+            {
+                case POSITION:
+                    position = value;
+                    return;
+                case SPEED:
+                    speed = value;
+                    return;
+                case EFFORT:
+                    effort = value;
+                    return;
+                case RAW:
+                    raw = value;
+                    return;
+                default: throw std::runtime_error("invalid mode given to getField");
+            }
+        }
+
+        /** Returns the mode of this JointState
+         *
+         * The mode is defined only if the structure has only one field set.
+         * runtime_error is thrown if this is called with more than one field
+         * set.
+         *
+         * @see MODE
+         */
+        MODE getMode() const
+        {
+            if (isPosition())    return POSITION;
+            else if (isSpeed())  return SPEED;
+            else if (isEffort()) return EFFORT;
+            else if (isRaw())    return RAW;
+            else if (hasPosition() || hasSpeed() || hasEffort() || hasRaw())
+                throw std::runtime_error("getMode() called on a JointState that has more than one field set");
+            else
+                return UNSET;
+        }
     };
 }
 
