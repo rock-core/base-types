@@ -27,6 +27,7 @@
 #include <base/backward/base/waypoint.h>
 
 #ifdef SISL_FOUND
+#include <base/backward/base/geometry/spline.h>
 #include <base/backward/base/trajectory.h>
 #endif
 
