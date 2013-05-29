@@ -35,6 +35,20 @@ namespace base
 
                 throw std::runtime_error(jointName + " is not a joint name contained in this structure");
             }
+
+            /** Resize the states vector to this size
+             */
+            void resize(size_t size)
+            {
+                states.resize(size);
+            }
+
+            /** Returns the number of joints reported in this structure
+             */
+            size_t size() const
+            {
+                return states.size();
+            }
         };
     }
 }
