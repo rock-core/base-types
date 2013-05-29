@@ -22,6 +22,13 @@ namespace base
          *
          * For angular joints that can move more than 360 degrees, this
          * accumulates the movement since initialization
+         *
+         * If the joint is an angular joint whose motion is constrained to less
+         * than one full turn, the value should be in [-PI, PI]. base::Angle
+         * could be used to manipulate it before setting it in this structure
+         *
+         * If the joint is an unconstrained angular joint (e.g. a wheel joint),
+         * the range is [-inf, inf]
          */
         float position;
 
