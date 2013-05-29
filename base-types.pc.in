@@ -7,5 +7,5 @@ Version: 0.1
 Description: Common types for robotics modules
 Libs:
 Requires: eigen3
-Cflags: -I${includedir} -I${includedir}/backward
+Cflags: -I${includedir} -I${includedir}/base/backward
 
