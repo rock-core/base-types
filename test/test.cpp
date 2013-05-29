@@ -1,23 +1,43 @@
 #define BOOST_TEST_MODULE BaseTypes
 #include <boost/test/included/unit_test.hpp>
 
-#include "base/angle.h"
-#include "base/time.h"
-#include "base/timemark.h"
-#include "base/pose.h"
-#include "base/samples/frame.h"
-#include "base/samples/imu.h"
-#include "base/samples/laser_scan.h"
-#include "base/samples/sonar_beam.h"
-#include "base/samples/sonar_scan.h"
-#include "base/samples/rigid_body_state.h"
+#include <base/Angle.hpp>
+#include <base/commands/AUVMotion.hpp>
+#include <base/commands/AUVPosition.hpp>
+#include <base/commands/Joints.hpp>
+#include <base/commands/Motion2D.hpp>
+#include <base/commands/Speed6D.hpp>
+#include <base/Deprecated.hpp>
+#include <base/Eigen.hpp>
+#include <base/Float.hpp>
+#include <base/JointState.hpp>
+#include <base/Odometry.hpp>
+#include <base/Point.hpp>
+#include <base/Pose.hpp>
+//#include <base/samples/CompressedFrame.hpp>
+#include <base/samples/DistanceImage.hpp>
+#include <base/samples/Frame.hpp>
+#include <base/samples/IMUSensors.hpp>
+#include <base/samples/Joints.hpp>
+#include <base/samples/LaserScan.hpp>
+#include <base/samples/PointCloud.hpp>
+#include <base/samples/RigidBodyAcceleration.hpp>
+#include <base/samples/RigidBodyState.hpp>
+#include <base/samples/SonarBeam.hpp>
+#include <base/samples/SonarScan.hpp>
+#include <base/Temperature.hpp>
+#include <base/Time.hpp>
+#include <base/TimeMark.hpp>
+#include <base/Trajectory.hpp>
+#include <base/vehicles/Wheel4.hpp>
+#include <base/Waypoint.hpp>
 
 #ifdef SISL_FOUND
-#include <base/trajectory.h>
+#include <base/Trajectory.hpp>
 #endif
 
 #define BASE_LOG_DEBUG
-#include "base/logging.h"
+#include <base/Logging.hpp>
 
 #include <Eigen/SVD>
 #include <Eigen/LU>
@@ -401,7 +421,7 @@ BOOST_AUTO_TEST_CASE( logging_test )
         printf("Estimated time per log msg %f seconds", seconds);
 }
 
-#include <base/float.h>
+#include <base/Float.hpp>
 
 BOOST_AUTO_TEST_CASE( test_inf_nan )
 {
