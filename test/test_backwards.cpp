@@ -25,6 +25,7 @@
 #include <base/backward/base/timemark.h>
 #include <base/backward/base/trajectory.h>
 #include <base/backward/base/waypoint.h>
+#include <base/backward/base/singleton.h>
 
 #ifdef SISL_FOUND
 #include <base/backward/base/geometry/spline.h>
