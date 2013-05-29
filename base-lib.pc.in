@@ -6,6 +6,6 @@ Name: baseLib
 Version: 0.1
 Description: Common types for robotics modules, part that require a library
 Cflags: -I${includedir}
-Requires: eigen3
+Requires: eigen3 base-types
 Libs: -L@CMAKE_INSTALL_PREFIX@/lib -lbase
 
