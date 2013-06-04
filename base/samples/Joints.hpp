@@ -41,6 +41,7 @@ namespace base
             void resize(size_t size)
             {
                 states.resize(size);
+                names.resize(size);
             }
 
             /** Returns the number of joints reported in this structure
