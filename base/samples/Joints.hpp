@@ -50,6 +50,32 @@ namespace base
             {
                 return states.size();
             }
+
+            /** Exception thrown when trying to find the index of a joint by
+             * name, but the name does not exist
+             */
+            struct InvalidName : public std::runtime_error
+            {
+                std::string name;
+                InvalidName(std::string const& name)
+                    : std::runtime_error("trying to access joint " + name + ", but there is no joint with that name on this Joints structure")
+                    , name(name) {}
+
+                ~InvalidName() throw() {}
+            };
+
+            /** Returns the joint index that corresponds to the given name
+             *
+             * @throws InvalidName if the given name does not exist on this
+             *   Joints
+             */
+            size_t mapNameToIndex(std::string const& name) const
+            {
+                std::vector<std::string>::const_iterator it = find(names.begin(), names.end(), name);
+                if (it == names.end())
+                    throw InvalidName(name);
+                return it - names.begin();
+            }
         };
     }
 }
