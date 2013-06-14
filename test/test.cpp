@@ -29,7 +29,6 @@
 #include <base/Time.hpp>
 #include <base/TimeMark.hpp>
 #include <base/Trajectory.hpp>
-#include <base/vehicles/Wheel4.hpp>
 #include <base/Waypoint.hpp>
 
 #ifdef SISL_FOUND
