@@ -34,7 +34,7 @@ namespace base
          * If the joint is an unconstrained angular joint (e.g. a wheel joint),
          * the range is [-inf, inf]
          */
-        float position;
+        double position;
 
         /** Speed in radians per second for angular actuators, in m/s
          * for linear ones
