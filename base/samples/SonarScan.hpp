@@ -382,20 +382,6 @@ namespace base { namespace samples {
             //Some imaging sonars store their data in Cartesian rather than 
             //polar coordinates (BlueView)
             bool polar_coordinates;
-
-            //check if opencv is present
-#if defined( __OPENCV_CV_H__) ||defined (__OPENCV_CV_HPP__) || defined(_CV_H_) || defined(_CV_HPP_) || defined(__OPENCV_ALL_HPP__) ||defined(__OPENCV_OLD_CV_H__)
-            inline cv::Mat convertToCvMat()
-            {
-                return cv::Mat(number_of_bins,number_of_beams, CV_8UC1, getDataPtr());
-            }
-            inline const cv::Mat convertToCvMat()const
-            {
-                return cv::Mat(number_of_bins,number_of_beams, CV_8UC1, (void*)getDataConstPtr());
-            }
-#else
-#define convertToCvMat If_you_want_to_use_convertToCvMat_include_opencv_2_first
-#endif
     };
 }}
 
