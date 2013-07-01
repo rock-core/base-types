@@ -9,6 +9,25 @@
 #include <Eigen/LU>
 
 namespace base { namespace samples {
+    /** Representation of the state of a rigid body
+     *
+     * This is among other things used to express frame transformations by
+     * Rock's transformer
+     * 
+     * Given a source and target frame, this structure expresses the _frame
+     * change_ between these two frames. In effect, it represents the state of
+     * the source frame expressed in the target frame.
+     *
+     * Per [Rock's conventions](http://rock.opendfki.de/wiki/WikiStart/Standards), you
+     * should use a X-forward, right handed coordinate system when assigning
+     * frames to bodies (i.e.  X=forward, Y=left, Z=up). In addition,
+     * world-fixed frames should be aligned to North (North-East-Up)
+     *
+     * For instance, if sourceFrame is "body" and targetFrame is "world", then
+     * the RigidBodyState object is the state of body in the world frame
+     * (usually, the world frame has an arbitrary origin and a North-East-Up
+     * orientation).
+     */
     struct RigidBodyState
     {
 
@@ -19,34 +38,33 @@ namespace base { namespace samples {
 
         base::Time time;
 
-	/** name of the source reference frame */
+	/** Name of the source reference frame */
 	std::string sourceFrame;
 
-	/** name of the target reference frame */
+	/** Name of the target reference frame */
 	std::string targetFrame;
 
-        /** Position in m, world fixed frame of reference (East-North-Up) */
+        /** Position in m of sourceFrame's origin expressed in targetFrame
+         */
         Position   position;
 	/** Covariance matrix of the position
 	 */
         base::Matrix3d cov_position;
 
-        /** Orientation as a body->world transformation */
+        /** Orientation of targetFrame expressed in sourceFrame */
         Orientation orientation;
         /** Covariance matrix of the orientation as an axis/angle manifold in
          * body coordinates
 	 */
         base::Matrix3d cov_orientation;
 
-        /** Velocity in m/s with respect to world fixed frame, in body fixed
-         * frame (Right-Front-Up) */
+        /** Velocity in m/s of sourceFrame expressed in targetFrame */
         base::Vector3d velocity;
 	/** Covariance of the velocity 
 	 */
         base::Matrix3d cov_velocity;
 
         /** Angular Velocity as an axis-angle representation in body fixed frame
-         * (Right-Front-Up)
          *
          * The direction of the vector is the axis, its length the speed */
         base::Vector3d angular_velocity;
