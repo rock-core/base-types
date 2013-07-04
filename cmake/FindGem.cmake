@@ -1,5 +1,8 @@
 # Author thomas.roehr@dfki.de
 #
+# Version 0.3 2013-07-02
+#       - rely on `gem content` to find library and header
+#       - introduce GEM_OS_PKG to allow search via pkgconfig
 # Version 0.2 2010-01-14
 #       - add support for searching for multiple gems
 # Version 0.1 2010-12-15
@@ -11,16 +14,17 @@
 # GEM_INCLUDE_DIRS	After successful search contains the include directores
 #
 # GEM_LIBRARIES		After successful search contains the full path of each found library
-# 
+#
 #
 # Usage: 
-# set(Gem_DEBUG TRUE)
+# set(GEM_DEBUG TRUE)
 # find_package(Gem COMPONENTS rice hoe)
 # include_directories(${GEM_INCLUDE_DIRS})
 # target_link_libraries(${GEM_LIBRARIES}
 #
+# in case pkg-config should be used to search for the os pkg, set GEM_OS_PKG, i.e.
+# set(GEM_OS_PKG TRUE)
 #
-
 # Check for how 'gem' should be called
 find_program(GEM_EXECUTABLE
     NAMES "gem${RUBY_VERSION_MAJOR}${RUBY_VERSION_MINOR}"
@@ -33,103 +37,119 @@ find_program(GEM_EXECUTABLE
         "gem-${RUBY_VERSION_MAJOR}.${RUBY_VERSION_MINOR}.${RUBY_VERSION_PATCH}"
         "gem")
 
+# Making backward compatible
+if(Gem_DEBUG)
+    set(GEM_DEBUG TRUE)
+endif()
+
 if(NOT GEM_EXECUTABLE)
 	MESSAGE(FATAL_ERROR "Could not find the gem executable - install 'gem' first")
 endif()
 
 if(NOT Gem_FIND_COMPONENTS)
-	MESSAGE(FATAL_ERROR "If searching for a Gem you have to provide COMPONENTS with the name of the gem") 
+	MESSAGE(FATAL_ERROR "If searching for a Gem you have to provide COMPONENTS with the name of the gem")
 endif()
 
 set(GEM_FOUND TRUE)
 foreach(Gem_NAME ${Gem_FIND_COMPONENTS})
-        # If no gem version has been specified use the highest version found
-	if(Gem_FIND_VERSION)
-	 # TBD: Perform reg matching on hoe>=1.9 or similar to extract version if available
-	endif(Gem_FIND_VERSION)
+    # If the gem is installed as a gem
+    if(NOT GEM_OS_PKG)
+	    set(GEM_HOME ENV{GEM_HOME})
 
-	set(GEM_HOME ENV{GEM_HOME})
+        # Use `gem content <gem-name>` to extract current information about installed gems
+        # Store the information into ${GEM_LOCAL_INFO}
+        EXECUTE_PROCESS(COMMAND ${GEM_EXECUTABLE} content ${Gem_NAME} OUTPUT_VARIABLE GEM_LOCAL_INFO)
 
-	# Safe output of gem list --local into ${GEM_LOCAL_INFO}
-	EXECUTE_PROCESS(COMMAND ${GEM_EXECUTABLE} list --local OUTPUT_VARIABLE GEMS_LOCAL_INFO)
+	    if("${GEM_LOCAL_INFO}" STREQUAL "")
+	    	MESSAGE(FATAL_ERROR "No local gem found. Check your GEM_HOME setting!")
+	    else()
+            set(_library_NAME_PATTERN lib${Gem_NAME}.a
+	        		   lib${Gem_NAME}.so
+	        		   lib${Gem_NAME}.dylib
+	        		   ${Gem_NAME}.a
+	        		   ${Gem_NAME}.so
+	        		   ${Gem_NAME}.dylib
+                       .*.a
+                       .*.so
+                       .*.dylib
+	        )
 
-	if("${GEMS_LOCAL_INFO}" STREQUAL "")
-		MESSAGE(FATAL_ERROR "No local gem found. Check your GEM_HOME setting!") 
-	else()
-		STRING(REGEX MATCH "${Gem_NAME} \\(([0-9.]+)" GEM_INFO "${GEMS_LOCAL_INFO}")
-		STRING(REGEX REPLACE ".* \\(([0-9.]+).*" "\\1" GEM_VERSION "${GEM_INFO}")
-		MESSAGE(STATUS "found gem ${Gem_NAME} version: ${GEM_VERSION}")
-	endif()
+            set(_header_SUFFIX_PATTERN
+                        .h
+                        .hh
+                        .hpp
+            )
 
-	if("${GEM_VERSION}" STREQUAL "")
-		MESSAGE(FATAL_ERROR "No local gem found. Check your GEM_HOME / GEM_PATH setting!") 
-	else()
-                if(NOT "$ENV{GEM_HOME}" STREQUAL "")
-                    list(APPEND GEM_SEARCH_PATH $ENV{GEM_HOME})
-                endif()
-                if(NOT "$ENV{GEM_PATH}" STREQUAL "")
-                    string(REPLACE ":" ";" GEM_PATH "$ENV{GEM_PATH}")
-                    list(APPEND GEM_SEARCH_PATH ${GEM_PATH})
-                endif()
+            # Create a list from the output results of the gem command
+            string(REPLACE "\n" ";" GEM_CONTENT_LIST ${GEM_LOCAL_INFO})
+            foreach(_gem_CONTENT_PATH ${GEM_CONTENT_LIST})
+                
+                # Convert so that only '/' Unix path separator are being using
+                # needed to do proper regex matching
+                FILE(TO_CMAKE_PATH ${_gem_CONTENT_PATH} gem_CONTENT_PATH)
 
-                foreach(gem_dir ${GEM_SEARCH_PATH})
-                    set(gem_dir "${gem_dir}/gems/${Gem_NAME}-${GEM_VERSION}")
-                    if (EXISTS "${gem_dir}")
-                        set(GEM_INCLUDE_DIRS "${gem_dir}")
+                # Identify library -- checking for a library in the gems 'lib' (sub)directory
+                # Search for an existing library, but only within the gems folder
+                foreach(_library_NAME ${_library_NAME_PATTERN})
+                    STRING(REGEX MATCH ".*${Gem_NAME}.*/lib/.*${_library_NAME}$" GEM_PATH_INFO "${gem_CONTENT_PATH}")
+                    if(NOT "${GEM_PATH_INFO}" STREQUAL "")
+                        list(APPEND GEM_LIBRARIES ${GEM_PATH_INFO})
                         break()
                     endif()
                 endforeach()
 
-		# Our heuristic to library names available for linking
-		# since there is no real standard for where to put the 
-		# library
-		set(_library_NAMES lib${Gem_NAME}.a
-				   lib${Gem_NAME}.so
-				   ${Gem_NAME}.a
-				   ${Gem_NAME}.so
-		)
+                # Identify headers
+                # Checking for available headers in an include directory
+                foreach(_header_PATTERN ${_header_SUFFIX_PATTERN})
+                    STRING(REGEX MATCH ".*${Gem_NAME}.*/include/.*${_header_PATTERN}$" GEM_PATH_INFO "${gem_CONTENT_PATH}")
+                    if(NOT "${GEM_PATH_INFO}" STREQUAL "")
+                        STRING(REGEX REPLACE "(.*${Gem_NAME}.*/include/).*${_header_PATTERN}$" "\\1" GEM_PATH_INFO "${gem_CONTENT_PATH}")
+                        list(APPEND GEM_INCLUDE_DIRS ${GEM_PATH_INFO})
+                        break()
+                    endif()
+                endforeach()
+            endforeach()
 
-		set(_library_SEARCH_DIRS
-				${GEM_INCLUDE_DIRS}
-				${GEM_INCLUDE_DIRS}/lib
-				${GEM_INCLUDE_DIRS}/${Gem_NAME}
-		)
-		
-		# Search for an existing library, but only within the gems folder
-		foreach(_library_NAME ${_library_NAMES})
-			foreach(_library_SEARCH_DIR ${_library_SEARCH_DIRS})
-			
-				
-				find_file(GEM_LIBRARY ${_library_NAME}
-						PATHS ${_library_SEARCH_DIR}
-						NO_DEFAULT_PATH
-				)
+            # Compact the lists
+            if(DEFINED GEM_LIBRARIES)
+                LIST(REMOVE_DUPLICATES GEM_LIBRARIES)
+            endif()
+            if(DEFINED GEM_INCLUDE_DIRS)
+                LIST(REMOVE_DUPLICATES GEM_INCLUDE_DIRS)
+            endif()
+        endif()
+    else(NOT GEM_OS_PKG)
+        pkg_check_modules(GEM_PKG ${Gem_NAME})
+        set(GEM_INCLUDE_DIRS ${GEM_PKG_INCLUDE_DIRS})
+        set(GEM_LIBRARIES ${GEM_PKG_LIBRARIES} ${GEM_PKG_STATIC_LIBRARIES})
+        list(APPEND GEM_LIBRARIES ${GEM_PKG_LDFLAGS} ${GEM_PKG_STATIC_LDFLAGS})
+        list(APPEND GEM_LIBRARIES ${GEM_PKG_LDFLAGS_OTHER} ${GEM_PKG_STATIC_LDFLAGS_OTHER})
 
-				if(Gem_DEBUG)
-					message(STATUS "Searching ${_library_NAME} in ${_library_SEARCH_DIR}")	
-					message(STATUS " >> ${GEM_LIBRARY}")
-				endif()	
-				
-				if(NOT "${GEM_LIBRARY}" STREQUAL "GEM_LIBRARY-NOTFOUND")
-					# Use the first library found
-					if("${GEM_LIBRARIES}" STREQUAL "")
-						list(APPEND GEM_LIBRARIES ${GEM_LIBRARIES} ${GEM_LIBRARY})
-					endif()
-				endif()
-			endforeach()
-		endforeach()
-		if("${GEM_LIBRARIES}" STREQUAL "")
-			set(GEM_FOUND FALSE)
-		endif()
+        if(GEM_DEBUG)
+            message(STATUS "GEM_OS_PKG is defined")
+            message(STATUS "GEM_INCLUDE_DIRS ${GEM_INCLUDE_DIRS}")
+            message(STATUS "GEM_STATIC_LIBRARY_DIRS ${GEM_PKG_STATIC_LIBRARY_DIRS}")
+            message(STATUS "GEM_LIBRARY_DIRS ${GEM_PKG_STATIC_LIBRARY_DIRS}")
+            message(STATUS "GEM_STATIC_LIBRARIES ${GEM_PKG_STATIC_LIBRARIES}")
+            message(STATUS "GEM_LIBRARIES ${GEM_LIBRARIES}")
+        endif()
+    endif()
+
+	if("${GEM_LIBRARIES}" STREQUAL "")
+		set(GEM_FOUND FALSE)
+    else()
+        MESSAGE(STATUS "Gem: ${Gem_NAME} found")
 	endif()
 
-	if(Gem_DEBUG)
+    if(GEM_DEBUG)
 		message(STATUS "${Gem_NAME} library dir: ${GEM_LIBRARIES}")
 		message(STATUS "${Gem_NAME} include dir: ${GEM_INCLUDE_DIRS}")
-	endif()
+    endif()
 		
-	if(Gem_FIND_REQUIRED)
-		MESSAGE(FATAL_ERROR "Gem: ${Gem_NAME} could not be found")
+    if(Gem_FIND_REQUIRED)
+        if(NOT GEM_FOUND)
+		    MESSAGE(FATAL_ERROR "Gem: ${Gem_NAME} could not be found")
+        endif()
 	endif()
 endforeach()
 
