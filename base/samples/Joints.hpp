@@ -15,6 +15,19 @@ namespace base
          */
         struct Joints
         {
+            /** Exception thrown when trying to find the index of a joint by
+             * name, but the name does not exist
+             */
+            struct InvalidName : public std::runtime_error
+            {
+                std::string name;
+                InvalidName(std::string const& name)
+                    : std::runtime_error("trying to access joint " + name + ", but there is no joint with that name on this Joints structure")
+                    , name(name) {}
+
+                ~InvalidName() throw() {}
+            };
+
             /** The sample timestamp */
             base::Time time;
 
@@ -29,11 +42,7 @@ namespace base
             /** Returns the joint state information for the given joint */
             JointState getStateByName(std::string jointName) const
             {
-                for (size_t i = 0; i < names.size(); ++i)
-                    if (names[i] == jointName)
-                        return states[i];
-
-                throw std::runtime_error(jointName + " is not a joint name contained in this structure");
+		return states.at( mapNameToIndex( jointName ) );
             }
 
             /** Resize the states vector to this size
@@ -50,19 +59,6 @@ namespace base
             {
                 return states.size();
             }
-
-            /** Exception thrown when trying to find the index of a joint by
-             * name, but the name does not exist
-             */
-            struct InvalidName : public std::runtime_error
-            {
-                std::string name;
-                InvalidName(std::string const& name)
-                    : std::runtime_error("trying to access joint " + name + ", but there is no joint with that name on this Joints structure")
-                    , name(name) {}
-
-                ~InvalidName() throw() {}
-            };
 
             /** Returns the joint index that corresponds to the given name
              *
