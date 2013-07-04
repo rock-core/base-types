@@ -141,18 +141,13 @@ namespace base { namespace samples { namespace frame {
 		this->frame_mode = mode;
 		this->size = frame_size_t(width, height);
 		setDataDepth(depth);
-                
-                //calculate size if not given 
-                if(!size)
-                    size = getPixelSize() * getPixelCount();
-                else
-                    if(!isCompressed() && size != getPixelSize()*getPixelCount()){
-			std::cout << "Expect image size: " << getPixelSize()*getPixelCount() << ", got: " << size << std::endl;
-                        throw std::runtime_error("Frame::init: wrong image size!");
-                    }
-
-		image.resize(size);
                }
+               //calculate size if not given 
+               if(!size)
+                   size = getPixelSize() * getPixelCount();
+
+               validateImageSize(size);
+               image.resize(size);
 	       reset(val);
 	    }
 	    
@@ -379,20 +374,28 @@ namespace base { namespace samples { namespace frame {
 		return this->image;
 	    }
 
-	    inline void setImage(const std::vector<uint8_t> &image) {
-		this->image = image;
-	    }
-	    inline void setImage(const char *data, uint32_t size) {
-		if (size != this->image.size())
-		{
+            void validateImageSize(uint32_t size) const {
+                uint32_t expected_size = getPixelSize()*getPixelCount();
+                if (!isCompressed() && size != expected_size){
 		    std::cerr << "Frame: "
 		              << __FUNCTION__ << " (" << __FILE__ << ", line "
 		              << __LINE__ << "): " << "image size mismatch in setImage() ("
-		              << size << " != " << this->image.size() << ")"
+		              << "getting " << size << " bytes but I was expecting " << expected_size << " bytes)"
 		              << std::endl;
-		    return;
-		}
-
+                    throw std::runtime_error("Frame::setFrane: wrong image size!");
+                }
+            }
+	    inline void setImage(const std::vector<uint8_t> &image) {
+                return setImage(&image[0], image.size());
+	    }
+            /** This is for backward compatibility for the people that were
+             * using the 'char' signature */
+	    inline void setImage(const char *data, uint32_t size) {
+                return setImage(reinterpret_cast<const uint8_t*>(data), size);
+            }
+	    inline void setImage(const uint8_t *data, uint32_t size) {
+                validateImageSize(size);
+                image.resize(size);
 		memcpy(&this->image[0], data, size);
 	    }
 
