@@ -150,7 +150,7 @@ namespace base { namespace samples { namespace frame {
                image.resize(size);
 	       reset(val);
 	    }
-	    
+
             // if val is negative the image will not be initialized
 	    void reset(int const val = 0)
 	    {
@@ -360,6 +360,21 @@ namespace base { namespace samples { namespace frame {
 
 	    }
 
+            void setFrameMode(frame_mode_t mode)
+            {
+                this->frame_mode = mode;
+
+                // Update pixel size
+		uint32_t comp_size = ((this->data_depth + 7) / 8);
+		this->pixel_size = getChannelCount(this->frame_mode) * comp_size;
+
+                //update row size
+                if(isCompressed())
+                    this->row_size = 0;                         //disable row size
+                else
+		    this->row_size = this->pixel_size * getWidth();
+            }
+
 	    inline frame_size_t getSize() const {
 		return this->size;
 	    }
@@ -382,7 +397,7 @@ namespace base { namespace samples { namespace frame {
 		              << __LINE__ << "): " << "image size mismatch in setImage() ("
 		              << "getting " << size << " bytes but I was expecting " << expected_size << " bytes)"
 		              << std::endl;
-                    throw std::runtime_error("Frame::setFrane: wrong image size!");
+                    throw std::runtime_error("Frame::validateImageSize: wrong image size!");
                 }
             }
 	    inline void setImage(const std::vector<uint8_t> &image) {
