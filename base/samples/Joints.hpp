@@ -60,6 +60,14 @@ namespace base
                 return states.size();
             }
 
+	    /** Clears the contents of states and names vector
+	     */
+	    void clear()
+	    {
+		states.clear();
+		names.clear();
+	    }
+
             /** Returns the joint index that corresponds to the given name
              *
              * @throws InvalidName if the given name does not exist on this
