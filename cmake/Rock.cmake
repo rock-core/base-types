@@ -95,6 +95,15 @@ macro(rock_standard_layout)
         endif()
     endif()
 
+    if (IS_DIRECTORY ${PROJECT_SOURCE_DIR}/bindings/ruby)
+        if (EXISTS ${PROJECT_SOURCE_DIR}/bindings/ruby/CMakeLists.txt)
+            include(RockRuby)
+            if (RUBY_FOUND)
+                add_subdirectory(bindings/ruby)
+            endif()
+        endif()
+    endif()
+
     if (IS_DIRECTORY ${PROJECT_SOURCE_DIR}/configuration)
 	install(DIRECTORY ${PROJECT_SOURCE_DIR}/configuration/ DESTINATION configuration/${PROJECT_NAME}
 	        FILES_MATCHING PATTERN "*" 
