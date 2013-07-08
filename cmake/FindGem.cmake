@@ -61,7 +61,6 @@ foreach(Gem_NAME ${Gem_FIND_COMPONENTS})
         EXECUTE_PROCESS(COMMAND ${GEM_EXECUTABLE} content ${Gem_NAME} OUTPUT_VARIABLE GEM_LOCAL_INFO)
 
 	    if("${GEM_LOCAL_INFO}" STREQUAL "")
-	    	MESSAGE(FATAL_ERROR "No local gem found. Check your GEM_HOME setting!")
 	    else()
             set(_library_NAME_PATTERN lib${Gem_NAME}.a
 	        		   lib${Gem_NAME}.so
@@ -136,8 +135,6 @@ foreach(Gem_NAME ${Gem_FIND_COMPONENTS})
     endif()
 
 	if("${GEM_LIBRARIES}" STREQUAL "")
-		set(GEM_FOUND FALSE)
-    else()
         MESSAGE(STATUS "Gem: ${Gem_NAME} found")
 	endif()
 
