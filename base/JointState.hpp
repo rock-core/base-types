@@ -22,7 +22,7 @@ namespace base
         { POSITION, SPEED, EFFORT, RAW, UNSET };
 
         /** Current position of the actuator, in radians for angular
-         * joints, in m/s for linear ones
+         * joints, in m for linear ones
          *
          * For angular joints that can move more than 360 degrees, this
          * accumulates the movement since initialization
