@@ -14,6 +14,16 @@ macro(rock_use_full_rpath install_rpath)
     SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 endmacro()
 
+function(rock_add_compiler_flag_if_it_exists FLAG)
+    string(REGEX REPLACE "[^a-zA-Z]"
+        "_" VAR_SUFFIX
+        "${FLAG}")
+    CHECK_CXX_COMPILER_FLAG(${FLAG} CXX_SUPPORTS${VAR_SUFFIX})
+    if (CXX_SUPPORTS${VAR_SUFFIX})
+        add_definitions(${FLAG})
+    endif()
+endfunction()
+
 ## Main initialization for Rock CMake projects
 macro (rock_init PROJECT_NAME PROJECT_VERSION)
     project(${PROJECT_NAME})
@@ -22,10 +32,8 @@ macro (rock_init PROJECT_NAME PROJECT_VERSION)
 
     include(CheckCXXCompilerFlag)
     include(FindPkgConfig)
-    CHECK_CXX_COMPILER_FLAG(-Wall ROCK_CXX_SUPPORTS_WALL)
-    if (ROCK_CXX_SUPPORTS_WALL)
-        add_definitions(-Wall)
-    endif()
+    rock_add_compiler_flag_if_it_exists(-Wall)
+    rock_add_compiler_flag_if_it_exists(-Wno-unused-local-typedefs)
     add_definitions(-DBASE_LOG_NAMESPACE=${PROJECT_NAME})
 endmacro()
 
