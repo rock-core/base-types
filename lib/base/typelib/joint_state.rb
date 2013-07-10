@@ -1,15 +1,11 @@
 require 'base/float'
 
 Typelib.specialize_model '/base/JointState' do
-    def new(*args)
-        result = super
-        if args.empty?
-            result.position = Base::unset
-            result.speed = Base::unset
-            result.effort = Base::unset
-            result.raw = Base::unset
-        end
-        result
+    def initialize
+        self.position = Base::unset
+        self.speed = Base::unset
+        self.effort = Base::unset
+        self.raw = Base::unset
     end
 
     def Position(value)
