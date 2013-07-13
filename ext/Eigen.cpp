@@ -229,6 +229,12 @@ struct Quaternion
             Eigen::AngleAxisd(angles.z(), Eigen::Vector3d::Unit(axis2));
     }
 
+    void fromMatrix(MatrixX const& matrix)
+    {
+	*(this->q) = 
+            Quaterniond(Eigen::Matrix3d(*matrix.m));
+    }
+
     bool isApprox(Quaternion const& other, double tolerance)
     {
         return q->isApprox(*other.q, tolerance);
@@ -339,7 +345,8 @@ void Init_eigen_ext()
        .define_method("approx?", &Quaternion::isApprox)
        .define_method("to_euler", &Quaternion::toEuler)
        .define_method("from_euler", &Quaternion::fromEuler)
-       .define_method("from_angle_axis", &Quaternion::fromAngleAxis);
+       .define_method("from_angle_axis", &Quaternion::fromAngleAxis)
+       .define_method("from_matrix", &Quaternion::fromMatrix);
      
      Data_Type<VectorX> rb_VectorX = define_class_under<VectorX>(rb_mEigen, "VectorX")
        .define_constructor(Constructor<VectorX,int>(),

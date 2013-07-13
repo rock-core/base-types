@@ -195,6 +195,13 @@ module Eigen
             q
         end
 
+        # Creates a quaternion from a rotation matrix
+        def self.from_matrix(m)
+            q = new(1, 0, 0, 0)
+            q.from_matrix(m)
+            q
+        end
+
         # Extracts the yaw angle from this quaternion
         #
         # It decomposes the quaternion in euler angles using to_euler(2, 1, 0) 
