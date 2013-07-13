@@ -13,6 +13,13 @@ Typelib.specialize_model '/base/samples/RigidBodyState_m' do
             :angular_velocity => v3,
             :cov_angular_velocity => m3)
     end
+
+    def from_pose(pose)
+        rbs = new
+        rbs.position = pose.position
+        rbs.orientation = pose.orientation
+        rbs
+    end
 end
 
 Typelib.specialize '/base/samples/RigidBodyState_m' do
