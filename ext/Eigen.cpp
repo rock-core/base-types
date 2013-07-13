@@ -64,13 +64,124 @@ struct Vector3
     { return v->isApprox(*other.v, tolerance); }
 };
 
+struct VectorX {
+
+    VectorXd* v;
+    
+    VectorX()
+        : v(new VectorXd()) {}
+    VectorX(VectorX const& v)
+        : v(new VectorXd(*v.v)) {}
+    VectorX(int n)
+        : v(new VectorXd(n)) {}
+    VectorX(VectorXd const& _v)
+        : v(new VectorXd(_v)) {}
+    ~VectorX()
+    { delete v; }
+    
+    void resize(int n) { v->resize(n); }
+    void conservativeResize(int n) { v->conservativeResize(n); }
+
+    double norm() const { return v->norm(); }
+    VectorX* normalize() const { return new VectorX(v->normalized()); }
+    void normalizeBang() const { v->normalize(); }
+
+    int size() { return v->size(); }
+
+    double get(int i) const { return (*v)[i]; }
+    void set(int i, double value) { (*v)[i] = value; }
+
+    VectorX* operator + (VectorX const& other) const
+    { return new VectorX(*v + *other.v); }
+    VectorX* operator - (VectorX const& other) const
+    { return new VectorX(*v - *other.v); }
+
+    VectorX* operator / (double scalar) const
+    { return new VectorX(*v / scalar); }
+    
+    VectorX* negate() const
+    { return new VectorX(-*v); }
+
+    VectorX* scale(double value) const
+    { return new VectorX(*v * value); }
+
+    double dot(VectorX const& other) const
+    { return this->v->dot(*other.v); }
+
+    bool operator ==(VectorX const& other) const
+    { return (*this->v) == (*other.v); }
+
+    bool isApprox(VectorX const& other, double tolerance)
+    { return v->isApprox(*other.v, tolerance); }
+
+};
+
+struct MatrixX {
+
+    MatrixXd* m;
+
+    MatrixX() : m(new MatrixXd()) {}
+    MatrixX(const MatrixX& m) : m(new MatrixXd(*m.m)) {}
+    MatrixX(int rows, int cols) : m(new MatrixXd(rows,cols)) {}
+    MatrixX(const MatrixXd& _m) : m(new MatrixXd(_m)) {}
+    ~MatrixX() { delete m; }
+
+    void resize(int rows, int cols) { m->resize(rows,cols); }
+    void conservativeResize(int rows, int cols) { m->conservativeResize(rows,cols); }
+    
+    double norm() const { return m->norm(); }
+
+    int rows() const { return m->rows(); }
+    int cols() const { return m->cols(); }
+    int size() const { return m->size(); }
+
+    double get(int i, int j ) const { return (*m)(i,j); }
+    void set(int i, int j, double value) { (*m)(i,j) = value; }
+    
+    VectorX* getRow(int i) const { return new VectorX(m->row(i)); }
+    void setRow(int i, const VectorX& v) { m->row(i) = *(v.v); }
+
+    VectorX* getColumn(int j) const { return new VectorX(m->col(j)); }
+    void setColumn(int j, const VectorX& v) { m->col(j) = *(v.v); }
+
+    MatrixX* transpose() const
+    { return new MatrixX(m->transpose()); }
+
+    MatrixX* operator + (MatrixX const& other) const
+    { return new MatrixX(*m + *other.m); }
+
+    MatrixX* operator - (MatrixX const& other) const
+    { return new MatrixX(*m - *other.m); }
+
+    MatrixX* operator / (double scalar) const
+    { return new MatrixX(*m / scalar); }
+
+    MatrixX* negate() const
+    { return new MatrixX(-*m); }
+    
+    MatrixX* scale (double scalar) const
+    { return new MatrixX(*m * scalar); }
+
+    MatrixX* dotV (VectorX const& other) const
+    { return new MatrixX(*m * *other.v); }
+    
+    MatrixX* dotM (MatrixX const& other) const
+    { return new MatrixX(*m * (*other.m)); }
+
+    bool operator ==(MatrixX const& other) const
+    { return (*this->m) == (*other.m); }
+
+    bool isApprox(MatrixX const& other, double tolerance)
+    { return m->isApprox(*other.m, tolerance); }
+};
+
 struct Quaternion
 {
     Quaterniond* q;
-
     Quaternion(double w, double x, double y, double z)
         : q(new Quaterniond(w, x, y, z)) { }
-
+    Quaternion(Quaternion const& q)
+        : q(new Quaterniond(*q.q)) { }
     Quaternion(Quaterniond const& _q)
         : q(new Quaterniond(_q)) {}
 
@@ -129,114 +240,6 @@ struct Quaternion
     }
 };
 
-struct VectorX {
-
-    VectorXd* v;
-    
-    VectorX()
-        : v(new VectorXd()) {}
-    VectorX(int n)
-        : v(new VectorXd(n)) {}
-    VectorX(VectorXd const& _v)
-        : v(new VectorXd(_v)) {}
-    ~VectorX()
-    { delete v; }
-    
-    void resize(int n) { v->resize(n); }
-    void conservativeResize(int n) { v->conservativeResize(n); }
-
-    double norm() const { return v->norm(); }
-    VectorX* normalize() const { return new VectorX(v->normalized()); }
-    void normalizeBang() const { v->normalize(); }
-
-    int size() { return v->size(); }
-
-    double get(int i) const { return (*v)[i]; }
-    void set(int i, double value) { (*v)[i] = value; }
-
-    VectorX* operator + (VectorX const& other) const
-    { return new VectorX(*v + *other.v); }
-    VectorX* operator - (VectorX const& other) const
-    { return new VectorX(*v - *other.v); }
-
-    VectorX* operator / (double scalar) const
-    { return new VectorX(*v / scalar); }
-    
-    VectorX* negate() const
-    { return new VectorX(-*v); }
-
-    VectorX* scale(double value) const
-    { return new VectorX(*v * value); }
-
-    double dot(VectorX const& other) const
-    { return this->v->dot(*other.v); }
-
-    bool operator ==(VectorX const& other) const
-    { return (*this->v) == (*other.v); }
-
-    bool isApprox(VectorX const& other, double tolerance)
-    { return v->isApprox(*other.v, tolerance); }
-
-};
-
-struct MatrixX {
-
-    MatrixXd* m;
-
-    MatrixX() : m(new MatrixXd()) {}
-    MatrixX(int rows, int cols) : m(new MatrixXd(rows,cols)) {}
-    MatrixX(const MatrixXd& _m) : m(new MatrixXd(_m)) {}
-    ~MatrixX() { delete m; }
-
-    void resize(int rows, int cols) { m->resize(rows,cols); }
-    void conservativeResize(int rows, int cols) { m->conservativeResize(rows,cols); }
-    
-    double norm() const { return m->norm(); }
-
-    int rows() const { return m->rows(); }
-    int cols() const { return m->cols(); }
-    int size() const { return m->size(); }
-
-    double get(int i, int j ) const { return (*m)(i,j); }
-    void set(int i, int j, double value) { (*m)(i,j) = value; }
-    
-    VectorX* getRow(int i) const { return new VectorX(m->row(i)); }
-    void setRow(int i, const VectorX& v) { m->row(i) = *(v.v); }
-
-    VectorX* getColumn(int j) const { return new VectorX(m->col(j)); }
-    void setColumn(int j, const VectorX& v) { m->col(j) = *(v.v); }
-
-    MatrixX* transpose() const
-    { return new MatrixX(m->transpose()); }
-
-    MatrixX* operator + (MatrixX const& other) const
-    { return new MatrixX(*m + *other.m); }
-
-    MatrixX* operator - (MatrixX const& other) const
-    { return new MatrixX(*m - *other.m); }
-
-    MatrixX* operator / (double scalar) const
-    { return new MatrixX(*m / scalar); }
-
-    MatrixX* negate() const
-    { return new MatrixX(-*m); }
-    
-    MatrixX* scale (double scalar) const
-    { return new MatrixX(*m * scalar); }
-
-    MatrixX* dotV (VectorX const& other) const
-    { return new MatrixX(*m * *other.v); }
-    
-    MatrixX* dotM (MatrixX const& other) const
-    { return new MatrixX(*m * (*other.m)); }
-
-    bool operator ==(MatrixX const& other) const
-    { return (*this->m) == (*other.m); }
-
-    bool isApprox(MatrixX const& other, double tolerance)
-    { return m->isApprox(*other.m, tolerance); }
-};
-
 #include <iostream>
 
 struct Isometry3
@@ -244,6 +247,7 @@ struct Isometry3
     Isometry3d *t;
 
     Isometry3() : t(new Isometry3d()) { t->setIdentity(); }
+    Isometry3(const Isometry3& _m) : t(new Isometry3d(*_m.t)) {}
     Isometry3(const Isometry3d& _m) : t(new Isometry3d(_m)) {}
     ~Isometry3() { delete t; }
 
