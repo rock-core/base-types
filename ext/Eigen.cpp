@@ -197,6 +197,8 @@ struct Quaternion
     void setY(double value) { q->y() = value; }
     void setZ(double value) { q->z() = value; }
 
+    double norm() const { return q->norm(); }
+
     bool operator ==(Quaternion const& other) const
     { return x() == other.x() && y() == other.y() && z() == other.z() && w() == other.w(); }
 
@@ -213,6 +215,10 @@ struct Quaternion
         Quaterniond q = *this->q;
         q.normalize();
         return new Quaternion(q);
+    }
+    MatrixX* matrix() const
+    {
+        return new MatrixX(q->matrix());
     }
 
     void fromAngleAxis(double angle, Vector3 const& axis)
@@ -337,9 +343,11 @@ void Init_eigen_ext()
        .define_method("x=", &Quaternion::setX)
        .define_method("y=", &Quaternion::setY)
        .define_method("z=", &Quaternion::setZ)
+       .define_method("norm", &Quaternion::norm)
        .define_method("concatenate", &Quaternion::concatenate)
        .define_method("inverse", &Quaternion::inverse)
        .define_method("transform", &Quaternion::transform)
+       .define_method("matrix", &Quaternion::matrix)
        .define_method("normalize!", &Quaternion::normalizeBang)
        .define_method("normalize", &Quaternion::normalize)
        .define_method("approx?", &Quaternion::isApprox)
