@@ -31,6 +31,12 @@ namespace base
 	/** The element vector */
 	std::vector<T> elements;
 
+        /** Returns true if the joint vector is properly filled */
+        bool hasNames() const
+        {
+            return !names.empty() && !names[0].empty();
+        }
+
 	/** Returns the state information for the given element */
 	const T& getElementByName(std::string name) const
 	{
