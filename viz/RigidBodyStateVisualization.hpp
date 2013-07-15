@@ -17,7 +17,7 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         Q_PROPERTY(bool forceOrientationDisplay READ isOrientationDisplayForced WRITE setOrientationDisplayForceFlag)
     public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-	RigidBodyStateVisualization();	
+	RigidBodyStateVisualization(QObject* parent = NULL);
 	virtual ~RigidBodyStateVisualization();
 
         Q_INVOKABLE void updateData( const base::samples::RigidBodyState& state )

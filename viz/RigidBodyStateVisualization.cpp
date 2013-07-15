@@ -9,9 +9,14 @@
 namespace vizkit 
 {
 
-RigidBodyStateVisualization::RigidBodyStateVisualization()
-    : covariance(false), covariance_with_samples(false), color(1, 1, 1), main_size(0.1),
-    forcePositionDisplay(false), forceOrientationDisplay(false)
+    : Vizkit3DPlugin<base::samples::RigidBodyState>(parent)
+    , covariance(false)
+    , covariance_with_samples(false)
+    , color(1, 1, 1)
+    , main_size(0.1)
+    , body_type(BODY_NONE)
+    , forcePositionDisplay(false)
+    , forceOrientationDisplay(false)
 {
 }
 
