@@ -11,10 +11,13 @@ namespace vizkit
 class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBodyState>
 {
         Q_OBJECT
+        Q_PROPERTY(double size READ getSize WRITE setSize)
+        Q_PROPERTY(double sphereSize READ getMainSphereSize WRITE setMainSphereSize)
         Q_PROPERTY(bool displayCovariance READ isCovarianceDisplayed WRITE displayCovariance)
         Q_PROPERTY(bool displayCovarianceWithSamples READ isCovarianceDisplayedWithSamples WRITE displayCovarianceWithSamples)
         Q_PROPERTY(bool forcePositionDisplay READ isPositionDisplayForced WRITE setPositionDisplayForceFlag)
         Q_PROPERTY(bool forceOrientationDisplay READ isOrientationDisplayForced WRITE setOrientationDisplayForceFlag)
+
     public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	RigidBodyStateVisualization(QObject* parent = NULL);
@@ -37,6 +40,9 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         bool isOrientationDisplayForced() const;
         void setOrientationDisplayForceFlag(bool flag);
 
+        double getSize() const;
+        void setSize(double size);
+
         void resetModel(double size);
 	void resetModelSphere(double size);
 	
@@ -48,6 +54,13 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
          * The default is 0.1
          */
         void setMainSphereSize(double size);
+
+        /** When using one of the default bodies, returns the size of the main
+         * sphere, relative to the size of the complete object
+         *
+         * The default is 0.1
+         */
+        double getMainSphereSize() const;
 
         void displayCovariance(bool enable);
         bool isCovarianceDisplayed() const;
@@ -69,10 +82,15 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         bool covariance;
         bool covariance_with_samples;
         base::Vector3d color;
+        double total_size;
         double main_size;
+
+        enum BODY_TYPES
+        { BODY_NONE, BODY_SIMPLE, BODY_SPHERE, BODY_CUSTOM_MODEL };
 
 	osg::Vec3d pos;
 	osg::Quat orientation;
+        BODY_TYPES body_type;
 	osg::ref_ptr<osg::Node>  body_model;
         osg::ref_ptr<osg::Group> createSimpleBody(double size);
 	osg::ref_ptr<osg::Group> createSimpleSphere(double size);

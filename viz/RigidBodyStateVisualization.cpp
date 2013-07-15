@@ -9,10 +9,12 @@
 namespace vizkit 
 {
 
+RigidBodyStateVisualization::RigidBodyStateVisualization(QObject* parent)
     : Vizkit3DPlugin<base::samples::RigidBodyState>(parent)
     , covariance(false)
     , covariance_with_samples(false)
     , color(1, 1, 1)
+    , total_size(1)
     , main_size(0.1)
     , body_type(BODY_NONE)
     , forcePositionDisplay(false)
@@ -99,24 +101,48 @@ osg::ref_ptr<osg::Group> RigidBodyStateVisualization::createSimpleBody(double si
     return group;
 }
 
+double RigidBodyStateVisualization::getMainSphereSize() const
+{
+    return main_size;
+}
+
 void RigidBodyStateVisualization::setMainSphereSize(double size)
 {
     main_size = size;
+    // This triggers an update of the model if we don't have a custom model
+    setSize(total_size);
+}
+
+void RigidBodyStateVisualization::setSize(double size)
+{
+    total_size = size;
+    if (body_type == BODY_SIMPLE)
+        resetModel(size);
+    else if (body_type == BODY_SPHERE)
+        resetModelSphere(size);
+}
+
+double RigidBodyStateVisualization::getSize() const
+{
+    return total_size;
 }
 
 void RigidBodyStateVisualization::resetModel(double size)
 {
+    body_type  = BODY_SIMPLE;
     body_model = createSimpleBody(size);
 }
 
 void RigidBodyStateVisualization::resetModelSphere(double size)
 {
+    body_type  = BODY_SPHERE;
     body_model = createSimpleSphere(size);
 }
 
 void RigidBodyStateVisualization::loadModel(std::string const& path)
 {
     osg::ref_ptr<osg::Node> model = osgDB::readNodeFile(path);
+    body_type  = BODY_CUSTOM_MODEL;
     body_model = model;
     //set plugin name
     if(vizkit3d_plugin_name.isEmpty())
@@ -157,7 +183,7 @@ osg::ref_ptr<osg::Node> RigidBodyStateVisualization::createMainNode()
     osg::PositionAttitudeTransform* body_pose =
         new osg::PositionAttitudeTransform();
     if (!body_model)
-        resetModel(1);
+        resetModel(total_size);
     body_pose->addChild(body_model);
     group->addChild(body_pose);
     return group;
