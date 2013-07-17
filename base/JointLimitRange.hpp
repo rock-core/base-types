@@ -25,9 +25,9 @@ struct JointLimitRange
 	std::string name;
 	double min, max, value;
 	OutOfBounds( std::string name, double min, double max, double value )
-	    : std::runtime_error( errorString( min, max, value ) ),
-	    name( name ),
-	    min( min ), max( max ), value( value )
+	    : std::runtime_error( errorString( name, min, max, value ) )
+            , name( name )
+            , min( min ), max( max ), value( value )
 	{
 	}
 	~OutOfBounds() throw() {}
