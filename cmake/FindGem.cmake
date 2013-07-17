@@ -149,6 +149,5 @@ endif()
 
 find_package_handle_standard_args(GEM
     REQUIRED_VARS ${components_found_vars}
-    FAIL_MESSAGE "Could not find all required gems"
-    HANDLE_COMPONENTS)
+    FAIL_MESSAGE "Could not find all required gems")
 
