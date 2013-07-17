@@ -82,6 +82,13 @@ namespace base
 	    return elements.size();
 	}
 
+        /** Returns true if this does not contain any elements
+         */
+        bool empty() const
+        {
+            return elements.empty();
+        }
+
 	/** Clears the contents of elements and names vector
 	*/
 	void clear()
