@@ -48,12 +48,12 @@ struct JointLimitRange
 		throw OutOfBounds( "position", min.position, max.position, state.position );
 	}
 
-	if( state.hasVelocity() )
+	if( state.hasSpeed() )
 	{
-	    if( min.hasVelocity() && min.velocity > state.velocity )
-		throw OutOfBounds( "velocity", min.velocity, max.velocity, state.velocity );
-	    if( max.hasVelocity() && max.velocity < state.velocity )
-		throw OutOfBounds( "velocity", min.velocity, max.velocity, state.velocity );
+	    if( min.hasSpeed() && min.speed > state.speed )
+		throw OutOfBounds( "speed", min.speed, max.speed, state.speed );
+	    if( max.hasSpeed() && max.speed < state.speed )
+		throw OutOfBounds( "speed", min.speed, max.speed, state.speed );
 	}
 
 	if( state.hasEffort() )
@@ -84,10 +84,10 @@ struct JointLimitRange
         return result;
     }
         
-    /** Creates a JointLimitRange structure with the velocity range set to \c
+    /** Creates a JointLimitRange structure with the speed range set to \c
      * min, \c max
      */
-    static JointLimitRange Velocity(double min, double max)
+    static JointLimitRange Speed(double min, double max)
     {
         JointLimitRange result;
         result.min.position = min;
