@@ -11,6 +11,9 @@
 #include <base/Eigen.hpp>
 #include <base/Float.hpp>
 #include <base/JointState.hpp>
+#include <base/NamedVector.hpp>
+#include <base/JointLimitRange.hpp>
+#include <base/JointLimits.hpp>
 #include <base/Odometry.hpp>
 #include <base/Point.hpp>
 #include <base/Pose.hpp>
