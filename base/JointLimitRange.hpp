@@ -19,7 +19,7 @@ struct JointLimitRange
 	    std::ostringstream ss;
 	    ss << "The " << name << " value " << value 
 		<< " was outside the allowed bounds [" << min << ":" << max << "].";
-	    std::string s(ss.str());
+            return ss.str();
 	}
 	
 	std::string name;
