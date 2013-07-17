@@ -26,6 +26,7 @@
 # set(GEM_OS_PKG TRUE)
 #
 # Check for how 'gem' should be called
+include(FindPackageHandleStandardArgs)
 find_program(GEM_EXECUTABLE
     NAMES "gem${RUBY_VERSION_MAJOR}${RUBY_VERSION_MINOR}"
         "gem${RUBY_VERSION_MAJOR}.${RUBY_VERSION_MINOR}"
@@ -50,18 +51,21 @@ if(NOT Gem_FIND_COMPONENTS)
 	MESSAGE(FATAL_ERROR "If searching for a Gem you have to provide COMPONENTS with the name of the gem")
 endif()
 
-set(GEM_FOUND TRUE)
 foreach(Gem_NAME ${Gem_FIND_COMPONENTS})
+    set(GEM_${Gem_NAME}_FOUND TRUE)
+    list(APPEND components_found_vars GEM_${Gem_NAME}_FOUND)
     # If the gem is installed as a gem
     if(NOT GEM_OS_PKG)
 	    set(GEM_HOME ENV{GEM_HOME})
 
         # Use `gem content <gem-name>` to extract current information about installed gems
         # Store the information into ${GEM_LOCAL_INFO}
-        EXECUTE_PROCESS(COMMAND ${GEM_EXECUTABLE} content ${Gem_NAME} OUTPUT_VARIABLE GEM_LOCAL_INFO)
+        EXECUTE_PROCESS(COMMAND ${GEM_EXECUTABLE} content ${Gem_NAME}
+            RESULT_VARIABLE GEM_RUN_RESULT
+            OUTPUT_VARIABLE GEM_LOCAL_INFO)
 
-	    if("${GEM_LOCAL_INFO}" STREQUAL "")
-	    else()
+        if(GEM_RUN_RESULT STREQUAL "0")
+            list(APPEND FOUND_GEMS ${Gem_NAME})
             set(_library_NAME_PATTERN lib${Gem_NAME}.a
 	        		   lib${Gem_NAME}.so
 	        		   lib${Gem_NAME}.dylib
@@ -108,17 +112,12 @@ foreach(Gem_NAME ${Gem_FIND_COMPONENTS})
                     endif()
                 endforeach()
             endforeach()
-
-            # Compact the lists
-            if(DEFINED GEM_LIBRARIES)
-                LIST(REMOVE_DUPLICATES GEM_LIBRARIES)
-            endif()
-            if(DEFINED GEM_INCLUDE_DIRS)
-                LIST(REMOVE_DUPLICATES GEM_INCLUDE_DIRS)
-            endif()
+        else()
+            set(GEM_${Gem_NAME}_FOUND FALSE)
         endif()
     else(NOT GEM_OS_PKG)
         pkg_check_modules(GEM_PKG ${Gem_NAME})
+        set(GEM_${GEM_NAME}_FOUND GEM_PKG_FOUND)
         set(GEM_INCLUDE_DIRS ${GEM_PKG_INCLUDE_DIRS})
         set(GEM_LIBRARIES ${GEM_PKG_LIBRARIES} ${GEM_PKG_STATIC_LIBRARIES})
         list(APPEND GEM_LIBRARIES ${GEM_PKG_LDFLAGS} ${GEM_PKG_STATIC_LDFLAGS})
@@ -134,19 +133,22 @@ foreach(Gem_NAME ${Gem_FIND_COMPONENTS})
         endif()
     endif()
 
-	if("${GEM_LIBRARIES}" STREQUAL "")
-        MESSAGE(STATUS "Gem: ${Gem_NAME} found")
-	endif()
-
     if(GEM_DEBUG)
 		message(STATUS "${Gem_NAME} library dir: ${GEM_LIBRARIES}")
 		message(STATUS "${Gem_NAME} include dir: ${GEM_INCLUDE_DIRS}")
     endif()
-		
-    if(Gem_FIND_REQUIRED)
-        if(NOT GEM_FOUND)
-		    MESSAGE(FATAL_ERROR "Gem: ${Gem_NAME} could not be found")
-        endif()
-	endif()
 endforeach()
+
+# Compact the lists
+if(DEFINED GEM_LIBRARIES)
+    LIST(REMOVE_DUPLICATES GEM_LIBRARIES)
+endif()
+if(DEFINED GEM_INCLUDE_DIRS)
+    LIST(REMOVE_DUPLICATES GEM_INCLUDE_DIRS)
+endif()
+
+find_package_handle_standard_args(GEM
+    REQUIRED_VARS ${components_found_vars}
+    FAIL_MESSAGE "Could not find all required gems"
+    HANDLE_COMPONENTS)
 
