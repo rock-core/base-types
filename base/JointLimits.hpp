@@ -14,12 +14,12 @@ namespace base
 	 * Will throw if this is not the case. Will also throw if there are no
 	 * limits for a particular joint.
 	 */
-	void assert( const base::samples::Joints& joints )
+	void validate( const base::samples::Joints& joints )
 	{
 	    for( size_t i=0; i<joints.size(); i++ )
 	    {
 		const JointLimitRange &range( getElementByName( joints.names[i] ) );
-		range.assert( joints[i] );
+		range.validate( joints[i] );
 	    }
 	}
     };

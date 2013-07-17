@@ -38,7 +38,7 @@ struct JointLimitRange
      *
      * will throw OutOfBoundsException if limits are exceeded. 
      */
-    void assert( const JointState &state ) const
+    void validate( const JointState &state ) const
     {
 	if( state.hasPosition() )
 	{
