@@ -8,6 +8,23 @@ namespace base
 {
     struct JointLimits : public NamedVector<JointLimitRange>
     {
+        bool isValid( const base::samples::Joints& joints ) const
+        {
+            if (joints.hasNames())
+            {
+                for( size_t i=0; i<joints.size(); i++ )
+                    if (! (*this)[joints.names[i]].isValid( joints[i] ))
+                        return false;
+            }
+            else
+            {
+                for( size_t i=0; i<joints.size(); i++ )
+                    if (! (*this)[i].isValid( joints[i] ))
+                        return false;
+            }
+            return true;
+        }
+
 	/** 
 	 * Makes sure that all jointstate are within their respective limits
 	 *
