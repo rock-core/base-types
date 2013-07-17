@@ -1,6 +1,7 @@
 #ifndef BASE_JOINT_LIMITS_HPP
 #define BASE_JOINT_LIMITS_HPP
 
+#include <base/samples/Joints.hpp>
 #include <base/JointLimitRange.hpp>
 #include <base/NamedVector.hpp>
 
