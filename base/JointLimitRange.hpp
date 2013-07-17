@@ -72,6 +72,50 @@ struct JointLimitRange
 		throw OutOfBounds( "raw", min.raw, max.raw, state.raw );
 	}
     }
+
+    /** Creates a JointLimitRange structure with the position range set to \c
+     * min, \c max
+     */
+    static JointLimitRange Position(double min, double max)
+    {
+        JointLimitRange result;
+        result.min.position = min;
+        result.max.position = max;
+        return result;
+    }
+        
+    /** Creates a JointLimitRange structure with the velocity range set to \c
+     * min, \c max
+     */
+    static JointLimitRange Velocity(double min, double max)
+    {
+        JointLimitRange result;
+        result.min.position = min;
+        result.max.position = max;
+        return result;
+    }
+
+    /** Creates a JointLimitRange structure with the effort range set to \c
+     * min, \c max
+     */
+    static JointLimitRange Effort(double min, double max)
+    {
+        JointLimitRange result;
+        result.min.position = min;
+        result.max.position = max;
+        return result;
+    }
+
+    /** Creates a JointLimitRange structure with the raw range set to \c
+     * min, \c max
+     */
+    static JointLimitRange Raw(double min, double max)
+    {
+        JointLimitRange result;
+        result.min.position = min;
+        result.max.position = max;
+        return result;
+    }
 };
 
 }
