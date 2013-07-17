@@ -2,8 +2,7 @@
 #define BASE_JOINT_LIMITS_HPP
 
 #include <base/JointLimitRange.hpp>
-#include <base/NameArray.hpp>
-
+#include <base/NamedVector.hpp>
 
 namespace base
 {
