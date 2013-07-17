@@ -32,13 +32,18 @@ namespace base
 	 * Will throw if this is not the case. Will also throw if there are no
 	 * limits for a particular joint.
 	 */
-	void validate( const base::samples::Joints& joints )
+	void validate( const base::samples::Joints& joints ) const
 	{
-	    for( size_t i=0; i<joints.size(); i++ )
-	    {
-		const JointLimitRange &range( getElementByName( joints.names[i] ) );
-		range.validate( joints[i] );
-	    }
+            if (joints.hasNames())
+            {
+                for( size_t i=0; i<joints.size(); i++ )
+                    (*this)[joints.names[i]].validate( joints[i] );
+            }
+            else
+            {
+                for( size_t i=0; i<joints.size(); i++ )
+                    (*this)[i].validate( joints[i] );
+            }
 	}
     };
 }
