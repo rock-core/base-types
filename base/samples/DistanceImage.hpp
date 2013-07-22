@@ -83,6 +83,7 @@ namespace samples
 	bool getScenePoint( size_t x, size_t y, Eigen::Matrix<Scalar_,3,1>& point ) const
 	{
 	    point = Eigen::Matrix<Scalar_,3,1>( (x*scale_x)+center_x, (y*scale_y)+center_y, 1.0 );
+	    point.normalize();
 
 	    // check bounds
 	    if( (x < 0 || x >= width) || (y < 0 || y >= height) ) 
