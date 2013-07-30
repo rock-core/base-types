@@ -235,13 +235,14 @@ macro(rock_target_definition TARGET_NAME)
     # explicitely, pass on everything
     foreach(__depmode PLAIN CMAKE PKGCONFIG)
         if (NOT ${TARGET_NAME}_PUBLIC_${__depmode})
-            set(${TARGET_NAME}_PUBLIC_${__depmode} ${${TARGET_NAME}_${__depmode}})
+            set(${TARGET_NAME}_PUBLIC_${__depmode} ${${TARGET_NAME}_DEPS_${__depmode}})
         endif()
     endforeach()
 
     # Export public dependencies to pkg-config
     set(${TARGET_NAME}_PKGCONFIG_REQUIRES
         "${${TARGET_NAME}_PKGCONFIG_REQUIRES} ${${TARGET_NAME}_PUBLIC_PKGCONFIG}")
+    string(REPLACE ";" " " ${TARGET_NAME}_PKGCONFIG_REQUIRES "${${TARGET_NAME}_PKGCONFIG_REQUIRES}")
     foreach(dep_mode PLAIN CMAKE)
         foreach(__dep ${${TARGET_NAME}_PUBLIC_${dep_mode}})
             rock_libraries_for_pkgconfig(${TARGET_NAME}_PKGCONFIG_LIBS
@@ -291,7 +292,7 @@ endmacro()
 ## Common post-target-definition setup for all C/C++ targets
 macro(rock_target_setup TARGET_NAME)
     set_property(TARGET ${TARGET_NAME}
-        PROPERTY DEPS_PKGCONFIG ${${TARGET_NAME}_DEPS_PKGCONFIG})
+        PROPERTY DEPS_PUBLIC_PKGCONFIG ${${TARGET_NAME}_PUBLIC_PKGCONFIG})
     set_property(TARGET ${TARGET_NAME}
         PROPERTY DEPS_PUBLIC_PLAIN ${${TARGET_NAME}_PUBLIC_PLAIN})
     set_property(TARGET ${TARGET_NAME}
@@ -610,7 +611,8 @@ macro(rock_libraries_for_pkgconfig VARNAME)
     endforeach()
 endmacro()
 
-## Defines a new vizkit widget
+## List dependencies for the given target that are needed by the user of that
+# target
 #
 # rock_add_public_dependencies(TARGET
 #     [PLAIN] dep0 dep1 dep2
@@ -630,6 +632,10 @@ endmacro()
 #
 # Which can be used in pkg-config files to automatically add the necessary
 # information from these dependencies in the target's pkg-config file
+#
+# Unless you call this, all dependencies listed in the rock_* macro to create
+# the target are public. You only need to call this to restrict the
+# cross-project dependencies
 macro(rock_add_public_dependencies TARGET_NAME)
     set(MODE PLAIN)
     foreach(__dep ${ARGN})
