@@ -44,27 +44,27 @@ namespace base
          *    (position1 - position0)/(time1 - * time0).toSeconds()
          * is not necessarily equal to 'speed'
          */
-        float speed;
+        double speed;
 
         /** Torque in N.m for angular joints and N for linear ones
          */
-        float effort;
+        double effort;
 
         /** Raw command to/from the actuator, if this is an actuated joint. It
          * is commonly a PWM value in [0,1]
          */
-        float raw;
+        double raw;
 
         JointState()
-            : position(base::unset<float>())
-            , speed(base::unset<float>())
-            , effort(base::unset<float>())
-            , raw(base::unset<float>()) {}
+            : position(base::unset<double>())
+            , speed(base::unset<double>())
+            , effort(base::unset<double>())
+            , raw(base::unset<double>()) {}
 
         /** Returns a JointState object with the position field set to the given
          * value
          */
-        static JointState Position(float value)
+        static JointState Position(double value)
         {
             JointState ret;
             ret.position = value;
@@ -74,7 +74,7 @@ namespace base
         /** Returns a JointState object with the speed field set to the given
          * value
          */
-        static JointState Speed(float value)
+        static JointState Speed(double value)
         {
             JointState ret;
             ret.speed = value;
@@ -84,7 +84,7 @@ namespace base
         /** Returns a JointState object with the effort field set to the given
          * value
          */
-        static JointState Effort(float value)
+        static JointState Effort(double value)
         {
             JointState ret;
             ret.effort = value;
@@ -94,7 +94,7 @@ namespace base
         /** Returns a JointState object with the raw field set to the given
          * value
          */
-        static JointState Raw(float value)
+        static JointState Raw(double value)
         {
             JointState ret;
             ret.raw = value;
@@ -102,13 +102,13 @@ namespace base
         }
 
         /** Tests whether the position field is set */
-        bool hasPosition() const { return !base::isUnset<float>(position); }
+        bool hasPosition() const { return !base::isUnset<double>(position); }
         /** Tests whether the speed field is set */
-        bool hasSpeed() const { return !base::isUnset<float>(speed); }
+        bool hasSpeed() const { return !base::isUnset<double>(speed); }
         /** Tests whether the effort field is set */
-        bool hasEffort() const { return !base::isUnset<float>(effort); }
+        bool hasEffort() const { return !base::isUnset<double>(effort); }
         /** Tests whether the raw field is set */
-        bool hasRaw() const { return !base::isUnset<float>(raw); }
+        bool hasRaw() const { return !base::isUnset<double>(raw); }
 
         /** Tests whether the position field is the only field set
          *
@@ -144,7 +144,7 @@ namespace base
          *
          * @see MODE
          */
-        float getField(int mode) const
+        double getField(int mode) const
         {
             switch(mode)
             {
@@ -160,7 +160,7 @@ namespace base
          *
          * @see MODE
          */
-        void setField(int mode, float value)
+        void setField(int mode, double value)
         {
             switch(mode)
             {

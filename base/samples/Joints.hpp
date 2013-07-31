@@ -42,7 +42,7 @@ namespace base
                 Joints result;
                 result.elements.resize(speeds.size());
                 for (std::size_t i = 0; i != speeds.size(); ++i)
-                    result[i].position = speeds[i];
+                    result[i].speed= speeds[i];
                 return result;
             }
 
@@ -60,7 +60,7 @@ namespace base
                 Joints result;
                 result.elements.resize(efforts.size());
                 for (std::size_t i = 0; i != efforts.size(); ++i)
-                    result[i].position = efforts[i];
+                    result[i].effort = efforts[i];
                 return result;
             }
 
@@ -78,7 +78,7 @@ namespace base
                 Joints result;
                 result.elements.resize(raw.size());
                 for (std::size_t i = 0; i != raw.size(); ++i)
-                    result[i].position = raw[i];
+                    result[i].raw = raw[i];
                 return result;
             }
 
