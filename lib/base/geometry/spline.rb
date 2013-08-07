@@ -1,4 +1,4 @@
-require 'base_types_ext'
+require 'base_types/base_types'
 require 'eigen'
 
 module Types

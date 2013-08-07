@@ -5,9 +5,6 @@ gem 'rice', '>= 1.3.2'
 
 require 'mkmf-rice'
 
-# Give it a name
-extension_name = 'base_types_ext'
-
 # If you need some pkg-config dependencies, add them here
 if !pkg_config('eigen3')
    STDERR.puts "could not find eigen3 pkg-config file, assuming eigen headers is in /usr/include/eigen3"
@@ -19,6 +16,6 @@ if !pkg_config('base-lib')
    exit(1)
 end
 
-create_makefile(extension_name)
+create_makefile("base_types/base_types")#, "base")
 
 

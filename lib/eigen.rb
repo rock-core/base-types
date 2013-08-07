@@ -1,4 +1,4 @@
-require 'base_types_ext'
+require 'base/base'
 
 module Eigen
     # 3-dimensional vector
