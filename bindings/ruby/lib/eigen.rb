@@ -1,4 +1,4 @@
-require 'base/base'
+require 'base_types_ruby'
 
 module Eigen
     # 3-dimensional vector

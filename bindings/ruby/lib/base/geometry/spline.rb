@@ -1,4 +1,4 @@
-require 'base_types/base_types'
+require 'base_types_ruby'
 require 'eigen'
 
 module Types
