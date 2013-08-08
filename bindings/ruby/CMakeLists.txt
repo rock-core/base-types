@@ -20,3 +20,4 @@ rock_ruby_library(base ${RUBY_FILES})
 
 install(FILES lib/eigen.rb DESTINATION ${RUBY_LIBRARY_INSTALL_DIR})
 
+rock_ruby_test()

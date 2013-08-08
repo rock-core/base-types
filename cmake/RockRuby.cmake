@@ -119,5 +119,36 @@ ELSEIF(NOT RUBY_EXTENSIONS_AVAILABLE)
         endif()
 
     endfunction()
+
+    # Adds the target 'test_bindings_ruby' in order to test the ruby extension
+    # Assumes a test folder inside the extension
+    function(ROCK_RUBY_TEST)
+        set(TEST_TARGET_NAME test_bindings_ruby)
+        STRING(COMPARE EQUAL "${ARGC}" "0" NO_ARGUMENT)
+
+        if(NO_ARGUMENT)
+            set(directory ${CMAKE_CURRENT_SOURCE_DIR})
+        else()
+            set(directory ${ARGN})
+        endif()
+
+        # Creating test script
+        set(TEST_SCRIPT_NAME "${CMAKE_BINARY_DIR}/bin/${PROJECT_NAME}-${TEST_TARGET_NAME}")
+
+        # Use all files in the test folder
+        file(GLOB TEST_FILES ${directory}/test/*.rb)
+        set(TEST_STRING "require 'rubygems'; require 'minitest/autorun';")
+        foreach(TEST_FILE ${TEST_FILES})
+            set(TEST_STRING "${TEST_STRING} require '${TEST_FILE}';")
+        endforeach()
+        set(TEST_STRING ${TEST_STRING})
+        file(WRITE "${TEST_SCRIPT_NAME}" "${TEST_STRING}")
+
+        add_custom_target(${TEST_TARGET_NAME}
+            WORKING_DIRECTORY ${directory}
+            COMMAND ruby -w -I. -I${CMAKE_BINARY_DIR} ${TEST_SCRIPT_NAME}
+            VERBATIM
+        )
+    endfunction()
 ENDIF(NOT RUBY_INCLUDE_PATH)
 
