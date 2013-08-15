@@ -71,7 +71,7 @@ namespace base
 	 */
 	bool test( const Eigen::Affine3d& pdelta )
 	{
-	    return test( Eigen::AngleAxisd( pdelta.translation().norm(), pdelta.linear() ).angle() );
+	    return test( pdelta.translation().norm(), Eigen::AngleAxisd( pdelta.linear() ).angle() );
 	}
 
 	/** 
