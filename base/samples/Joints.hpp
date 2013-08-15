@@ -37,7 +37,7 @@ namespace base
                 return result;
             }
 
-            static Joints Speeds(std::vector<double> const& speeds)
+            static Joints Speeds(std::vector<float> const& speeds)
             {
                 Joints result;
                 result.elements.resize(speeds.size());
@@ -46,7 +46,7 @@ namespace base
                 return result;
             }
 
-            static Joints Speeds(std::vector<double> const& speeds, std::vector<std::string> const& names)
+            static Joints Speeds(std::vector<float> const& speeds, std::vector<std::string> const& names)
             {
                 Joints result = Speeds(speeds);
                 if (result.elements.size() != names.size())
@@ -55,7 +55,7 @@ namespace base
                 return result;
             }
 
-            static Joints Efforts(std::vector<double> const& efforts)
+            static Joints Efforts(std::vector<float> const& efforts)
             {
                 Joints result;
                 result.elements.resize(efforts.size());
@@ -64,7 +64,7 @@ namespace base
                 return result;
             }
 
-            static Joints Efforts(std::vector<double> const& efforts, std::vector<std::string> const& names)
+            static Joints Efforts(std::vector<float> const& efforts, std::vector<std::string> const& names)
             {
                 Joints result = Efforts(efforts);
                 if (result.elements.size() != names.size())
@@ -73,7 +73,7 @@ namespace base
                 return result;
             }
 
-            static Joints Raw(std::vector<double> const& raw)
+            static Joints Raw(std::vector<float> const& raw)
             {
                 Joints result;
                 result.elements.resize(raw.size());
@@ -82,7 +82,7 @@ namespace base
                 return result;
             }
 
-            static Joints Raw(std::vector<double> const& raw, std::vector<std::string> const& names)
+            static Joints Raw(std::vector<float> const& raw, std::vector<std::string> const& names)
             {
                 Joints result = Raw(raw);
                 if (result.elements.size() != names.size())
