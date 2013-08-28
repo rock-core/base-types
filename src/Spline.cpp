@@ -285,7 +285,7 @@ void SplineBase::interpolate(std::vector<double> const& points,
     }
     else
     {
-	assert( coord_types.size() == points.size() );
+	assert( coord_types.size()*dimension == points.size() );
 	std::copy( coord_types.begin(), coord_types.end(), std::back_inserter( point_types ) );
     }
 
