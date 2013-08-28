@@ -8,7 +8,6 @@
 #include <base/backward/base/float.h>
 #include <base/backward/base/joint_state.h>
 #include <base/backward/base/motion_command.h>
-#include <base/backward/base/odometry.h>
 #include <base/backward/base/pose.h>
 #include <base/backward/base/samples/distance_image.h>
 #include <base/backward/base/samples/frame.h>
