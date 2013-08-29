@@ -136,7 +136,6 @@ void Init_spline_ext(Rice::Module& base_m)
 {
     typedef std::vector<double>(RubySpline::*SimplifySelector)(double);
     typedef void(SplineBase::*Append)(SplineBase const&,double);
-    typedef double(SplineBase::*CurveLenght)();
 
     coordinate_type_type =
 	define_enum<CoordinateType>("CoordinateType")
@@ -160,7 +159,7 @@ void Init_spline_ext(Rice::Module& base_m)
         .define_method("reverse", &SplineBase::reverse)
         .define_method("dimension", &SplineBase::getDimension)
         .define_method("point_count", &SplineBase::getPointCount)
-        .define_method("curve_length", static_cast<CurveLenght>(&SplineBase::getCurveLength))
+        .define_method("curve_length", &SplineBase::getCurveLength)
         .define_method("curvature_max", &SplineBase::getCurvatureMax)
         .define_method("start_param", &SplineBase::getStartParam)
         .define_method("end_param", &SplineBase::getEndParam)

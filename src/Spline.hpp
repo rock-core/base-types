@@ -49,12 +49,12 @@ namespace geometry {
         void setCurveOrder(int value) { curve_order = value; }
         /** Returns the order of the curve */
         int    getCurveOrder() const { return curve_order; }
-        /** Returns the length of the curve in geometric space */
-        double getCurveLength();
-	
-        /** Returns the length of the curve in geometric space 
-	 * noncaching const version */
-        double getCurveLength() const;
+        /** Returns the length of the curve in geometric space
+         *
+         * @param relative_error the acceptable error on the final result w.r.t.
+         *   the real curve length
+         */
+        double getCurveLength(double relative_resolution = 0.01) const;
         /** Returns the maximum curvature of the curve */
         double getCurvatureMax();
         double getStartParam() const { return start_param; };
@@ -298,11 +298,6 @@ namespace geometry {
         double start_param;
         //! the end parameter, as returned by SISL
         double end_param;
-
-        //! if we have already calculated the curve length
-        bool has_curve_length;
-        //! the cache value for the curve length in geometric space
-        double curve_length; // Length of the curve
 
         //! if we have already calculated the maximum curvature
         bool has_curvature_max;
