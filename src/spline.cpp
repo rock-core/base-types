@@ -26,7 +26,6 @@ SplineBase::SplineBase (int dim, double _geometric_resolution, int _curve_order)
     : dimension(dim), curve(0), geometric_resolution(_geometric_resolution)
     , curve_order(_curve_order)
     , start_param(0), end_param(0)
-    , has_curve_length(false), curve_length(-1)
     , has_curvature_max(false), curvature_max(-1)
 {
     if (dimension <= 0)
@@ -37,7 +36,6 @@ SplineBase::SplineBase(double geometric_resolution, SISLCurve* curve)
     : dimension(curve->idim), curve(curve), geometric_resolution(geometric_resolution)
     , curve_order(curve->ik)
     , start_param(0), end_param(0)
-    , has_curve_length(false), curve_length(-1)
     , has_curvature_max(false), curvature_max(-1)
 {
     if (dimension <= 0)
@@ -63,7 +61,6 @@ SplineBase::SplineBase(SplineBase const& source)
     , geometric_resolution(source.geometric_resolution)
     , curve_order(source.curve_order)
     , start_param(source.start_param), end_param(source.end_param)
-    , has_curve_length(source.has_curve_length), curve_length(source.curve_length)
     , has_curvature_max(source.has_curvature_max), curvature_max(source.curvature_max)
 {
 }
@@ -83,8 +80,6 @@ SplineBase const& SplineBase::operator = (SplineBase const& source)
     curve_order          = source.curve_order;
     start_param          = source.start_param;
     end_param            = source.end_param;
-    has_curve_length     = source.has_curve_length;
-    curve_length         = source.curve_length;
     has_curvature_max    = source.has_curvature_max;
     curvature_max        = source.curvature_max;
     return *this;
@@ -189,7 +184,7 @@ double SplineBase::getVariationOfCurvature(double _param)  // Variation of Curva
     return VoC;
 }
 
-double base::geometry::SplineBase::getCurveLength() const
+double base::geometry::SplineBase::getCurveLength(double relative_resolution) const
 {
     if (isSingleton())
         return 0;
@@ -198,22 +193,11 @@ double base::geometry::SplineBase::getCurveLength() const
 
     int status;
     double length;
-    s1240(curve, geometric_resolution, &length, &status);
+    s1240(curve, relative_resolution, &length, &status);
     if (status != 0)
         throw std::runtime_error("cannot get the curve length");
     
     return length;
-}
-
-double SplineBase::getCurveLength()
-{
-    if (has_curve_length)
-        return curve_length;
-
-    curve_length = ((const SplineBase *) this)->getCurveLength();
-
-    has_curve_length = true;
-    return curve_length;
 }
 
 double SplineBase::getUnitParameter()
@@ -259,7 +243,6 @@ void SplineBase::interpolate(std::vector<double> const& points,
     clear();
     start_param = 0.0;
     has_curvature_max = false;
-    has_curve_length  = false;
 
     int const point_count = points.size() / dimension;
     if (point_count == 0)
@@ -271,8 +254,6 @@ void SplineBase::interpolate(std::vector<double> const& points,
     else if (point_count == 1)
     {
         end_param = 0;
-        has_curve_length = true;
-        curve_length = 0;
         singleton = points;
         return;
     }
@@ -378,7 +359,6 @@ void SplineBase::reset(SISLCurve* new_curve)
     new_curve->cuopen = 1;
     singleton.clear();
     has_curvature_max = false;
-    has_curve_length = false;
     this->curve = new_curve;
 
     int status;
@@ -401,8 +381,6 @@ void SplineBase::reset(std::vector<double> const& coordinates, std::vector<doubl
 
         start_param = end_param = 0;
         has_curvature_max = false;
-        has_curve_length = true;
-        curve_length = 0;
         singleton = coordinates;
         return;
     }
