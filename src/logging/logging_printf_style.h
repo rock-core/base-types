@@ -173,7 +173,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <vector>
-#include <base/singleton.h>
+#include <base/Singleton.hpp>
 
 namespace base {
 
