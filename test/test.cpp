@@ -14,6 +14,7 @@
 #include <base/NamedVector.hpp>
 #include <base/JointLimitRange.hpp>
 #include <base/JointLimits.hpp>
+#include <base/JointsTrajectory.hpp>
 #include <base/Point.hpp>
 #include <base/Pose.hpp>
 //#include <base/samples/CompressedFrame.hpp>

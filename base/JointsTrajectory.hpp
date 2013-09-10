@@ -42,7 +42,7 @@ struct JointsTrajectory
 
 	for(size_t i=0; i<elements.size(); ++i)
 	{
-	    if( elements[i].size() != size )
+	    if( elements[i].size() != samples )
 		return false;
 	}
 
@@ -68,7 +68,7 @@ struct JointsTrajectory
 	base::Time summed;
 	for(size_t i=0; i<times.size(); i++)
 	{
-	    summed = summed+samples[i];
+	    summed = summed+times[i];
 	}
 	return summed;
     }
