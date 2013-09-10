@@ -8,6 +8,8 @@
 
 namespace base {
 
+typedef std::vector<JointState> JointTrajectory;
+
 /** 
  * @brief Holds a time-series of JointStates for multiple joints
  *
@@ -22,7 +24,7 @@ namespace base {
  * of that size
  */
 struct JointsTrajectory 
-    : public NamedVector<std::vector<JointState> >
+    : public NamedVector<JointTrajectory>
 {
     /**
      * @brief optional array of time values corresponding to the samples of the JointState
@@ -36,9 +38,7 @@ struct JointsTrajectory
      */
     bool isValid()
     {
-	size_t samples = 0;
-	if( !elements.empty() )
-	    samples = elements[0].size();
+	size_t samples = getTimeSteps();
 
 	for(size_t i=0; i<elements.size(); ++i)
 	{
@@ -59,11 +59,22 @@ struct JointsTrajectory
     {
 	return !times.empty();
     }
+
+    /**
+     * @return the number of time steps in the trajectory
+     */
+    size_t getTimeSteps()
+    {
+	size_t steps = 0;
+	if( !elements.empty() )
+	    steps = elements[0].size();
+	return steps;
+    }
    
     /** 
      * @return the total duration of the time series if time information is available
      */
-    base::Time duration()
+    base::Time getDuration()
     {
 	base::Time summed;
 	for(size_t i=0; i<times.size(); i++)
