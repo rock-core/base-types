@@ -87,10 +87,9 @@ void PointcloudVisualization::updateMainNode(osg::Node* node)
             osg::Vec3d vec(pos->x(), pos->y(), pos->z());
             pointsOSG->push_back(vec);
             if(pointCloud.colors.size() == pointCloud.points.size()){
-                osg::Vec4f v = osg::Vec4f(pointCloud.colors[i][0]/255.0, pointCloud.colors[i][1]/255.0, pointCloud.colors[i][2]/255.0, 1.0f);
+                osg::Vec4f v = osg::Vec4f(pointCloud.colors[i][0], pointCloud.colors[i][1], pointCloud.colors[i][2], pointCloud.colors[i][3]);
                 color->push_back(v);
             }else{
-                printf("Sizes missmatch %i %i\n",pointCloud.colors.size() ,pointCloud.points.size());
                 color->push_back(default_feature_color);
             }
             
