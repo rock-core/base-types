@@ -1,7 +1,7 @@
 #include "PointcloudVisualization.hpp"
 #include <osg/Geode>
 
-namespace vizkit
+namespace vizkit3d
 {
 
 PointcloudVisualization::PointcloudVisualization()

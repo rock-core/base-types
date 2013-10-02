@@ -3,7 +3,7 @@
 #include <osg/Geode>
 #include <osg/LineWidth>
 
-namespace vizkit 
+namespace vizkit3d 
 {
 
 TrajectoryVisualization::TrajectoryVisualization()

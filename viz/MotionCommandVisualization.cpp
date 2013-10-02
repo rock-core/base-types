@@ -6,7 +6,7 @@
 #include <osg/Geometry>
 #include <osg/PositionAttitudeTransform>
 
-namespace vizkit 
+namespace vizkit3d 
 {
 
 MotionCommandVisualization::MotionCommandVisualization()

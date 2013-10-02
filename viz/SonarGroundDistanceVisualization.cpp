@@ -1,12 +1,12 @@
 #include "SonarGroundDistanceVisualization.hpp"
-#include <vizkit/Uncertainty.hpp>
+#include "Uncertainty.hpp"
 #include <osg/Geode>
 #include <osg/ShapeDrawable>
 #include <osg/PositionAttitudeTransform>
 #include <osgDB/ReadFile>
 #include <osg/Material>
 
-using namespace vizkit;
+using namespace vizkit3d;
 
 SonarGroundDistanceVisualization::SonarGroundDistanceVisualization():
     beam_width(3.0/180.0*M_PI)

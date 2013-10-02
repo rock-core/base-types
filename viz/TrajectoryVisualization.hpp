@@ -3,11 +3,11 @@
 #include <Eigen/Geometry>
 #include <list>
 #include <osg/Geometry>
-#include <vizkit/Vizkit3DPlugin.hpp>
+#include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <base/geometry/spline.h>
 #include <base/trajectory.h>
 
-namespace vizkit 
+namespace vizkit3d 
 {
 
 class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>

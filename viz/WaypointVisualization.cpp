@@ -1,7 +1,7 @@
 #include "WaypointVisualization.hpp"
 #include <iostream>
 
-namespace vizkit 
+namespace vizkit3d 
 {
 
 WaypointVisualization::WaypointVisualization()

@@ -1,12 +1,12 @@
 #ifndef __SONAR_GROUND_DISTANCE_VISUALIZATION_HPP__
 #define __SONAR_GROUND_DISTANCE_VISUALIZATION_HPP__
 
-#include <vizkit/Vizkit3DPlugin.hpp>
+#include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <Eigen/Geometry>
 #include <base/samples/rigid_body_state.h>
 #include <osg/Shape>
 
-namespace vizkit 
+namespace vizkit3d 
 {
 
 class SonarGroundDistanceVisualization : public Vizkit3DPlugin<base::samples::RigidBodyState>

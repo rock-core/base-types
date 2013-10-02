@@ -1,12 +1,12 @@
 #include "RigidBodyStateVisualization.hpp"
-#include <vizkit/Uncertainty.hpp>
+#include "Uncertainty.hpp"
 #include <osg/Geode>
 #include <osg/ShapeDrawable>
 #include <osg/PositionAttitudeTransform>
 #include <osgDB/ReadFile>
 #include <osg/Material>
 
-namespace vizkit 
+namespace vizkit3d 
 {
 
 RigidBodyStateVisualization::RigidBodyStateVisualization(QObject* parent)

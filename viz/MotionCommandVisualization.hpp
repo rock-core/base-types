@@ -1,13 +1,13 @@
 #ifndef MOTIONCOMMANDVISUALIZATION_H
 #define MOTIONCOMMANDVISUALIZATION_H
-#include <vizkit/Vizkit3DPlugin.hpp>
+#include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <base/motion_command.h>
 #include <base/pose.h>
 #include <osg/Shape>
 #include <Eigen/Geometry>
 #include <osg/Drawable>
 
-namespace vizkit 
+namespace vizkit3d 
 {
 
 class MotionCommandVisualization : public Vizkit3DPlugin<base::MotionCommand2D>, public VizPluginAddType<base::Pose>

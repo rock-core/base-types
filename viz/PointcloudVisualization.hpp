@@ -1,20 +1,20 @@
 #ifndef PointcloudVisualization_H
 #define PointcloudVisualization_H
 
-#include <vizkit/Vizkit3DPlugin.hpp>
+#include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <base/samples/pointcloud.h>
 
 #include <osg/Node>
 #include <osg/Geometry>
 
-namespace vizkit
+namespace vizkit3d
 {
 
 /**
  * Vizkit plugin to visualize Pointcloudes.
  * 
  */
-class PointcloudVisualization : public vizkit::Vizkit3DPlugin< base::samples::Pointcloud >
+class PointcloudVisualization : public vizkit3d::Vizkit3DPlugin< base::samples::Pointcloud >
 {    
     Q_OBJECT
     Q_PROPERTY(QColor defaultFeatureColor READ getDefaultFeatureColor WRITE setDefaultFeatureColor)

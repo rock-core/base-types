@@ -3,13 +3,13 @@
 
 #include <base/samples/laser_scan.h>
 #include <base/samples/rigid_body_state.h>
-#include <vizkit/Vizkit3DPlugin.hpp>
+#include <vizkit3d/Vizkit3DPlugin.hpp>
 
 namespace osg {
     class Geometry;
 }
 
-namespace vizkit {
+namespace vizkit3d {
 
 class LaserScanVisualization : public Vizkit3DPlugin<base::samples::LaserScan>, public VizPluginAddType<base::samples::RigidBodyState>
 {

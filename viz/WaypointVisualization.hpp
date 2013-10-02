@@ -1,7 +1,7 @@
 #ifndef WAYPOINTVISUALIZATION_H
 #define WAYPOINTVISUALIZATION_H
 
-#include <vizkit/Vizkit3DPlugin.hpp>
+#include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <base/waypoint.h>
 #include <osg/PositionAttitudeTransform>
 #include <osg/Geode>
@@ -10,7 +10,7 @@
 
 #include <Qt/qobject.h>
 
-namespace vizkit 
+namespace vizkit3d 
 {
     
 class WaypointVisualization: public Vizkit3DPlugin<base::Waypoint>

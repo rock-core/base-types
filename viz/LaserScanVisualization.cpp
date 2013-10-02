@@ -1,37 +1,38 @@
 #include "LaserScanVisualization.hpp"
+#include "Vizkit3DHelper.hpp"
+
 #include <osg/PositionAttitudeTransform>
 #include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Point>
 #include <iostream>
-#include <vizkit/Vizkit3DHelper.hpp>
-#include <vizkit/ColorConversionHelper.hpp>
+#include <vizkit3d/ColorConversionHelper.hpp>
 
-using namespace vizkit;
+using namespace vizkit3d;
 
-vizkit::LaserScanVisualization::LaserScanVisualization()
+vizkit3d::LaserScanVisualization::LaserScanVisualization()
     : mYForward(false),colorize(false),show_polygon(true),colorize_interval(0.2)
 {
     scanOrientation = Eigen::Quaterniond::Identity();
     scanPosition.setZero();
 }
 
-vizkit::LaserScanVisualization::~LaserScanVisualization()
+vizkit3d::LaserScanVisualization::~LaserScanVisualization()
 {
 }
 
-void vizkit::LaserScanVisualization::updateDataIntern(const base::samples::LaserScan& data)
+void vizkit3d::LaserScanVisualization::updateDataIntern(const base::samples::LaserScan& data)
 {
     scan = data;
 }
 
-void vizkit::LaserScanVisualization::updateDataIntern(const base::samples::RigidBodyState& data)
+void vizkit3d::LaserScanVisualization::updateDataIntern(const base::samples::RigidBodyState& data)
 {
     scanOrientation = data.orientation;
     scanPosition = data.position;
 }
 
-osg::ref_ptr< osg::Node > vizkit::LaserScanVisualization::createMainNode()
+osg::ref_ptr< osg::Node > vizkit3d::LaserScanVisualization::createMainNode()
 {
     transformNode = new osg::PositionAttitudeTransform();
     scanNode = new osg::Geode();
@@ -60,7 +61,7 @@ osg::ref_ptr< osg::Node > vizkit::LaserScanVisualization::createMainNode()
     return transformNode;
 }
 
-void vizkit::LaserScanVisualization::updateMainNode(osg::Node* node)
+void vizkit3d::LaserScanVisualization::updateMainNode(osg::Node* node)
 {
     transformNode->setPosition(eigenVectorToOsgVec3(scanPosition));
     transformNode->setAttitude(eigenQuatToOsgQuat(scanOrientation));
