@@ -1,8 +1,8 @@
 #ifndef MOTIONCOMMANDVISUALIZATION_H
 #define MOTIONCOMMANDVISUALIZATION_H
 #include <vizkit3d/Vizkit3DPlugin.hpp>
-#include <base/motion_command.h>
-#include <base/pose.h>
+#include <base/commands/Motion2D.hpp>
+#include <base/Pose.hpp>
 #include <osg/Shape>
 #include <Eigen/Geometry>
 #include <osg/Drawable>
@@ -10,7 +10,7 @@
 namespace vizkit3d 
 {
 
-class MotionCommandVisualization : public Vizkit3DPlugin<base::MotionCommand2D>, public VizPluginAddType<base::Pose>
+class MotionCommandVisualization : public Vizkit3DPlugin<base::commands::Motion2D>, public VizPluginAddType<base::Pose>
 {
     Q_OBJECT
     Q_PROPERTY(FrontAxis frontAxis READ getFrontAxis WRITE setFrontAxis)   
@@ -22,12 +22,12 @@ class MotionCommandVisualization : public Vizkit3DPlugin<base::MotionCommand2D>,
         
         enum FrontAxis {FrontAxisX, FrontAxisY};
 
-        Q_INVOKABLE void updateData(const base::MotionCommand2D& data)
-        { Vizkit3DPlugin<base::MotionCommand2D>::updateData(data); }
-        Q_INVOKABLE void updateMotionCommand(const base::MotionCommand2D& data)
+        Q_INVOKABLE void updateData(const base::commands::Motion2D& data)
+        { Vizkit3DPlugin<base::commands::Motion2D>::updateData(data); }
+        Q_INVOKABLE void updateMotionCommand(const base::commands::Motion2D& data)
         { updateData(data); }
         Q_INVOKABLE void updateData(const base::Pose& data)
-        { Vizkit3DPlugin<base::MotionCommand2D>::updateData(data); }
+        { Vizkit3DPlugin<base::commands::Motion2D>::updateData(data); }
         Q_INVOKABLE void updatePose(const base::Pose& data)
         { updateData(data); }
 
@@ -38,7 +38,7 @@ class MotionCommandVisualization : public Vizkit3DPlugin<base::MotionCommand2D>,
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
         virtual void updateMainNode( osg::Node* node );
-	void updateDataIntern ( const base::MotionCommand2D& data );
+	void updateDataIntern ( const base::commands::Motion2D& data );
         void updateDataIntern ( const base::Pose& data );
 
     private:

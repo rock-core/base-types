@@ -1,8 +1,8 @@
 #ifndef LASERSCANVISUALIZATION_H
 #define LASERSCANVISUALIZATION_H
 
-#include <base/samples/laser_scan.h>
-#include <base/samples/rigid_body_state.h>
+#include <base/samples/LaserScan.hpp>
+#include <base/samples/RigidBodyState.hpp>
 #include <vizkit3d/Vizkit3DPlugin.hpp>
 
 namespace osg {

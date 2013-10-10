@@ -4,8 +4,8 @@
 #include <list>
 #include <osg/Geometry>
 #include <vizkit3d/Vizkit3DPlugin.hpp>
-#include <base/geometry/spline.h>
-#include <base/trajectory.h>
+#include <base/geometry/Spline.hpp>
+#include <base/Trajectory.hpp>
 
 namespace vizkit3d 
 {

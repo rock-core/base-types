@@ -113,7 +113,7 @@ void MotionCommandVisualization::updateMainNode( osg::Node* node )
     drawRotation();
 }
 
-void MotionCommandVisualization::updateDataIntern ( const base::MotionCommand2D& data )
+void MotionCommandVisualization::updateDataIntern ( const base::commands::Motion2D& data )
 {
     tv = data.translation;
     rv = data.rotation;
