@@ -138,7 +138,7 @@ void Init_spline_ext(Rice::Module& base_m)
     typedef void(SplineBase::*Append)(SplineBase const&,double);
 
     coordinate_type_type =
-	define_enum<CoordinateType>("CoordinateType")
+	define_enum<CoordinateType>("CoordinateType", base_m)
 	.define_value("ORDINARY_POINT", SplineBase::ORDINARY_POINT)
 	.define_value("KNUCKLE_POINT", SplineBase::KNUCKLE_POINT)
 	.define_value("DERIVATIVE_TO_NEXT", SplineBase::DERIVATIVE_TO_NEXT)
