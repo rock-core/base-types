@@ -25,7 +25,7 @@ osg::ref_ptr< osg::Node > PointcloudVisualization::createMainNode()
     pointGeom->setVertexArray(pointsOSG);
     color = new osg::Vec4Array;
     pointGeom->setColorArray(color);
-    pointGeom->setColorBinding(osg::Geometry::BIND_PER_PRIMITIVE);
+    pointGeom->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
     pointGeom->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF); 
     drawArrays = new osg::DrawArrays( osg::PrimitiveSet::POINTS, 0, pointsOSG->size() );
     pointGeom->addPrimitiveSet(drawArrays.get());
