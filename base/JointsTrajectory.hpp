@@ -67,7 +67,7 @@ struct JointsTrajectory
     {
 	size_t steps = 0;
 	if( !elements.empty() )
-	    steps = elements[0].size();
+	    steps = elements.size();
 	return steps;
     }
    
