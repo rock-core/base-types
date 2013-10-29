@@ -38,6 +38,15 @@ namespace base {
 		}
 
 		/**
+		 * sets a new value for the timestamped class using it's base class
+		 * @param from the value to be timestamped
+		 */
+		inline void set(const BASE &from, Time &timestamp){
+			getBase() = from;
+			this->time = timestamp;
+		}
+
+		/**
 		 * updates the time
 		 */
 		void updateTime(){
