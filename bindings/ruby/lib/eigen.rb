@@ -186,6 +186,37 @@ module Eigen
 	    q
 	end
 
+        # Returns an angle,axis representation equivalent to this quaternion
+        #
+        # If the angle turns out to be PI, there are two solutions and the one
+        # with positive Z component is chosen.
+        #
+        # @param [Float] eps if the angle turns out to be closer to zero than eps, the
+        #   rotation axis is undefined and chosen to be the Z axis.
+        #
+        # @return [(Float,Vector3)] the angle and axis. The angle is in [0, PI]
+        def to_angle_axis(eps = 1e-12)
+            w, x, y, z = to_a
+            norm  = Math.sqrt(x*x+y*y+z*z);
+            if norm < eps
+                return 0, Eigen::Vector3.new(0,0,1);
+            end
+
+            angle = 2.0 * Math.atan2(norm, w);
+            axis  = Eigen::Vector3.new(x, y, z) / norm
+            return angle, axis
+        end
+
+        # Returns a scaled axis representation that is equivalent to this
+        # quaternion
+        #
+        # @param [Float] eps see {#to_angle_axis}
+        # @return [Vector3]
+        def to_scaled_axis(eps = 1e-12)
+            angle, axis = to_angle_axis(eps)
+            return axis * angle
+        end
+
         # Creates a quaternion from a set of euler angles.
         #
         # See Quaternion#from_euler for details

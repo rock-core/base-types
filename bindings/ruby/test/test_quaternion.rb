@@ -46,5 +46,16 @@ class TC_Eigen_Quaternion < Test::Unit::TestCase
         loaded = Marshal.load(dumped)
         assert(q.approx?(loaded, 0.0001))
     end
+
+    def test_to_angle_axis
+        axis = (Eigen::Vector3.UnitX * 0.4 + Eigen::Vector3.UnitZ * 0.5).normalize
+        angle = 0.5
+        q = Eigen::Quaternion.from_angle_axis(angle, axis)
+        result_angle, result_axis = q.to_angle_axis
+        assert_in_delta angle, result_angle, 1e-6
+        assert_in_delta 0, (result_axis - axis).norm, 1e-6
+    end
+
+
 end
 
