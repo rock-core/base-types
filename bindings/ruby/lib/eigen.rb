@@ -161,6 +161,12 @@ module Eigen
                 return -unsigned
             end
         end
+
+        # @return [Qt::Quaternion] the Qt vector that is identical to this
+        # one
+        def to_qt
+            Qt::Vector3D.new(x, y, z)
+        end
     end
 
     # Representation and manipulation of a quaternion
@@ -399,6 +405,13 @@ module Eigen
         #   inverse => quaternion
         #
         # Computes the quaternion that is inverse of this one
+
+
+        # @return [Qt::Quaternion] the Qt quaternion that is identical to this
+        # one
+        def to_qt
+            Qt::Quaternion.new(w, x, y, z)
+        end
     end
 
     # Abritary size vector
