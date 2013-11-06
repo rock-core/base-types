@@ -229,8 +229,8 @@ namespace base
 
 	io << (microsecs / 1000000)
 	   << std::setfill('0')
-	   << "." << std::setw(3) << (std::abs((int)microsecs) / 1000) % 1000 
-	   << "." << std::setw(3) << (std::abs((int)microsecs) % 1000)
+	   << "." << std::setw(3) << (std::llabs(microsecs) / 1000) % 1000
+	   << "." << std::setw(3) << (std::llabs(microsecs) % 1000)
 	   << std::setfill(' ');
 
 	return io;
