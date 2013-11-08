@@ -14,6 +14,8 @@ Typelib.specialize_model '/base/samples/RigidBodyState_m' do
             :cov_angular_velocity => m3)
     end
 
+    def Invalid; invalid end
+
     def from_pose(pose)
         rbs = new
         rbs.position = pose.position
