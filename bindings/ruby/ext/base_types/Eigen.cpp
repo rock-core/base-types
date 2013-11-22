@@ -246,9 +246,19 @@ struct Quaternion
         return q->isApprox(*other.q, tolerance);
     }
 
-    Vector3* toEuler(int axis0, int axis1, int axis2)
+    Vector3* toEuler()
     {
-        return new Vector3(q->toRotationMatrix().eulerAngles(axis0, axis1, axis2));
+        const Eigen::Matrix3d m = q->toRotationMatrix();
+        double i = Eigen::Vector2d(m.coeff(2,2) , m.coeff(2,1)).norm();
+        double y = atan2(-m.coeff(2,0), i);
+        double x=0,z=0;
+        if (i > Eigen::NumTraits<double>::dummy_precision()){
+            x = ::atan2(m.coeff(1,0), m.coeff(0,0));
+            z = ::atan2(m.coeff(2,1), m.coeff(2,2));
+        }else{
+            z = (m.coeff(2,0)>0?1:-1)* ::atan2(-m.coeff(0,1), m.coeff(1,1));
+        }
+        return new Vector3(x,y,z);
     }
 };
 

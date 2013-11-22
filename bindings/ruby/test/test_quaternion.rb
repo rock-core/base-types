@@ -12,7 +12,7 @@ class TC_Eigen_Quaternion < Test::Unit::TestCase
 
     def test_to_euler
         q = Eigen::Quaternion.new(1, 0, 0, 0)
-        result = q.to_euler(2, 1, 0)
+        result = q.to_euler
         assert_equal([0, 0, 0], result.to_a)
     end
 
@@ -20,7 +20,7 @@ class TC_Eigen_Quaternion < Test::Unit::TestCase
         q = Eigen::Quaternion.new(0.2, 0.5, 0.1, 0.5)
         q.normalize!
 
-        v = q.to_euler(2, 1, 0)
+        v = q.to_euler
         result = Eigen::Quaternion.from_euler(v, 2, 1, 0)
 
         assert(q.approx?(result, 0.0001))
