@@ -200,6 +200,9 @@ BOOST_AUTO_TEST_CASE(time_fromString)
     std::string microsecondResolutionFormat = formatNow.toString(base::Time::Microseconds);
     BOOST_REQUIRE_EQUAL(microsecondResolutionFormat,"20120614-12:05:06:001001");
 
+    std::string customFormat = formatNow.toString(base::Time::Milliseconds, "Time: %Y%m%dT%H%M%S");
+    BOOST_REQUIRE_EQUAL(customFormat,"Time: 20120614T120506:001");
+
     std::string defaultResolutionFormat = formatNow.toString();
     BOOST_REQUIRE_EQUAL(microsecondResolutionFormat,defaultResolutionFormat);
 
