@@ -11,19 +11,44 @@ namespace base
     typedef base::Vector2d    Position2D;
     typedef double            Orientation2D;
 
+    /*
+     * Decomposes the orientation in euler angles so that this can be
+     * obtained by applying the following rotations in order:
+     *
+     *  rotation of a2 around x-axis
+     *  rotation of a1 around y-axis
+     *  rotation of a0 around z-axis
+     *
+     * assuming angles in range of: a0:(-pi,pi), a1:(-pi/2,pi/2), a2:(-pi/2,pi/2)
+     *
+     */
+    static base::Vector3d getEuler(const base::Orientation &orientation){
+        const Eigen::Matrix3d m = orientation.toRotationMatrix();
+        double x = base::Vector2d(m.coeff(2,2) , m.coeff(2,1)).norm();
+        base::Vector3d res(0,::atan2(-m.coeff(2,0), x),0);
+        if (x > Eigen::NumTraits<double>::dummy_precision()){
+            res[0] = ::atan2(m.coeff(1,0), m.coeff(0,0));
+            res[2] = ::atan2(m.coeff(2,1), m.coeff(2,2));
+        }else{
+            res[0] = 0;
+            res[2] = (m.coeff(2,0)>0?1:-1)* ::atan2(-m.coeff(0,1), m.coeff(1,1));
+        }
+        return res;
+    }
+
     static double getYaw(const base::Orientation& orientation)
     {
-        return orientation.toRotationMatrix().eulerAngles(2,1,0)[0];
+        return base::getEuler(orientation)[0];
     }
-    
+
     static double getPitch(const base::Orientation& orientation)
     {
-        return orientation.toRotationMatrix().eulerAngles(2,1,0)[1];
+        return base::getEuler(orientation)[1];
     }
-    
+
     static double getRoll(const base::Orientation& orientation)
     {
-        return orientation.toRotationMatrix().eulerAngles(2,1,0)[2];
+        return base::getEuler(orientation)[2];
     }
 
 
@@ -31,7 +56,7 @@ namespace base
     {
 	return Eigen::AngleAxisd( -getYaw(orientation), Eigen::Vector3d::UnitZ()) * orientation;
     }
-    
+
     static inline base::Orientation removePitch(const base::Orientation& orientation)
     {
 	return Eigen::AngleAxisd( -getPitch(orientation), Eigen::Vector3d::UnitY()) * orientation;
