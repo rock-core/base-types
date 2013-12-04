@@ -139,11 +139,38 @@ void RigidBodyStateVisualization::resetModelSphere(double size)
     body_model = createSimpleSphere(size);
 }
 
+QString RigidBodyStateVisualization::getModelPath() const
+{
+    if (body_type == BODY_SPHERE)
+        return "sphere";
+    else if (body_type == BODY_SIMPLE)
+        return "simple";
+    else
+        return model_path;
+}
+
+void RigidBodyStateVisualization::loadModel(QString const& path)
+{
+    return loadModel(path.toStdString());
+}
+
 void RigidBodyStateVisualization::loadModel(std::string const& path)
 {
+    if (path == "sphere")
+    {
+        resetModelSphere(total_size);
+        return;
+    }
+    else if (path == "simple")
+    {
+        resetModel(total_size);
+        return;
+    }
+
     osg::ref_ptr<osg::Node> model = osgDB::readNodeFile(path);
     body_type  = BODY_CUSTOM_MODEL;
     body_model = model;
+    model_path = QString::fromStdString(path);
     //set plugin name
     if(vizkit3d_plugin_name.isEmpty())
     {

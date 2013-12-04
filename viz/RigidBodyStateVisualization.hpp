@@ -17,6 +17,7 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         Q_PROPERTY(bool displayCovarianceWithSamples READ isCovarianceDisplayedWithSamples WRITE displayCovarianceWithSamples)
         Q_PROPERTY(bool forcePositionDisplay READ isPositionDisplayForced WRITE setPositionDisplayForceFlag)
         Q_PROPERTY(bool forceOrientationDisplay READ isOrientationDisplayForced WRITE setOrientationDisplayForceFlag)
+        Q_PROPERTY(QString modelPath READ getModelPath WRITE loadModel)
 
     public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -46,7 +47,9 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         void resetModel(double size);
 	void resetModelSphere(double size);
 	
+        QString getModelPath() const;
         void loadModel(std::string const& path);
+        void loadModel(QString const& path);
 
         /** When using the default body, sets the size of the main sphere,
          * relative to the size of the complete object
@@ -97,6 +100,8 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
 
         bool forcePositionDisplay;
         bool forceOrientationDisplay;
+        
+        QString model_path;
 
 };
 
