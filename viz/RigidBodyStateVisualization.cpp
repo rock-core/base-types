@@ -131,12 +131,14 @@ void RigidBodyStateVisualization::resetModel(double size)
 {
     body_type  = BODY_SIMPLE;
     body_model = createSimpleBody(size);
+    setDirty();
 }
 
 void RigidBodyStateVisualization::resetModelSphere(double size)
 {
     body_type  = BODY_SPHERE;
     body_model = createSimpleSphere(size);
+    setDirty();
 }
 
 QString RigidBodyStateVisualization::getModelPath() const
@@ -189,6 +191,8 @@ void RigidBodyStateVisualization::loadModel(std::string const& path)
                 setPluginName(QString::fromStdString(str));
         }
     }
+
+    setDirty();
 }
 
 void RigidBodyStateVisualization::displayCovariance(bool enable)
