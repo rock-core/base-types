@@ -3,6 +3,11 @@ require 'base_types_ruby'
 module Eigen
     # 3-dimensional vector
     class Vector3
+        # Returns a vector with all values set to Base.unset
+        def self.Unset
+            return Vector3.new(Base.unset, Base.unset, Base.unset)
+        end
+
         # Returns the [x, y, z] tuple
         def to_a; [x, y, z] end
 
