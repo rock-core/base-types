@@ -7,6 +7,9 @@ set(EXT_SOURCES
     ext/base_types/init.cpp)
 
 rock_ruby_rice_extension(base_types_ruby ${EXT_SOURCES})
+
+if(base_types_ruby_AVAILABLE)
+
 target_link_libraries(base_types_ruby ${PROJECT_NAME})
 
 set(RUBY_FILES
@@ -21,3 +24,4 @@ install(FILES lib/eigen.rb DESTINATION ${RUBY_LIBRARY_INSTALL_DIR})
 rock_typelib_ruby_plugin(lib/base/typelib_plugin.rb RENAME base_types.rb)
 
 rock_ruby_test()
+endif()
