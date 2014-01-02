@@ -95,15 +95,16 @@ module Base
 		end
 
 		# check types argument size
-		if types && types.size != (coordinates.size / self.dimension)
-		    raise ArgumentError, "if types are given, it needs to be of the same size as points. " +
-			"types.size = #{types.size}, points.size = #{coordinates.size / self.dimension}"
+		if types
+                    if types.size != (coordinates.size / self.dimension)
+                        raise ArgumentError, "if types are given, it needs to be of the same size as points. " +
+                            "types.size = #{types.size}, points.size = #{coordinates.size / self.dimension}"
+                    end
+                    # convert the symbols to consts from the enum
+                    types = types.map {|v| CoordinateType.const_get v} 
                 else
-                    types = [:ORDINARY_POINT] * (coordinates.size / self.dimension)
+                    types = [CoordinateType::ORDINARY_POINT] * (coordinates.size / self.dimension)
 		end
-
-		# convert the symbols to consts from the enum
-		types = types.map {|v| CoordinateType.const_get v} 
 
 		do_interpolate(coordinates, parameters || [], types || [])
             end
