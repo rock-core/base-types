@@ -56,6 +56,9 @@ class TC_Eigen_Quaternion < Test::Unit::TestCase
         assert_in_delta 0, (result_axis - axis).norm, 1e-6
     end
 
-
+    def test_dup
+        q = Eigen::Quaternion.new(0.2, 0.5, 0.1, 0.5)
+        assert(q.dup.approx?(q, 0.0001))
+    end
 end
 

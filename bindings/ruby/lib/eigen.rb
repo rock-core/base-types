@@ -8,6 +8,10 @@ module Eigen
             return Vector3.new(Base.unset, Base.unset, Base.unset)
         end
 
+        def dup
+            Vector3.new(x, y, z)
+        end
+
         # Returns the [x, y, z] tuple
         def to_a; [x, y, z] end
 
@@ -176,6 +180,10 @@ module Eigen
 
     # Representation and manipulation of a quaternion
     class Quaternion
+        def dup
+            Quaternion.new(w, x, y, z)
+        end
+
         # Returns the quaternion as [w, x, y, z]
         def to_a; [w, x, y, z] end
 
@@ -423,6 +431,9 @@ module Eigen
 
     # Abritary size vector
     class VectorX
+        def dup
+            VectorX.from_a(to_a)
+        end
 
         # Returns the array value in a vector
         def to_a()
@@ -431,6 +442,12 @@ module Eigen
                     a << self[i]
             end
             a
+        end
+
+        def self.from_a(array)
+            v = VectorX.new
+            v.from_a(array)
+            v
         end
 
         def from_a(array)
@@ -467,6 +484,15 @@ module Eigen
     
     # Abritary size vector
     class MatrixX
+        def dup
+            MatrixX.from_a(to_a, rows, cols)
+        end
+
+        def self.from_a(*args)
+            m = new
+            m.from_a(*args)
+            m
+        end
 
         # Returns the array value in a vector 
         def to_a(column_major=true)
@@ -551,6 +577,10 @@ module Eigen
 	    i.pretranslate( v )
 	    i
 	end
+
+        def dup
+            raise NotImplementedError
+        end
 
         def ==(q)
             q.kind_of?(self.class) &&
