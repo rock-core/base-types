@@ -84,9 +84,9 @@ namespace samples
 	{
 	    point = Eigen::Matrix<Scalar_,3,1>( (x*scale_x)+center_x, (y*scale_y)+center_y, 1.0 );
 
-	    // check bounds
-	    if( (x < 0 || x >= width) || (y < 0 || y >= height) ) 
-		return false;
+	    // check bounds. x and y are always positive
+	    if( (x >= width) || (y >= height) ) 
+            return false;
 
 	    // only process vector if distance value is not NaN or inf
 	    const float d = data[width*y+x];
@@ -113,9 +113,9 @@ namespace samples
 	    x = ((point.x() / point.z()) - center_x) / scale_x;
 	    y = ((point.y() / point.z()) - center_y) / scale_y;
 
-	    // check bounds
-	    if( (x < 0 || x >= width) || (y < 0 || y >= height) ) 
-		return false;
+	    // check bounds. x and y are always positive
+	    if( (x >= width) || (y >= height) ) 
+            return false;
 
 	    return true;
 	}
