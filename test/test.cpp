@@ -1,5 +1,5 @@
 #define BOOST_TEST_MODULE BaseTypes
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include <base/Angle.hpp>
 #include <base/commands/AUVMotion.hpp>
