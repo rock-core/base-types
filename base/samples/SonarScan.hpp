@@ -25,8 +25,15 @@ namespace base { namespace samples {
             /**
              * Initialize the sonar scan
              */
-            SonarScan() :
-                number_of_beams(0),number_of_bins(0),sampling_interval(0), speed_of_sound(0),memory_layout_column(true),polar_coordinates(true)
+            SonarScan()
+                : number_of_beams(0)
+                , number_of_bins(0)
+                , sampling_interval(0)
+                , speed_of_sound(0)
+                , beamwidth_horizontal(base::Angle::fromRad(0))
+                , beamwidth_vertical(base::Angle::fromRad(0))
+                , memory_layout_column(true)
+                , polar_coordinates(true)
             {
                 reset();
             }
@@ -78,6 +85,8 @@ namespace base { namespace samples {
                 this->angular_resolution = angular_resolution;
                 this->memory_layout_column = memory_layout_column;
                 speed_of_sound = 0;
+                beamwidth_horizontal = base::Angle::fromRad(0);
+                beamwidth_vertical = base::Angle::fromRad(0);
                 reset(val);
             }
 
