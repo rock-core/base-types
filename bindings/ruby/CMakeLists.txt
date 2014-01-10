@@ -22,6 +22,4 @@ rock_ruby_library(base ${RUBY_FILES})
 install(FILES lib/eigen.rb DESTINATION ${RUBY_LIBRARY_INSTALL_DIR})
 
 rock_typelib_ruby_plugin(lib/base/typelib_plugin.rb RENAME base_types.rb)
-
-rock_ruby_test()
 endif()
