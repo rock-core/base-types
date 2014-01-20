@@ -3,6 +3,15 @@ require 'base_types_ruby'
 module Eigen
     # 3-dimensional vector
     class Vector3
+        # Returns a vector with all values set to Base.unset
+        def self.Unset
+            return Vector3.new(Base.unset, Base.unset, Base.unset)
+        end
+
+        def dup
+            Vector3.new(x, y, z)
+        end
+
         # Returns the [x, y, z] tuple
         def to_a; [x, y, z] end
 
@@ -161,10 +170,20 @@ module Eigen
                 return -unsigned
             end
         end
+
+        # @return [Qt::Quaternion] the Qt vector that is identical to this
+        # one
+        def to_qt
+            Qt::Vector3D.new(x, y, z)
+        end
     end
 
     # Representation and manipulation of a quaternion
     class Quaternion
+        def dup
+            Quaternion.new(w, x, y, z)
+        end
+
         # Returns the quaternion as [w, x, y, z]
         def to_a; [w, x, y, z] end
 
@@ -186,6 +205,37 @@ module Eigen
 	    q
 	end
 
+        # Returns an angle,axis representation equivalent to this quaternion
+        #
+        # If the angle turns out to be PI, there are two solutions and the one
+        # with positive Z component is chosen.
+        #
+        # @param [Float] eps if the angle turns out to be closer to zero than eps, the
+        #   rotation axis is undefined and chosen to be the Z axis.
+        #
+        # @return [(Float,Vector3)] the angle and axis. The angle is in [0, PI]
+        def to_angle_axis(eps = 1e-12)
+            w, x, y, z = to_a
+            norm  = Math.sqrt(x*x+y*y+z*z);
+            if norm < eps
+                return 0, Eigen::Vector3.new(0,0,1);
+            end
+
+            angle = 2.0 * Math.atan2(norm, w);
+            axis  = Eigen::Vector3.new(x, y, z) / norm
+            return angle, axis
+        end
+
+        # Returns a scaled axis representation that is equivalent to this
+        # quaternion
+        #
+        # @param [Float] eps see {#to_angle_axis}
+        # @return [Vector3]
+        def to_scaled_axis(eps = 1e-12)
+            angle, axis = to_angle_axis(eps)
+            return axis * angle
+        end
+
         # Creates a quaternion from a set of euler angles.
         #
         # See Quaternion#from_euler for details
@@ -204,18 +254,18 @@ module Eigen
 
         # Extracts the yaw angle from this quaternion
         #
-        # It decomposes the quaternion in euler angles using to_euler(2, 1, 0) 
+        # It decomposes the quaternion in euler angles using to_euler
         # and returns the first element. See #to_euler for details.
         def yaw
-            to_euler(2, 1, 0)[0]
+            to_euler[0]
         end
         
         def pitch
-            to_euler(2, 1, 0)[1]
+            to_euler[1]
         end
 
         def roll
-            to_euler(2, 1, 0)[2]
+            to_euler[2]
         end
 
         # The inverse of #yaw
@@ -333,18 +383,20 @@ module Eigen
         ##
         # :method: to_euler
         # :call-seq:
-        #    to_euler(axis0, axis1, axis2) => Eigen::Vector3(a0, a1, a2)
+        #    to_euler => Eigen::Vector3(a0, a1, a2)
         # 
         # Decomposes this quaternion in euler angles so that +self+ can be
         # obtained by applying the following rotations in order:
         #
-        #   rotation of a2 around axis2
-        #   rotation of a1 around axis1
-        #   rotation of a0 around axis0
+        #   rotation of a2 around x-axis
+        #   rotation of a1 around y-axis
+        #   rotation of a0 around z-axis
+        #
+        #   assuming angles in range of: a0:(-pi,pi), a1:(-pi/2,pi/2), a2:(-pi/2,pi/2)
         #
         # note that 
         #
-        #   self == Quaternion.from_euler(to_euler(axis0, axis1, axis2), axis0, axis1, axis2)
+        #   self == Quaternion.from_euler(to_euler, axis0, axis1, axis2)
 
         ##
         # :method: from_euler
@@ -360,7 +412,7 @@ module Eigen
         #
         # note that 
         #
-        #   self == Quaternion.from_euler(to_euler(axis0, axis1, axis2), axis0, axis1, axis2)
+        #   self == Quaternion.from_euler(to_euler, axis0, axis1, axis2)
         
         ## 
         # :method: inverse
@@ -368,10 +420,20 @@ module Eigen
         #   inverse => quaternion
         #
         # Computes the quaternion that is inverse of this one
+
+
+        # @return [Qt::Quaternion] the Qt quaternion that is identical to this
+        # one
+        def to_qt
+            Qt::Quaternion.new(w, x, y, z)
+        end
     end
 
     # Abritary size vector
     class VectorX
+        def dup
+            VectorX.from_a(to_a)
+        end
 
         # Returns the array value in a vector
         def to_a()
@@ -380,6 +442,12 @@ module Eigen
                     a << self[i]
             end
             a
+        end
+
+        def self.from_a(array)
+            v = VectorX.new
+            v.from_a(array)
+            v
         end
 
         def from_a(array)
@@ -416,6 +484,15 @@ module Eigen
     
     # Abritary size vector
     class MatrixX
+        def dup
+            MatrixX.from_a(to_a, rows, cols)
+        end
+
+        def self.from_a(*args)
+            m = new
+            m.from_a(*args)
+            m
+        end
 
         # Returns the array value in a vector 
         def to_a(column_major=true)
@@ -500,6 +577,10 @@ module Eigen
 	    i.pretranslate( v )
 	    i
 	end
+
+        def dup
+            raise NotImplementedError
+        end
 
         def ==(q)
             q.kind_of?(self.class) &&

@@ -1,5 +1,5 @@
 #define BOOST_TEST_MODULE BaseTypes
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include <base/Angle.hpp>
 #include <base/commands/AUVMotion.hpp>
@@ -14,6 +14,7 @@
 #include <base/NamedVector.hpp>
 #include <base/JointLimitRange.hpp>
 #include <base/JointLimits.hpp>
+#include <base/JointsTrajectory.hpp>
 #include <base/Point.hpp>
 #include <base/Pose.hpp>
 //#include <base/samples/CompressedFrame.hpp>
@@ -198,6 +199,9 @@ BOOST_AUTO_TEST_CASE(time_fromString)
 
     std::string microsecondResolutionFormat = formatNow.toString(base::Time::Microseconds);
     BOOST_REQUIRE_EQUAL(microsecondResolutionFormat,"20120614-12:05:06:001001");
+
+    std::string customFormat = formatNow.toString(base::Time::Milliseconds, "Time: %Y%m%dT%H%M%S");
+    BOOST_REQUIRE_EQUAL(customFormat,"Time: 20120614T120506:001");
 
     std::string defaultResolutionFormat = formatNow.toString();
     BOOST_REQUIRE_EQUAL(microsecondResolutionFormat,defaultResolutionFormat);

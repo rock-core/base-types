@@ -69,8 +69,12 @@ namespace base
             return tv;
         }
 
-	/** Convert his time into a string object **/
-	std::string toString(base::Time::Resolution resolution = Microseconds) const
+	/** Convert time into a string
+         * \param resolution Resolution which the string should present
+         * \param mainFormat Main format to use -- this is passed to strftime and appended by ':' plus the
+         *     below seconds resolution if requested by the resolution argument
+         **/
+	std::string toString(base::Time::Resolution resolution = Microseconds, const std::string& mainFormat = "%Y%m%d-%H:%M:%S") const
 	{
             struct timeval tv = toTimeval();
             int uSecs = tv.tv_usec;
@@ -78,10 +82,10 @@ namespace base
 	    time_t when = tv.tv_sec;
 	    struct tm *tm = localtime(&when); 
 
-            char time[25];
-            strftime(time, 25, "%Y%m%d-%H:%M:%S", tm);
-		
-	    char buffer[25];
+            char time[50];
+            strftime(time,50, mainFormat.c_str(), tm);
+
+            char buffer[57];
             switch(resolution)
             {
                 case Seconds:
@@ -229,8 +233,8 @@ namespace base
 
 	io << (microsecs / 1000000)
 	   << std::setfill('0')
-	   << "." << std::setw(3) << (std::abs((int)microsecs) / 1000) % 1000 
-	   << "." << std::setw(3) << (std::abs((int)microsecs) % 1000)
+	   << "." << std::setw(3) << (std::llabs(microsecs) / 1000) % 1000
+	   << "." << std::setw(3) << (std::llabs(microsecs) % 1000)
 	   << std::setfill(' ');
 
 	return io;

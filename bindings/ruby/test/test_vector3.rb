@@ -42,5 +42,11 @@ class TC_Eigen_Vector3 < Test::Unit::TestCase
         loaded = Marshal.load(dumped)
         assert((v - loaded).norm < 0.0001)
     end
+
+    def test_dup
+        v = Eigen::Vector3.new(0.2, 0.5, 0.1)
+        new = v.dup
+        assert((v - new).norm < 0.0001)
+    end
 end
 

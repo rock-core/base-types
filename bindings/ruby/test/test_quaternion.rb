@@ -12,7 +12,7 @@ class TC_Eigen_Quaternion < Test::Unit::TestCase
 
     def test_to_euler
         q = Eigen::Quaternion.new(1, 0, 0, 0)
-        result = q.to_euler(2, 1, 0)
+        result = q.to_euler
         assert_equal([0, 0, 0], result.to_a)
     end
 
@@ -20,7 +20,7 @@ class TC_Eigen_Quaternion < Test::Unit::TestCase
         q = Eigen::Quaternion.new(0.2, 0.5, 0.1, 0.5)
         q.normalize!
 
-        v = q.to_euler(2, 1, 0)
+        v = q.to_euler
         result = Eigen::Quaternion.from_euler(v, 2, 1, 0)
 
         assert(q.approx?(result, 0.0001))
@@ -45,6 +45,20 @@ class TC_Eigen_Quaternion < Test::Unit::TestCase
         dumped = Marshal.dump(q)
         loaded = Marshal.load(dumped)
         assert(q.approx?(loaded, 0.0001))
+    end
+
+    def test_to_angle_axis
+        axis = (Eigen::Vector3.UnitX * 0.4 + Eigen::Vector3.UnitZ * 0.5).normalize
+        angle = 0.5
+        q = Eigen::Quaternion.from_angle_axis(angle, axis)
+        result_angle, result_axis = q.to_angle_axis
+        assert_in_delta angle, result_angle, 1e-6
+        assert_in_delta 0, (result_axis - axis).norm, 1e-6
+    end
+
+    def test_dup
+        q = Eigen::Quaternion.new(0.2, 0.5, 0.1, 0.5)
+        assert(q.dup.approx?(q, 0.0001))
     end
 end
 
