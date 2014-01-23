@@ -181,7 +181,7 @@ namespace base
         static Time fromString(const std::string& stringTime, Resolution resolution = Microseconds, const std::string& mainFormat = "%Y%m%d-%H:%M:%S")
         {
             std::string mainTime = stringTime;
-            int usecs = 0;
+            int32_t usecs = 0;
             if(resolution > Seconds)
             {
                 size_t pos = stringTime.find_last_of(':');
@@ -222,7 +222,7 @@ namespace base
             tm.tm_isdst = -1; 
             time_t time = mktime(&tm);
 
-            return Time(static_cast<int64_t>(time* UsecPerSec + usecs));
+            return Time(static_cast<int64_t>(time)*UsecPerSec + static_cast<int64_t>(usecs));
         }
 
     };
