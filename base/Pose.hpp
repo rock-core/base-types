@@ -235,6 +235,13 @@ namespace base
 
         Pose2D(Position2D const& p, Orientation2D const& o)
             : position(p), orientation(o) {}
+
+        Pose2D(Position const& p, Orientation const& o)
+            : position(Vector2d(p.x(), p.y())), orientation(base::getYaw(o)) {}
+
+        Pose2D( const Pose &p)
+            : position(Vector2d(p.position.x(), p.position.y())), orientation(p.getYaw()) {}
+
     };
 }
 
