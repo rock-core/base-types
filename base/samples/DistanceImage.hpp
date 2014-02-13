@@ -130,8 +130,7 @@ namespace samples
             {
                 for(size_t x = 0; x < width ; x++)
                 {
-                    {
-                        pointCloud.points.push_back(point);
+                    pointCloud.points.push_back(point);
                 }
             }
             return pointCloud;
