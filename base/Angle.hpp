@@ -5,6 +5,7 @@
 #include <math.h>
 #include <base/Eigen.hpp>
 #include <iostream>
+#include <base/Deprecated.hpp>
 
 namespace base
 {
@@ -110,6 +111,14 @@ public:
     {
 	return rad / M_PI * 180;
     }
+
+    /**
+     * @deprecated this function does not work is right_limit == left_limit.
+     *             From the API one can't differenciate between small interval 
+     *             or a full cycle. Use base::AngleSegment instead
+    * @return true if the angle is insight the given interval
+    */
+    bool isInRange(const Angle &left_limit, const Angle &right_limit) const BASE_TYPES_DEPRECATED;
 
     /**
      * compare two angles for approximate equality
@@ -223,6 +232,14 @@ static inline Angle operator*( double a, Angle b )
     return Angle::fromRad( a * b.getRad() );
 }
 
+bool inline Angle::isInRange(const Angle& left_limit, const Angle& right_limit) const
+{
+    if((right_limit-left_limit).rad < 0)
+        return !isInRange(right_limit,left_limit);
+    if((*this -left_limit).getRad() >= 0 && (right_limit -*this).getRad() >= 0) 
+        return true;
+    return false;
+}
 
 
 static inline std::ostream& operator << (std::ostream& os, Angle angle)
