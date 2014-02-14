@@ -113,14 +113,6 @@ public:
     }
 
     /**
-     * @deprecated this function does not work is right_limit == left_limit.
-     *             From the API one can't differenciate between small interval 
-     *             or a full cycle. Use base::AngleSegment instead
-    * @return true if the angle is insight the given interval
-    */
-    bool isInRange(const Angle &left_limit, const Angle &right_limit) const BASE_TYPES_DEPRECATED;
-
-    /**
      * compare two angles for approximate equality
      * @param other - angle to compare
      * @param prec - precision interval in deg
@@ -165,6 +157,43 @@ public:
         return *this;
     }
     
+    inline Angle operator+( const Angle &other ) const
+    {
+        return Angle::fromRad( getRad() + other.getRad() );
+    }
+
+    inline Angle operator-( const Angle &other ) const
+    {
+        return Angle::fromRad( getRad() - other.getRad() );
+    }
+
+    inline Angle operator*( const Angle &other ) const
+    {
+        return Angle::fromRad( getRad() * other.getRad() );
+    }
+
+    inline Angle operator*( const double &val ) const
+    {
+        return Angle::fromRad( getRad() * val );
+    }
+
+BASE_TYPES_DEPRECATED_SUPPRESS_START
+    /**
+     * @deprecated this function does not work is right_limit == left_limit.
+     *             From the API one can't differenciate between small interval 
+     *             or a full cycle. Use base::AngleSegment instead
+    * @return true if the angle is insight the given interval
+    */
+    bool isInRange(const Angle& left_limit, const Angle& right_limit) const BASE_TYPES_DEPRECATED
+    {
+        if((right_limit-left_limit).rad < 0)
+            return !isInRange(right_limit,left_limit);
+        if((*this -left_limit).getRad() >= 0 && (right_limit -*this).getRad() >= 0) 
+            return true;
+        return false;
+    }
+BASE_TYPES_DEPRECATED_SUPPRESS_STOP
+
     /**
      * Returns a new angle which is the inverse of tis object.
      * */
@@ -212,35 +241,10 @@ public:
     }
 };
 
-static inline Angle operator+( Angle a, Angle b )
-{
-    return Angle::fromRad( a.getRad() + b.getRad() );
-}
-
-static inline Angle operator-( Angle a, Angle b )
-{
-    return Angle::fromRad( a.getRad() - b.getRad() );
-}
-
-static inline Angle operator*( Angle a, double b )
-{
-    return Angle::fromRad( a.getRad() * b );
-}
-
 static inline Angle operator*( double a, Angle b )
 {
     return Angle::fromRad( a * b.getRad() );
 }
-
-bool inline Angle::isInRange(const Angle& left_limit, const Angle& right_limit) const
-{
-    if((right_limit-left_limit).rad < 0)
-        return !isInRange(right_limit,left_limit);
-    if((*this -left_limit).getRad() >= 0 && (right_limit -*this).getRad() >= 0) 
-        return true;
-    return false;
-}
-
 
 static inline std::ostream& operator << (std::ostream& os, Angle angle)
 {
