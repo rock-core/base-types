@@ -630,7 +630,7 @@ BOOST_AUTO_TEST_CASE( logging_test )
 #endif
         BASE_LOG_INFO("info-message")
 #else
-
+        FILE* s = fopen("test.out", "w");
 #ifdef WIN32
         LOG_CONFIGURE(INFO_P, s);
 #else 
