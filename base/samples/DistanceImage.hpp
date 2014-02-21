@@ -2,6 +2,8 @@
 #define __BASE_SAMPLES_DISTANCE_IMAGE_H__
 
 #include <base/Time.hpp>
+#include <base/Eigen.hpp>
+#include "Pointcloud.hpp"
 #include <vector>
 #include <Eigen/Core>
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -25,7 +27,7 @@ namespace samples
      *
      * NOTE: unfortunately the scale and center is directly inverse to the convention
      * used in:
-     * http://opencv.willowgarage.com/documentation/camera_calibration_and_3d_reconstruction.html
+     * http://docs.opencv.org/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html
      * for the time being, scale_x and scale_y are kept public for legacy code.
      * It is recommended to use the functions operating on it instead.
      */
@@ -120,6 +122,20 @@ namespace samples
 	    return true;
 	}
 
+        base::samples::Pointcloud getPointCloud() const
+        {
+            base::samples::Pointcloud pointCloud;
+            Eigen::Vector3d point;
+            for(size_t y = 0; y < height ; y++)
+            {
+                for(size_t x = 0; x < width ; x++)
+                {
+                    pointCloud.points.push_back(point);
+                }
+            }
+            return pointCloud;
+        }
+        
 	/** 
 	 * The intrinsic matrix has the following form
 	 *
