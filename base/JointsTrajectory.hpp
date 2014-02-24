@@ -58,10 +58,15 @@ struct JointsTrajectory
     }
     
     void resize(int num_joints, int num_samples){
-        elements.resize(num_joints);
+        this->resize(num_joints);
         for(size_t i=0; i<elements.size(); i++){
             elements[i].resize(num_samples);
         }
+    }
+    
+    void resize(int num_joints){
+        elements.resize(num_joints);
+        names.resize(num_joints);
     }
 
     /**
