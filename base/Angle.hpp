@@ -325,14 +325,14 @@ public:
     {
         std::vector<AngleSegment> ret;
         //special case, this segment is a whole circle
-        if(width == 2*M_PI)
+        if(width >= 2*M_PI)
         {
             ret.push_back(b);
             return ret;
         }
         
         //special case, other segment is a whole circle
-        if(b.width == 2*M_PI)
+        if(b.width >= 2*M_PI)
         {
             ret.push_back(*this);
             return ret;
