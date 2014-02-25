@@ -221,6 +221,19 @@ namespace base
             return base::getYaw(orientation);
         }
     };
+    
+    inline std::ostream& operator << (std::ostream& io, base::Pose const& pose)
+    {
+        
+        io << "Position "
+           << pose.position.transpose()
+           << " Orientation (RPY)" 
+           << getRoll(pose.orientation) << " " 
+           << getPitch(pose.orientation) << " " 
+           << getYaw(pose.orientation);
+;
+        return io;
+    }
 
     /**
      * Representation for a pose in 2D
