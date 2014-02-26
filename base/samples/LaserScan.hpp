@@ -18,7 +18,8 @@ namespace base { namespace samples {
         TOO_NEAR           = 2,
         MEASUREMENT_ERROR  = 3,
         OTHER_RANGE_ERRORS = 4,
-        MAX_RANGE_ERROR    = 5  
+        MAX_RANGE_ERROR    = 5,
+        END_LASER_RANGE_ERRORS
     };
 
     struct LaserScan {
@@ -82,7 +83,7 @@ namespace base { namespace samples {
 
         inline bool isRangeValid(uint32_t range) const
         {
-	    if(range >= minRange && range <= maxRange)
+	    if(range >= minRange && range <= maxRange && range >= END_LASER_RANGE_ERRORS)
 		return true;
 	    return false;
         }
