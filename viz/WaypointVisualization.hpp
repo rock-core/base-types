@@ -1,44 +1,87 @@
 #ifndef WAYPOINTVISUALIZATION_H
 #define WAYPOINTVISUALIZATION_H
 
+#include <boost/noncopyable.hpp>
 #include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <base/Waypoint.hpp>
-#include <osg/PositionAttitudeTransform>
-#include <osg/Geode>
-#include <osg/Geometry>
-#include <osg/ShapeDrawable>
 
-#include <Qt/qobject.h>
+namespace osg {
+    class Group;
+}
 
-namespace vizkit3d 
+namespace vizkit3d
 {
-    
-class WaypointVisualization: public Vizkit3DPlugin<base::Waypoint>
-{
+    class WaypointVisualization
+        : public vizkit3d::Vizkit3DPlugin< std::vector<base::Waypoint> >
+        , public vizkit3d::VizPluginAddType<base::Waypoint>
+        , boost::noncopyable
+    {
     Q_OBJECT
+    Q_PROPERTY(QColor Color READ getColor WRITE setColor)
     
     public:
-	WaypointVisualization();
-	Q_INVOKABLE void updateWp(const base::Waypoint &wp);
-	Q_INVOKABLE void updateData(const base::Waypoint &wp)
-	{Vizkit3DPlugin<base::Waypoint>::updateData(wp);};
-	
-	/** Sets the color of the default body model in R, G, B
-         *
-         * Values must be between 0 and 1
-         */
-        Q_INVOKABLE void setColor(base::Vector3d const& color);
-    protected:
-        virtual osg::ref_ptr<osg::Node> createMainNode();
-	virtual void updateMainNode( osg::Node* node );
-	void updateDataIntern ( const base::Waypoint& data );
-	osg::Vec4d color;
-	osg::ref_ptr<osg::PositionAttitudeTransform> waypointPosition;
-	base::Waypoint waypoint;
-	osg::ref_ptr<osg::Geode> geode;
-	osg::ref_ptr<osg::Sphere> sphere;
-	osg::ref_ptr<osg::ShapeDrawable> sphereDrawable;
-};
+        WaypointVisualization();
+        ~WaypointVisualization();
 
+        /**
+         * Thread-safe call of 
+         * 'updateDataIntern ( std::vector<base::Waypoint> const& data )'.
+         */
+        Q_INVOKABLE void updateData(std::vector<base::Waypoint> const &sample) {
+            vizkit3d::Vizkit3DPlugin< std::vector<base::Waypoint> >::updateData(sample);
+        }
+        
+        /**
+         * Thread-safe call of 'updateDataIntern ( const base::Waypoint& data )'.
+         */
+        Q_INVOKABLE void updateData(base::Waypoint const &sample) {
+            vizkit3d::Vizkit3DPlugin< std::vector<base::Waypoint> >::updateData(sample);
+        }
+        
+    public slots:
+        /**
+         * Sets the color of all waypoints.
+         */
+        void setColor(QColor q_color);
+        
+        /**
+         * Returns the current color of the waypoints.
+         */
+        QColor getColor() const;
+        
+    protected:
+        /**
+         * OSG tree: Group <- Transformation <- Geode <- Sphere 
+         *                                            <- Triangle
+         */
+        osg::ref_ptr<osg::Node> createMainNode();
+        
+        /**
+         * Clears the group and redraws all waypoints.
+         */
+        void updateMainNode(osg::Node* node);
+        
+        /**
+         * Replaces the current list of waypoints with the passed one.
+         */
+        void updateDataIntern(std::vector<base::Waypoint> const& data);
+        
+        /**
+         * Clears the current list of waypoints and adds the new waypoint.
+         */
+        void updateDataIntern ( base::Waypoint const& data );
+        
+    private:
+        osg::ref_ptr<osg::Group> group;
+        struct Data;
+        Data* p;
+        osg::Vec4 color;
+        
+        /**
+         * Inserts all waypoints into the tree using the tree structure shown 
+         * in \a createMainNode() and the currently set color.
+         */
+        void addWaypoints(osg::Group* group);
+    };
 }
-#endif // WAYPOINTVISUALIZATION_H
+#endif

@@ -22,6 +22,11 @@ typedef std::vector<JointState> JointTrajectory;
  * For the data-type to be valid, the length of each time series needs to be
  * the same for all joints. The times vector needs to be either empty or also
  * of that size
+ *
+ * How to access the state of a joint at a given sample:
+ *      elements[joint_index][sample_number]
+ * The first index corresponds to the indices in the name vector. Second index to the time step.
+ *
  */
 struct JointsTrajectory 
     : public NamedVector<JointTrajectory>
@@ -51,6 +56,18 @@ struct JointsTrajectory
 
 	return true;
     }
+    
+    void resize(int num_joints, int num_samples){
+        this->resize(num_joints);
+        for(size_t i=0; i<elements.size(); i++){
+            elements[i].resize(num_samples);
+        }
+    }
+    
+    void resize(int num_joints){
+        elements.resize(num_joints);
+        names.resize(num_joints);
+    }
 
     /**
      * @return true if the JointState series has timing information
@@ -67,7 +84,7 @@ struct JointsTrajectory
     {
 	size_t steps = 0;
 	if( !elements.empty() )
-	    steps = elements.size();
+	    steps = elements[0].size();
 	return steps;
     }
    

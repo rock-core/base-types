@@ -321,20 +321,176 @@ BOOST_AUTO_TEST_CASE( angle_test )
     BOOST_CHECK( a.isApprox( Angle::fromDeg( 90 ) - Angle::fromDeg( 720 )) );
     BOOST_CHECK( (2*a).isApprox( Angle::fromDeg( 180 )) );
     BOOST_CHECK_CLOSE( (Angle::fromDeg(45)+Angle::fromDeg(-45)).getRad(), Angle::fromRad(0).getRad(), 1e-3 );
-    std::cout << a << std::endl;
 
-    BOOST_CHECK( a.isInRange(Angle::fromDeg(89),Angle::fromDeg(91)));
-    BOOST_CHECK( a.isInRange(Angle::fromDeg(89),Angle::fromDeg(180)));
-    BOOST_CHECK( a.isInRange(Angle::fromDeg(89),Angle::fromDeg(190)));
-    BOOST_CHECK( a.isInRange(Angle::fromDeg(89),Angle::fromDeg(360)));
-    BOOST_CHECK( !a.isInRange(Angle::fromDeg(91),Angle::fromDeg(89)));
-
+    {
+        base::AngleSegment s(base::Angle::fromDeg(89), base::Angle::fromDeg(2).getRad());
+        BOOST_CHECK( s.isInside(a) );
+        s = base::AngleSegment(base::Angle::fromDeg(89), (180-89) / 180.0 * M_PI);
+        BOOST_CHECK( s.isInside(a) );
+        s = base::AngleSegment(base::Angle::fromDeg(89), (190-89) / 180.0 * M_PI);
+        BOOST_CHECK( s.isInside(a) );
+        s = base::AngleSegment(base::Angle::fromDeg(89), (360-89) / 180.0 * M_PI);
+        BOOST_CHECK( s.isInside(a) );
+        s = base::AngleSegment(base::Angle::fromDeg(91), (360-2) / 180.0 * M_PI);
+        BOOST_CHECK(! s.isInside(a) );
+    }
     a = Angle::fromDeg( 190 );
-    BOOST_CHECK( a.isInRange(Angle::fromDeg(170),Angle::fromDeg(200)));
-    BOOST_CHECK( a.isInRange(Angle::fromDeg(185),Angle::fromDeg(200)));
-    BOOST_CHECK( a.isInRange(Angle::fromDeg(170),Angle::fromDeg(160)));
-    BOOST_CHECK( a.isInRange(Angle::fromDeg(170),Angle::fromDeg(350)));
-    BOOST_CHECK( !a.isInRange(Angle::fromDeg(200),Angle::fromDeg(380)));
+    {
+        base::AngleSegment s(base::Angle::fromDeg(170), (30) / 180.0 * M_PI);
+        BOOST_CHECK( s.isInside(a) );
+        s = base::AngleSegment(base::Angle::fromDeg(185), (15) / 180.0 * M_PI);
+        BOOST_CHECK( s.isInside(a) );
+        s = base::AngleSegment(base::Angle::fromDeg(170), (350) / 180.0 * M_PI);
+        BOOST_CHECK( s.isInside(a) );
+        s = base::AngleSegment(base::Angle::fromDeg(170), (350-170) / 180.0 * M_PI);
+        BOOST_CHECK( s.isInside(a) );
+        s = base::AngleSegment(base::Angle::fromDeg(200), (380-200) / 180.0 * M_PI);
+        BOOST_CHECK(! s.isInside(a) );
+    }
+    {
+        base::AngleSegment s(base::Angle::fromDeg(20), base::Angle::fromDeg(45).getRad());
+        BOOST_CHECK( s.isInside(Angle::fromDeg(20)));
+        BOOST_CHECK( s.isInside(Angle::fromDeg(30)));
+        BOOST_CHECK( s.isInside(Angle::fromDeg(65)));
+        BOOST_CHECK(! s.isInside(Angle::fromDeg(19)));
+        BOOST_CHECK(! s.isInside(Angle::fromDeg(66)));
+    }
+    
+    {
+        base::AngleSegment s(base::Angle::fromDeg(350), base::Angle::fromDeg(45).getRad());
+        BOOST_CHECK( s.isInside(Angle::fromDeg(20)));
+        BOOST_CHECK( s.isInside(Angle::fromDeg(35)));
+        BOOST_CHECK( s.isInside(Angle::fromDeg(350)));
+        BOOST_CHECK( s.isInside(Angle::fromDeg(355)));
+        BOOST_CHECK(! s.isInside(Angle::fromDeg(36)));
+        BOOST_CHECK(! s.isInside(Angle::fromDeg(349)));
+    }
+    
+    {
+        base::AngleSegment s(base::Angle::fromDeg(160), base::Angle::fromDeg(45).getRad());
+        BOOST_CHECK( s.isInside(Angle::fromDeg(160)));
+        BOOST_CHECK( s.isInside(Angle::fromDeg(180)));
+        BOOST_CHECK( s.isInside(Angle::fromDeg(181)));
+        BOOST_CHECK( s.isInside(Angle::fromDeg(205)));
+        BOOST_CHECK(! s.isInside(Angle::fromDeg(159)));
+        BOOST_CHECK(! s.isInside(Angle::fromDeg(206)));
+    }
+
+    {
+        base::AngleSegment result(base::Angle::fromDeg(0), 0);
+        base::AngleSegment s1(base::Angle::fromDeg(160), base::Angle::fromDeg(45).getRad());
+        base::AngleSegment s2(base::Angle::fromDeg(100), base::Angle::fromDeg(45).getRad());
+        std::vector<AngleSegment> ret = s1.getIntersections(s2);
+        BOOST_CHECK(ret.size() == 0);
+    }
+    {
+        base::AngleSegment s1(base::Angle::fromDeg(160), base::Angle::fromDeg(45).getRad());
+        base::AngleSegment s2(base::Angle::fromDeg(180), base::Angle::fromDeg(45).getRad());
+        std::vector<AngleSegment> ret = s1.getIntersections(s2);
+        base::AngleSegment result = ret[0];
+        BOOST_CHECK(ret.size() == 1);
+        BOOST_CHECK(fabs(result.startRad - base::Angle::fromDeg(180).getRad()) < 0.0001);
+        BOOST_CHECK(fabs(result.getWidth() - base::Angle::fromDeg(25).getRad()) < 0.0001);
+    }
+    {
+        base::AngleSegment s1(base::Angle::fromDeg(180), base::Angle::fromDeg(45).getRad());
+        base::AngleSegment s2(base::Angle::fromDeg(220), base::Angle::fromDeg(45).getRad());
+        std::vector<AngleSegment> ret = s1.getIntersections(s2);
+        base::AngleSegment result = ret[0];
+        BOOST_CHECK(ret.size() == 1);
+        BOOST_CHECK(fabs(result.getWidth() - base::Angle::fromDeg(5).getRad()) < 0.0001);
+        BOOST_CHECK(fabs(result.startRad - base::Angle::fromDeg(220).getRad()) < 0.0001);
+    }
+    {
+        base::AngleSegment s1(base::Angle::fromDeg(160), base::Angle::fromDeg(45).getRad());
+        base::AngleSegment s2(base::Angle::fromDeg(165), base::Angle::fromDeg(20).getRad());
+        std::vector<AngleSegment> ret = s1.getIntersections(s2);
+        base::AngleSegment result = ret[0];
+        BOOST_CHECK(ret.size() == 1);
+        BOOST_CHECK(fabs(result.getWidth() - base::Angle::fromDeg(20).getRad()) < 0.0001);
+        BOOST_CHECK(fabs(result.startRad - base::Angle::fromDeg(165).getRad()) < 0.0001);
+    }
+    {
+        base::AngleSegment s1(base::Angle::fromDeg(160), 2*M_PI);
+        base::AngleSegment s2(base::Angle::fromDeg(180), base::Angle::fromDeg(45).getRad());
+        std::vector<AngleSegment> ret = s1.getIntersections(s2);
+        base::AngleSegment result = ret[0];
+        BOOST_CHECK(ret.size() == 1);
+        BOOST_CHECK(fabs(result.getWidth() - base::Angle::fromDeg(45).getRad()) < 0.0001);
+        BOOST_CHECK(fabs(result.startRad - base::Angle::fromDeg(180).getRad()) < 0.0001);
+    }
+
+    {
+        base::AngleSegment s1(base::Angle::fromDeg(-20), 2*M_PI);
+        base::AngleSegment s2(base::Angle::fromDeg(50), base::Angle::fromDeg(45).getRad());
+        std::vector<AngleSegment> ret = s1.getIntersections(s2);
+        base::AngleSegment result = ret[0];
+        BOOST_CHECK(ret.size() == 1);
+        BOOST_CHECK(fabs(result.getWidth() - base::Angle::fromDeg(45).getRad()) < 0.0001);
+        BOOST_CHECK(fabs(result.startRad - base::Angle::fromDeg(50).getRad()) < 0.0001);
+    }
+    {
+        base::AngleSegment s1(base::Angle::fromDeg(-20), 2*M_PI);
+        base::AngleSegment s2(base::Angle::fromDeg(0), 2*M_PI);
+        std::vector<AngleSegment> ret = s1.getIntersections(s2);
+        base::AngleSegment result = ret[0];
+        BOOST_CHECK(ret.size() == 1);
+        BOOST_CHECK(fabs(result.getWidth() - 2*M_PI) < 0.0001);
+        BOOST_CHECK(fabs(result.startRad - base::Angle::fromDeg(0).getRad()) < 0.0001);
+    }
+    {
+        base::AngleSegment s1(base::Angle::fromDeg(-20), 2*M_PI - base::Angle::fromDeg(1).getRad());
+        base::AngleSegment s2(base::Angle::fromDeg(0), 2*M_PI - base::Angle::fromDeg(1).getRad());
+        std::vector<AngleSegment> ret = s1.getIntersections(s2);
+        base::AngleSegment result = ret[0];
+        BOOST_CHECK(ret.size() == 2);
+        BOOST_CHECK(fabs(result.getWidth() - (2*M_PI - base::Angle::fromDeg(21).getRad())) < 0.0001);
+        BOOST_CHECK(fabs(result.startRad - base::Angle::fromDeg(0).getRad()) < 0.0001);
+    }
+
+    {
+        for(int x = 0; x < 360; x++)
+        {
+            for(int y = 0; y < 360; y++)
+            {
+                base::AngleSegment s1(base::Angle::fromDeg(x), 2*M_PI - base::Angle::fromDeg(1).getRad());
+                base::AngleSegment s2(base::Angle::fromDeg(y), 2*M_PI - base::Angle::fromDeg(1).getRad());
+                std::vector<AngleSegment> ret = s1.getIntersections(s2);
+                double sum = 0;
+                for(std::vector<AngleSegment>::const_iterator it = ret.begin(); it != ret.end(); it++)
+                {
+                    sum += it->width;
+//                     std::cout << "A1 " << x << " A2 " << y << " Result 8" << *it << std::endl;
+                }
+                if(abs(x-y) < 2 || (x == 0 && y == 359 )|| (y == 0 && x == 359))
+                {
+                    if(ret.size() != 1)
+                    {
+                        for(std::vector<AngleSegment>::const_iterator it = ret.begin(); it != ret.end(); it++)
+                        {
+                            std::cout << "A1 " << x << " A2 " << y << " Result 8" << *it << std::endl;
+                        }
+                    }
+                    BOOST_CHECK(ret.size() == 1);
+                    assert(fabs((2*M_PI - base::Angle::fromDeg(1).getRad()) - sum) < 0.000001);
+                }
+                else
+                {
+                    if(ret.size() != 2)
+                    {
+                        for(std::vector<AngleSegment>::const_iterator it = ret.begin(); it != ret.end(); it++)
+                        {
+                            std::cout << "A1 " << x << " A2 " << y << " Result 8" << *it << std::endl;
+                        }
+                    }
+
+                    BOOST_CHECK(ret.size() == 2);
+                    assert(fabs((2*M_PI - base::Angle::fromDeg(2).getRad()) - sum) < 0.000001);
+                }
+            }
+        }
+    }
+
 }
 
 BOOST_AUTO_TEST_CASE( yaw_test )
@@ -361,6 +517,82 @@ BOOST_AUTO_TEST_CASE( yaw_test )
     }
 }
 
+BOOST_AUTO_TEST_CASE( angle_segment )
+{
+    using base::Angle;
+    using base::AngleSegment;
+    
+    {
+        Angle start = Angle::fromRad(-M_PI);
+        AngleSegment test(start, 2*M_PI);
+        for(int i = 0; i < 20; i++)
+        {
+            Angle angle = Angle::fromRad(i*2*M_PI/20 - M_PI);
+            BOOST_CHECK(test.isInside(angle));
+        }
+        
+    }
+    
+    {
+        Angle start = Angle::fromRad(-M_PI / 2.0);
+        AngleSegment test(start, M_PI);
+        {
+        Angle angle = Angle::fromRad(0);
+        BOOST_CHECK(test.isInside(angle));
+        }
+        {
+        Angle angle = Angle::fromRad(-M_PI / 2.0);
+        BOOST_CHECK(test.isInside(angle));
+        }
+        {
+        Angle angle = Angle::fromRad(M_PI / 2.0);
+        BOOST_CHECK(test.isInside(angle));
+        }
+        {
+        Angle angle = Angle::fromRad(M_PI / 3 * 4);
+        BOOST_CHECK(!test.isInside(angle));
+        }
+        {
+        Angle angle = Angle::fromRad(-M_PI / 3 * 4);
+        BOOST_CHECK(!test.isInside(angle));
+        }
+        
+    }
+    {
+        Angle start = Angle::fromRad(M_PI / 2.0);
+        AngleSegment test(start, M_PI);
+        {
+        Angle angle = Angle::fromRad(0);
+        BOOST_CHECK(!test.isInside(angle));
+        }
+        {
+        Angle angle = Angle::fromRad(-M_PI / 2.0);
+        BOOST_CHECK(test.isInside(angle));
+        }
+        {
+        Angle angle = Angle::fromRad(M_PI / 2.0);
+        BOOST_CHECK(test.isInside(angle));
+        }
+        {
+        Angle angle = Angle::fromRad(M_PI / 3 * 4);
+        BOOST_CHECK(test.isInside(angle));
+        }
+        {
+        Angle angle = Angle::fromRad(M_PI / 1 * 4);
+        BOOST_CHECK(!test.isInside(angle));
+        }
+        {
+        Angle angle = Angle::fromRad(-M_PI / 3 * 4);
+        BOOST_CHECK(test.isInside(angle));
+        }
+        {
+        Angle angle = Angle::fromRad(-M_PI / 1 * 4);
+        BOOST_CHECK(!test.isInside(angle));
+        }
+        
+    }
+
+}
 
 BOOST_AUTO_TEST_CASE( angle_between_vectors )
 {
@@ -388,8 +620,8 @@ BOOST_AUTO_TEST_CASE( angle_between_vectors )
 
 BOOST_AUTO_TEST_CASE( logging_test )
 {
-        FILE* s = fopen("test.out", "w");
 #ifdef BASE_LONG_NAMES
+        FILE* s = fopen("test.out", "w");
 
 #ifdef WIN32
         BASE_LOG_CONFIGURE(INFO_P, s);
@@ -398,7 +630,7 @@ BOOST_AUTO_TEST_CASE( logging_test )
 #endif
         BASE_LOG_INFO("info-message")
 #else
-
+        FILE* s = fopen("test.out", "w");
 #ifdef WIN32
         LOG_CONFIGURE(INFO_P, s);
 #else 
