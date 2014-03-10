@@ -75,8 +75,8 @@ struct JointLimitRange
     static JointLimitRange Speed(double min, double max)
     {
         JointLimitRange result;
-        result.min.position = min;
-        result.max.position = max;
+        result.min.speed = min;
+        result.max.speed = max;
         return result;
     }
 
@@ -86,8 +86,8 @@ struct JointLimitRange
     static JointLimitRange Effort(double min, double max)
     {
         JointLimitRange result;
-        result.min.position = min;
-        result.max.position = max;
+        result.min.effort = min;
+        result.max.effort = max;
         return result;
     }
 
@@ -97,8 +97,8 @@ struct JointLimitRange
     static JointLimitRange Raw(double min, double max)
     {
         JointLimitRange result;
-        result.min.position = min;
-        result.max.position = max;
+        result.min.raw = min;
+        result.max.raw = max;
         return result;
     }
 
