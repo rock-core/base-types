@@ -62,7 +62,7 @@ namespace base { namespace samples {
         std::vector<float> remission;
 
         LaserScan()
-            : start_angle(0), angular_resolution(0), speed(0) {}
+            : start_angle(0), angular_resolution(0), speed(0), minRange(0), maxRange(0) {}
             
         bool isValidBeam(const unsigned int i) const {
 	    if(i > ranges.size())
