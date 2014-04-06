@@ -41,7 +41,7 @@ struct JointsTrajectory
 
     /** @return true if the structure is valid
      */
-    bool isValid()
+    bool isValid() const
     {
 	size_t samples = getTimeSteps();
 
@@ -72,7 +72,7 @@ struct JointsTrajectory
     /**
      * @return true if the JointState series has timing information
      */
-    bool isTimed()
+    bool isTimed() const
     {
 	return !times.empty();
     }
@@ -80,18 +80,26 @@ struct JointsTrajectory
     /**
      * @return the number of time steps in the trajectory
      */
-    size_t getTimeSteps()
+    size_t getTimeSteps() const
     {
 	size_t steps = 0;
 	if( !elements.empty() )
 	    steps = elements[0].size();
 	return steps;
     }
+    
+    /**
+     * @return the number of joints in the trajectory
+     */
+    size_t getNumberOfJoints() const
+    {
+	return elements.size();
+    }
    
     /** 
      * @return the total duration of the time series if time information is available
      */
-    base::Time getDuration()
+    base::Time getDuration() const
     {
 	base::Time summed;
 	for(size_t i=0; i<times.size(); i++)
