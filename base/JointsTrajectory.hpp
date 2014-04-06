@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <base/JointState.hpp>
+#include <base/samples/Joints.hpp>
 #include <base/NamedVector.hpp>
 #include <base/Time.hpp>
 
@@ -31,6 +32,19 @@ typedef std::vector<JointState> JointTrajectory;
 struct JointsTrajectory 
     : public NamedVector<JointTrajectory>
 {
+    /** Exception thrown when trying to access an element by
+	 *  at an non-existing time step
+	 */
+	struct InvalidTimeStep : public std::runtime_error
+	{
+	    size_t time_step;
+	    InvalidTimeStep(size_t const& time_step)
+		: std::runtime_error("trying to access time_step which is out of range."),
+		  time_step(time_step) {}
+
+	    ~InvalidTimeStep() throw() {}
+	};
+	
     /**
      * @brief optional array of time values corresponding to the samples of the JointState
      *
@@ -67,6 +81,25 @@ struct JointsTrajectory
     void resize(int num_joints){
         elements.resize(num_joints);
         names.resize(num_joints);
+    }
+    
+    /**
+     * @brief Extracts the base::samples::Joints structure at a given time step
+     *
+     * @param joints extracted base::samples::Joints will be stored here
+     *
+     * @throws InvalidTimeStep if the given time_step does not exist in the
+     *         trajectory.
+     */
+    void getJointsAtTimeStep(size_t time_step, base::samples::Joints& joints){
+        if(time_step > getTimeSteps())
+            throw(InvalidTimeStep(time_step));
+            
+        joints.resize(getNumberOfJoints());
+        joints.names = names;
+        for(size_t i=0; i<getNumberOfJoints(); i++){
+            joints.elements[i] = elements[i][time_step];
+        }
     }
 
     /**
