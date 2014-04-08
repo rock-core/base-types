@@ -18,3 +18,5 @@ Vizkit::UiLoader.register_3d_plugin_for('PointcloudVisualization', "/base/sample
 Vizkit::UiLoader.register_3d_plugin('WaypointVisualization', "base", 'WaypointVisualization')
 Vizkit::UiLoader.register_3d_plugin_for('WaypointVisualization', "/std/vector</base/Waypoint>", :updateData )
 Vizkit::UiLoader.register_3d_plugin_for('WaypointVisualization', "/base/Waypoint", :updateData )
+Vizkit::UiLoader.register_3d_plugin('SonarBeamVisualization', "base", 'SonarBeamVisualization')
+Vizkit::UiLoader.register_3d_plugin_for('SonarBeamVisualization', "/base/SonarBeam", :updateBeam )

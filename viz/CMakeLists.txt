@@ -8,6 +8,7 @@ rock_vizkit_plugin(base-viz
         TrajectoryVisualization.cpp 
         WaypointVisualization.cpp 
         SonarGroundDistanceVisualization.cpp 
+        SonarBeamVisualization.cpp
         PointcloudVisualization.cpp
     HEADERS 
         Uncertainty.hpp 
@@ -19,6 +20,7 @@ rock_vizkit_plugin(base-viz
         TrajectoryVisualization.hpp 
         WaypointVisualization.hpp 
         SonarGroundDistanceVisualization.hpp 
+        SonarBeamVisualization.hpp
         PointcloudVisualization.hpp
     LIBS base
 )
