@@ -6,6 +6,7 @@
 #include "RigidBodyStateVisualization.hpp"
 #include "SonarGroundDistanceVisualization.hpp"
 #include "PointcloudVisualization.hpp"
+#include "SonarBeamVisualization.hpp"
 
 namespace vizkit3d {
     class QtPluginVizkit : public vizkit3d::VizkitPluginFactory {
@@ -30,6 +31,7 @@ namespace vizkit3d {
 	    pluginNames->push_back("SonarGroundDistanceVisualization");
 	    pluginNames->push_back("GridVisualization");
 	    pluginNames->push_back("PointcloudVisualization");
+	    pluginNames->push_back("SonarBeamVisualization");
 	    return pluginNames;
 	}
 	
@@ -63,6 +65,10 @@ namespace vizkit3d {
 	    else if (pluginName == "PointcloudVisualization")
 	    {
 	        plugin = new vizkit3d::PointcloudVisualization();
+	    }
+	    else if (pluginName == "SonarBeamVisualization")
+	    {
+	        plugin = new vizkit3d::SonarBeamVisualization();
 	    }
 
 	    if (plugin) 
