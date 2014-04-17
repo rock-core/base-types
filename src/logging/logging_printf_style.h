@@ -53,10 +53,17 @@
 #undef BASE_LOG_DEBUG
 #endif
 
+#ifndef BASE_LOG_PRIORITY
+// if no log level is given explicitely, determine from the environment
+// in case either compiling for release mode, or NDEBUG is specified we
+// compile for WARN and above
+#if defined(Release) || defined(NDEBUG)
+#define BASE_LOG_PRIORITY 3
+#else
 // Default logging priority that is compiled in, i.e. all log levels 
 // will be accessible at runtime
-#ifndef BASE_LOG_PRIORITY
 #define BASE_LOG_PRIORITY 6
+#endif
 #endif
 
 #ifdef BASE_LONG_NAMES
@@ -75,8 +82,6 @@
 #define LOG_FATAL(FORMAT, ARGS...)
 #define LOG_CONFIGURE(PRIO, STREAM)
 #endif // BASE_LONG_NAMES
-
-#if !defined(Release) && !defined(NDEBUG)
 
 #ifndef BASE_LOG_NAMESPACE
 #define BASE_LOG_NAMESPACE ""
@@ -162,9 +167,6 @@
 #endif
 
 #endif // BASE_LONG_NAMES
-
-#endif // Release
-
 
 
 
