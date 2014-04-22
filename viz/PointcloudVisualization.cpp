@@ -1,8 +1,10 @@
 #include "PointcloudVisualization.hpp"
 #include <osg/Geode>
+#include <osg/Point>
 
 namespace vizkit3d
 {
+const double DEFAULT_POINT_SIZE = 2.0;
 
 PointcloudVisualization::PointcloudVisualization()
 {
@@ -18,7 +20,7 @@ PointcloudVisualization::PointcloudVisualization()
 osg::ref_ptr< osg::Node > PointcloudVisualization::createMainNode()
 {
     osg::ref_ptr<osg::Group> mainNode = new osg::Group();
-    
+
     // set up point cloud
     pointGeom = new osg::Geometry;
     pointsOSG = new osg::Vec3Array;
@@ -33,7 +35,7 @@ osg::ref_ptr< osg::Node > PointcloudVisualization::createMainNode()
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
     geode->addDrawable(pointGeom.get());
     mainNode->addChild(geode);
-    
+    setPointSize(DEFAULT_POINT_SIZE);
     return mainNode;
 }
 
@@ -51,6 +53,28 @@ void PointcloudVisualization::setDefaultFeatureColor(QColor color)
     default_feature_color.z() = color.blueF();
     default_feature_color.w() = color.alphaF();
     emit propertyChanged("defaultFeatureColor");
+}
+
+void PointcloudVisualization::setPointSize(double size)
+{
+    if(pointGeom.valid())
+    {
+        if(size <= 0.0)
+            size = 0.01;
+        osg::ref_ptr<osg::Point> pt = new osg::Point(size);
+        pointGeom->getOrCreateStateSet()->setAttribute(pt, osg::StateAttribute::ON);
+    }
+}
+
+double PointcloudVisualization::getPointSize()
+{
+    if(pointGeom.valid())
+    {
+        osg::Point *pt = dynamic_cast<osg::Point*>(pointGeom->getOrCreateStateSet()->getAttribute(osg::StateAttribute::POINT));
+        if(pt)
+            return pt->getSize();
+    }
+    return DEFAULT_POINT_SIZE;
 }
 
 /**
@@ -92,12 +116,10 @@ void PointcloudVisualization::updateMainNode(osg::Node* node)
             }else{
                 color->push_back(default_feature_color);
             }
-            
         }
         drawArrays->setCount(pointsOSG->size());
         pointGeom->setVertexArray(pointsOSG);
         pointGeom->setColorArray(color);
     }
 }
-
 }

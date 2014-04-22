@@ -18,6 +18,7 @@ class PointcloudVisualization : public vizkit3d::Vizkit3DPlugin< base::samples::
 {    
     Q_OBJECT
     Q_PROPERTY(QColor defaultFeatureColor READ getDefaultFeatureColor WRITE setDefaultFeatureColor)
+    Q_PROPERTY(double pointSize READ getPointSize WRITE setPointSize)
     
     public:
         PointcloudVisualization();
@@ -30,7 +31,10 @@ class PointcloudVisualization : public vizkit3d::Vizkit3DPlugin< base::samples::
     public slots:
         QColor getDefaultFeatureColor();
         void setDefaultFeatureColor(QColor color);
-        
+
+        double getPointSize();
+        void setPointSize(double size);
+
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
         virtual void updateMainNode( osg::Node* node );
