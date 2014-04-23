@@ -980,6 +980,17 @@ double SplineBase::distanceError(base::Vector3d _pt, double _param)
     return (angle >= 0.0)?(error.norm()):(-error.norm());
 }
 
+base::Vector3d SplineBase::poseError(base::Vector3d _position, double _heading, double _guess, double minParam)
+{
+    double param = findOneClosestPoint(_position.data(), _guess, getGeometricResolution());
+    
+    if(param < minParam)
+        param = minParam;
+
+    // Returns the error [distance error, orientation error, parameter] 
+    return base::Vector3d(distanceError(_position, param), headingError(_heading, param), param);
+}
+
 base::Vector3d SplineBase::poseError(base::Vector3d _position, double _heading, double _guess)
 {
     double param = findOneClosestPoint(_position.data(), _guess, getGeometricResolution());

@@ -282,7 +282,8 @@ namespace geometry {
         double distanceError(base::Vector3d _pt, double _param);
         //! available only in Spline<3>
         base::Vector3d poseError(base::Vector3d _pt, double _actZRot, double _st_para);
-
+        //! available only in Spline<3>
+        base::Vector3d poseError(base::Vector3d _pt, double _actZRot, double _st_para, double minParam);
     private:
         std::vector<double> singleton;
 
@@ -345,6 +346,20 @@ namespace geometry {
          */
         base::Vector3d poseError(base::Vector3d const& _position, double _heading, double _guess)
         { return SplineBase::poseError(_position, _heading, _guess); }
+        
+        /** Searches for the closest point in the curve, the it checks, if the closest point is
+         * an advancement on the trajectory in respect to the given 'minParam'. If this is the 
+         * case is uses the new point, else it uses minParam.
+         * Returns the pose
+         * error between the frenet frame on the curve and the given pose (determinded by the current param)
+         * given by _position and _heading.
+         *
+         * The returned vector is (distance_error, heading_error,
+         * curve_parameter)
+         * */
+        base::Vector3d poseError(base::Vector3d const& _position, double _heading, double _guess, double minParam)
+        { return SplineBase::poseError(_position, _heading, _guess, minParam); }
+
     };
 
     template<int DIM> struct SplineBaseClass
