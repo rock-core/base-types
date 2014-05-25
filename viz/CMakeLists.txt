@@ -22,5 +22,5 @@ rock_vizkit_plugin(base-viz
         SonarGroundDistanceVisualization.hpp 
         SonarBeamVisualization.hpp
         PointcloudVisualization.hpp
-    LIBS base
+        LIBS base ${Boost_SYSTEM_LIBRARY}
 )
