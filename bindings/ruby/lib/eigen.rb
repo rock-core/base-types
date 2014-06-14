@@ -80,7 +80,7 @@ module Eigen
         end
 
         def data=(value)
-            x,y,z = value
+            self.x,self.y,self.z = value
         end
 
         ##

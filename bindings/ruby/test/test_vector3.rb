@@ -71,5 +71,11 @@ class TC_Eigen_Vector3 < Test::Unit::TestCase
         v2 = Eigen::Vector3.new(1.5, 1.5, 1.5)
         assert v1.approx?(v2, 2)
     end
+
+    def test_data_assign
+        v = Eigen::Vector3.new(0, 0, 0)
+        v.data = [1, 2, 3]
+        assert v.approx?(Eigen::Vector3.new(1, 2, 3))
+    end
 end
 
