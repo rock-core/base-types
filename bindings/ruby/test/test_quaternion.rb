@@ -1,7 +1,7 @@
-require 'test/unit'
+require 'minitest/autorun'
 require 'eigen'
 
-class TC_Eigen_Quaternion < Test::Unit::TestCase
+class TC_Eigen_Quaternion < MiniTest::Unit::TestCase
     def test_base
         v = Eigen::Quaternion.new(0, 1, 2, 3)
         assert_equal(0, v.w)

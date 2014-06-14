@@ -1,7 +1,7 @@
-require 'test/unit'
+require 'minitest/autorun'
 require 'eigen'
 
-class TC_Eigen_Isometry3 < Test::Unit::TestCase
+class TC_Eigen_Isometry3 < MiniTest::Unit::TestCase
     def test_base
         v = Eigen::Vector3.new(1, 2, 3)
 	q = Eigen::Quaternion.new(1, 0, 0, 0)
