@@ -1,7 +1,7 @@
-require 'test/unit'
+require 'minitest/autorun'
 require 'base/float'
 
-class TC_Float < Test::Unit::TestCase
+class TC_Float < MiniTest::Unit::TestCase
     def test_special_values
         assert Base.infinity?(Infinity)
         assert Base.nan?(NaN)
