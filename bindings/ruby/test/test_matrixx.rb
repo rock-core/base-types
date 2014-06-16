@@ -91,16 +91,16 @@ class TC_Eigen_MatrixX < Test::Unit::TestCase
         end
         dumped = Marshal.dump(m)
         loaded = Marshal.load(dumped)
-        assert((m-loaded).norm < 0.0001)
+        assert m.approx?(loaded)
     end
 
     def test_dup
         m = Eigen::MatrixX.new(9,7)
         l = 9*7
         for i in 0..l-1
-            m[i%9,i/9] = i
+            m[i%9,i/9] = i + 1
         end
-        assert((m-m.dup).norm < 0.0001)
+        assert m.approx?(m.dup)
     end
 end
 

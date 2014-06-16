@@ -19,13 +19,13 @@ class TC_Eigen_Isometry3 < Test::Unit::TestCase
 	t = Eigen::Isometry3.from_position_orientation( v, q )
 
 	p1 = Eigen::Vector3.new(1,1,1)
-	assert( (t * p1).approx?(q * p1, 1e-6) )
-	assert( (t.rotation * p1).approx?(q * p1, 1e-6) )
+	assert( (t * p1).approx?(q * p1) )
+	assert( (t.rotation * p1).approx?(q * p1) )
 
 	vt = t.translation
 	qt = t.rotation
-	assert( v.approx?( vt, 1e-6 ) )
-	assert( q.approx?( qt, 1e-6 ) )
+	assert( v.approx?( vt ) )
+	assert( q.approx?( qt ) )
     end
 
     def test_composition
@@ -63,18 +63,18 @@ class TC_Eigen_Isometry3 < Test::Unit::TestCase
 
     def test_approx_p_returns_true_on_equality
         v = Eigen::Vector3.new(1, 2, 3)
-	q = Eigen::Quaternion.new(1, 0, 0, 0)
-	t = Eigen::Isometry3.from_position_orientation( v, q )
+        q = Eigen::Quaternion.new(1, 0, 0, 0)
+        t = Eigen::Isometry3.from_position_orientation( v, q )
         assert t.approx?(t)
     end
 
     def test_approx_p_returns_true_on_inequality
         v = Eigen::Vector3.new(1, 2, 3)
-	q = Eigen::Quaternion.new(1, 0, 0, 0)
-	t1 = Eigen::Isometry3.from_position_orientation( v, q )
+        q = Eigen::Quaternion.new(1, 0, 0, 0)
+        t1 = Eigen::Isometry3.from_position_orientation( v, q )
         v = Eigen::Vector3.new(2, 2, 3)
-	q = Eigen::Quaternion.new(1, 0, 0, 0)
-	t2 = Eigen::Isometry3.from_position_orientation( v, q )
+        q = Eigen::Quaternion.new(1, 0, 0, 0)
+        t2 = Eigen::Isometry3.from_position_orientation( v, q )
         refute t1.approx?(t2)
     end
 end

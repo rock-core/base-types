@@ -76,7 +76,7 @@ class TC_Eigen_Quaternion < Test::Unit::TestCase
         q = Eigen::Quaternion.from_angle_axis(angle, axis)
         result_angle, result_axis = q.to_angle_axis
         assert_in_delta angle, result_angle, 1e-6
-        assert_in_delta 0, (result_axis - axis).norm, 1e-6
+        assert result_axis.approx?(axis)
     end
 
     def test_dup

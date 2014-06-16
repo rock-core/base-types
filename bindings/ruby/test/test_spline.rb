@@ -118,7 +118,7 @@ class TC_Geometry_Spline < Test::Unit::TestCase
 
         test_p = Eigen::Vector3.new(0.5, 0.5, 0.5)
         t = v1.find_one_closest_point(test_p, 0, 1e-9)
-        assert((v1.get(t) - test_p).norm < 1e-9)
+        assert v1.get(t).approx?(test_p)
     end
 end
 
