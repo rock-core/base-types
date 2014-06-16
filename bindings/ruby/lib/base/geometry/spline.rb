@@ -29,7 +29,7 @@ module Base
             # Returns a copy of this curve
             def dup
                 result = self.class.new(dimension, geometric_resolution, order)
-                result.initialize_copy(self)
+                result.send(:initialize_copy, self)
                 result
             end
 
