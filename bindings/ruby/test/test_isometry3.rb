@@ -60,4 +60,21 @@ class TC_Eigen_Isometry3 < Test::Unit::TestCase
 
 	assert_equal( i, Eigen::Isometry3.Identity )
     end
+
+    def test_approx_p_returns_true_on_equality
+        v = Eigen::Vector3.new(1, 2, 3)
+	q = Eigen::Quaternion.new(1, 0, 0, 0)
+	t = Eigen::Isometry3.from_position_orientation( v, q )
+        assert t.approx?(t)
+    end
+
+    def test_approx_p_returns_true_on_inequality
+        v = Eigen::Vector3.new(1, 2, 3)
+	q = Eigen::Quaternion.new(1, 0, 0, 0)
+	t1 = Eigen::Isometry3.from_position_orientation( v, q )
+        v = Eigen::Vector3.new(2, 2, 3)
+	q = Eigen::Quaternion.new(1, 0, 0, 0)
+	t2 = Eigen::Isometry3.from_position_orientation( v, q )
+        refute t1.approx?(t2)
+    end
 end

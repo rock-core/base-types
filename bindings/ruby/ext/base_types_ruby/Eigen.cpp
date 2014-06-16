@@ -340,7 +340,7 @@ void Init_eigen_ext()
        .define_method("*",  &Vector3::scale)
        .define_method("cross", &Vector3::cross)
        .define_method("dot",  &Vector3::dot)
-       .define_method("approx?", &Vector3::isApprox);
+       .define_method("approx?", &Vector3::isApprox, (Arg("v"), Arg("tolerance") = Eigen::NumTraits<double>::dummy_precision()));
 
      Data_Type<Quaternion> rb_Quaternion = define_class_under<Quaternion>(rb_mEigen, "Quaternion")
        .define_constructor(Constructor<Quaternion,double,double,double,double>())
@@ -360,7 +360,7 @@ void Init_eigen_ext()
        .define_method("matrix", &Quaternion::matrix)
        .define_method("normalize!", &Quaternion::normalizeBang)
        .define_method("normalize", &Quaternion::normalize)
-       .define_method("approx?", &Quaternion::isApprox)
+       .define_method("approx?", &Quaternion::isApprox, (Arg("q"), Arg("tolerance") = Eigen::NumTraits<double>::dummy_precision()))
        .define_method("to_euler", &Quaternion::toEuler)
        .define_method("from_euler", &Quaternion::fromEuler)
        .define_method("from_angle_axis", &Quaternion::fromAngleAxis)
@@ -383,7 +383,7 @@ void Init_eigen_ext()
        .define_method("-@", &VectorX::negate)
        .define_method("*",  &VectorX::scale)
        .define_method("dot",  &VectorX::dot)
-       .define_method("approx?", &VectorX::isApprox);
+       .define_method("approx?", &VectorX::isApprox, (Arg("v"), Arg("tolerance") = Eigen::NumTraits<double>::dummy_precision()));
      
      Data_Type<MatrixX> rb_MatrixX = define_class_under<MatrixX>(rb_mEigen, "MatrixX")
        .define_constructor(Constructor<MatrixX,int,int>(),
@@ -409,12 +409,12 @@ void Init_eigen_ext()
        .define_method("*",  &MatrixX::scale)
        .define_method("dotV",  &MatrixX::dotV)
        .define_method("dotM",  &MatrixX::dotM)
-       .define_method("approx?", &MatrixX::isApprox);
+       .define_method("approx?", &MatrixX::isApprox, (Arg("m"), Arg("tolerance") = Eigen::NumTraits<double>::dummy_precision()));
 
      Data_Type<Isometry3> rb_Isometry3 = define_class_under<Isometry3>(rb_mEigen, "Isometry3")
        .define_constructor(Constructor<Isometry3>())
        .define_method("__equal__",  &Isometry3::operator ==)
-       .define_method("approx?",  &Isometry3::isApprox)
+       .define_method("approx?", &Isometry3::isApprox, (Arg("i"), Arg("tolerance") = Eigen::NumTraits<double>::dummy_precision()))
        .define_method("inverse", &Isometry3::inverse)
        .define_method("translation", &Isometry3::translation)
        .define_method("rotation", &Isometry3::rotation)
