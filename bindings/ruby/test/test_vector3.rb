@@ -1,7 +1,7 @@
-require 'test/unit'
+require 'minitest/autorun'
 require 'eigen'
 
-class TC_Eigen_Vector3 < Test::Unit::TestCase
+class TC_Eigen_Vector3 < Minitest::Test
     def test_base
         v = Eigen::Vector3.new(1, 2, 3)
         assert_equal(1, v.x)

@@ -1,7 +1,7 @@
-require 'test/unit'
+require 'minitest/autorun'
 require 'eigen'
 
-class TC_Eigen_MatrixX < Test::Unit::TestCase
+class TC_Eigen_MatrixX < Minitest::Test
     def test_base
         m = Eigen::MatrixX.new(2,3)
         assert_equal(m.rows, 2)
