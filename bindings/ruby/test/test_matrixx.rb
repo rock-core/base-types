@@ -102,16 +102,5 @@ class TC_Eigen_MatrixX < Test::Unit::TestCase
         end
         assert((m-m.dup).norm < 0.0001)
     end
-    
-    def test_vector_dump_load
-        v = Eigen::VectorX.new(88)
-        l = v.size
-        for i in 0..l-1
-            v[i] = l-i
-        end
-        dumped = Marshal.dump(v)
-        loaded = Marshal.load(dumped)
-        assert((v-loaded).norm < 0.0001)
-    end
 end
 
