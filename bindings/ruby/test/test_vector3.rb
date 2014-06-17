@@ -40,13 +40,42 @@ class TC_Eigen_Vector3 < Test::Unit::TestCase
         v = Eigen::Vector3.new(0.2, 0.5, 0.1)
         dumped = Marshal.dump(v)
         loaded = Marshal.load(dumped)
-        assert((v - loaded).norm < 0.0001)
+        assert v.approx?(loaded)
     end
 
     def test_dup
         v = Eigen::Vector3.new(0.2, 0.5, 0.1)
         new = v.dup
-        assert((v - new).norm < 0.0001)
+        assert v.approx?(new)
+    end
+
+    def test_approx_returns_true_on_equal_vectors
+        v = Eigen::Vector3.new(0, 0, 0)
+        assert v.approx?(v)
+    end
+
+    def test_approx_returns_true_on_vectors_that_are_different_by_epsilon
+        v1 = Eigen::Vector3.new(1, 1, 1)
+        v2 = Eigen::Vector3.new(1 + Float::EPSILON, 1, 1)
+        assert v1.approx?(v2)
+    end
+
+    def test_approx_returns_false_on_vectors_that_are_different
+        v1 = Eigen::Vector3.new(1, 1, 1)
+        v2 = Eigen::Vector3.new(2, 2, 2)
+        refute v1.approx?(v2)
+    end
+
+    def test_approx_returns_true_on_vectors_that_are_less_different_than_the_provided_accuracy
+        v1 = Eigen::Vector3.new(1, 1, 1)
+        v2 = Eigen::Vector3.new(1.5, 1.5, 1.5)
+        assert v1.approx?(v2, 2)
+    end
+
+    def test_data_assign
+        v = Eigen::Vector3.new(0, 0, 0)
+        v.data = [1, 2, 3]
+        assert v.approx?(Eigen::Vector3.new(1, 2, 3))
     end
 end
 
