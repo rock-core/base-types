@@ -26,6 +26,29 @@ class TC_Eigen_Quaternion < Test::Unit::TestCase
         assert(q.approx?(result, 0.0001))
     end
 
+    def test_approx_returns_true_on_equality
+        q = Eigen::Quaternion.new(0, 0, 0, 0)
+        assert q.approx?(q)
+    end
+
+    def test_approx_returns_true_on_quaternions_that_are_different_by_epsilon
+        q1 = Eigen::Quaternion.new(1, 1, 1, 1)
+        q2 = Eigen::Quaternion.new(1 + Float::EPSILON, 1, 1, 1)
+        assert q1.approx?(q2)
+    end
+
+    def test_approx_returns_false_on_quaternions_that_are_different
+        q1 = Eigen::Quaternion.new(1, 1, 1, 1)
+        q2 = Eigen::Quaternion.new(2, 2, 2, 2)
+        refute q1.approx?(q2)
+    end
+
+    def test_approx_returns_true_on_quaternions_that_are_less_different_than_the_proqided_accuracy
+        q1 = Eigen::Quaternion.new(1, 1, 1, 1)
+        q2 = Eigen::Quaternion.new(1.5, 1.5, 1.5, 1.5)
+        assert q1.approx?(q2, 2)
+    end
+
     def test_angle_axis
 	q = Eigen::Quaternion.from_angle_axis( Math::PI, Eigen::Vector3.new( 1, 0, 0 ) )
 	v = Eigen::Vector3.new(0, 1, 0)
@@ -53,7 +76,7 @@ class TC_Eigen_Quaternion < Test::Unit::TestCase
         q = Eigen::Quaternion.from_angle_axis(angle, axis)
         result_angle, result_axis = q.to_angle_axis
         assert_in_delta angle, result_angle, 1e-6
-        assert_in_delta 0, (result_axis - axis).norm, 1e-6
+        assert result_axis.approx?(axis)
     end
 
     def test_dup
