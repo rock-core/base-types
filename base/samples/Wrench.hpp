@@ -3,6 +3,7 @@
 
 #include <base/Eigen.hpp>
 #include <base/Time.hpp>
+#include <base/NamedVector.hpp>
 
 namespace base { namespace samples {
 
@@ -16,6 +17,15 @@ namespace base { namespace samples {
 
 	    /** Torque in Nm*/
         base::Vector3d torque;
+    };
+
+    /** 
+     * Wrenches with names
+    */
+    struct Wrenches : public base::NamedVector<Wrench>
+    {
+        /** The sample timestamp */
+        base::Time time;
     };
 }}
 
