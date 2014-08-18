@@ -2,7 +2,7 @@
 #define BASE_SAMPLES_WRENCHES_HPP
 
 #include <base/NamedVector.hpp>
-#include <base/WrenchState.hpp>
+#include <base/Wrench.hpp>
 #include <base/Time.hpp>
 
 namespace base { namespace samples {
@@ -10,7 +10,7 @@ namespace base { namespace samples {
     /**
      * A named vector of base::WrenchState with sampled Time.
      */
-    struct Wrenches : public base::NamedVector< base::WrenchState >
+    struct Wrenches : public base::NamedVector< base::Wrench >
     {
         base::Time time;
     };

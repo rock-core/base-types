@@ -1,7 +1,7 @@
 #ifndef BASE_SAMPLES_WRENCH_HPP
 #define BASE_SAMPLES_WRENCH_HPP
 
-#include <base/WrenchState.hpp>
+#include <base/Wrench.hpp>
 #include <base/Time.hpp>
 
 namespace base { namespace samples {
@@ -9,7 +9,7 @@ namespace base { namespace samples {
     /** 
      * Wrench sample with Force, Torque and sampled Time
      */
-    struct Wrench : public base::WrenchState
+    struct Wrench : public base::Wrench
     {
         base::Time time;
     };

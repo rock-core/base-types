@@ -8,7 +8,7 @@ namespace base {
     /**
      *  Represents the force and torque applied at a point 
      */
-    struct WrenchState 
+    struct Wrench
     {
         /** Force in N */
         base::Vector3d force;
