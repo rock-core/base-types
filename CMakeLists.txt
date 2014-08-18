@@ -8,7 +8,7 @@ include_directories(BEFORE ${PROJECT_SOURCE_DIR})
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/DownloadBoost.cmake)
 
-if (NO_BOOST_DEPENDENCY)
+if (INSTALL_BOOST_IF_REQUIRED)
     rock_find_cmake(Boost)
 
     if (NOT Boost_FOUND)
