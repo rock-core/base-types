@@ -1,17 +1,21 @@
 #ifndef BASE_SAMPLES_WRENCH_HPP
 #define BASE_SAMPLES_WRENCH_HPP
 
-#include <base/Wrench.hpp>
+#include <base/Eigen.hpp>
 #include <base/Time.hpp>
 
 namespace base { namespace samples {
 
-    /** 
-     * Wrench sample with Force, Torque and sampled Time
-     */
-    struct Wrench : public base::Wrench
+    // Represents the force and torque applied at a point 
+    struct Wrench 
     {
         base::Time time;
+
+        /** Force in N */
+        base::Vector3d force;
+
+	    /** Torque in Nm*/
+        base::Vector3d torque;
     };
 }}
 
