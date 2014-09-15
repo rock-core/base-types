@@ -2,8 +2,7 @@
 #define __BASE_TEMPERATURE_HH__
 
 #include <boost/format.hpp>
-#include <base/Eigen.hpp>
-#include <base/Time.hpp>
+#include <math.h>
 
 namespace base
 {
