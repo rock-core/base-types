@@ -2,7 +2,7 @@
 #define __BASE_TEMPERATURE_HH__
 
 #include <boost/format.hpp>
-#include <math.h>
+#include <complex>      // std::abs
 
 namespace base
 {
@@ -107,7 +107,7 @@ public:
      */
     bool inline isApprox( Temperature other, double prec = 1e-5 ) const
     {
-	return fabs( other.kelvin - kelvin ) < prec;
+	return std::abs( other.kelvin - kelvin ) < prec;
     }
 
     void operator=(const Temperature &other)
