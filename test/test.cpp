@@ -17,6 +17,7 @@
 #include <base/JointsTrajectory.hpp>
 #include <base/Point.hpp>
 #include <base/Pose.hpp>
+#include <base/Pressure.hpp>
 //#include <base/samples/CompressedFrame.hpp>
 #include <base/samples/DistanceImage.hpp>
 #include <base/samples/Frame.hpp>
@@ -24,6 +25,7 @@
 #include <base/samples/Joints.hpp>
 #include <base/samples/LaserScan.hpp>
 #include <base/samples/Pointcloud.hpp>
+#include <base/samples/Pressure.hpp>
 #include <base/samples/RigidBodyAcceleration.hpp>
 #include <base/samples/RigidBodyState.hpp>
 #include <base/samples/SonarBeam.hpp>
