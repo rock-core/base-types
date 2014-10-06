@@ -65,7 +65,7 @@ namespace base
         /** Converts this time as a timeval object */
         timeval toTimeval() const
         {
-            timeval tv = { microseconds / UsecPerSec, microseconds % UsecPerSec };
+            timeval tv = { static_cast<__time_t>(microseconds / UsecPerSec), static_cast<__suseconds_t>(microseconds % UsecPerSec) };
             return tv;
         }
 
