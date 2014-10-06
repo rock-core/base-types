@@ -843,4 +843,11 @@ BOOST_AUTO_TEST_CASE( trajectory )
     tr.speed = -5;    
     BOOST_CHECK(!tr.driveForward());
 }
+
+BOOST_AUTO_TEST_CASE( pressure )
+{
+    base::Pressure pressure;
+    base::samples::Pressure pressureSample;
+}
+
 #endif 
