@@ -6,6 +6,7 @@
 #include <base/Eigen.hpp>
 #include <iostream>
 #include <base/Deprecated.hpp>
+#include <base/Float.hpp>
 
 namespace base
 {
@@ -28,9 +29,9 @@ public:
     double rad;
 
     /** 
-     * default constructor, which will leave the angle uninitialized.
+     * default constructor, which will initialize the value to unknown (NaN)
      */
-    Angle() {}
+    Angle() : rad(base::unknown<double>()) {}
     
 protected:
     explicit Angle( double rad ) : rad(rad) 

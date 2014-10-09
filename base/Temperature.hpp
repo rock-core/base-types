@@ -3,6 +3,7 @@
 
 #include <boost/format.hpp>
 #include <complex>      // std::abs
+#include <base/Float.hpp>
 
 namespace base
 {
@@ -28,7 +29,7 @@ public:
     /** 
      * default constructor, which will leave the temperature uninitialized.
      */
-    Temperature() {}
+    Temperature() : kelvin(base::unknown<double>()) {}
     
 protected:
     explicit Temperature( double kelvin ) : kelvin(kelvin) 
