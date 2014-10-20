@@ -48,6 +48,53 @@
 
 using namespace std;
 
+BOOST_AUTO_TEST_CASE(joint_state)
+{
+    base::JointState state;
+    BOOST_CHECK(state.hasPosition() == false);
+    BOOST_CHECK(state.hasSpeed() == false);
+    BOOST_CHECK(state.hasAcceleration() == false);
+    BOOST_CHECK(state.hasEffort() == false);
+    BOOST_CHECK(state.hasPosition() == false);
+
+    BOOST_REQUIRE_THROW(state.getMode(), std::runtime_error);
+
+    state.setField(base::JointState::POSITION, 0.3);
+    BOOST_CHECK(state.hasPosition() == true);
+    BOOST_CHECK(state.getField(base::JointState::POSITION) == 0.3);
+    BOOST_CHECK(state.getMode() == base::JointState::POSITION);
+
+    state.setField(base::JointState::POSITION, base::NaN<double>());
+    state.setField(base::JointState::SPEED, -.1f);
+    BOOST_CHECK(state.hasSpeed() == true);
+    BOOST_CHECK(state.getField(base::JointState::SPEED) == -.1f);
+    BOOST_CHECK(state.getMode() == base::JointState::SPEED);
+
+    state.setField(base::JointState::SPEED, base::NaN<float>());
+    state.setField(base::JointState::ACCELERATION, -.5f);
+    BOOST_CHECK(state.hasAcceleration() == true);
+    BOOST_CHECK(state.getField(base::JointState::ACCELERATION) == -.5f);
+    BOOST_CHECK(state.getMode() == base::JointState::ACCELERATION);
+
+    state.setField(base::JointState::ACCELERATION, base::NaN<float>());
+    state.setField(base::JointState::EFFORT, 1.5f);
+    BOOST_CHECK(state.hasEffort() == true);
+    BOOST_CHECK(state.getField(base::JointState::EFFORT) == 1.5f);
+    BOOST_CHECK(state.getMode() == base::JointState::EFFORT);
+    BOOST_CHECK(state.hasAcceleration() == false);
+    BOOST_CHECK(state.isAcceleration() == false);
+
+    state.setField(base::JointState::EFFORT, base::NaN<float>());
+    state.setField(base::JointState::RAW, -0.7f);
+    BOOST_CHECK(state.hasRaw() == true);
+    BOOST_CHECK(state.getField(base::JointState::RAW) == -0.7f);
+    BOOST_CHECK(state.getMode() == base::JointState::RAW);
+
+
+    BOOST_REQUIRE_THROW(state.getField(99), std::runtime_error);
+    BOOST_REQUIRE_THROW(state.setField(99, 0.5), std::runtime_error);
+}
+
 BOOST_AUTO_TEST_CASE(sonar_scan)
 {
     base::samples::SonarScan sonar_scan;
