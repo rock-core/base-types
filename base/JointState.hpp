@@ -19,7 +19,7 @@ namespace base
     struct JointState
     {
         enum MODE
-        { POSITION, SPEED, ACCELERATION, EFFORT, RAW, UNSET };
+        { POSITION, SPEED, EFFORT, RAW, ACCELERATION, UNSET };
 
         /** Current position of the actuator, in radians for angular
          * joints, in m for linear ones
@@ -55,7 +55,8 @@ namespace base
          */
         float raw;
 
-        /** Acceleration in rad/ss per or in m/ss for linear actuators. */
+        /** Acceleration in radians per square second for angular actuators, in m/ss
+         * for linear ones */
         float acceleration;
 
         JointState()
@@ -132,28 +133,21 @@ namespace base
          * structure is a valid command for said controller (e.g. a position
          * controller would throw if isPosition() returns false)
          */
-        bool isPosition() const { return hasPosition(); }
+        bool isPosition() const { return hasPosition() && !hasSpeed() && !hasEffort() && !hasRaw() && !hasAcceleration(); }
         /** Tests whether the speed field is the only field set
          *
          * This is commonly used in controllers to test whether this data
          * structure is a valid command for said controller (e.g. a speed
          * controller would throw if isSpeed() returns false)
          */
-        bool isSpeed() const { return !hasPosition() && hasSpeed(); }
-        /** Tests whether the acceleration field is the only field set
-         *
-         * This is commonly used in controllers to test whether this data
-         * structure is a valid command for said controller (e.g. an acceleration
-         * controller would throw if isAcceleration() returns false)
-         */
-        bool isAcceleration() const { return !hasPosition() && !hasSpeed() && hasAcceleration();  }
+        bool isSpeed() const { return !hasPosition() && hasSpeed() && !hasEffort() && !hasRaw() && !hasAcceleration(); }
         /** Tests whether the effort field is the only field set
          *
          * This is commonly used in controllers to test whether this data
          * structure is a valid command for said controller (e.g. a torque
          * controller would throw if isEffort() returns false)
          */
-        bool isEffort() const { return !hasPosition() && !hasSpeed() && !hasAcceleration() && hasEffort(); }
+        bool isEffort() const { return !hasPosition() && !hasSpeed() && hasEffort() && !hasRaw() && !hasAcceleration(); }
         /** Tests whether the raw field is the only field set
          *
          * This is commonly used in controllers to test whether this data
@@ -161,7 +155,15 @@ namespace base
          * driver that is controlled in PWM would throw if isRaw() returns
          * false)
          */
-        bool isRaw() const { return !hasPosition() && !hasSpeed() && !hasAcceleration() && !hasEffort() && hasRaw(); }
+        bool isRaw() const { return !hasPosition() && !hasSpeed() && !hasEffort() && hasRaw() && !hasAcceleration(); }
+        /** Tests whether the acceleration field is the only field set
+         *
+         * This is commonly used in controllers to test whether this data
+         * structure is a valid command for said controller (e.g. a hardware
+         * driver that is controlled in acceleration would throw if isAcceleration() returns
+         * false)
+         */
+        bool isAcceleration() const { return !hasPosition() && !hasSpeed() && !hasEffort() && !hasRaw() && hasAcceleration(); }
 
         /** Returns the field that matches the given mode
          *
@@ -173,9 +175,9 @@ namespace base
             {
                 case POSITION: return position;
                 case SPEED: return speed;
-                case ACCELERATION: return acceleration;
                 case EFFORT: return effort;
                 case RAW: return raw;
+                case ACCELERATION: return acceleration;
                 default: throw std::runtime_error("invalid mode given to getField");
             }
         }
@@ -194,14 +196,14 @@ namespace base
                 case SPEED:
                     speed = value;
                     return;
-                case ACCELERATION:
-                    acceleration = value;
-                    return;
                 case EFFORT:
                     effort = value;
                     return;
                 case RAW:
                     raw = value;
+                    return;
+                case ACCELERATION:
+                    acceleration = value;
                     return;
                 default: throw std::runtime_error("invalid mode given to getField");
             }
@@ -219,11 +221,13 @@ namespace base
         {
             if (isPosition())    return POSITION;
             else if (isSpeed())  return SPEED;
-            else if (isAcceleration())  return ACCELERATION;
             else if (isEffort()) return EFFORT;
             else if (isRaw())    return RAW;
-            else 
-                throw std::runtime_error("getMode() called on JointState, but mode could not be determined clearly.");
+            else if (isAcceleration())    return ACCELERATION;
+            else if (hasPosition() || hasSpeed() || hasEffort() || hasRaw() || hasAcceleration())
+                throw std::runtime_error("getMode() called on a JointState that has more than one field set");
+            else
+                return UNSET;
         }
     };
 }
