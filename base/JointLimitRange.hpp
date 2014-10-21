@@ -102,6 +102,17 @@ struct JointLimitRange
         return result;
     }
 
+    /** Creates a JointLimitRange structure with the acceleration range set to \c
+     * min, \c max
+     */
+    static JointLimitRange Acceleration(double min, double max)
+    {
+        JointLimitRange result;
+        result.min.acceleration = min;
+        result.max.acceleration = max;
+        return result;
+    }
+
 private:
     /** Internal helper method for validate and isValid */
     std::pair<bool, OutOfBounds> verifyValidity( const JointState& state ) const
@@ -137,6 +148,14 @@ private:
 		return make_pair(false, OutOfBounds( "raw", min.raw, max.raw, state.raw ));
 	    if( max.hasRaw() && max.raw < state.raw )
 		return make_pair(false, OutOfBounds( "raw", min.raw, max.raw, state.raw ));
+	}
+
+	if( state.hasAcceleration() )
+	{
+	    if( min.hasAcceleration() && min.acceleration > state.acceleration )
+		return make_pair(false, OutOfBounds( "acceleration", min.acceleration, max.acceleration, state.acceleration ));
+	    if( max.hasAcceleration() && max.acceleration < state.acceleration )
+		return make_pair(false, OutOfBounds( "acceleration", min.acceleration, max.acceleration, state.acceleration ));
 	}
         return make_pair(true, OutOfBounds());
     }
