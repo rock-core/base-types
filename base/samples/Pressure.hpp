@@ -3,6 +3,7 @@
 
 #include <base/Pressure.hpp>
 #include <base/Time.hpp>
+#include <base/Float.hpp>
 
 namespace base
 {
@@ -13,6 +14,9 @@ namespace base
         {
             /** The sample timestamp */
             base::Time time;
+
+            Pressure()
+                : base::Pressure(base::Pressure::fromPascal(base::unknown<float>())) {}
 
             Pressure(base::Time const& time, base::Pressure pressure)
                 : base::Pressure(pressure)
