@@ -30,6 +30,7 @@
 #include <base/samples/RigidBodyState.hpp>
 #include <base/samples/SonarBeam.hpp>
 #include <base/samples/SonarScan.hpp>
+#include <base/samples/DepthMap.hpp>
 #include <base/Temperature.hpp>
 #include <base/Time.hpp>
 #include <base/TimeMark.hpp>
@@ -45,6 +46,7 @@
 
 #include <Eigen/SVD>
 #include <Eigen/LU>
+#include <Eigen/Geometry>
 
 using namespace std;
 
@@ -280,6 +282,175 @@ BOOST_AUTO_TEST_CASE( laser_scan_test )
     BOOST_CHECK(!isnan(points[3].x()));
     BOOST_CHECK(!isnan(points[3].y()));
     BOOST_CHECK(!isnan(points[3].z()));
+}
+
+BOOST_AUTO_TEST_CASE(depth_map_test)
+{
+    // setup scan
+    base::samples::DepthMap scan;
+    scan.vertical_size = 5;
+    scan.horizontal_size = 2;
+    scan.vertical_interval.push_back(0.0);
+    scan.vertical_interval.push_back(0.0);
+    //scan.vertical_start_angle = base::Angle::fromDeg(0.0);
+    //scan.vertical_angular_resolution = base::Angle::fromDeg(90.0);
+    scan.vertical_rotation_speed = base::infinity<double>();
+    scan.horizontal_rotation_speed = base::infinity<double>();
+    // add points
+    for(unsigned j = 0; j < scan.horizontal_size; j++)
+    {
+	scan.timestamps.push_back(base::Time::now());
+	scan.horizontal_interval.push_back(base::Angle::fromDeg(-90.0 * j).getRad());
+    }
+    for(unsigned i = 0; i < scan.vertical_size-1; i++)
+    {
+	for(unsigned j = 0; j < scan.horizontal_size; j++)
+	    scan.distances.push_back((j+1) * 2.0);
+    }
+    scan.distances.push_back(0.0);
+    scan.distances.push_back(0.0);
+    
+    
+    // create reference points
+    std::vector<Eigen::Vector3d> ref_points;
+    ref_points.push_back(Eigen::Vector3d(2.0,0.0,0.0));
+    ref_points.push_back(Eigen::Vector3d(0.0,-4.0,0.0));
+    ref_points.push_back(Eigen::Vector3d(0.0,0.0,-2.0));
+    ref_points.push_back(Eigen::Vector3d(0.0,0.0,-4.0));
+    ref_points.push_back(Eigen::Vector3d(-2.0,0.0,0.0));
+    ref_points.push_back(Eigen::Vector3d(0.0,4.0,0.0));
+    ref_points.push_back(Eigen::Vector3d(0.0,0.0,2.0));
+    ref_points.push_back(Eigen::Vector3d(0.0,0.0,4.0));
+    
+    
+    // check transformation using the identity
+    std::vector<base::Vector3d> scan_points;
+    Eigen::Affine3d transform = Eigen::Affine3d::Identity();
+    scan.convertDepthMapToPointCloud(scan_points, transform);
+    
+    BOOST_CHECK(scan_points.size() == 8);
+    for(unsigned i = 0; i < scan_points.size(); i++)
+	BOOST_CHECK(scan_points[i].isApprox(ref_points[i], 1e-12));
+    
+    // check transformation with translation
+    transform.translation() = Eigen::Vector3d(5.0,0.0,0.0);
+    scan_points.clear();
+    scan.convertDepthMapToPointCloud(scan_points, transform);
+    
+    BOOST_CHECK(scan_points.size() == 8);
+    for(unsigned i = 0; i < scan_points.size(); i++)
+	BOOST_CHECK(scan_points[i].isApprox(ref_points[i] + transform.translation(), 1e-12));
+    
+    // check transformation with translation and roations
+    transform.setIdentity();
+    transform.translation() = Eigen::Vector3d(-7.0,3.5,1.0);
+    transform.rotate(Eigen::AngleAxisd(0.1*M_PI,Eigen::Vector3d::UnitZ()) * 
+		    Eigen::AngleAxisd(0.2*M_PI,Eigen::Vector3d::UnitY()) * 
+		    Eigen::AngleAxisd(-0.3*M_PI,Eigen::Vector3d::UnitX()));
+    scan_points.clear();
+    scan.convertDepthMapToPointCloud(scan_points, transform);
+    
+    BOOST_CHECK(scan_points.size() == 8);
+    for(unsigned i = 0; i < scan_points.size(); i++)
+	BOOST_CHECK(scan_points[i].isApprox(transform * ref_points[i], 1e-12));
+    
+    // use more than one transformation
+    std::vector<Eigen::Affine3d> transformations;
+    transformations.push_back(transform);
+    transformations.push_back(transform * transform);
+    scan_points.clear();
+    scan.convertDepthMapToPointCloud(scan_points, transformations, true, false);
+    BOOST_CHECK(scan_points.size() == 8);
+    for(unsigned i = 0; i < scan_points.size(); i++)
+	BOOST_CHECK(scan_points[i].isApprox(transformations[(i%2==0)?0:1] * ref_points[i], 1e-12));
+    
+    scan_points.clear();
+    scan.convertDepthMapToPointCloud(scan_points, transformations[0], transformations[1], true, false);
+    BOOST_CHECK(scan_points.size() == 8);
+    for(unsigned i = 0; i < scan_points.size(); i++)
+	BOOST_CHECK(scan_points[i].isApprox(transformations[(i%2==0)?0:1] * ref_points[i], 1e-12));
+    
+    
+    // test vertical irregular transformation
+    // add irregular scan angles
+    scan.vertical_interval.clear();
+    scan.timestamps.clear();
+    for(unsigned j = 0; j < scan.vertical_size; j++)
+    {
+	scan.timestamps.push_back(base::Time::now());
+	scan.vertical_interval.push_back(base::Angle::fromDeg(90.0 * j).getRad());
+    }
+    scan_points.clear();
+    scan.convertDepthMapToPointCloud(scan_points, Eigen::Affine3d::Identity());
+    BOOST_CHECK(scan_points.size() == 8);
+    for(unsigned i = 0; i < scan_points.size(); i++)
+ 	BOOST_CHECK(scan_points[i].isApprox(ref_points[i], 1e-12));
+    
+    // check transformation with translation and roations
+    scan_points.clear();
+    scan.convertDepthMapToPointCloud(scan_points, transform);
+    BOOST_CHECK(scan_points.size() == 8);
+    for(unsigned i = 0; i < scan_points.size(); i++)
+ 	BOOST_CHECK(scan_points[i].isApprox(transform * ref_points[i], 1e-12));
+    
+    // use more than one transformation
+    Eigen::Affine3d delta = Eigen::Affine3d::Identity();
+    delta.translation() = Eigen::Vector3d(0.1,-0.2,-0.02);
+    delta.rotate(Eigen::AngleAxisd(-0.05*M_PI,Eigen::Vector3d::UnitZ()) * 
+		    Eigen::AngleAxisd(-0.02*M_PI,Eigen::Vector3d::UnitY()) * 
+		    Eigen::AngleAxisd(0.07*M_PI,Eigen::Vector3d::UnitX()));
+    transformations.clear();
+    for(unsigned i = 1; i <= scan.vertical_size; i++)
+	transformations.push_back(transform * Eigen::Affine3d(delta.matrix() * (double)i));
+    scan_points.clear();
+    scan.convertDepthMapToPointCloud(scan_points, transformations);
+    BOOST_CHECK(scan_points.size() == 8);
+    for(unsigned i = 0; i < scan_points.size(); i++)
+ 	BOOST_CHECK(scan_points[i].isApprox(transformations[i/2] * ref_points[i], 1e-12));
+    
+    
+    // don't skip invalid points
+    scan_points.clear();
+    scan.convertDepthMapToPointCloud(scan_points, transform, false);
+
+    BOOST_CHECK(scan_points.size() == 10);
+    for(unsigned i = 0; i < scan_points.size(); i++)
+	BOOST_CHECK((i < 8) ? base::isnotnan(scan_points[i]) : !base::isnotnan(scan_points[i]));
+    
+    
+    // check measurement states
+    scan.reset();
+    scan.distances.push_back(1.0);
+    scan.distances.push_back(0.0);
+    scan.distances.push_back(base::infinity<float>());
+    scan.distances.push_back(base::NaN<float>());
+    scan.horizontal_size = 1;
+    scan.vertical_size = 4;
+    
+    BOOST_CHECK(scan.getIndexState(0) == base::samples::DepthMap::VALID_MEASUREMENT);
+    BOOST_CHECK(scan.getIndexState(1) == base::samples::DepthMap::TOO_NEAR);
+    BOOST_CHECK(scan.getIndexState(2) == base::samples::DepthMap::TOO_FAR);
+    BOOST_CHECK(scan.getIndexState(3) == base::samples::DepthMap::MEASUREMENT_ERROR);
+    BOOST_CHECK(scan.getMeasurementState(3,0) == base::samples::DepthMap::MEASUREMENT_ERROR);
+    BOOST_CHECK(scan.isIndexValid(0));
+    BOOST_CHECK(!scan.isIndexValid(1));
+    BOOST_CHECK(!scan.isIndexValid(2));
+    BOOST_CHECK(!scan.isIndexValid(3));
+    
+    
+    // check exceptions
+    scan.vertical_size = 5;
+    BOOST_CHECK_THROW(scan.isIndexValid(4), std::out_of_range);
+    BOOST_CHECK_THROW(scan.getIndexState(4), std::out_of_range);
+    BOOST_CHECK_THROW(scan.getMeasurementState(0,0), std::out_of_range);
+    BOOST_CHECK_THROW(scan.convertDepthMapToPointCloud(scan_points, transform), std::out_of_range);
+    scan.vertical_size = 2;
+    BOOST_CHECK_THROW(scan.convertDepthMapToPointCloud(scan_points, transform), std::out_of_range);
+    scan.vertical_size = 4;
+    BOOST_CHECK_THROW(scan.getMeasurementState(5,0), std::out_of_range);
+    BOOST_CHECK_THROW(scan.getMeasurementState(0,1), std::out_of_range);
+    scan.convertDepthMapToPointCloud(scan_points, transform);
+    BOOST_CHECK(scan_points.size() == 1);
 }
 
 BOOST_AUTO_TEST_CASE( pose_test )
