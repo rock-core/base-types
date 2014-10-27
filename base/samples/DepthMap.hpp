@@ -92,18 +92,6 @@ struct DepthMap
     
     /** Number of horizontal depth samples */
     uint32_t horizontal_size;
-    
-    /** The rotation speed of the sensor in radians/seconds in horizontal direction */
-    double horizontal_rotation_speed;
-    
-    /** The rotation speed of the sensor in radians/seconds in vertical direction */
-    double vertical_rotation_speed;
-    
-    /** Minimal valid distance per measurement */
-    scalar min_distance;
-    
-    /** Maximal valid distance per measurement */
-    scalar max_distance;
 
     /** The distance samples. The data is arranged in a row major order to simplify
      * the usage as a distance image. One row is a set of horizontal arranged single measurements.
@@ -120,8 +108,7 @@ struct DepthMap
     std::vector<scalar> remissions;
 
     DepthMap() : vertical_projection(POLAR), horizontal_projection(POLAR),
-		vertical_size(0), horizontal_size(0), horizontal_rotation_speed(0.0), 
-		vertical_rotation_speed(0.0), min_distance(0.0), max_distance(base::infinity<scalar>()) {}
+		vertical_size(0), horizontal_size(0) {}
 
     /** Reset the sample */
     void reset()
@@ -133,10 +120,6 @@ struct DepthMap
 	horizontal_interval.clear();
 	vertical_size = 0;
 	horizontal_size = 0;
-	horizontal_rotation_speed = 0.0;
-	vertical_rotation_speed = 0.0;
-	min_distance = 0.0;
-	max_distance = base::infinity<scalar>();
 	distances.clear();
 	remissions.clear();
     }
@@ -184,9 +167,9 @@ struct DepthMap
     {
 	if(base::isNaN<scalar>(distance))
 	    return MEASUREMENT_ERROR;
-	else if(base::isInfinity<scalar>(distance) || distance > max_distance)
+	else if(base::isInfinity<scalar>(distance))
 	    return TOO_FAR;
-	else if(distance <= 0.0 || distance < min_distance)
+	else if(distance <= 0.0)
 	    return TOO_NEAR;
 	else
 	    return VALID_MEASUREMENT;

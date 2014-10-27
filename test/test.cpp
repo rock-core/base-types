@@ -292,10 +292,6 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     scan.horizontal_size = 2;
     scan.vertical_interval.push_back(0.0);
     scan.vertical_interval.push_back(0.0);
-    //scan.vertical_start_angle = base::Angle::fromDeg(0.0);
-    //scan.vertical_angular_resolution = base::Angle::fromDeg(90.0);
-    scan.vertical_rotation_speed = base::infinity<double>();
-    scan.horizontal_rotation_speed = base::infinity<double>();
     // add points
     for(unsigned j = 0; j < scan.horizontal_size; j++)
     {
