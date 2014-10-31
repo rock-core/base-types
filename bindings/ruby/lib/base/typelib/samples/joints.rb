@@ -36,6 +36,15 @@ Typelib.specialize_model '/base/samples/Joints' do
         end
         new(:elements => states)
     end
+
+    def from_accelerations(*accelerations)
+        states = accelerations.map do |r|
+            j = self[:elements].deference.new
+            j.acceleration = r
+            j
+        end
+        new(:elements => states)
+    end
 end
 
 Typelib.specialize '/base/samples/Joints' do
