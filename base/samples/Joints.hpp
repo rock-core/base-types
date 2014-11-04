@@ -68,7 +68,7 @@ namespace base
             {
                 Joints result = Efforts(efforts);
                 if (result.elements.size() != names.size())
-                    throw std::runtime_error("the position and names vectors differ");
+                    throw std::runtime_error("the effort and names vectors differ");
                 result.names = names;
                 return result;
             }
@@ -86,7 +86,25 @@ namespace base
             {
                 Joints result = Raw(raw);
                 if (result.elements.size() != names.size())
-                    throw std::runtime_error("the position and names vectors differ");
+                    throw std::runtime_error("the raw and names vectors differ");
+                result.names = names;
+                return result;
+            }
+
+            static Joints Accelerations(std::vector<float> const& acceleration)
+            {
+                Joints result;
+                result.elements.resize(acceleration.size());
+                for (std::size_t i = 0; i != acceleration.size(); ++i)
+                    result[i].acceleration = acceleration[i];
+                return result;
+            }
+
+            static Joints Accelerations(std::vector<float> const& acceleration, std::vector<std::string> const& names)
+            {
+                Joints result = Accelerations(acceleration);
+                if (result.elements.size() != names.size())
+                    throw std::runtime_error("the acceleration and names vectors differ");
                 result.names = names;
                 return result;
             }

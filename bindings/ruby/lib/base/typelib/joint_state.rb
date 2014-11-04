@@ -21,6 +21,11 @@ Typelib.specialize_model '/base/JointState' do
         result.raw = value
         result
     end
+    def Acceleration(value)
+        result = new
+        result.acceleration = value
+        result
+    end
 end
 
 Typelib.specialize '/base/JointState' do
@@ -29,6 +34,7 @@ Typelib.specialize '/base/JointState' do
         self.speed = Base::unset
         self.effort = Base::unset
         self.raw = Base::unset
+        self.acceleration = Base::unset
     end
 
     def [](mode)
@@ -41,6 +47,8 @@ Typelib.specialize '/base/JointState' do
             effort
         when :RAW
             raw
+        when :ACCELERATION
+            acceleration
         else raise ArgumentError, "#{mode} is not a valid mode, was expecting one of :POSITION, :SPEED, :EFFORT or :RAW"
         end
     end
@@ -55,7 +63,9 @@ Typelib.specialize '/base/JointState' do
             self.effort = value
         when :RAW
             self.raw = value
-        else raise ArgumentError, "#{mode} is not a valid mode, was expecting one of :POSITION, :SPEED, :EFFORT or :RAW"
+        when :ACCELERATION
+            self.acceleration = value
+        else raise ArgumentError, "#{mode} is not a valid mode, was expecting one of :POSITION, :SPEED, :ACCELERATION, :EFFORT or :RAW"
         end
     end
 end
