@@ -1,9 +1,7 @@
-$LOAD_PATH.unshift File.expand_path("../lib", File.dirname(__FILE__))
-
-require 'test/unit'
+require 'minitest/autorun'
 require 'base/geometry/spline'
 
-class TC_Geometry_Spline < Test::Unit::TestCase
+class TC_Geometry_Spline < Minitest::Test
     def test_base
         v = Types::Base::Geometry::Spline.new(3)
         assert_equal 3, v.dimension
