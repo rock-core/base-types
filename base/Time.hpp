@@ -185,7 +185,6 @@ namespace base
             if(resolution > Seconds)
             {
                 size_t pos = stringTime.find_last_of(':');
-                std::string mainTime = stringTime.substr(0,pos-1);
                 std::string usecsString = stringTime.substr(pos+1);
                 size_t usecsStringLength = usecsString.size();
                 if( (usecsStringLength == 3 || usecsStringLength == 6) && !(usecsStringLength == 3 && resolution > Milliseconds))
