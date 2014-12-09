@@ -94,9 +94,9 @@ namespace base { namespace samples { namespace frame {
 	    }
 	    
             //@depth number of bits per pixel and channel
-	    Frame(uint16_t width, uint16_t height, uint8_t depth=8, frame_mode_t mode=MODE_GRAYSCALE, uint8_t const val = 0,size_t size=0)
+	    Frame(uint16_t width, uint16_t height, uint8_t depth=8, frame_mode_t mode=MODE_GRAYSCALE, uint8_t const val = 0,size_t sizeInBytes=0)
 	    {
-		init(width,height,depth,mode,val,size);
+		init(width,height,depth,mode,val,sizeInBytes);
 	    }
 
 	    //makes a copy of other
@@ -127,11 +127,11 @@ namespace base { namespace samples { namespace frame {
 	       copyImageIndependantAttributes(other);
 	    }
 
-	    void init(uint16_t width, uint16_t height, uint8_t depth=8, frame_mode_t mode=MODE_GRAYSCALE, const uint8_t val = 0,size_t size=0)
+	    void init(uint16_t width, uint16_t height, uint8_t depth=8, frame_mode_t mode=MODE_GRAYSCALE, const uint8_t val = 0, size_t sizeInBytes=0)
 	    {
                //change size if the frame does not fit
 	       if(this->size.height != height || this->size.width !=  width || this->frame_mode != mode || 
-                 this->data_depth != depth || (size != 0 && size != image.size()))
+                 this->data_depth != depth || (sizeInBytes != 0 && sizeInBytes != image.size()))
                {
                 //check if depth = 0
                 //this might be a programmer error 
@@ -143,11 +143,11 @@ namespace base { namespace samples { namespace frame {
 		setDataDepth(depth);
                }
                //calculate size if not given 
-               if(!size)
-                   size = getPixelSize() * getPixelCount();
+               if(!sizeInBytes)
+                  sizeInBytes = getPixelSize() * getPixelCount();
 
-               validateImageSize(size);
-               image.resize(size);
+               validateImageSize(sizeInBytes);
+               image.resize(sizeInBytes);
 	       reset(val);
 	    }
 
@@ -389,29 +389,29 @@ namespace base { namespace samples { namespace frame {
 		return this->image;
 	    }
 
-            void validateImageSize(uint32_t size) const {
-                uint32_t expected_size = getPixelSize()*getPixelCount();
-                if (!isCompressed() && size != expected_size){
+            void validateImageSize(size_t sizeToValidate) const {
+                size_t expected_size = getPixelSize()*getPixelCount();
+                if (!isCompressed() && sizeToValidate != expected_size){
 		    std::cerr << "Frame: "
 		              << __FUNCTION__ << " (" << __FILE__ << ", line "
 		              << __LINE__ << "): " << "image size mismatch in setImage() ("
-		              << "getting " << size << " bytes but I was expecting " << expected_size << " bytes)"
+		              << "getting " << sizeToValidate << " bytes but I was expecting " << expected_size << " bytes)"
 		              << std::endl;
                     throw std::runtime_error("Frame::validateImageSize: wrong image size!");
                 }
             }
-	    inline void setImage(const std::vector<uint8_t> &image) {
-                return setImage(&image[0], image.size());
+	    inline void setImage(const std::vector<uint8_t> &newImage) {
+                return setImage(&newImage[0], newImage.size());
 	    }
             /** This is for backward compatibility for the people that were
              * using the 'char' signature */
-	    inline void setImage(const char *data, uint32_t size) {
-                return setImage(reinterpret_cast<const uint8_t*>(data), size);
+	    inline void setImage(const char *data, size_t newImageSize) {
+                return setImage(reinterpret_cast<const uint8_t*>(data), newImageSize);
             }
-	    inline void setImage(const uint8_t *data, uint32_t size) {
-                validateImageSize(size);
-                image.resize(size);
-		memcpy(&this->image[0], data, size);
+	    inline void setImage(const uint8_t *data, size_t newImageSize) {
+                validateImageSize(newImageSize);
+                image.resize(newImageSize);
+		memcpy(&this->image[0], data, newImageSize);
 	    }
 
 	    inline uint8_t *getImagePtr() {
