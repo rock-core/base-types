@@ -17,8 +17,8 @@ namespace base
     struct Time
     {
     private:
-        explicit Time(int64_t microseconds)
-            : microseconds(microseconds) { }
+        explicit Time(int64_t _microseconds)
+            : microseconds(_microseconds) { }
     public:
         int64_t microseconds;
 
