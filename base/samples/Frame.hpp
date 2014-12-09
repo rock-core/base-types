@@ -401,7 +401,8 @@ namespace base { namespace samples { namespace frame {
                 }
             }
 	    inline void setImage(const std::vector<uint8_t> &newImage) {
-                return setImage(&newImage[0], newImage.size());
+                // calling the overloading function wich uses the "char*" interface
+                return setImage(newImage.data(), newImage.size());
 	    }
             /** This is for backward compatibility for the people that were
              * using the 'char' signature */
@@ -415,10 +416,10 @@ namespace base { namespace samples { namespace frame {
 	    }
 
 	    inline uint8_t *getImagePtr() {
-		return static_cast<uint8_t *>(&this->image[0]);
+		return static_cast<uint8_t *>(image.data());
 	    }
 	    inline const uint8_t *getImageConstPtr() const {
-		return static_cast<const uint8_t *>(&this->image[0]);
+		return static_cast<const uint8_t *>(image.data());
 	    }
 
             inline uint8_t* getLastByte(){
