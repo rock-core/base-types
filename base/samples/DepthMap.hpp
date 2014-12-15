@@ -1,5 +1,5 @@
-#ifndef BASE_SAMPLES_DEPTH_MAP_H__
-#define BASE_SAMPLES_DEPTH_MAP_H__
+#ifndef __BASE_SAMPLES_DEPTH_MAP_HPP__
+#define __BASE_SAMPLES_DEPTH_MAP_HPP__
 
 #include <vector>
 #include <Eigen/Geometry>
@@ -36,7 +36,7 @@ struct DepthMap
 	VALID_MEASUREMENT  = 0,
 	TOO_FAR            = 1,
 	TOO_NEAR           = 2,
-	MEASUREMENT_ERROR  = 3,
+	MEASUREMENT_ERROR  = 3
     };
     
     enum PROJECTION_TYPE
@@ -156,7 +156,7 @@ struct DepthMap
 	if(v_index >= vertical_size || h_index >= horizontal_size)
 	    throw std::out_of_range("Invalid vertrical or horizontal index given.");
 	
-	return getMeasurementState(distances[vertricaHorizontalToIndex(v_index,h_index)]);
+	return getMeasurementState(distances[getIndex(v_index,h_index)]);
     }
 
     /** Returns the measurement state of a given measurement 
@@ -201,7 +201,7 @@ struct DepthMap
 	if(v_index >= vertical_size || h_index >= horizontal_size)
 	    throw std::out_of_range("Invalid vertrical or horizontal index given.");
 	
-	return isMeasurementValid(distances[vertricaHorizontalToIndex(v_index,h_index)]);
+	return isMeasurementValid(distances[getIndex(v_index,h_index)]);
     }
 
     /** Returns true if the measurement is valid.
@@ -217,17 +217,17 @@ struct DepthMap
      * of a given vertrical and horizontal index. 
      * Note that the data is stored in row major form.
      */
-    inline size_t vertricaHorizontalToIndex(uint32_t v_index, uint32_t h_index) const
+    inline size_t getIndex(uint32_t v_index, uint32_t h_index) const
     {
 	return ((size_t)v_index * (size_t)horizontal_size + (size_t)h_index);
     }
 
     /** Converts the depth map to a pointcloud according to the given transformation matrix.
      * If the transformation matrix is set to identity the depth map is converted into 
-     * the coordinate system of the sensor (x-axis = forward, y-axis = to the left, z-axis = upwards)
+     * the coordinate system of the sensor (x-axis = forward, y-axis = to the left, z-axis = upwards).
      * If the resulting pointcloud should be associated with the remission values the invalid
      * measurements should not be skipped.
-     * The template point must be derived from a 3D eigen vector.
+     * The template point type must be derived from a 3D eigen vector.
      * 
      * @param point_cloud returned pointcloud
      * @param transformation all points will be transformed using this transformation
