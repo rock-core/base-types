@@ -319,6 +319,7 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     ref_points.push_back(Eigen::Vector3d(0.0,0.0,4.0));
     
     
+    // Test polar projection
     // check transformation using the identity
     std::vector<Eigen::Vector3d> scan_points;
     Eigen::Affine3d transform = Eigen::Affine3d::Identity();
@@ -418,8 +419,59 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     BOOST_CHECK(scan_points.size() == 10);
     for(unsigned i = 0; i < scan_points.size(); i++)
 	BOOST_CHECK((i < 8) ? base::isnotnan(scan_points[i]) : !base::isnotnan(scan_points[i]));
-    
-    
+
+
+
+    // Test planar projection
+    // setup scan and reference points
+    ref_points.clear();
+    scan.reset();
+    scan.horizontal_projection = base::samples::DepthMap::PLANAR;
+    scan.vertical_projection = base::samples::DepthMap::PLANAR;
+    scan.horizontal_interval.push_back(-1.0);
+    scan.horizontal_interval.push_back(1.0);
+    scan.vertical_interval.push_back(-0.5);
+    scan.vertical_interval.push_back(0.5);
+    scan.horizontal_size = 8;
+    scan.vertical_size = 5;
+    double h_step_width = (scan.horizontal_interval.back() - scan.horizontal_interval.front()) / (double)(scan.horizontal_size-1);
+    double v_step_width = (scan.vertical_interval.back() - scan.vertical_interval.front()) / (double)(scan.vertical_size-1);
+
+    for(unsigned j = 0; j < scan.vertical_size; j++)
+    {
+	for(unsigned i = 0; i < scan.horizontal_size; i++)
+	{
+	    // fill distances
+	    double distance = 0.1 * (((double)i) * scan.vertical_size + (double)j + 0.1);
+	    scan.distances.push_back(distance);
+	    
+	    // compute reference point
+	    Eigen::Vector3d ref_point(distance, 0.0, 0.0);
+	    ref_points.push_back(Eigen::AngleAxisd(atan(-1.0 * (scan.horizontal_interval.front() + (double)i * h_step_width)), Eigen::Vector3d::UnitZ()) *
+				Eigen::AngleAxisd(atan((scan.vertical_interval.front() + (double)j * v_step_width)), Eigen::Vector3d::UnitY()) *
+				ref_point);
+	}
+    }
+
+    // check identity transformation
+    scan_points.clear();
+    scan.convertDepthMapToPointCloud(scan_points);
+    BOOST_CHECK(scan_points.size() == scan.vertical_size * scan.horizontal_size);
+    for(unsigned i = 0; i < scan_points.size(); i++)
+    {
+	BOOST_CHECK(scan_points[i].isApprox(ref_points[i], 1e-6));
+    }
+
+    // check with transformation
+    scan_points.clear();
+    scan.convertDepthMapToPointCloud(scan_points, transform);
+    BOOST_CHECK(scan_points.size() == scan.vertical_size * scan.horizontal_size);
+    for(unsigned i = 0; i < scan_points.size(); i++)
+    {
+	BOOST_CHECK(scan_points[i].isApprox(transform * ref_points[i], 1e-6));
+    }
+
+
     // check measurement states
     scan.reset();
     scan.distances.push_back(1.0);
