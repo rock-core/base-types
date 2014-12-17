@@ -320,13 +320,14 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     
     
     // check transformation using the identity
-    std::vector<base::Vector3d> scan_points;
+    std::vector<Eigen::Vector3d> scan_points;
     Eigen::Affine3d transform = Eigen::Affine3d::Identity();
     scan.convertDepthMapToPointCloud(scan_points, transform);
     
     BOOST_CHECK(scan_points.size() == 8);
     for(unsigned i = 0; i < scan_points.size(); i++)
 	BOOST_CHECK(scan_points[i].isApprox(ref_points[i], 1e-12));
+    
     
     // check transformation with translation
     transform.translation() = Eigen::Vector3d(5.0,0.0,0.0);
@@ -336,6 +337,7 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     BOOST_CHECK(scan_points.size() == 8);
     for(unsigned i = 0; i < scan_points.size(); i++)
 	BOOST_CHECK(scan_points[i].isApprox(ref_points[i] + transform.translation(), 1e-12));
+    
     
     // check transformation with translation and roations
     transform.setIdentity();
@@ -350,24 +352,26 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     for(unsigned i = 0; i < scan_points.size(); i++)
 	BOOST_CHECK(scan_points[i].isApprox(transform * ref_points[i], 1e-12));
     
-    // use more than one transformation
+    
+    // use multiple transformations
     std::vector<Eigen::Affine3d> transformations;
     transformations.push_back(transform);
     transformations.push_back(transform * transform);
     scan_points.clear();
-    scan.convertDepthMapToPointCloud(scan_points, transformations, true, false);
+    scan.convertDepthMapToPointCloud(scan_points, transformations, true, true, false);
     BOOST_CHECK(scan_points.size() == 8);
     for(unsigned i = 0; i < scan_points.size(); i++)
 	BOOST_CHECK(scan_points[i].isApprox(transformations[(i%2==0)?0:1] * ref_points[i], 1e-12));
     
     scan_points.clear();
-    scan.convertDepthMapToPointCloud(scan_points, transformations[0], transformations[1], true, false);
+    scan.convertDepthMapToPointCloud(scan_points, transformations[0], transformations[1], true, true, false);
     BOOST_CHECK(scan_points.size() == 8);
     for(unsigned i = 0; i < scan_points.size(); i++)
 	BOOST_CHECK(scan_points[i].isApprox(transformations[(i%2==0)?0:1] * ref_points[i], 1e-12));
     
     
-    // test vertical irregular transformation
+    
+    // Test vertical irregular transformation
     // add irregular scan angles
     scan.vertical_interval.clear();
     scan.timestamps.clear();
@@ -382,6 +386,7 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     for(unsigned i = 0; i < scan_points.size(); i++)
  	BOOST_CHECK(scan_points[i].isApprox(ref_points[i], 1e-12));
     
+    
     // check transformation with translation and roations
     scan_points.clear();
     scan.convertDepthMapToPointCloud(scan_points, transform);
@@ -389,7 +394,8 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     for(unsigned i = 0; i < scan_points.size(); i++)
  	BOOST_CHECK(scan_points[i].isApprox(transform * ref_points[i], 1e-12));
     
-    // use more than one transformation
+    
+    // use multiple transformations
     Eigen::Affine3d delta = Eigen::Affine3d::Identity();
     delta.translation() = Eigen::Vector3d(0.1,-0.2,-0.02);
     delta.rotate(Eigen::AngleAxisd(-0.05*M_PI,Eigen::Vector3d::UnitZ()) * 
@@ -407,7 +413,7 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     
     // don't skip invalid points
     scan_points.clear();
-    scan.convertDepthMapToPointCloud(scan_points, transform, false);
+    scan.convertDepthMapToPointCloud(scan_points, transform, false, false);
 
     BOOST_CHECK(scan_points.size() == 10);
     for(unsigned i = 0; i < scan_points.size(); i++)

@@ -7,6 +7,7 @@
 #include <base/Float.hpp>
 #include <base/Time.hpp>
 #include <base/Angle.hpp>
+#include <base/Singleton.hpp>
 
 namespace base { namespace samples {
 
@@ -24,6 +25,7 @@ namespace base { namespace samples {
  */
 struct DepthMap
 {
+public:
     typedef float scalar;
     typedef boost::uint32_t uint32_t;
     typedef Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::DontAlign | Eigen::RowMajor> DepthMatrix;
@@ -43,6 +45,13 @@ struct DepthMap
     {
 	POLAR,
 	PLANAR
+    };
+    
+    enum UNIT_AXIS
+    {
+	UNIT_X = 0,
+	UNIT_Y = 1,
+	UNIT_Z = 2
     };
     
     /** The timestamps can be either one timestamp for all measurements,
@@ -66,7 +75,7 @@ struct DepthMap
     /** The interval can describe a position on a planar plane or an
      * angle. The interval is interpreted as defined by the vertical projection type.
      * In planar projection mode the vertical intervals are y coordinates on an 
-     * depth-image plane.
+     * depth-image plane, with zero in the middle of the plane.
      * In polar projection mode the vertical intervals are angular rotations
      * around the Y-unit axis.
      * The field has either two or |vertical_size| entries. In the case of two 
@@ -78,7 +87,7 @@ struct DepthMap
     /** The interval can describe a position on a planar plane or an
      * angle. The interval is interpreted as defined by the horizontal projection type.
      * In planar projection mode the horizontal intervals are x coordinates on an 
-     * depth-image plane.
+     * depth-image plane, with zero in the middle of the plane.
      * In polar projection mode the horizontal intervals are angular rotations
      * around the Z-unit axis.
      * The field has either two or |horizontal_size| entries. In the case of two 
@@ -221,6 +230,26 @@ struct DepthMap
     {
 	return ((size_t)v_index * (size_t)horizontal_size + (size_t)h_index);
     }
+    
+    /** Converts the depth map to a pointcloud in the coordinate system of the sensor 
+     * (x-axis = forward, y-axis = to the left, z-axis = upwards).
+     * If the resulting pointcloud should be associated with the remission values the invalid
+     * measurements should not be skipped.
+     * The template point type must be derived from a 3D eigen vector.
+     * 
+     * @param point_cloud returned pointcloud
+     * @param use_lut true, if lookup table for single unit axis rotations shall be used
+     * @param skip_invalid_measurements true, if invalid measurements should be skipped
+     */
+    template<typename T>
+    void convertDepthMapToPointCloud(std::vector<T> &point_cloud, 
+				     bool use_lut = false, 
+				     bool skip_invalid_measurements = true) const
+    {
+	convertDepthMapToPointCloud(point_cloud, Eigen::Transform<typename T::Scalar,3,Eigen::Affine>::Identity(), 
+				    use_lut,
+				    skip_invalid_measurements);
+    }
 
     /** Converts the depth map to a pointcloud according to the given transformation matrix.
      * If the transformation matrix is set to identity the depth map is converted into 
@@ -231,11 +260,13 @@ struct DepthMap
      * 
      * @param point_cloud returned pointcloud
      * @param transformation all points will be transformed using this transformation
+     * @param use_lut true, if lookup table for single unit axis rotations shall be used
      * @param skip_invalid_measurements true, if invalid measurements should be skipped
      */
     template<typename T>
     void convertDepthMapToPointCloud(std::vector<T> &point_cloud,
 				const Eigen::Transform<typename T::Scalar,3,Eigen::Affine>& transformation,
+				bool use_lut = false, 
 				bool skip_invalid_measurements = true) const
     {
 	point_cloud.clear();
@@ -254,7 +285,7 @@ struct DepthMap
 	// precompute local transformations
 	std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > rows2column;
 	std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > columns2pointcloud;
-	computeLocalTransformations(rows2column, columns2pointcloud);
+	computeLocalTransformations(rows2column, columns2pointcloud, use_lut);
 	
 	// convert rows
 	for(unsigned v = 0; v < vertical_size; v++)
@@ -263,21 +294,23 @@ struct DepthMap
 
     /** Converts the depth map to a pointcloud according to the given transformation matrices.
      * On basis of the first and last transformation the transformations will be
-     * interpolated and applied row-wise if the parameter apply_transforms_row_wise is 
+     * interpolated and applied row-wise if the parameter apply_transforms_vertically is 
      * set to true, otherwise they will be interpolated and applied col-wise.
      * 
      * @param point_cloud returned pointcloud
      * @param first_transformation transformation of the first row or column
      * @param last_transformation translation of the last row or column
+     * @param use_lut true, if lookup table for single unit axis rotations shall be used
      * @param skip_invalid_measurements true, if invalid measurements should be skipped
-     * @param apply_transforms_row_wise true, if transformations should be applied row-wise
+     * @param apply_transforms_vertically true, if transformations should be applied row-wise
      */
     template<typename T>
     void convertDepthMapToPointCloud(std::vector<T> &point_cloud,
 				const Eigen::Transform<typename T::Scalar,3,Eigen::Affine>& first_transformation,
 				const Eigen::Transform<typename T::Scalar,3,Eigen::Affine>& last_transformation,
+				bool use_lut = false,
 				bool skip_invalid_measurements = true,
-				bool apply_transforms_row_wise = true) const
+				bool apply_transforms_vertically = true) const
     {
 	point_cloud.clear();
 	
@@ -295,14 +328,14 @@ struct DepthMap
 	// precompute local transformations
 	std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > rows2column;
 	std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > columns2pointcloud;
-	computeLocalTransformations(rows2column, columns2pointcloud);
+	computeLocalTransformations(rows2column, columns2pointcloud, use_lut);
 	
 	Eigen::Matrix<typename T::Scalar,3,1> translation_delta = last_transformation.translation() - first_transformation.translation();
 	Eigen::Quaterniond first_rotation = Eigen::Quaterniond(first_transformation.linear());
 	Eigen::Quaterniond last_rotation = Eigen::Quaterniond(last_transformation.linear());
 	
 	// apply global interpolated transformations
-	if(!apply_transforms_row_wise)
+	if(!apply_transforms_vertically)
 	{
 	    for(unsigned h = 0; h < horizontal_size; h++)
 	    {
@@ -314,7 +347,9 @@ struct DepthMap
 	    
 	    // convert rows
 	    for(unsigned v = 0; v < vertical_size; v++)
-		convertSingleRow(point_cloud, v, rows2column[v], columns2pointcloud, Eigen::Transform<typename T::Scalar,3,Eigen::Affine>::Identity(), skip_invalid_measurements);
+		convertSingleRow(point_cloud, v, rows2column[v], columns2pointcloud, 
+				 Eigen::Transform<typename T::Scalar,3,Eigen::Affine>::Identity(), 
+				 skip_invalid_measurements);
 	}
 	else
 	{
@@ -329,26 +364,29 @@ struct DepthMap
 	    
 	    // convert rows
 	    for(unsigned v = 0; v < vertical_size; v++)
-		convertSingleRow(point_cloud, v, rows2column[v], columns2pointcloud, pointcloud2world[v], skip_invalid_measurements);
+		convertSingleRow(point_cloud, v, rows2column[v], columns2pointcloud, 
+				 pointcloud2world[v], skip_invalid_measurements);
 	}
     }
 
     /** Converts the depth map to a pointcloud according to the given transformation matrices.
      * Each transformation in the given vector will be applied to each row if the parameter 
-     * apply_transforms_row_wise is set to true, otherwise it will be applied col-wise.
+     * apply_transforms_vertically is set to true, otherwise it will be applied col-wise.
      * The transformations vector therefore must have either the same size of the columns 
      * or the rows.
      * 
      * @param point_cloud returned pointcloud
      * @param transformations vector of transformation matrices
+     * @param use_lut true, if lookup table for single unit axis rotations shall be used
      * @param skip_invalid_measurements true, if invalid measurements should be skipped
-     * @param apply_transforms_row_wise true, if transformations should be applied row-wise
+     * @param apply_transforms_vertically true, if transformations should be applied row-wise
      */
     template<typename T>
     void convertDepthMapToPointCloud(std::vector<T> &point_cloud,
 				const std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> >& transformations,
+				bool use_lut = false,
 				bool skip_invalid_measurements = true,
-				bool apply_transforms_row_wise = true) const
+				bool apply_transforms_vertically = true) const
     {
 	point_cloud.clear();
 	
@@ -369,7 +407,7 @@ struct DepthMap
 	computeLocalTransformations(rows2column, columns2pointcloud);
 	
 	// apply global transformations
-	if(!apply_transforms_row_wise)
+	if(!apply_transforms_vertically)
 	{
 	    if(transformations.size() != horizontal_size)
 		throw std::out_of_range("Invalid amount of transformations given");
@@ -378,7 +416,9 @@ struct DepthMap
 	    
 	    // convert rows
 	    for(unsigned v = 0; v < vertical_size; v++)
-		convertSingleRow(point_cloud, v, rows2column[v], columns2pointcloud, Eigen::Transform<typename T::Scalar,3,Eigen::Affine>::Identity(), skip_invalid_measurements);
+		convertSingleRow(point_cloud, v, rows2column[v], columns2pointcloud, 
+				 Eigen::Transform<typename T::Scalar,3,Eigen::Affine>::Identity(), 
+				 skip_invalid_measurements);
 	}
 	else
 	{
@@ -387,12 +427,16 @@ struct DepthMap
 	    
 	    // convert rows
 	    for(unsigned v = 0; v < vertical_size; v++)
-		convertSingleRow(point_cloud, v, rows2column[v], columns2pointcloud, transformations[v], skip_invalid_measurements);
+		convertSingleRow(point_cloud, v, rows2column[v], columns2pointcloud, 
+				 transformations[v], 
+				 skip_invalid_measurements);
 	}
     }
+    
+private:
+    template<typename T, UNIT_AXIS> class RotationLUT;
 
-protected:
-
+protected:    
     /** Helper method which converts a single row to a pointcloud. */
     template<typename T>
     void convertSingleRow(std::vector<T> &point_cloud, 
@@ -405,15 +449,18 @@ protected:
 	size_t row_index = (size_t)row * (size_t)horizontal_size;
 	for(unsigned h = 0; h < horizontal_size; h++)
 	{
-	    if(isMeasurementValid(distances[row_index + h]))
+	    scalar distance = distances[row_index + h];
+	    if(isMeasurementValid(distance))
 	    {
-		T point(distances[row_index + h], 0.0, 0.0);
+		T point(distance, 0.0, 0.0);
 		point =  pointcloud2world * (columns2pointcloud[h] * row2column * point);
 		point_cloud.push_back(point);
 	    }
 	    else if(!skip_invalid_measurements)
 	    {
-		point_cloud.push_back(T(base::unknown<typename T::Scalar>(), base::unknown<typename T::Scalar>(), base::unknown<typename T::Scalar>()));
+		point_cloud.push_back(T(base::unknown<typename T::Scalar>(), 
+					base::unknown<typename T::Scalar>(), 
+					base::unknown<typename T::Scalar>()));
 	    }
 	}
     }
@@ -421,144 +468,165 @@ protected:
     /** Helper method to compute the local rows2column and columns2pointcloud transformations. */
     template<typename T>
     void computeLocalTransformations(std::vector< Eigen::Transform<T,3,Eigen::Affine> >& rows2column, 
-				     std::vector< Eigen::Transform<T,3,Eigen::Affine> >& columns2pointcloud) const
+				     std::vector< Eigen::Transform<T,3,Eigen::Affine> >& columns2pointcloud,
+				     bool use_lut = false) const
     {
 	// check interval sizes
 	if(vertical_interval.size() > 2 && vertical_interval.size() != vertical_size)
 	{
 	    std::string err_msg = "Number of vertical ";
-	    err_msg += vertical_projection == POLAR ? "angles" : "distances";
+	    err_msg += vertical_projection == POLAR ? "angles " : "distances ";
 	    err_msg += "does no match the expected number of entries.";
 	    throw std::invalid_argument(err_msg);
 	}
 	if(horizontal_interval.size() > 2 && horizontal_interval.size() != horizontal_size)
 	{
 	    std::string err_msg = "Number of horizontal ";
-	    err_msg += horizontal_projection == POLAR ? "angles" : "distances";
+	    err_msg += horizontal_projection == POLAR ? "angles " : "distances ";
 	    err_msg += "does no match the expected number of entries.";
 	    throw std::invalid_argument(err_msg);
 	}
-
+	
 	// compute row2column transformations
-	rows2column.resize(vertical_size);
-	if(vertical_interval.empty())
-	{
-	    // no transformation set, use the identity for all vertical measurements
-	    rows2column.resize(vertical_size, Eigen::Transform<T,3,Eigen::Affine>::Identity());
-	}
+	rows2column.resize(vertical_size, Eigen::Transform<T,3,Eigen::Affine>::Identity());
 	if(vertical_interval.size() == 1)
 	{
 	    // one planar translation or polar rotation for all vertical measurements
 	    if(vertical_projection == PLANAR)
-	    {
-		Eigen::Transform<T,3,Eigen::Affine> trans = Eigen::Transform<T,3,Eigen::Affine>::Identity();
-		trans.translation() = Eigen::Matrix<T,3,1>(0.0, 0.0, -1.0 * vertical_interval.front());
-		rows2column.resize(vertical_size, trans);
-	    }
+		rows2column.resize(vertical_size, Eigen::Transform<T,3,Eigen::Affine>(Eigen::AngleAxis<T>(
+		    base::Angle::normalizeRad(atan(vertical_interval.front())), Eigen::Matrix<T,3,1>::UnitY())));
 	    else if(vertical_projection == POLAR)
-		rows2column.resize(vertical_size, Eigen::Transform<T,3,Eigen::Affine>(Eigen::AngleAxis<T>(base::Angle::normalizeRad(vertical_interval.front()), Eigen::Matrix<T,3,1>::UnitY())));
+		rows2column.resize(vertical_size, Eigen::Transform<T,3,Eigen::Affine>(Eigen::AngleAxis<T>(
+		    base::Angle::normalizeRad(vertical_interval.front()), Eigen::Matrix<T,3,1>::UnitY())));
 	    else
 		throw std::invalid_argument("Invalid argument for vertical projection type.");
 	}
-	if(vertical_interval.size() == 2)
+	else if(vertical_interval.size() == 2)
 	{
 	    // interpolate transformations between the given start and end values for all vertical measurements
+	    std::vector<base::Angle> vertical_angles(vertical_size);
+	    double step_resolution = computeResolution(vertical_interval, vertical_size, vertical_projection);
 	    if(vertical_projection == PLANAR)
-	    {
-		double plane_resolution = computeResolution(vertical_interval, vertical_size, vertical_projection);
-		Eigen::Transform<T,3,Eigen::Affine> trans = Eigen::Transform<T,3,Eigen::Affine>::Identity();
+	    {	
 		for(unsigned v = 0; v < vertical_size; v++)
-		{
-		    trans.translation() = Eigen::Matrix<T,3,1>(0.0, 0.0, -1.0 * (vertical_interval.front() + ((double)v * plane_resolution)));
-		    rows2column[v] = trans;
-		}
+		    vertical_angles[v] = base::Angle::fromRad(atan(vertical_interval.front() + ((double)v * step_resolution)));
 	    }
 	    else if(vertical_projection == POLAR)
 	    {
-		double angular_resolution = computeResolution(vertical_interval, vertical_size, vertical_projection);
 		for(unsigned v = 0; v < vertical_size; v++)
-		    rows2column[v] = Eigen::AngleAxis<T>(base::Angle::normalizeRad(vertical_interval.front() + (angular_resolution * (double)v)), Eigen::Matrix<T,3,1>::UnitY());
+		    vertical_angles[v] = base::Angle::fromRad(vertical_interval.front() + ((double)v * step_resolution));
 	    }
 	    else
 		throw std::invalid_argument("Invalid argument for vertical projection type.");
+	    
+	    computeRotations(rows2column, vertical_angles, UNIT_Y, use_lut);
 	}
-	else
+	else if(vertical_interval.size() > 2)
 	{
 	    // use unique planar translation or polar rotation for each vertical measurement
+	    std::vector<base::Angle> vertical_angles(vertical_size);
 	    if(vertical_projection == PLANAR)
 		for(unsigned v = 0; v < vertical_size; v++)
-		{
-		    Eigen::Transform<T,3,Eigen::Affine> trans = Eigen::Transform<T,3,Eigen::Affine>::Identity();
-		    trans.translation() = Eigen::Matrix<T,3,1>(0.0, 0.0, -1.0 * vertical_interval[v]);
-		    rows2column[v] = trans;
-		}
+		    vertical_angles[v] = base::Angle::fromRad(atan(vertical_interval[v]));
 	    else if(vertical_projection == POLAR)
+	    {
 		for(unsigned v = 0; v < vertical_size; v++)
-		    rows2column[v] = Eigen::AngleAxis<T>(base::Angle::normalizeRad(vertical_interval[v]), Eigen::Matrix<T,3,1>::UnitY());
+		    vertical_angles[v] = base::Angle::fromRad(vertical_interval[v]);
+	    }
 	    else
 		throw std::invalid_argument("Invalid argument for vertical projection type.");
+	    
+	    computeRotations(rows2column, vertical_angles, UNIT_Y, use_lut);
 	}
 	
 	// compute columns2pointcloud transformations
-	columns2pointcloud.resize(horizontal_size);
-	if(horizontal_interval.empty())
-	{
-	    // no transformation set, use the identity for all horizontal measurements
-	    columns2pointcloud.resize(horizontal_size, Eigen::Transform<T,3,Eigen::Affine>::Identity());
-	}
+	columns2pointcloud.resize(horizontal_size, Eigen::Transform<T,3,Eigen::Affine>::Identity());
 	if(horizontal_interval.size() == 1)
 	{
 	    // one planar translation or polar rotation for all horizontal measurements
 	    if(horizontal_projection == PLANAR)
-	    {
-		Eigen::Transform<T,3,Eigen::Affine> trans = Eigen::Transform<T,3,Eigen::Affine>::Identity();
-		trans.translation() = Eigen::Matrix<T,3,1>(0.0, -1.0 * horizontal_interval.front(), 0.0);
-		columns2pointcloud.resize(horizontal_size, trans);
-	    }
+		columns2pointcloud.resize(horizontal_size, Eigen::Transform<T,3,Eigen::Affine>(Eigen::AngleAxis<T>(
+		    base::Angle::normalizeRad(atan(horizontal_interval.front())), Eigen::Matrix<T,3,1>::UnitZ())));
 	    else if(horizontal_projection == POLAR)
-		columns2pointcloud.resize(horizontal_size, Eigen::Transform<T,3,Eigen::Affine>(Eigen::AngleAxis<T>(base::Angle::normalizeRad(horizontal_interval.front()), Eigen::Matrix<T,3,1>::UnitZ())));
+		columns2pointcloud.resize(horizontal_size, Eigen::Transform<T,3,Eigen::Affine>(Eigen::AngleAxis<T>(
+		    base::Angle::normalizeRad(horizontal_interval.front()), Eigen::Matrix<T,3,1>::UnitZ())));
 	    else
 		throw std::invalid_argument("Invalid argument for horizontal projection type.");
 	}
-	if(horizontal_interval.size() == 2)
+	else if(horizontal_interval.size() == 2)
 	{
 	    // interpolate transformations between the given start and end values for all horizontal measurements
+	    std::vector<base::Angle> horizontal_angles(horizontal_size);
+	    double step_resolution = computeResolution(horizontal_interval, horizontal_size, horizontal_projection);
 	    if(horizontal_projection == PLANAR)
 	    {
-		double planar_resolution = computeResolution(horizontal_interval, horizontal_size, horizontal_projection);
-		Eigen::Transform<T,3,Eigen::Affine> trans = Eigen::Transform<T,3,Eigen::Affine>::Identity();
 		for(unsigned h = 0; h < horizontal_size; h++)
-		{
-		    trans.translation() = Eigen::Matrix<T,3,1>(0.0, -1.0 * (horizontal_interval.front() + ((double)h * planar_resolution)), 0.0);
-		    columns2pointcloud[h] = trans;
-		}
+		    horizontal_angles[h] = base::Angle::fromRad(atan(-1.0 * (horizontal_interval.front() + ((double)h * step_resolution))));
 	    }
 	    else if(horizontal_projection == POLAR)
 	    {
-		double angular_resolution = computeResolution(horizontal_interval, horizontal_size, horizontal_projection);
 		for(unsigned h = 0; h < horizontal_size; h++)
-		    columns2pointcloud[h] = Eigen::AngleAxis<T>(base::Angle::normalizeRad(horizontal_interval.front() - (angular_resolution * (double)h)), Eigen::Matrix<T,3,1>::UnitZ());
+		    horizontal_angles[h] = base::Angle::fromRad(horizontal_interval.front() - ((double)h * step_resolution));
 	    }
 	    else
 		throw std::invalid_argument("Invalid argument for horizontal projection type.");
+	    
+	    computeRotations(columns2pointcloud, horizontal_angles, UNIT_Z, use_lut);
+	}
+	else if(horizontal_interval.size() > 2)
+	{
+	    // use unique planar translation or polar rotation for each horizontal measurement
+	    std::vector<base::Angle> horizontal_angles(horizontal_size);
+	    if(horizontal_projection == PLANAR)
+		for(unsigned h = 0; h < horizontal_size; h++)
+		    horizontal_angles[h] = base::Angle::fromRad(atan(-1.0 * horizontal_interval[h]));
+	    else if(horizontal_projection == POLAR)
+		for(unsigned h = 0; h < horizontal_size; h++)
+		    horizontal_angles[h] = base::Angle::fromRad(horizontal_interval[h]);
+	    else
+		throw std::invalid_argument("Invalid argument for horizontal projection type.");
+	    
+	    computeRotations(columns2pointcloud, horizontal_angles, UNIT_Z, use_lut);
+	}
+    }
+    
+    /** Helper method to compute the rotations around an unit axis. */
+    template<typename T>
+    void computeRotations(std::vector< Eigen::Transform<T,3,Eigen::Affine> >& rotations, 
+			const std::vector<base::Angle>& angles, 
+			UNIT_AXIS axis,
+			bool use_lut = false) const
+    {
+	rotations.clear();
+	rotations.resize(angles.size());
+	
+	if(use_lut)
+	{
+	    if(axis == UNIT_X)
+	    {
+		RotationLUT<T,UNIT_X>* lut = Singleton< RotationLUT<T,UNIT_X> >::getInstance();
+		for(unsigned i = 0; i < angles.size(); i++)
+		    rotations[i] = lut->getTransformation(angles[i].getRad());
+	    }
+	    else if(axis == UNIT_Y)
+	    {
+		RotationLUT<T,UNIT_Y>* lut = Singleton< RotationLUT<T,UNIT_Y> >::getInstance();
+		for(unsigned i = 0; i < angles.size(); i++)
+		    rotations[i] = lut->getTransformation(angles[i].getRad());
+	    }
+	    else if(axis == UNIT_Z)
+	    {
+		RotationLUT<T,UNIT_Z>* lut = Singleton< RotationLUT<T,UNIT_Z> >::getInstance();
+		for(unsigned i = 0; i < angles.size(); i++)
+		    rotations[i] = lut->getTransformation(angles[i].getRad());
+	    }
 	}
 	else
 	{
-	    // use unique planar translation or polar rotation for each horizontal measurement
-	    if(horizontal_projection == PLANAR)
-		for(unsigned h = 0; h < horizontal_size; h++)
-		{
-		    Eigen::Transform<T,3,Eigen::Affine> trans = Eigen::Transform<T,3,Eigen::Affine>::Identity();
-		    trans.translation() = Eigen::Matrix<T,3,1>(0.0, -1.0 * horizontal_interval[h], 0.0);
-		    columns2pointcloud[h] = trans;
-		}
-	    else if(horizontal_projection == POLAR)
-		for(unsigned h = 0; h < horizontal_size; h++)
-		    columns2pointcloud[h] = Eigen::AngleAxis<T>(base::Angle::normalizeRad(horizontal_interval[h]), Eigen::Matrix<T,3,1>::UnitZ());
-	    else
-		throw std::invalid_argument("Invalid argument for horizontal projection type.");
+	    for(unsigned i = 0; i < angles.size(); i++)
+		rotations[i] = Eigen::AngleAxis<T>(angles[i].getRad(), Eigen::Matrix<T,3,1>::Unit(axis));
 	}
-    }
+    };
     
     /** Computes the resolution in a given interval. */
     double computeResolution(const std::vector<double> &interval, uint32_t elements, PROJECTION_TYPE projection) const
@@ -593,6 +661,34 @@ protected:
     {
 	return ((((size_t)vertical_size * (size_t)horizontal_size) == distances.size()) ? true : false);
     }
+    
+private:
+    /** Lookup table for rotations around one unit axis */
+    template<typename T, UNIT_AXIS unit_axis>
+    class RotationLUT
+    {
+	static const unsigned resolution = 36000;
+	
+    public:
+	Eigen::Transform<T,3,Eigen::Affine> getTransformation(double rad)
+	{
+	    uint16_t deg = (uint16_t)((rad < 0.0 ? rad + 2.0*M_PI: rad) * rad2deg);
+	    return transformations[deg];
+	};
+	
+	RotationLUT() : rad2deg( ((double)resolution) / (2.0*M_PI) ), deg2rad( (2.0*M_PI) / ((double)resolution) )
+	{
+	    transformations.resize(resolution);
+	    for(unsigned i = 0; i < resolution; i++)
+		transformations[i] = Eigen::Transform<T,3,Eigen::Affine>(Eigen::AngleAxis<T>((double)i * deg2rad, Eigen::Matrix<T,3,1>::Unit(unit_axis)));
+	}
+	virtual ~RotationLUT() {}
+	
+    private:
+	double rad2deg;
+	double deg2rad;
+	std::vector< Eigen::Transform<T,3,Eigen::Affine> > transformations;
+    };
 };
 
 }} // namespaces
