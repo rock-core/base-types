@@ -33,7 +33,7 @@ public:
     Angle() {}
     
 protected:
-    explicit Angle( double rad ) : rad(rad) 
+    explicit Angle( double _rad ) : rad(_rad)
     { 
 	canonize(); 
     }
