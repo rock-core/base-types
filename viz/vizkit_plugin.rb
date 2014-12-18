@@ -20,3 +20,5 @@ Vizkit::UiLoader.register_3d_plugin_for('WaypointVisualization', "/std/vector</b
 Vizkit::UiLoader.register_3d_plugin_for('WaypointVisualization', "/base/Waypoint", :updateData )
 Vizkit::UiLoader.register_3d_plugin('SonarBeamVisualization', "base", 'SonarBeamVisualization')
 Vizkit::UiLoader.register_3d_plugin_for('SonarBeamVisualization', "/base/samples/SonarBeam", :updateSonarBeam)
+Vizkit::UiLoader.register_3d_plugin('DepthMapVisualization', "base", 'DepthMapVisualization')
+Vizkit::UiLoader.register_3d_plugin_for('DepthMapVisualization', "/base/samples/DepthMap", :updateDepthMap)
