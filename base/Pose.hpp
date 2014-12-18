@@ -78,8 +78,8 @@ namespace base
 	/** 
 	 * constructor with distance and angle thresholds
 	 */
-	PoseUpdateThreshold( double distance, double angle )
-	    : distance( distance ), angle( angle ) {};
+	PoseUpdateThreshold( double _distance, double _angle )
+	    : distance( _distance ), angle( _angle ) {};
 
 	/** 
 	 * test if distance or angle is greater than the 
