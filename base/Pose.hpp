@@ -85,9 +85,9 @@ namespace base
 	 * test if distance or angle is greater than the 
 	 * stored threshold.
 	 */
-	bool test( double distance, double angle )
+	bool test( double otherDistance, double otherAngle )
 	{
-	    return distance > this->distance || angle > this->angle;
+	    return otherDistance > distance || otherAngle > angle;
 	}
 
 	/** 
