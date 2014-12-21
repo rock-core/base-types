@@ -6,7 +6,12 @@ Typelib.convert_to_ruby '/wrappers/geometry/Spline', Types::Base::Geometry::Spli
     if value.dimension == 3
         result = Types::Base::Geometry::Spline3.new(value.geometric_resolution, value.curve_order)
     else
-        result = Types::Base::Geometry::Spline.new(value.dimension, value.geometric_resolution, value.curve_order)
+        begin
+            result = Types::Base::Geometry::Spline.new(value.dimension, value.geometric_resolution, value.curve_order)  
+        rescue Exception => e
+            STDERR.puts "Eror during spline generation: #{e}, returning empty one instead"
+            result = Types::Base::Geometry::Spline.new(1,1,1)
+        end
     end
 
     kind_t = value.class['kind']
