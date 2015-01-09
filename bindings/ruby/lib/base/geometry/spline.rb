@@ -408,9 +408,9 @@ module Base
 		    return nil
 		end
                 result = super
-                p = Eigen::Vector3.new(*result[0, 3])
+                p = ::Eigen::Vector3.new(*result[0, 3])
                 if with_tangent
-                    t = Eigen::Vector3.new(*result[3, 3])
+                    t = ::Eigen::Vector3.new(*result[3, 3])
                     return p, t
                 else
                     return p
