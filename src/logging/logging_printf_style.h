@@ -1,29 +1,18 @@
 /*
  * @file logging_printf_style.h
- * @author Thomas Roehr, thomas.roehr@dfki.de
  *
- * @brief Plain logging class
- * @details Logging can be enable by linking to base-lib and including <base/logging.h>
- * At compile time the following defines can be set: 
- * Setting the namespace to facilitate associating the debug with a library
- * BASE_LOG_NAMESPACE, e.g. 
- * in your CMakeLists.txt add_defitions(-DBASE_LOG_NAMESPACE=$PROJECT_NAME)
+ * @brief printf style logging 
+ * @details defines printf like logging functions 
+ *
+ * To write a log message, use LOG_<log-level> in the code. E.g.
+ *
+ * LOG_DEBUG("Reached this point")
+ * LOG_INFO("Value is %i", value)
  * 
- * Allow only logs of a certain level or higher
- * BASE_LOG_<log-level>, e.g. BASE_LOG_FATAL
+ * are valid statements.
+ * if BASE_LONG_NAMES is defined, the statements are prefixed with BASE_ e.g.:
  *
- * Disable loging
- * BASE_LOG_DISABLE
- * 
- * Existing log levels are: FATAL, ERROR, WARN, INFO, DEBUG
- *
- * At runtime the enviroment variable BASE_LOG_LEVEL can be set to any of the 
- * given log levels, e.g. export BASE_LOG_LEVEL="info" to show debug of 
- * INFO and higher log statements
- *
- * Setting of BASE_LOG_COLOR enables a color scheme for the log message, that 
- * is best viewed in a terminal with dark background color
- *
+ * BASE_LOG_FATAL("Cannot reach device.")
  */
 
 #ifndef _BASE_LOGGING_PRINTF_STYLE_H_
