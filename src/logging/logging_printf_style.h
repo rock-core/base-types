@@ -175,9 +175,9 @@ namespace logging {
 * Still allowing to use without prefix on other systems
 */
 #ifdef WIN32
-enum Priority	{ UNKNOWN_P = 0, FATAL_P , ERROR_P, WARN_P, INFO_P, DEBUG_P, ENDPRIORITIES };
+enum Priority	{ DISABLE_P = -1, UNKNOWN_P = 0, FATAL_P , ERROR_P, WARN_P, INFO_P, DEBUG_P, ENDPRIORITIES };
 #else
-enum Priority	{ UNKNOWN = 0, UNKNOWN_P = 0, FATAL = 1, FATAL_P =1, ERROR = 2, ERROR_P = 2, WARN = 3, WARN_P = 3, INFO = 4, INFO_P = 4, DEBUG = 5, DEBUG_P = 5, ENDPRIORITIES };
+enum Priority	{ DISABLE = -1, DISABLE_P = -1, UNKNOWN = 0, UNKNOWN_P = 0, FATAL = 1, FATAL_P =1, ERROR = 2, ERROR_P = 2, WARN = 3, WARN_P = 3, INFO = 4, INFO_P = 4, DEBUG = 5, DEBUG_P = 5, ENDPRIORITIES };
 #endif
  
 
