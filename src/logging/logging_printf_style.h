@@ -46,7 +46,7 @@
 // if no log level is given explicitely, determine from the environment
 // in case either compiling for release mode, or NDEBUG is specified we
 // compile for WARN and above
-#if defined(Release) || defined(NDEBUG)
+#if defined(Release)
 #define BASE_LOG_PRIORITY 3
 #else
 // Default logging priority that is compiled in, i.e. all log levels 
