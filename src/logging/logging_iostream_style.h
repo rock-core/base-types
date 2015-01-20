@@ -21,7 +21,6 @@
 #include <base/logging/logging_printf_style.h>
 #include <sstream>
 
-#if !defined(Release) && !defined(NDEBUG)
 // To allow for the streaming syntax, relying on 'dead code elimination'
 // of the compiler, i.e. given the if prio > BASE_LOG_PRIORITY then the else branch
 // is never reachable. Compilers with 'dead code elimination'
@@ -33,10 +32,6 @@
 #define LOG_STREAM(PRIO) if(PRIO > BASE_LOG_PRIORITY) ; else base::logging::LogStream().get(PRIO,__func__, __FILE__, __LINE__,  __STRINGIFY(BASE_LOG_NAMESPACE))
 #endif
 
-#else
-//disable all logging if Release is defined
-#define LOG_STREAM(PRIO) if(true) ; else base::logging::LogStream().get(PRIO,"", "" , 0 , "")
-#endif // Release
 
 // MACROS for general usage of streaming logging
 // Example usage:

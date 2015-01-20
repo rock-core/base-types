@@ -24,6 +24,7 @@ Logger::Logger() : mStream(stderr), mPriorityNames(10), mLogFormatNames(3)
     mPriorityNames[ERROR_P] = "ERROR";
     mPriorityNames[FATAL_P] = "FATAL";
     mPriorityNames[UNKNOWN_P] = "UNKNOWN";
+    mPriorityNames[DISABLE_P] = "DISABLE";
 
     mLogFormatNames[DEFAULT] = "DEFAULT";
     mLogFormatNames[MULTILINE] = "MULTILINE";
