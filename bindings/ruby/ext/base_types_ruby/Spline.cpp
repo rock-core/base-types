@@ -132,13 +132,15 @@ public:
 
 
 
-void Init_spline_ext(Rice::Module& base_m)
+void Init_spline_ext()
 {
+    Rice::Module rb_mSpline = Rice::define_module("SISL");
+
     typedef std::vector<double>(RubySpline::*SimplifySelector)(double);
     typedef void(SplineBase::*Append)(SplineBase const&,double);
 
     coordinate_type_type =
-	define_enum<CoordinateType>("CoordinateType", base_m)
+	define_enum<CoordinateType>("CoordinateType", rb_mSpline)
 	.define_value("ORDINARY_POINT", SplineBase::ORDINARY_POINT)
 	.define_value("KNUCKLE_POINT", SplineBase::KNUCKLE_POINT)
 	.define_value("DERIVATIVE_TO_NEXT", SplineBase::DERIVATIVE_TO_NEXT)
@@ -148,7 +150,7 @@ void Init_spline_ext(Rice::Module& base_m)
 	.define_value("TANGENT_POINT_FOR_NEXT", SplineBase::TANGENT_POINT_FOR_NEXT)
 	.define_value("TANGENT_POINT_FOR_PRIOR", SplineBase::TANGENT_POINT_FOR_PRIOR);
 
-    Data_Type<SplineBase> rb_SplineBase = define_class_under<SplineBase>(base_m, "SplineBase")
+    Data_Type<SplineBase> rb_SplineBase = define_class_under<SplineBase>(rb_mSpline, "SplineBase")
         .define_constructor(Constructor<SplineBase,int,double,int>(),
                 (Arg("dimension"), Arg("geometric_resolution") = 0.1, Arg("order") = 3))
         .define_method("geometric_resolution=", &SplineBase::setGeometricResolution)
@@ -175,7 +177,7 @@ void Init_spline_ext(Rice::Module& base_m)
         .define_method("append", static_cast<Append>(&SplineBase::append),
                 (Arg("spline"), Arg("tolerance") = static_cast<double>(1e-6)));
 
-    Data_Type<RubySpline> rb_Spline = define_class_under<RubySpline, SplineBase>(base_m, "Spline")
+    Data_Type<RubySpline> rb_Spline = define_class_under<RubySpline, SplineBase>(rb_mSpline, "Spline")
         .define_constructor(Constructor<RubySpline,int,double,int>(),
                 (Arg("dimension"), Arg("geometric_resolution") = 0.1, Arg("order") = 3))
         .define_method("initialize_copy", &RubySpline::initialize_copy)

@@ -2,11 +2,11 @@
 ##
 # base/geometry/Spline to BaseTypes::Geometry::Spline convertions
 require 'base/geometry/spline'
-Typelib.convert_to_ruby '/wrappers/geometry/Spline', Types::Base::Geometry::Spline do |value|
+Typelib.convert_to_ruby '/wrappers/geometry/Spline', SISL::Spline do |value|
     if value.dimension == 3
-        result = Types::Base::Geometry::Spline3.new(value.geometric_resolution, value.curve_order)
+        result = SISL::Spline3.new(value.geometric_resolution, value.curve_order)
     else
-        result = Types::Base::Geometry::Spline.new(value.dimension, value.geometric_resolution, value.curve_order)
+        result = SISL::Spline.new(value.dimension, value.geometric_resolution, value.curve_order)
     end
 
     kind_t = value.class['kind']
@@ -14,17 +14,19 @@ Typelib.convert_to_ruby '/wrappers/geometry/Spline', Types::Base::Geometry::Spli
     result
 end
 
-def convert_spline_to_typelib(value, type) # :nodoc:
-    result = type.new
-    result.geometric_resolution = value.geometric_resolution
-    result.curve_order = value.order
-    result.dimension   = value.dimension
-    result.kind  = value.sisl_curve_type
-    result.knots = value.knots
-    result.vertices = value.coordinates
-    result
+module SISL
+    def self.convert_spline_to_typelib(value, type) # :nodoc:
+        result = type.new
+        result.geometric_resolution = value.geometric_resolution
+        result.curve_order = value.order
+        result.dimension   = value.dimension
+        result.kind  = value.sisl_curve_type
+        result.knots = value.knots
+        result.vertices = value.coordinates
+        result
+    end
 end
 
-Typelib.convert_from_ruby Types::Base::Geometry::Spline3, '/wrappers/geometry/Spline', &method(:convert_spline_to_typelib)
-Typelib.convert_from_ruby Types::Base::Geometry::Spline, '/wrappers/geometry/Spline', &method(:convert_spline_to_typelib)
+Typelib.convert_from_ruby SISL::Spline3, '/wrappers/geometry/Spline', &SISL.method(:convert_spline_to_typelib)
+Typelib.convert_from_ruby SISL::Spline, '/wrappers/geometry/Spline', &SISL.method(:convert_spline_to_typelib)
 
