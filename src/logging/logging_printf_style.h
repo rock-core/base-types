@@ -43,16 +43,9 @@
 #endif
 
 #ifndef BASE_LOG_PRIORITY
-// if no log level is given explicitely, determine from the environment
-// in case either compiling for release mode, or NDEBUG is specified we
-// compile for WARN and above
-#if defined(Release)
-#define BASE_LOG_PRIORITY 3
-#else
 // Default logging priority that is compiled in, i.e. all log levels 
 // will be accessible at runtime
 #define BASE_LOG_PRIORITY 6
-#endif
 #endif
 
 #ifdef BASE_LONG_NAMES
@@ -189,9 +182,6 @@ enum LogFormat	{ DEFAULT = 0, MULTILINE, SHORT};
  * with minimal impact on performance and minimal configuration
  * requirements
  * 
- * The logger will be only active in an application compiled 
- * not with 'Release' Flag 
- *
  * Use the enviroment variable BASE_LOG_LEVEL to define the 
  * requested logging level, e.g. 
  * export BASE_LOG_LEVEL="WARN" 
