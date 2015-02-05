@@ -251,9 +251,10 @@ bool SplineBase::isNURBS() const
     return curve->ikind == 2 || curve->ikind == 4;
 }
 
-void SplineBase::interpolate(std::vector<double> const& points, 
-	std::vector<double> const& parameters, 
-	std::vector<CoordinateType> const& coord_types )
+void SplineBase::interpolate(const vector< double >& points, 
+                             vector< double >& parametersOut, 
+                             const vector< double >& parametersIn, 
+                             const vector< SplineBase::CoordinateType >& coord_types)
 {
     clear();
     start_param = 0.0;
@@ -277,12 +278,12 @@ void SplineBase::interpolate(std::vector<double> const& points,
     vector<int> point_types;
     if( coord_types.empty() )
     {
-	point_types.resize(point_count, 1);
+        point_types.resize(point_count, 1);
     }
     else
     {
-	assert( coord_types.size()*dimension == points.size() );
-	std::copy( coord_types.begin(), coord_types.end(), std::back_inserter( point_types ) );
+        assert( coord_types.size()*dimension == points.size() );
+        std::copy( coord_types.begin(), coord_types.end(), std::back_inserter( point_types ) );
     }
 
     // Generates curve
@@ -290,7 +291,7 @@ void SplineBase::interpolate(std::vector<double> const& points,
     int nb_unique_param;
 
     int status;
-    if (parameters.empty())
+    if (parametersIn.empty())
     {
         s1356(const_cast<double*>(&points[0]), point_types.size(), dimension, &point_types[0],
                 0, 0, 1, curve_order, start_param, &end_param, &curve, 
@@ -299,7 +300,7 @@ void SplineBase::interpolate(std::vector<double> const& points,
     else
     {
         s1357(const_cast<double*>(&points[0]), point_types.size(), dimension, &point_types[0],
-                const_cast<double*>(&parameters[0]), 
+                const_cast<double*>(&parametersIn[0]), 
                 0, 0, 1, curve_order, start_param, &end_param, &curve, 
                 &point_param, &nb_unique_param, &status);
     }
@@ -314,17 +315,33 @@ void SplineBase::interpolate(std::vector<double> const& points,
             str << ")";
         }
 
-        if (!parameters.empty())
+        if (!parametersIn.empty())
         {
             str << " with parameters ";
-            for (unsigned int c = 0; c < parameters.size(); ++c)
-                str << " " << parameters[c];
+            for (unsigned int c = 0; c < parametersIn.size(); ++c)
+                str << " " << parametersIn[c];
         }
 
         throw std::runtime_error("cannot create a spline interpolating the required points" + str.str());
     }
 
+    parametersOut.clear();
+    for(int i = 0; i < nb_unique_param; i++)
+    {
+        parametersOut.push_back(point_param[i]);
+    }
+    
     free(point_param);
+
+}
+
+
+void SplineBase::interpolate(std::vector<double> const& points, 
+	std::vector<double> const& parameters, 
+	std::vector<CoordinateType> const& coord_types )
+{
+    std::vector<double> tmp;
+    interpolate(points, tmp, parameters, coord_types);
 }
 
 void SplineBase::printCurveProperties(std::ostream& io)

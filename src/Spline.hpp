@@ -49,6 +49,7 @@ namespace geometry {
         void setCurveOrder(int value) { curve_order = value; }
         /** Returns the order of the curve */
         int    getCurveOrder() const { return curve_order; }
+        
         /** Returns the length of the curve in geometric space
          *
          * @param relative_error the acceptable error on the final result w.r.t.
@@ -131,8 +132,13 @@ namespace geometry {
 	 *        coordinates param.
          */
         void interpolate(std::vector<double> const& coordinates, 
-		std::vector<double> const& parameters = std::vector<double>(), 
-		std::vector<CoordinateType> const& coord_types = std::vector<CoordinateType>() );
+                std::vector<double> const& parameters = std::vector<double>(), 
+                std::vector<CoordinateType> const& coord_types = std::vector<CoordinateType>() );
+
+        void interpolate(std::vector<double> const& coordinates, 
+                std::vector<double> &parameterOut, 
+                std::vector<double> const& parameterIn  = std::vector<double>(), 
+                std::vector<CoordinateType> const& coord_types = std::vector<CoordinateType>() );
 
         /** Tests for intersection between two curves
          */
@@ -375,7 +381,8 @@ namespace geometry {
     {
     public:
         typedef typename SplineBaseClass<DIM>::type base_t;
-        typedef Eigen::Matrix<double, DIM, 1, Eigen::DontAlign>     vector_t;
+        typedef Eigen::Matrix<double, DIM, 1, Eigen::DontAlign> vector_t;
+        typedef Eigen::Matrix<double, DIM, 1, Eigen::AutoAlign> vector_ta;
         typedef Eigen::Transform<double, DIM, Eigen::Affine> transform_t;
 
         explicit Spline(double geometric_resolution = 0.1, int order = 3)
@@ -558,6 +565,55 @@ namespace geometry {
             SplineBase::interpolate(coordinates, parameters, coord_types);
         }
 
+        void interpolate(std::vector<vector_t> const& points, 
+                std::vector<double> &parametersOut,
+                std::vector<double> const& parametersIn = std::vector<double>(),
+                std::vector<SplineBase::CoordinateType> const& coord_types = std::vector<SplineBase::CoordinateType>() )
+        {
+            std::vector<double> coordinates;
+            for (size_t i = 0; i < points.size(); ++i)
+                coordinates.insert(coordinates.end(), points[i].data(), points[i].data() + DIM);
+            SplineBase::interpolate(coordinates, parametersOut, parametersIn, coord_types);
+        }
+
+        void interpolate(std::vector<vector_ta> const& points, 
+                std::vector<double> &parametersOut,
+                std::vector<double> const& parametersIn = std::vector<double>(),
+                std::vector<SplineBase::CoordinateType> const& coord_types = std::vector<SplineBase::CoordinateType>() )
+        {
+            std::vector<double> coordinates;
+            for (size_t i = 0; i < points.size(); ++i)
+                coordinates.insert(coordinates.end(), points[i].data(), points[i].data() + DIM);
+            SplineBase::interpolate(coordinates, parametersOut, parametersIn, coord_types);
+        }
+
+        /** Compute the curve from the given set of points */
+        void interpolate(std::vector<vector_ta> const& points, 
+                std::vector<double> const& parameters = std::vector<double>(),
+                std::vector<SplineBase::CoordinateType> const& coord_types = std::vector<SplineBase::CoordinateType>() )
+        {
+            std::vector<double> coordinates;
+            for (size_t i = 0; i < points.size(); ++i)
+                coordinates.insert(coordinates.end(), points[i].data(), points[i].data() + DIM);
+            SplineBase::interpolate(coordinates, parameters, coord_types);
+        }
+        
+        void interpolate(std::vector<double> const& coordinates, 
+                std::vector<double> const& parameters = std::vector<double>(), 
+                std::vector<SplineBase::CoordinateType> const& coord_types = std::vector<SplineBase::CoordinateType>() )
+        {
+            return SplineBase::interpolate(coordinates, parameters, coord_types);
+        };
+
+        void interpolate(std::vector<double> const& coordinates, 
+                std::vector<double> &parameterOut, 
+                std::vector<double> const& parameterIn  = std::vector<double>(), 
+                std::vector<SplineBase::CoordinateType> const& coord_types = std::vector<SplineBase::CoordinateType>() )
+        {
+            return SplineBase::interpolate(coordinates, parameterOut, parameterIn, coord_types);
+        };
+
+        
         /** Returns the distance between the given point and the curve
          */
         double distanceTo(vector_t const& _pt) const
