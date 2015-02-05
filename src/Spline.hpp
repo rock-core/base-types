@@ -558,7 +558,7 @@ namespace geometry {
         }
 
         template<typename Test>
-        std::pair<double, double> dichotomic_search(double start_t, double end_t, Test test, double resolution, double parameter_threshold)
+        std::pair<double, double> dichotomic_search(double start_t, double end_t, Test test, double resolution, double parameter_threshold) const
         {
             return this->dichotomic_search(
                     start_t, this->getPoint(start_t),
@@ -573,8 +573,8 @@ namespace geometry {
          * will be the last point in the curve
          */
         template<typename Test>
-        std::pair<double, double> dichotomic_search(double start_t, base::Vector3d const& start_p, double end_t, base::Vector3d const& end_p,
-                Test test, double resolution, double parameter_threshold)
+        std::pair<double, double> dichotomic_search(double start_t, vector_t const& start_p, double end_t, vector_t const& end_p,
+                Test test, double resolution, double parameter_threshold) const
         {
             std::pair<bool, double> test_result =
                 test(start_t, end_t, *this);
@@ -585,7 +585,7 @@ namespace geometry {
                 return std::make_pair(start_t, end_t);
 
             double middle_t = (start_t + end_t) / 2;
-            base::Vector3d middle_p = getPoint(middle_t);
+            vector_t middle_p = getPoint(middle_t);
             std::pair<double, double> result;
 
             result = dichotomic_search(start_t, start_p, middle_t, middle_p, test, resolution, parameter_threshold);
