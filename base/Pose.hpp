@@ -259,7 +259,7 @@ namespace base
         bool isApprox(const Pose2D &other, double distPecision, double anglePrecision) const
         {
             return ((other.position - position).norm() < distPecision) && 
-                   (fabs((Angle::fromRad(other.orientation) - Angle::fromRad(orientation)).getRad()) < anglePrecision);
+                   (Angle::fromRad(other.orientation).isApprox(Angle::fromRad(orientation), anglePrecision));
         }
             
     };
