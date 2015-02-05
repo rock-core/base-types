@@ -914,9 +914,11 @@ namespace geometry {
     // This is for GCCXML parsing
     struct __gccxml_workaround_spline {
         base::geometry::Spline<1> instanciation1;
+        base::geometry::Spline<2> instanciation2;
         base::geometry::Spline<3> instanciation3;
     };
     typedef base::geometry::Spline<1> Spline1;
+    typedef base::geometry::Spline<2> Spline2;
     typedef base::geometry::Spline<3> Spline3;
     
     inline std::ostream& operator << (std::ostream& io, base::geometry::Spline<3> const& s)
