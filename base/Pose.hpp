@@ -2,6 +2,7 @@
 #define __BASE_POSE_HH__
 
 #include <base/Eigen.hpp>
+#include "Angle.hpp"
 
 namespace base
 {
@@ -255,7 +256,24 @@ namespace base
         Pose2D( const Pose &p)
             : position(Vector2d(p.position.x(), p.position.y())), orientation(p.getYaw()) {}
 
+        bool isApprox(const Pose2D &other, double distPecision, double anglePrecision) const
+        {
+            return ((other.position - position).norm() < distPecision) && 
+                   (fabs((Angle::fromRad(other.orientation) - Angle::fromRad(orientation)).getRad()) < anglePrecision);
+        }
+            
     };
+    
+    inline std::ostream& operator << (std::ostream& io, base::Pose2D const& pose)
+    {
+        
+        io << "Position "
+           << pose.position.transpose()
+           << " Orientation (Theta) " 
+           << pose.orientation ;
+;
+        return io;
+    }
 }
 
 #endif
