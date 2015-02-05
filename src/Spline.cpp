@@ -1085,3 +1085,15 @@ void SplineBase::split(SplineBase& second_part, double _param)
     second_part.reset(part2);
 }
 
+SplineBase *SplineBase::getSubSpline(double start_t, double end_t) const
+{
+    int result;
+    SISLCurve *newCurve;
+    s1712(curve, start_t, end_t, &newCurve, &result);
+    
+    if(result < 0)
+        return NULL;
+    
+    return new SplineBase(getGeometricResolution(), newCurve);
+}
+

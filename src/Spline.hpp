@@ -197,6 +197,12 @@ namespace geometry {
          */
         void crop(double start_t, double end_t);
 
+        /**
+         * Returns a new curve, that represents the
+         * spline between start_t and end_t
+         * */
+        SplineBase *getSubSpline(double start_t, double end_t) const;
+        
         int getCoordinatesStride() const
         {
             if (isNURBS()) return dimension + 1;
