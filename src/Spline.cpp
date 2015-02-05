@@ -200,10 +200,7 @@ double base::geometry::SplineBase::getCurveLength(double relative_resolution) co
     return length;
 }
 
-double SplineBase::getUnitParameter()
 {
-    if (end_param == start_param) return 0;
-    return (end_param - start_param) / getCurveLength();
 }
 
 double SplineBase::getCurvatureMax()
@@ -216,7 +213,7 @@ double SplineBase::getCurvatureMax()
     if (has_curvature_max)
         return curvature_max;
 
-    double const delPara = getUnitParameter() * geometric_resolution;
+    double const delPara = geometric_resolution;
     curvature_max = 0.0;
 
     for (double p = start_param; p <= end_param; p+= delPara)

@@ -73,13 +73,6 @@ namespace geometry {
          * at least once.
          */
         SISLCurve* getSISLCurve();
-
-        /** Returns the length-to-parametric scale
-         *
-         * I.e. it returns the number of parametric units that lie in one
-         * curve length unit
-         */
-        double getUnitParameter();
       
         /** Returns the curvature at the given position
          *
