@@ -200,7 +200,25 @@ double base::geometry::SplineBase::getCurveLength(double relative_resolution) co
     return length;
 }
 
+double SplineBase::getCurveLength(double startParam, double relative_resolution) const
 {
+    return getCurveLength(startParam, end_param, relative_resolution);
+}
+
+double SplineBase::getCurveLength(double startParam, double endParam, double relative_resolution) const
+{
+    if(fabs(startParam - endParam) < 0.001)
+    {
+        return 0;
+    }
+    
+    SplineBase *subspline = getSubSpline(startParam, endParam);
+    if(!subspline)
+        throw std::runtime_error(std::string("Could not get Subpline for parameters ") + boost::lexical_cast<std::string>(startParam) + " / " + boost::lexical_cast<std::string>(endParam));
+    
+    double ret = subspline->getCurveLength(relative_resolution);
+    delete subspline;
+    return ret;
 }
 
 double SplineBase::getCurvatureMax()

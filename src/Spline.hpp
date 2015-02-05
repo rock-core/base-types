@@ -55,6 +55,10 @@ namespace geometry {
          *   the real curve length
          */
         double getCurveLength(double relative_resolution = 0.01) const;
+        double getCurveLength(double startParam, double relative_resolution) const;
+        double getCurveLength(double startParam, double endParam, double relative_resolution) const;
+        
+        
         /** Returns the maximum curvature of the curve */
         double getCurvatureMax();
         double getStartParam() const { return start_param; };
