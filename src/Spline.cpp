@@ -231,7 +231,12 @@ double SplineBase::getCurvatureMax()
     if (has_curvature_max)
         return curvature_max;
 
-    double const delPara = geometric_resolution;
+    //Note this is wrong, but keeps backward compability
+    double unitParam = 0;
+    if(start_param != end_param)
+        unitParam = (end_param - start_param) / getCurveLength();
+    
+    double const delPara = unitParam * geometric_resolution;
     curvature_max = 0.0;
 
     for (double p = start_param; p <= end_param; p+= delPara)
