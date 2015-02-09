@@ -661,7 +661,9 @@ BOOST_AUTO_TEST_CASE( angle_test )
     BOOST_CHECK_CLOSE( (Angle::fromDeg(45)+Angle::fromDeg(-45)).getRad(), Angle::fromRad(0).getRad(), 1e-3 );
 
     BOOST_CHECK( Angle::fromRad(-M_PI - 0.001).isApprox( Angle::fromRad( M_PI + 0.001 ), 0.01 ));
-
+    
+    //check for missing fabs
+    BOOST_CHECK(! Angle::fromRad(-M_PI /3*2).isApprox( Angle::fromRad( M_PI /3*2 ), 0.01 ));
     
     {
         base::AngleSegment s(base::Angle::fromDeg(89), base::Angle::fromDeg(2).getRad());

@@ -120,7 +120,7 @@ public:
      */
     bool inline isApprox( Angle other, double prec = 1e-5 ) const
     {
-        return Angle(fabs( other.rad - rad )).getRad() < prec;
+        return fabs(Angle(other.rad - rad).getRad()) < prec;
     }
 
     void operator=(const Angle &other)
