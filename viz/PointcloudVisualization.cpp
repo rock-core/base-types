@@ -107,7 +107,6 @@ void PointcloudVisualization::updateMainNode(osg::Node* node)
         int i=0;
         for(std::vector<base::Vector3d>::const_iterator pos = pointCloud.points.begin(); pos != pointCloud.points.end(); pos++)
         {
-            i++;
             osg::Vec3d vec(pos->x(), pos->y(), pos->z());
             pointsOSG->push_back(vec);
             if(pointCloud.colors.size() == pointCloud.points.size()){
@@ -116,6 +115,7 @@ void PointcloudVisualization::updateMainNode(osg::Node* node)
             }else{
                 color->push_back(default_feature_color);
             }
+            i++;
         }
         drawArrays->setCount(pointsOSG->size());
         pointGeom->setVertexArray(pointsOSG);
