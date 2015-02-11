@@ -104,15 +104,14 @@ void PointcloudVisualization::updateMainNode(osg::Node* node)
         newPoints = false;
         pointsOSG->clear();
         color->clear();
-        int i=0;
-        for(std::vector<base::Vector3d>::const_iterator pos = pointCloud.points.begin(); pos != pointCloud.points.end(); pos++)
+        bool use_colors = pointCloud.colors.size() == pointCloud.points.size();
+        for(size_t i=0; i<pointCloud.points.size(); i++)
         {
-            i++;
-            osg::Vec3d vec(pos->x(), pos->y(), pos->z());
+            osg::Vec3d vec(pointCloud.points[i][0], pointCloud.points[i][1], pointCloud.points[i][2]);
             pointsOSG->push_back(vec);
-            if(pointCloud.colors.size() == pointCloud.points.size()){
-                osg::Vec4f v = osg::Vec4f(pointCloud.colors[i][0], pointCloud.colors[i][1], pointCloud.colors[i][2], pointCloud.colors[i][3]);
-                color->push_back(v);
+            if(use_colors)
+            {
+                color->push_back(osg::Vec4f(pointCloud.colors[i][0], pointCloud.colors[i][1], pointCloud.colors[i][2], pointCloud.colors[i][3]));
             }else{
                 color->push_back(default_feature_color);
             }
