@@ -195,6 +195,7 @@ void RigidBodyStateVisualization::loadModel(std::string const& path)
     }
 
     setDirty();
+    emit propertyChanged("modelPath");
 }
 
 void RigidBodyStateVisualization::displayCovariance(bool enable)
