@@ -6,6 +6,8 @@
 #include <osgDB/ReadFile>
 #include <osg/Material>
 
+using namespace osg;
+
 namespace vizkit3d 
 {
 
@@ -26,14 +28,14 @@ RigidBodyStateVisualization::~RigidBodyStateVisualization()
 {
 }
 
-void RigidBodyStateVisualization::setColor(const osg::Vec4d& color, osg::Geode* geode)
+void RigidBodyStateVisualization::setColor(const Vec4d& color, Geode* geode)
 {
-    osg::Material *material = new osg::Material();
-    material->setDiffuse(osg::Material::FRONT,  osg::Vec4(0.1, 0.1, 0.1, 1.0));
-    material->setSpecular(osg::Material::FRONT, osg::Vec4(0.6, 0.6, 0.6, 1.0));
-    material->setAmbient(osg::Material::FRONT,  osg::Vec4(0.1, 0.1, 0.1, 1.0));
-    material->setEmission(osg::Material::FRONT, color);
-    material->setShininess(osg::Material::FRONT, 10.0);
+    Material *material = new Material();
+    material->setDiffuse(Material::FRONT,  Vec4(0.1, 0.1, 0.1, 1.0));
+    material->setSpecular(Material::FRONT, Vec4(0.6, 0.6, 0.6, 1.0));
+    material->setAmbient(Material::FRONT,  Vec4(0.1, 0.1, 0.1, 1.0));
+    material->setEmission(Material::FRONT, color);
+    material->setShininess(Material::FRONT, 10.0);
 
     geode->getOrCreateStateSet()->setAttribute(material);    
 }
@@ -47,55 +49,55 @@ bool RigidBodyStateVisualization::isOrientationDisplayForced() const
 void RigidBodyStateVisualization::setOrientationDisplayForceFlag(bool flag)
 { forceOrientationDisplay = flag; }
 
-osg::ref_ptr<osg::Group> RigidBodyStateVisualization::createSimpleSphere(double size)
+ref_ptr<osg::Group> RigidBodyStateVisualization::createSimpleSphere(double size)
 {   
-    osg::ref_ptr<osg::Group> group = new osg::Group();
+    ref_ptr<Group> group = new Group();
     
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-    osg::ref_ptr<osg::Sphere> sp = new osg::Sphere(osg::Vec3f(0,0,0), main_size * size);
-    osg::ref_ptr<osg::ShapeDrawable> spd = new osg::ShapeDrawable(sp);
-    spd->setColor(osg::Vec4f(color.x(), color.y(), color.z(), 1.0));
+    ref_ptr<Geode> geode = new Geode();
+    ref_ptr<Sphere> sp = new Sphere(Vec3f(0,0,0), main_size * size);
+    ref_ptr<ShapeDrawable> spd = new ShapeDrawable(sp);
+    spd->setColor(Vec4f(color.x(), color.y(), color.z(), 1.0));
     geode->addDrawable(spd);
     group->addChild(geode);
     
     return group;
 }
   
-osg::ref_ptr<osg::Group> RigidBodyStateVisualization::createSimpleBody(double size)
+ref_ptr<Group> RigidBodyStateVisualization::createSimpleBody(double size)
 {   
-    osg::ref_ptr<osg::Group> group = new osg::Group();
+    ref_ptr<Group> group = new Group();
     
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-    osg::ref_ptr<osg::Sphere> sp = new osg::Sphere(osg::Vec3f(0,0,0), main_size * size);
-    osg::ref_ptr<osg::ShapeDrawable> spd = new osg::ShapeDrawable(sp);
-    spd->setColor(osg::Vec4f(color.x(), color.y(), color.z(), 1.0));
+    ref_ptr<Geode> geode = new Geode();
+    ref_ptr<Sphere> sp = new Sphere(Vec3f(0,0,0), main_size * size);
+    ref_ptr<ShapeDrawable> spd = new ShapeDrawable(sp);
+    spd->setColor(Vec4f(color.x(), color.y(), color.z(), 1.0));
     geode->addDrawable(spd);
     group->addChild(geode);
     
     //up
-    osg::ref_ptr<osg::Geode> c1g = new osg::Geode();
-    osg::ref_ptr<osg::Cylinder> c1 = new osg::Cylinder(osg::Vec3f(0, 0, size / 2), size / 40, size);
-    osg::ref_ptr<osg::ShapeDrawable> c1d = new osg::ShapeDrawable(c1);
+    ref_ptr<Geode> c1g = new Geode();
+    ref_ptr<Cylinder> c1 = new Cylinder(Vec3f(0, 0, size / 2), size / 40, size);
+    ref_ptr<ShapeDrawable> c1d = new ShapeDrawable(c1);
     c1g->addDrawable(c1d);
-    setColor(osg::Vec4f(0, 0, 1.0, 1.0), c1g);
+    setColor(Vec4f(0, 0, 1.0, 1.0), c1g);
     group->addChild(c1g);
     
     //north direction
-    osg::ref_ptr<osg::Geode> c2g = new osg::Geode();
-    osg::ref_ptr<osg::Cylinder> c2 = new osg::Cylinder(osg::Vec3f(0, size / 2, 0), size / 40, size);
-    c2->setRotation(osg::Quat(M_PI/2.0, osg::Vec3d(1,0,0)));
-    osg::ref_ptr<osg::ShapeDrawable> c2d = new osg::ShapeDrawable(c2);
+    ref_ptr<Geode> c2g = new Geode();
+    ref_ptr<Cylinder> c2 = new Cylinder(Vec3f(0, size / 2, 0), size / 40, size);
+    c2->setRotation(Quat(M_PI/2.0, Vec3d(1,0,0)));
+    ref_ptr<ShapeDrawable> c2d = new ShapeDrawable(c2);
     c2g->addDrawable(c2d);
-    setColor(osg::Vec4f(0.0, 1.0, 0, 1.0), c2g);
+    setColor(Vec4f(0.0, 1.0, 0, 1.0), c2g);
     group->addChild(c2g);
 
     //east
-    osg::ref_ptr<osg::Geode> c3g = new osg::Geode();
-    osg::ref_ptr<osg::Cylinder> c3 = new osg::Cylinder(osg::Vec3f(size / 2, 0, 0), size / 40, size);
-    c3->setRotation(osg::Quat(M_PI/2.0, osg::Vec3d(0,1,0)));
-    osg::ref_ptr<osg::ShapeDrawable> c3d = new osg::ShapeDrawable(c3);
+    ref_ptr<Geode> c3g = new Geode();
+    ref_ptr<Cylinder> c3 = new Cylinder(Vec3f(size / 2, 0, 0), size / 40, size);
+    c3->setRotation(Quat(M_PI/2.0, Vec3d(0,1,0)));
+    ref_ptr<ShapeDrawable> c3d = new ShapeDrawable(c3);
     c3g->addDrawable(c3d);
-    setColor(osg::Vec4f(1.0, 0.0, 0, 1.0), c3g);
+    setColor(Vec4f(1.0, 0.0, 0, 1.0), c3g);
     group->addChild(c3g);
 
     return group;
@@ -169,7 +171,7 @@ void RigidBodyStateVisualization::loadModel(std::string const& path)
         return;
     }
 
-    osg::ref_ptr<osg::Node> model = osgDB::readNodeFile(path);
+    ref_ptr<Node> model = osgDB::readNodeFile(path);
     body_type  = BODY_CUSTOM_MODEL;
     body_model = model;
     model_path = QString::fromStdString(path);
@@ -208,11 +210,11 @@ void RigidBodyStateVisualization::displayCovarianceWithSamples(bool enable)
 bool RigidBodyStateVisualization::isCovarianceDisplayedWithSamples() const
 { return covariance_with_samples; }
 
-osg::ref_ptr<osg::Node> RigidBodyStateVisualization::createMainNode()
+ref_ptr<Node> RigidBodyStateVisualization::createMainNode()
 {
-    osg::Group* group = new osg::Group;
-    osg::PositionAttitudeTransform* body_pose =
-        new osg::PositionAttitudeTransform();
+    Group* group = new Group;
+    PositionAttitudeTransform* body_pose =
+        new PositionAttitudeTransform();
     if (!body_model)
         resetModel(total_size);
     body_pose->addChild(body_model);
@@ -220,11 +222,11 @@ osg::ref_ptr<osg::Node> RigidBodyStateVisualization::createMainNode()
     return group;
 }
 
-void RigidBodyStateVisualization::updateMainNode(osg::Node* node)
+void RigidBodyStateVisualization::updateMainNode(Node* node)
 {
-    osg::Group* group = node->asGroup();
-    osg::PositionAttitudeTransform* body_pose =
-        dynamic_cast<osg::PositionAttitudeTransform*>(group->getChild(0));
+    Group* group = node->asGroup();
+    PositionAttitudeTransform* body_pose =
+        dynamic_cast<PositionAttitudeTransform*>(group->getChild(0));
 
     // Check if we need an uncertainty representation node, and manage the
     // uncertainty child accordingly
