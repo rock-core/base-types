@@ -5,6 +5,14 @@
 #include <Eigen/Geometry>
 #include <base/samples/RigidBodyState.hpp>
 
+#include <osg/Image>
+#include <osg/Texture2D>
+
+namespace osgFX
+{
+    class BumpMapping;
+}
+
 namespace vizkit3d 
 {
 
@@ -81,6 +89,17 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
 	
 	void setColor(const osg::Vec4d& color, osg::Geode* geode);
 	
+        void setTexture(QString const& path);
+        void setTexture(std::string const& path);
+        void clearTexture();
+        void addBumpMapping(
+                QString const& diffuse_color_map_path,
+                QString const& normal_map_path);
+        void addBumpMapping(
+                std::string const& diffuse_color_map_path,
+                std::string const& normal_map_path);
+        void removeBumpMapping();
+
     private:
         bool covariance;
         bool covariance_with_samples;
@@ -97,6 +116,19 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
 	osg::ref_ptr<osg::Node>  body_model;
         osg::ref_ptr<osg::Group> createSimpleBody(double size);
 	osg::ref_ptr<osg::Group> createSimpleSphere(double size);
+
+        osg::ref_ptr<osg::Image> image;
+        osg::ref_ptr<osg::Texture2D> texture;
+        bool texture_dirty;
+        void updateTexture();
+
+        osg::ref_ptr<osg::Image> diffuse_image;
+        osg::ref_ptr<osg::Image> normal_image;
+        osg::ref_ptr<osg::Texture2D> diffuse_texture;
+        osg::ref_ptr<osg::Texture2D> normal_texture;
+        osg::ref_ptr<osgFX::BumpMapping> bump_mapping;
+        bool bump_mapping_dirty;
+        void updateBumpMapping();
 
         bool forcePositionDisplay;
         bool forceOrientationDisplay;
