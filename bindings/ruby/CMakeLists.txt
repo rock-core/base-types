@@ -2,7 +2,7 @@ include_directories(${CMAKE_BINARY_DIR}/include)
 
 find_package(SISL)
 if(SISL_FOUND)
-    add_definition(SISL_FOUND)
+    add_definitions(-DSISL_FOUND)
     rock_add_ruby_package(base
         EXT_RICE base_types_ruby Eigen.cpp Spline.cpp init.cpp)
 else(SISL_FOUND)
