@@ -81,6 +81,10 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
 	
 	void setColor(const osg::Vec4d& color, osg::Geode* geode);
 	
+        QVector3D getTranslation() const;
+        void setTranslation(QVector3D const& v);
+        void setRotation(QQuaternion const& q);
+
     private:
         bool covariance;
         bool covariance_with_samples;
@@ -88,11 +92,12 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         double total_size;
         double main_size;
 
+        osg::Vec3 translation;
+        osg::Quat rotation;
+
         enum BODY_TYPES
         { BODY_NONE, BODY_SIMPLE, BODY_SPHERE, BODY_CUSTOM_MODEL };
 
-	osg::Vec3d pos;
-	osg::Quat orientation;
         BODY_TYPES body_type;
 	osg::ref_ptr<osg::Node>  body_model;
         osg::ref_ptr<osg::Group> createSimpleBody(double size);

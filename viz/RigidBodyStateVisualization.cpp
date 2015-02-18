@@ -18,10 +18,15 @@ RigidBodyStateVisualization::RigidBodyStateVisualization(QObject* parent)
     , color(1, 1, 1)
     , total_size(1)
     , main_size(0.1)
+    , translation(0, 0, 0)
+    , rotation(0, 0, 0, 1)
     , body_type(BODY_NONE)
     , forcePositionDisplay(false)
     , forceOrientationDisplay(false)
 {
+    state = base::samples::RigidBodyState::invalid();
+    state.position = base::Vector3d::Zero();
+    state.orientation = base::Quaterniond::Identity();
 }
 
 RigidBodyStateVisualization::~RigidBodyStateVisualization()
@@ -198,6 +203,22 @@ void RigidBodyStateVisualization::loadModel(std::string const& path)
     emit propertyChanged("modelPath");
 }
 
+QVector3D RigidBodyStateVisualization::getTranslation() const
+{
+    return QVector3D(translation.x(), translation.y(), translation.z());
+}
+void RigidBodyStateVisualization::setTranslation(QVector3D const& v)
+{
+    translation = osg::Vec3(v.x(), v.y(), v.z());
+    setDirty();
+}
+
+void RigidBodyStateVisualization::setRotation(QQuaternion const& q)
+{
+    rotation = osg::Quat(q.x(), q.y(), q.z(), q.scalar());
+    setDirty();
+}
+
 void RigidBodyStateVisualization::displayCovariance(bool enable)
 { covariance = enable; }
 bool RigidBodyStateVisualization::isCovarianceDisplayed() const
@@ -253,8 +274,10 @@ void RigidBodyStateVisualization::updateMainNode(Node* node)
 
     if (forcePositionDisplay || state.hasValidPosition())
     {
-        pos.set(state.position.x(), state.position.y(), state.position.z());
-        body_pose->setPosition(pos);
+	osg::Vec3d pos(
+                state.position.x(), state.position.y(), state.position.z());
+        
+        body_pose->setPosition(pos + translation);
     }
     if (needs_uncertainty)
     {
@@ -268,11 +291,11 @@ void RigidBodyStateVisualization::updateMainNode(Node* node)
     }
     if (forceOrientationDisplay || state.hasValidOrientation())
     {
-        orientation.set(state.orientation.x(),
+	osg::Quat orientation(state.orientation.x(),
                 state.orientation.y(),
                 state.orientation.z(),
                 state.orientation.w());
-        body_pose->setAttitude(orientation);
+        body_pose->setAttitude(rotation * orientation);
     }
 }
 
