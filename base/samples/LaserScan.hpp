@@ -9,6 +9,8 @@
 #include <base/Float.hpp>
 #include <base/Time.hpp>
 #include <base/Deprecated.hpp>
+#include <base/samples/RigidBodyState.hpp>
+
 
 namespace base { namespace samples {
     /** Special values for the ranges. If a range has one of these values, then
@@ -130,6 +132,53 @@ namespace base { namespace samples {
 		}
 	    }
 	}
+	
+	/**Converts the laser scan into an interpolated pointcloud according to the given transformation, 
+	 * the startTime, the angular_resolution and the rotation speed of the laserbeam.
+	 * Acts just like convertScanToPointCloud() but considers the motion of the laser scanner.
+	 */
+	template<typename T, typename Trans>
+    void convertScanToPointCloudInterpolated(std::vector<T> &points,
+                                                const Trans& transformation,
+                                                const base::Time startTime,
+                                                bool skip_invalid_points = true)const
+    {
+        points.clear();
+        
+        //give the vector a hint about the size it might be
+        points.reserve(ranges.size());
+
+        //this is optimized for runtime
+        //moving the check for skip_invalid_points
+        //out of the loop speeds up the execution 
+        //time by ~25 %
+        if(!skip_invalid_points)
+        {
+            for(unsigned int i = 0; i < ranges.size(); i++) {
+                base::samples::RigidBodyState bodyState;
+                Eigen::Vector3d point;
+                if(getPointFromScanBeamXForward(i, point) && transformation.get(startTime + base::Time::fromSeconds((start_angle / angular_resolution + i) * 
+                                                                                (angular_resolution / speed)), bodyState, false)) 
+                {
+                    point = bodyState.getPose().toTransform() * point;
+                    points.push_back(point);
+                } else {
+                    points.push_back(Eigen::Vector3d(base::unknown<double>(), base::unknown<double>(), base::unknown<double>()));
+                }
+            }
+        } else {
+            for(unsigned int i = 0; i < ranges.size(); i++) {
+                base::samples::RigidBodyState bodyState;
+                Eigen::Vector3d point;
+                if(getPointFromScanBeamXForward(i, point) && transformation.get(startTime + base::Time::fromSeconds((start_angle / angular_resolution + i) * 
+                                                                                (angular_resolution / speed)), bodyState, false)) 
+                {
+                    point = bodyState.getPose().toTransform() * point;
+                    points.push_back(point);
+                }
+            }
+        }
+    }
             
         /**
          * Helper function that converts range 'i' to a point.
@@ -186,3 +235,4 @@ namespace base { namespace samples {
 }} // namespaces
 
 #endif
+
