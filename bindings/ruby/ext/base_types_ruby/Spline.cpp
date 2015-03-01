@@ -138,6 +138,7 @@ void Init_spline_ext()
 
     typedef std::vector<double>(RubySpline::*SimplifySelector)(double);
     typedef void(SplineBase::*Append)(SplineBase const&,double);
+    typedef double (SplineBase::*GetCurveLength)(double) const;
 
     coordinate_type_type =
 	define_enum<CoordinateType>("CoordinateType", rb_mSpline)
@@ -161,11 +162,10 @@ void Init_spline_ext()
         .define_method("reverse", &SplineBase::reverse)
         .define_method("dimension", &SplineBase::getDimension)
         .define_method("point_count", &SplineBase::getPointCount)
-        .define_method("curve_length", &SplineBase::getCurveLength)
+        .define_method("curve_length", static_cast<GetCurveLength>(&SplineBase::getCurveLength))
         .define_method("curvature_max", &SplineBase::getCurvatureMax)
         .define_method("start_param", &SplineBase::getStartParam)
         .define_method("end_param", &SplineBase::getEndParam)
-        .define_method("unit_parameter", &SplineBase::getUnitParameter)
         .define_method("curvature_at", &SplineBase::getCurvature)
         .define_method("variation_of_curvature_at", &SplineBase::getVariationOfCurvature)
         .define_method("simplify", static_cast<SimplifySelector>(&SplineBase::simplify))

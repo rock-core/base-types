@@ -200,10 +200,25 @@ double base::geometry::SplineBase::getCurveLength(double relative_resolution) co
     return length;
 }
 
-double SplineBase::getUnitParameter()
+double SplineBase::getCurveLength(double startParam, double relative_resolution) const
 {
-    if (end_param == start_param) return 0;
-    return (end_param - start_param) / getCurveLength();
+    return getCurveLength(startParam, end_param, relative_resolution);
+}
+
+double SplineBase::getCurveLength(double startParam, double endParam, double relative_resolution) const
+{
+    if(fabs(startParam - endParam) < 0.001)
+    {
+        return 0;
+    }
+    
+    SplineBase *subspline = getSubSpline(startParam, endParam);
+    if(!subspline)
+        throw std::runtime_error(std::string("Could not get Subpline for parameters ") + boost::lexical_cast<std::string>(startParam) + " / " + boost::lexical_cast<std::string>(endParam));
+    
+    double ret = subspline->getCurveLength(relative_resolution);
+    delete subspline;
+    return ret;
 }
 
 double SplineBase::getCurvatureMax()
@@ -216,7 +231,12 @@ double SplineBase::getCurvatureMax()
     if (has_curvature_max)
         return curvature_max;
 
-    double const delPara = getUnitParameter() * geometric_resolution;
+    //Note this is wrong, but keeps backward compability
+    double unitParam = 0;
+    if(start_param != end_param)
+        unitParam = (end_param - start_param) / getCurveLength();
+    
+    double const delPara = unitParam * geometric_resolution;
     curvature_max = 0.0;
 
     for (double p = start_param; p <= end_param; p+= delPara)
@@ -236,9 +256,10 @@ bool SplineBase::isNURBS() const
     return curve->ikind == 2 || curve->ikind == 4;
 }
 
-void SplineBase::interpolate(std::vector<double> const& points, 
-	std::vector<double> const& parameters, 
-	std::vector<CoordinateType> const& coord_types )
+void SplineBase::interpolate(const vector< double >& points, 
+                             vector< double >& parametersOut, 
+                             const vector< double >& parametersIn, 
+                             const vector< SplineBase::CoordinateType >& coord_types)
 {
     clear();
     start_param = 0.0;
@@ -262,12 +283,12 @@ void SplineBase::interpolate(std::vector<double> const& points,
     vector<int> point_types;
     if( coord_types.empty() )
     {
-	point_types.resize(point_count, 1);
+        point_types.resize(point_count, 1);
     }
     else
     {
-	assert( coord_types.size()*dimension == points.size() );
-	std::copy( coord_types.begin(), coord_types.end(), std::back_inserter( point_types ) );
+        assert( coord_types.size()*dimension == points.size() );
+        std::copy( coord_types.begin(), coord_types.end(), std::back_inserter( point_types ) );
     }
 
     // Generates curve
@@ -275,7 +296,7 @@ void SplineBase::interpolate(std::vector<double> const& points,
     int nb_unique_param;
 
     int status;
-    if (parameters.empty())
+    if (parametersIn.empty())
     {
         s1356(const_cast<double*>(&points[0]), point_types.size(), dimension, &point_types[0],
                 0, 0, 1, curve_order, start_param, &end_param, &curve, 
@@ -284,7 +305,7 @@ void SplineBase::interpolate(std::vector<double> const& points,
     else
     {
         s1357(const_cast<double*>(&points[0]), point_types.size(), dimension, &point_types[0],
-                const_cast<double*>(&parameters[0]), 
+                const_cast<double*>(&parametersIn[0]), 
                 0, 0, 1, curve_order, start_param, &end_param, &curve, 
                 &point_param, &nb_unique_param, &status);
     }
@@ -299,17 +320,33 @@ void SplineBase::interpolate(std::vector<double> const& points,
             str << ")";
         }
 
-        if (!parameters.empty())
+        if (!parametersIn.empty())
         {
             str << " with parameters ";
-            for (unsigned int c = 0; c < parameters.size(); ++c)
-                str << " " << parameters[c];
+            for (unsigned int c = 0; c < parametersIn.size(); ++c)
+                str << " " << parametersIn[c];
         }
 
         throw std::runtime_error("cannot create a spline interpolating the required points" + str.str());
     }
 
+    parametersOut.clear();
+    for(int i = 0; i < nb_unique_param; i++)
+    {
+        parametersOut.push_back(point_param[i]);
+    }
+    
     free(point_param);
+
+}
+
+
+void SplineBase::interpolate(std::vector<double> const& points, 
+	std::vector<double> const& parameters, 
+	std::vector<CoordinateType> const& coord_types )
+{
+    std::vector<double> tmp;
+    interpolate(points, tmp, parameters, coord_types);
 }
 
 void SplineBase::printCurveProperties(std::ostream& io)
@@ -1086,5 +1123,17 @@ void SplineBase::split(SplineBase& second_part, double _param)
         throw std::runtime_error("failed to split the curve at " + boost::lexical_cast<std::string>(_param));
     reset(part1);
     second_part.reset(part2);
+}
+
+SplineBase *SplineBase::getSubSpline(double start_t, double end_t) const
+{
+    int result;
+    SISLCurve *newCurve;
+    s1712(curve, start_t, end_t, &newCurve, &result);
+    
+    if(result < 0)
+        return NULL;
+    
+    return new SplineBase(getGeometricResolution(), newCurve);
 }
 

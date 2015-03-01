@@ -49,12 +49,17 @@ namespace geometry {
         void setCurveOrder(int value) { curve_order = value; }
         /** Returns the order of the curve */
         int    getCurveOrder() const { return curve_order; }
+        
         /** Returns the length of the curve in geometric space
          *
          * @param relative_error the acceptable error on the final result w.r.t.
          *   the real curve length
          */
         double getCurveLength(double relative_resolution = 0.01) const;
+        double getCurveLength(double startParam, double relative_resolution) const;
+        double getCurveLength(double startParam, double endParam, double relative_resolution) const;
+        
+        
         /** Returns the maximum curvature of the curve */
         double getCurvatureMax();
         double getStartParam() const { return start_param; };
@@ -73,13 +78,6 @@ namespace geometry {
          * at least once.
          */
         SISLCurve* getSISLCurve();
-
-        /** Returns the length-to-parametric scale
-         *
-         * I.e. it returns the number of parametric units that lie in one
-         * curve length unit
-         */
-        double getUnitParameter();
       
         /** Returns the curvature at the given position
          *
@@ -134,8 +132,13 @@ namespace geometry {
 	 *        coordinates param.
          */
         void interpolate(std::vector<double> const& coordinates, 
-		std::vector<double> const& parameters = std::vector<double>(), 
-		std::vector<CoordinateType> const& coord_types = std::vector<CoordinateType>() );
+                std::vector<double> const& parameters = std::vector<double>(), 
+                std::vector<CoordinateType> const& coord_types = std::vector<CoordinateType>() );
+
+        void interpolate(std::vector<double> const& coordinates, 
+                std::vector<double> &parameterOut, 
+                std::vector<double> const& parameterIn  = std::vector<double>(), 
+                std::vector<CoordinateType> const& coord_types = std::vector<CoordinateType>() );
 
         /** Tests for intersection between two curves
          */
@@ -204,6 +207,12 @@ namespace geometry {
          */
         void crop(double start_t, double end_t);
 
+        /**
+         * Returns a new curve, that represents the
+         * spline between start_t and end_t
+         * */
+        SplineBase *getSubSpline(double start_t, double end_t) const;
+        
         int getCoordinatesStride() const
         {
             if (isNURBS()) return dimension + 1;
@@ -372,7 +381,8 @@ namespace geometry {
     {
     public:
         typedef typename SplineBaseClass<DIM>::type base_t;
-        typedef Eigen::Matrix<double, DIM, 1, Eigen::DontAlign>     vector_t;
+        typedef Eigen::Matrix<double, DIM, 1, Eigen::DontAlign> vector_t;
+        typedef Eigen::Matrix<double, DIM, 1, Eigen::AutoAlign> vector_ta;
         typedef Eigen::Transform<double, DIM, Eigen::Affine> transform_t;
 
         explicit Spline(double geometric_resolution = 0.1, int order = 3)
@@ -555,6 +565,55 @@ namespace geometry {
             SplineBase::interpolate(coordinates, parameters, coord_types);
         }
 
+        void interpolate(std::vector<vector_t> const& points, 
+                std::vector<double> &parametersOut,
+                std::vector<double> const& parametersIn = std::vector<double>(),
+                std::vector<SplineBase::CoordinateType> const& coord_types = std::vector<SplineBase::CoordinateType>() )
+        {
+            std::vector<double> coordinates;
+            for (size_t i = 0; i < points.size(); ++i)
+                coordinates.insert(coordinates.end(), points[i].data(), points[i].data() + DIM);
+            SplineBase::interpolate(coordinates, parametersOut, parametersIn, coord_types);
+        }
+
+        void interpolate(std::vector<vector_ta> const& points, 
+                std::vector<double> &parametersOut,
+                std::vector<double> const& parametersIn = std::vector<double>(),
+                std::vector<SplineBase::CoordinateType> const& coord_types = std::vector<SplineBase::CoordinateType>() )
+        {
+            std::vector<double> coordinates;
+            for (size_t i = 0; i < points.size(); ++i)
+                coordinates.insert(coordinates.end(), points[i].data(), points[i].data() + DIM);
+            SplineBase::interpolate(coordinates, parametersOut, parametersIn, coord_types);
+        }
+
+        /** Compute the curve from the given set of points */
+        void interpolate(std::vector<vector_ta> const& points, 
+                std::vector<double> const& parameters = std::vector<double>(),
+                std::vector<SplineBase::CoordinateType> const& coord_types = std::vector<SplineBase::CoordinateType>() )
+        {
+            std::vector<double> coordinates;
+            for (size_t i = 0; i < points.size(); ++i)
+                coordinates.insert(coordinates.end(), points[i].data(), points[i].data() + DIM);
+            SplineBase::interpolate(coordinates, parameters, coord_types);
+        }
+        
+        void interpolate(std::vector<double> const& coordinates, 
+                std::vector<double> const& parameters = std::vector<double>(), 
+                std::vector<SplineBase::CoordinateType> const& coord_types = std::vector<SplineBase::CoordinateType>() )
+        {
+            return SplineBase::interpolate(coordinates, parameters, coord_types);
+        };
+
+        void interpolate(std::vector<double> const& coordinates, 
+                std::vector<double> &parameterOut, 
+                std::vector<double> const& parameterIn  = std::vector<double>(), 
+                std::vector<SplineBase::CoordinateType> const& coord_types = std::vector<SplineBase::CoordinateType>() )
+        {
+            return SplineBase::interpolate(coordinates, parameterOut, parameterIn, coord_types);
+        };
+
+        
         /** Returns the distance between the given point and the curve
          */
         double distanceTo(vector_t const& _pt) const
@@ -565,7 +624,7 @@ namespace geometry {
         }
 
         template<typename Test>
-        std::pair<double, double> dichotomic_search(double start_t, double end_t, Test test, double resolution, double parameter_threshold)
+        std::pair<double, double> dichotomic_search(double start_t, double end_t, Test test, double resolution, double parameter_threshold) const
         {
             return this->dichotomic_search(
                     start_t, this->getPoint(start_t),
@@ -580,8 +639,8 @@ namespace geometry {
          * will be the last point in the curve
          */
         template<typename Test>
-        std::pair<double, double> dichotomic_search(double start_t, base::Vector3d const& start_p, double end_t, base::Vector3d const& end_p,
-                Test test, double resolution, double parameter_threshold)
+        std::pair<double, double> dichotomic_search(double start_t, vector_t const& start_p, double end_t, vector_t const& end_p,
+                Test test, double resolution, double parameter_threshold) const
         {
             std::pair<bool, double> test_result =
                 test(start_t, end_t, *this);
@@ -592,7 +651,7 @@ namespace geometry {
                 return std::make_pair(start_t, end_t);
 
             double middle_t = (start_t + end_t) / 2;
-            base::Vector3d middle_p = getPoint(middle_t);
+            vector_t middle_p = getPoint(middle_t);
             std::pair<double, double> result;
 
             result = dichotomic_search(start_t, start_p, middle_t, middle_p, test, resolution, parameter_threshold);
@@ -855,9 +914,11 @@ namespace geometry {
     // This is for GCCXML parsing
     struct __gccxml_workaround_spline {
         base::geometry::Spline<1> instanciation1;
+        base::geometry::Spline<2> instanciation2;
         base::geometry::Spline<3> instanciation3;
     };
     typedef base::geometry::Spline<1> Spline1;
+    typedef base::geometry::Spline<2> Spline2;
     typedef base::geometry::Spline<3> Spline3;
     
     inline std::ostream& operator << (std::ostream& io, base::geometry::Spline<3> const& s)
