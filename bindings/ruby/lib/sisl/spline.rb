@@ -301,7 +301,7 @@ module SISL
 		else
 		    pp.text "dimensions=[#{start_point}, #{end_point}]"
 		    pp.breakable		
-		    pp.text "lenght=[#{curve_length}]"
+		    pp.text "length=[#{curve_length}]"
 		    pp.breakable
 		    pp.text "params=[#{start_param}, #{end_param}]"
 		end
