@@ -287,7 +287,11 @@ void SplineBase::interpolate(const vector< double >& points,
     }
     else
     {
-        assert( coord_types.size()*dimension == points.size() );
+        if (coord_types.size() * dimension != points.size()) {
+            throw std::runtime_error("base::types::Spline::interpolate(): "
+                                     "'points.size()' does not match "
+                                     "expectation");
+        }
         std::copy( coord_types.begin(), coord_types.end(), std::back_inserter( point_types ) );
     }
 
@@ -846,8 +850,11 @@ double SplineBase::join(SplineBase const& other, double tolerance, bool with_tan
     int jnbpar;
     int ret;
     
-    //be shure joining_Types has the right size
-    assert(joining_points.size() / dim <= 4);
+    //be sure joining_Types has the right size
+    if (joining_points.size() / dim > 4) {
+        throw std::runtime_error("base::SplineBase::join(): the size of "
+                                 "'joining_points' is unexpectedly big");
+    }
 
     s1356(&joining_points[0], joining_points.size() / dim, dim, joining_types, 0, 0, 1, getCurveOrder(), 0,
             &end_par, &raw_intermediate_curve, &gpar, &jnbpar, &ret);
@@ -1136,4 +1143,3 @@ SplineBase *SplineBase::getSubSpline(double start_t, double end_t) const
     
     return new SplineBase(getGeometricResolution(), newCurve);
 }
-
