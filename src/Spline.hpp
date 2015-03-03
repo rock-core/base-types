@@ -259,6 +259,10 @@ namespace geometry {
                 std::vector<double>& points,
                 std::vector< std::pair<double, double> >& segments, double _geores) const;
 
+        /**
+         * Warning, do not use this method, it is broken and returns the wrong result
+         * 
+         * */
         double findOneClosestPoint(double const* _pt, double _guess, double _geores) const;
         void findClosestPoints(double const* ref_point,
                 std::vector<double>& _result_points,
@@ -829,27 +833,83 @@ namespace geometry {
         double findOneClosestPoint(vector_t const& _pt) const
         { return findOneClosestPoint(_pt, SplineBase::getGeometricResolution()); }
 
-        /** \overload
-         *
-         * Calls findOneClosestPoint using the start parameter as the guess
-         * parameter. I.e. it will always return the point closest to the start
-         * of the curve.
+        bool isCloser(const vector_t &p, const double &squaredDist, const double param, vector_t &pOfParam, double &squaredDistOfParam) const
+        {
+            vector_t curPoint = getPoint(param);
+            double curSquaredDist = (curPoint - p).squaredNorm();
+            if( curSquaredDist < squaredDist )
+            {
+                pOfParam = curPoint;
+                squaredDistOfParam = curSquaredDist;
+                return true;
+            }
+            
+            return false;
+        }
+        
+        /** 
+         * This method return the closest point in the curve to the given
+         * point _pt.
          */
         double findOneClosestPoint(vector_t const& _pt, double _geometric_resolution) const
-        { return findOneClosestPoint(_pt, SplineBase::getStartParam(), _geometric_resolution); }
+        { 
+            if (!SplineBase::getSISLCurve())
+                return SplineBase::getStartParam();
+
+            std::vector<double> points;
+            std::vector< std::pair<double, double> > curves;
+            findClosestPoints(_pt, points, curves, _geometric_resolution);
+            
+            vector_t closestPoint;
+            double closestParam;
+            double closestSquaredDist = std::numeric_limits< double >::max();
+            if (points.empty())
+            {
+                if (curves.empty())
+                    throw std::logic_error("no closest point returned by findClosestPoints");
+                else
+                {
+                    closestPoint = getPoint(curves.front().first);
+                    closestParam = curves.front().first;
+                    closestSquaredDist = (_pt - closestPoint).squaredNorm();
+                }
+            }
+            else
+            {
+                closestPoint = getPoint(points.front());
+                closestParam = points.front();
+                closestSquaredDist = (_pt - closestPoint).squaredNorm();
+                for(std::vector<double>::iterator it = points.begin() + 1; it != points.end(); ++it) 
+                {
+                    if(isCloser(_pt, closestSquaredDist, *it, closestPoint, closestSquaredDist))
+                        closestParam = *it;
+                }
+            }
+
+            for (std::vector< std::pair<double, double> >::const_iterator it = curves.begin();
+                    it != curves.end(); ++it)
+            {
+                if(isCloser(_pt, closestSquaredDist, it->first, closestPoint, closestSquaredDist))
+                    closestParam = it->first;
+
+                if(isCloser(_pt, closestSquaredDist, it->second, closestPoint, closestSquaredDist))
+                    closestParam = it->second;
+            }
+            return closestParam;
+        }
 
         /** Returns a single closest point to _pt
          *
          * This is a convenience method that calls findClosestPoints and returns
-         * one single parameter in the values returned. The returned parameter
-         * is the closes point closest to _guess.
+         * one single parameter in the values returned. 
          *
          * @return the parameter of the found closes point
+         * @param _guess this paramter is ignored. It is only there for backward compability
          * @throw std::logic_error if no points have been found (should not happen)
          * @see localClosestPointSearch findClosestPoints
          */
         double findOneClosestPoint(vector_t const& _pt, double _guess, double _geometric_resolution) const
-        { return SplineBase::findOneClosestPoint(_pt.data(), _guess, _geometric_resolution); }
+        { return findOneClosestPoint(_pt, _geometric_resolution); }
 
         /** \overload
          */
