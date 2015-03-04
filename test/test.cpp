@@ -815,7 +815,7 @@ BOOST_AUTO_TEST_CASE( angle_test )
                         }
                     }
                     BOOST_CHECK(ret.size() == 1);
-                    assert(fabs((2*M_PI - base::Angle::fromDeg(1).getRad()) - sum) < 0.000001);
+                    BOOST_CHECK(fabs((2*M_PI - base::Angle::fromDeg(1).getRad()) - sum) < 0.000001);
                 }
                 else
                 {
@@ -828,7 +828,7 @@ BOOST_AUTO_TEST_CASE( angle_test )
                     }
 
                     BOOST_CHECK(ret.size() == 2);
-                    assert(fabs((2*M_PI - base::Angle::fromDeg(2).getRad()) - sum) < 0.000001);
+                    BOOST_CHECK(fabs((2*M_PI - base::Angle::fromDeg(2).getRad()) - sum) < 0.000001);
                 }
             }
         }

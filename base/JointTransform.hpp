@@ -33,13 +33,23 @@ struct JointTransformVector : public base::NamedVector<JointTransform>
      */
     void setRigidBodyStates( const base::samples::Joints& joints, std::vector<base::samples::RigidBodyState>& rbs ) const
     {
-	assert( !joints.names.empty() );
+        if (joints.names.empty()) {
+            throw std::runtime_error("base::JointTransformVector::"
+                                     "setRigidBodyStates(): the vector "
+                                     "'joints.names()' is empty");
+        }
 
 	rbs.resize( joints.size() );
 	for( size_t i=0; i<joints.size(); i++ )
 	{
-	    assert( joints[i].hasPosition() );
-	    const JointTransform &jt( getElementByName( joints.names[i] ) );
+            if (!joints[i].hasPosition()) {
+                std::stringstream ss;
+                ss << "base::JointTransformVector::setRigidBodyStates(): "
+                      "the joint 'joints[" << i << "]' has no position";
+                throw std::runtime_error(ss.str());
+            }
+
+            const JointTransform &jt( getElementByName( joints.names[i] ) );
 
 	    rbs[i].time = joints.time;
 	    rbs[i].sourceFrame = jt.sourceFrame;

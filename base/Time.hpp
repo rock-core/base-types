@@ -10,7 +10,6 @@
 #include <ostream>
 #include <iomanip>
 #include <stdexcept>
-#include <assert.h>
 
 namespace base
 {
@@ -96,8 +95,10 @@ namespace base
                 case Microseconds:
                     sprintf(buffer,"%s:%06d", time, uSecs);
                     break;
-                default: 
-                    assert(-1);
+                default:
+                    throw std::invalid_argument(
+                        "base::Time::toString(): invalid "
+                        "value in switch-statement");
             }
 
 	    return std::string(buffer);
@@ -205,8 +206,15 @@ namespace base
                     case Microseconds:
                         sscanf(usecsString.c_str(), "%06d", &usecs);
                         break;
+                    case Seconds:
+                        throw std::invalid_argument(
+                            "base::Time::fromString(); "
+                            "'Seconds' is an invalid case "
+                            "here");
                     default:
-                        assert(-1);
+                        throw std::invalid_argument("base::Time::fromString(): "
+                                                    "invalid value in "
+                                                    "switch-statement");
                 }
             }
 
