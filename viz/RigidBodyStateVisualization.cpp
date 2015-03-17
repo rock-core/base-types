@@ -43,11 +43,11 @@ void RigidBodyStateVisualization::setColor(const Vec4d& color, Geode* geode)
 bool RigidBodyStateVisualization::isPositionDisplayForced() const
 { return forcePositionDisplay; }
 void RigidBodyStateVisualization::setPositionDisplayForceFlag(bool flag)
-{ forcePositionDisplay = flag; }
+{ forcePositionDisplay = flag; emit propertyChanged("forcePositionDisplay"); }
 bool RigidBodyStateVisualization::isOrientationDisplayForced() const
 { return forceOrientationDisplay; }
 void RigidBodyStateVisualization::setOrientationDisplayForceFlag(bool flag)
-{ forceOrientationDisplay = flag; }
+{ forceOrientationDisplay = flag; emit propertyChanged("forceOrientationDisplay"); }
 
 ref_ptr<osg::Group> RigidBodyStateVisualization::createSimpleSphere(double size)
 {   
@@ -111,6 +111,7 @@ double RigidBodyStateVisualization::getMainSphereSize() const
 void RigidBodyStateVisualization::setMainSphereSize(double size)
 {
     main_size = size;
+    emit propertyChanged("sphereSize");
     // This triggers an update of the model if we don't have a custom model
     setSize(total_size);
 }
@@ -118,6 +119,7 @@ void RigidBodyStateVisualization::setMainSphereSize(double size)
 void RigidBodyStateVisualization::setSize(double size)
 {
     total_size = size;
+    emit propertyChanged("size");
     if (body_type == BODY_SIMPLE)
         resetModel(size);
     else if (body_type == BODY_SPHERE)
@@ -199,7 +201,7 @@ void RigidBodyStateVisualization::loadModel(std::string const& path)
 }
 
 void RigidBodyStateVisualization::displayCovariance(bool enable)
-{ covariance = enable; }
+{ covariance = enable; emit propertyChanged("displayCovariance"); }
 bool RigidBodyStateVisualization::isCovarianceDisplayed() const
 { return covariance; }
 
@@ -207,7 +209,7 @@ void RigidBodyStateVisualization::setColor(base::Vector3d const& color)
 { this->color = color; }
 
 void RigidBodyStateVisualization::displayCovarianceWithSamples(bool enable)
-{ covariance_with_samples = enable; }
+{ covariance_with_samples = enable; emit propertyChanged("displayCovarianceWithSamples"); }
 bool RigidBodyStateVisualization::isCovarianceDisplayedWithSamples() const
 { return covariance_with_samples; }
 

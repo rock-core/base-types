@@ -151,7 +151,7 @@ osg::ref_ptr<osg::Node> LaserScanVisualization::cloneCurrentViz()
 }
 
 bool LaserScanVisualization::isYForwardModeEnabled() const { return mYForward; }
-void LaserScanVisualization::setYForwardMode(bool enabled) { mYForward = enabled; }
+void LaserScanVisualization::setYForwardMode(bool enabled) { mYForward = enabled; emit propertyChanged("YForward"); }
 
 void LaserScanVisualization::setColorize(bool value){colorize = value;emit propertyChanged("Colorize");}
 bool LaserScanVisualization::isColorizeEnabled()const { return colorize; }

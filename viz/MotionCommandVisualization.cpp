@@ -161,6 +161,7 @@ void MotionCommandVisualization::drawRotation()
 
 void MotionCommandVisualization::setFrontAxis(FrontAxis front_axis) {
     mFrontAxis = front_axis;
+    emit propertyChanged("frontAxis");
 }
 
 MotionCommandVisualization::FrontAxis MotionCommandVisualization::getFrontAxis() {
