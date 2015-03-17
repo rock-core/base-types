@@ -34,6 +34,7 @@ class SonarGroundDistanceVisualization : public Vizkit3DPlugin<base::samples::Ri
     public slots: 
         void setBeamWidth(double _beam_width){
             beam_width = _beam_width/180.0*M_PI;
+            emit propertyChanged("BeamWidth");
         }
         
         double getBeamWidth() const{

@@ -31,6 +31,7 @@ void WaypointVisualization::setColor(QColor q_color)
     color = osg::Vec4(q_color.redF(), q_color.greenF(), 
             q_color.blueF(), q_color.alphaF());
     setDirty();
+    emit propertyChanged("Color");
 }
 
 QColor WaypointVisualization::getColor() const

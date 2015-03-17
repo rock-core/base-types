@@ -64,6 +64,7 @@ void PointcloudVisualization::setPointSize(double size)
         osg::ref_ptr<osg::Point> pt = new osg::Point(size);
         pointGeom->getOrCreateStateSet()->setAttribute(pt, osg::StateAttribute::ON);
     }
+    emit propertyChanged("pointSize");
 }
 
 double PointcloudVisualization::getPointSize()

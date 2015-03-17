@@ -43,7 +43,7 @@ class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>
 
     public slots:
         int getMaxNumberOfPoints(){return max_number_of_points;};
-        void setMaxNumberOfPoints(int points){max_number_of_points = points;};
+        void setMaxNumberOfPoints(int points){max_number_of_points = points; emit propertyChanged("MaxPoints");};
 	double getLineWidth();
 	void setLineWidth(double line_width);
         void setColor(QColor color);

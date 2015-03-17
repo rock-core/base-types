@@ -55,6 +55,7 @@ void TrajectoryVisualization::setColor(double r, double g, double b, double a)
 void TrajectoryVisualization::setColor(const base::Vector3d& color)
 {
     setColor(color.x(), color.y(), color.z(), 1.0);
+    emit propertyChanged("Color");
 }
 
 
@@ -132,7 +133,7 @@ void TrajectoryVisualization::updateDataIntern( const base::Vector3d& data )
 void TrajectoryVisualization::setColor(QColor color)
 {
     setColor( color.redF(), color.greenF(), color.blueF(), color.alphaF() );
-    emit propertyChanged("color");
+    emit propertyChanged("Color");
 }
 
 QColor TrajectoryVisualization::getColor() const
@@ -157,6 +158,6 @@ void TrajectoryVisualization::setLineWidth(double line_width)
     stateset->setAttributeAndModes(linewidth,osg::StateAttribute::ON);
     stateset->setMode(GL_LIGHTING,osg::StateAttribute::OFF);
 
-    emit propertyChanged("line_width");
+    emit propertyChanged("LineWidth");
 }
 }
