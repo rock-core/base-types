@@ -1,6 +1,10 @@
 #ifndef BASE_TYPES_ACTUATORS_VEHICLES_HH
 #define BASE_TYPES_ACTUATORS_VEHICLES_HH
 
+#define ROCK_DEPRECATED_HEADER_SINCE 0
+#warning "the actuators:: functionality has been replaced by base::samples::Joints and base::commands::Joints"
+#include <base/DeprecatedHeader.hpp>
+
 namespace base {
     namespace actuators {
         /** Standard joint order for all 4-wheeled systems */

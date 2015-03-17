@@ -1,6 +1,10 @@
 #ifndef BASE_ACTUATORS_STATUS_HH
 #define BASE_ACTUATORS_STATUS_HH
 
+#define ROCK_DEPRECATED_HEADER_SINCE 0
+#warning "the actuators:: functionality has been replaced by base::samples::Joints and base::commands::Joints"
+#include <base/DeprecatedHeader.hpp>
+
 #include <base/Time.hpp>
 #include <base/Float.hpp>
 #include <vector>

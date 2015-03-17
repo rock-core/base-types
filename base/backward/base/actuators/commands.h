@@ -1,6 +1,10 @@
 #ifndef BASE_ACTUATORS_COMMANDS_H
 #define BASE_ACTUATORS_COMMANDS_H
 
+#define ROCK_DEPRECATED_HEADER_SINCE 0
+#warning "the actuators:: functionality has been replaced by base::samples::Joints and base::commands::Joints, in addition an equivalent of the PIDValues structure can now be found in the control/motor_controller package"
+#include <base/DeprecatedHeader.hpp>
+
 #include <vector>
 #include <base/Time.hpp>
 
