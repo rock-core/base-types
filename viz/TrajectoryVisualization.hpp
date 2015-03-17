@@ -6,6 +6,7 @@
 #include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <base/geometry/Spline.hpp>
 #include <base/Trajectory.hpp>
+#include <base/samples/RigidBodyState.hpp>
 
 namespace vizkit3d 
 {
@@ -40,6 +41,8 @@ class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>
         { Vizkit3DPlugin<base::Vector3d>::updateData(data); }
         Q_INVOKABLE void updateTrajectory(const base::Vector3d& data)
         { updateData(data); }
+        Q_INVOKABLE void updateTrajectory(const base::samples::RigidBodyState& data)
+        { updateData(data.position); }
 
     public slots:
         int getMaxNumberOfPoints(){return max_number_of_points;};
