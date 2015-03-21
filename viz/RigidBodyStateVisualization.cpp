@@ -5,9 +5,9 @@
 #include <osg/PositionAttitudeTransform>
 #include <osgDB/ReadFile>
 #include <osg/Material>
+#include <osgFX/BumpMapping>
 
 using namespace osg;
-
 namespace vizkit3d 
 {
 
@@ -18,10 +18,17 @@ RigidBodyStateVisualization::RigidBodyStateVisualization(QObject* parent)
     , color(1, 1, 1)
     , total_size(1)
     , main_size(0.1)
+    , translation(0, 0, 0)
+    , rotation(0, 0, 0, 1)
     , body_type(BODY_NONE)
+    , texture_dirty(false)
+    , bump_mapping_dirty(false)
     , forcePositionDisplay(false)
     , forceOrientationDisplay(false)
 {
+    state = base::samples::RigidBodyState::invalid();
+    state.position = base::Vector3d::Zero();
+    state.orientation = base::Quaterniond::Identity();
 }
 
 RigidBodyStateVisualization::~RigidBodyStateVisualization()
@@ -49,7 +56,101 @@ bool RigidBodyStateVisualization::isOrientationDisplayForced() const
 void RigidBodyStateVisualization::setOrientationDisplayForceFlag(bool flag)
 { forceOrientationDisplay = flag; emit propertyChanged("forceOrientationDisplay"); }
 
-ref_ptr<osg::Group> RigidBodyStateVisualization::createSimpleSphere(double size)
+void RigidBodyStateVisualization::setTexture(QString const& path)
+{ return setTexture(path.toStdString()); }
+void RigidBodyStateVisualization::setTexture(std::string const& path)
+{
+    if (path.empty())
+        return clearTexture();
+
+    image = osgDB::readImageFile(path);
+    texture_dirty = true;
+}
+
+void RigidBodyStateVisualization::clearTexture()
+{
+    image.release();
+    texture_dirty = true;
+}
+
+void RigidBodyStateVisualization::addBumpMapping(
+                QString const& diffuse_color_map_path,
+                QString const& normal_map_path)
+{ return addBumpMapping(diffuse_color_map_path.toStdString(),
+        normal_map_path.toStdString()); }
+void RigidBodyStateVisualization::addBumpMapping(
+                std::string const& diffuse_color_map_path,
+                std::string const& normal_map_path)
+{
+    if (!body_model->asGeode())
+    {
+        std::cerr << "model is not a geometry, cannot use bump mapping" << std::endl;
+        return;
+    }
+
+    // Setup the textures
+    diffuse_image = osgDB::readImageFile(diffuse_color_map_path);
+    normal_image  = osgDB::readImageFile(normal_map_path);
+
+    // And add bump mapping
+    osgFX::BumpMapping* bump_mapping = new osgFX::BumpMapping();
+    bump_mapping->setLightNumber(0);
+    bump_mapping->setNormalMapTextureUnit(1);
+    bump_mapping->setDiffuseTextureUnit(2);
+    this->bump_mapping = bump_mapping;
+    bump_mapping_dirty = true;
+}
+
+void RigidBodyStateVisualization::updateTexture()
+{
+    ref_ptr<StateSet> state = body_model->getOrCreateStateSet();
+    if (!image)
+    {
+        state->setTextureMode(0, GL_TEXTURE_2D, StateAttribute::OFF);
+        return;
+    }
+    else
+    {
+        texture->setImage(image.get());
+        state->setTextureAttributeAndModes(0, texture, StateAttribute::ON);
+    }
+}
+
+void RigidBodyStateVisualization::updateBumpMapping()
+{
+    ref_ptr<StateSet> state = body_model->getOrCreateStateSet();
+
+    if (!bump_mapping)
+    {
+        diffuse_image.release();
+        normal_image.release();
+        state->setTextureMode(1, GL_TEXTURE_2D, StateAttribute::OFF);
+        state->setTextureMode(2, GL_TEXTURE_2D, StateAttribute::OFF);
+        return;
+    }
+    else
+    {
+
+        ref_ptr<Geometry> geometry = body_model->asGeode()->getDrawable(0)->asGeometry();
+        ref_ptr<Array> tex_coord = geometry->getTexCoordArray(0);
+        geometry->setTexCoordArray(1, tex_coord);
+        geometry->setTexCoordArray(2, tex_coord);
+
+        diffuse_texture->setImage(diffuse_image.get());
+        normal_texture->setImage(normal_image.get());
+        state->setTextureAttributeAndModes(1, normal_texture, StateAttribute::ON);
+        state->setTextureAttributeAndModes(2, diffuse_texture, StateAttribute::ON);
+        bump_mapping->prepareChildren();
+    }
+}
+
+void RigidBodyStateVisualization::removeBumpMapping()
+{
+    bump_mapping.release();
+    bump_mapping_dirty = true;
+}
+
+ref_ptr<Group> RigidBodyStateVisualization::createSimpleSphere(double size)
 {   
     ref_ptr<Group> group = new Group();
     
@@ -176,6 +277,13 @@ void RigidBodyStateVisualization::loadModel(std::string const& path)
     ref_ptr<Node> model = osgDB::readNodeFile(path);
     body_type  = BODY_CUSTOM_MODEL;
     body_model = model;
+    if (!body_model->asGeode())
+        std::cerr << "model is not a geode, using bump mapping will not be possible" << std::endl;
+    else if (!body_model->asGeode()->getDrawable(0))
+        std::cerr << "model does not contain a mesh, using bump mapping will not be possible" << std::endl;
+    else if (!body_model->asGeode()->getDrawable(0)->asGeometry())
+        std::cerr << "model does not contain a mesh, using bump mapping will not be possible" << std::endl;
+
     model_path = QString::fromStdString(path);
     //set plugin name
     if(vizkit3d_plugin_name.isEmpty())
@@ -198,6 +306,21 @@ void RigidBodyStateVisualization::loadModel(std::string const& path)
 
     setDirty();
     emit propertyChanged("modelPath");
+}
+QVector3D RigidBodyStateVisualization::getTranslation() const
+{
+    return QVector3D(translation.x(), translation.y(), translation.z());
+}
+void RigidBodyStateVisualization::setTranslation(QVector3D const& v)
+{
+    translation = osg::Vec3(v.x(), v.y(), v.z());
+    setDirty();
+}
+
+void RigidBodyStateVisualization::setRotation(QQuaternion const& q)
+{
+    rotation = osg::Quat(q.x(), q.y(), q.z(), q.scalar());
+    setDirty();
 }
 
 void RigidBodyStateVisualization::displayCovariance(bool enable)
@@ -222,6 +345,23 @@ ref_ptr<Node> RigidBodyStateVisualization::createMainNode()
         resetModel(total_size);
     body_pose->addChild(body_model);
     group->addChild(body_pose);
+
+    texture = new osg::Texture2D;
+    texture->setWrap(Texture::WRAP_S, Texture::REPEAT);
+    texture->setWrap(Texture::WRAP_T, Texture::REPEAT);
+    texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR_MIPMAP_LINEAR);
+    texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+    diffuse_texture = new osg::Texture2D;
+    diffuse_texture->setWrap(Texture::WRAP_S, Texture::REPEAT);
+    diffuse_texture->setWrap(Texture::WRAP_T, Texture::REPEAT);
+    diffuse_texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR_MIPMAP_LINEAR);
+    diffuse_texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+    normal_texture = new osg::Texture2D;
+    normal_texture->setWrap(Texture::WRAP_S, Texture::REPEAT);
+    normal_texture->setWrap(Texture::WRAP_T, Texture::REPEAT);
+    normal_texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR_MIPMAP_LINEAR);
+    normal_texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+
     return group;
 }
 
@@ -249,14 +389,26 @@ void RigidBodyStateVisualization::updateMainNode(Node* node)
     }
 
     // Reset the body model if needed
-    osg::Node* body_node = body_pose->getChild(0);
-    if (body_node != this->body_model)
-        body_pose->setChild(0, this->body_model);
+    Node* body_node = body_pose->getChild(0);
+    if (bump_mapping && body_node != bump_mapping)
+    {
+        bump_mapping->addChild(body_model);
+        body_pose->setChild(0, bump_mapping);
+    }
+    else if (body_node != body_model)
+        body_pose->setChild(0, body_model);
+
+    if (texture_dirty)
+        updateTexture();
+    if (bump_mapping_dirty)
+        updateBumpMapping();
 
     if (forcePositionDisplay || state.hasValidPosition())
     {
-        pos.set(state.position.x(), state.position.y(), state.position.z());
-        body_pose->setPosition(pos);
+	osg::Vec3d pos(
+                state.position.x(), state.position.y(), state.position.z());
+        
+        body_pose->setPosition(pos + translation);
     }
     if (needs_uncertainty)
     {
@@ -270,11 +422,11 @@ void RigidBodyStateVisualization::updateMainNode(Node* node)
     }
     if (forceOrientationDisplay || state.hasValidOrientation())
     {
-        orientation.set(state.orientation.x(),
+	osg::Quat orientation(state.orientation.x(),
                 state.orientation.y(),
                 state.orientation.z(),
                 state.orientation.w());
-        body_pose->setAttitude(orientation);
+        body_pose->setAttitude(rotation * orientation);
     }
 }
 
