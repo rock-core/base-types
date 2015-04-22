@@ -28,14 +28,17 @@
 #include <base/samples/Pressure.hpp>
 #include <base/samples/RigidBodyAcceleration.hpp>
 #include <base/samples/RigidBodyState.hpp>
+#include <base/samples/BodyState.hpp>
 #include <base/samples/SonarBeam.hpp>
 #include <base/samples/SonarScan.hpp>
 #include <base/samples/DepthMap.hpp>
+#include <base/Transformation.hpp>
 #include <base/Temperature.hpp>
 #include <base/Time.hpp>
 #include <base/TimeMark.hpp>
 #include <base/Trajectory.hpp>
 #include <base/Waypoint.hpp>
+#include <base/Twist.hpp>
 
 #ifdef SISL_FOUND
 #include <base/Trajectory.hpp>
@@ -49,6 +52,73 @@
 #include <Eigen/Geometry>
 
 using namespace std;
+
+BOOST_AUTO_TEST_CASE(twist_validity)
+{
+    base::Twist velocity;
+    BOOST_CHECK(velocity.translation() == base::Vector3d::Zero());
+    BOOST_CHECK(velocity.rotation() == base::Vector3d::Zero());
+    BOOST_CHECK(velocity.hasValidVelocity() == true);
+    BOOST_CHECK(velocity.hasValidUncertainty() == false);
+    std::cout<<"Printing Twist\n";
+    std::cout<<velocity<<std::endl;
+    velocity.setCovariance(base::Matrix6d::Identity());
+    std::cout<<"Printing Twist\n";
+    std::cout<<velocity<<std::endl;
+    BOOST_CHECK(velocity.hasValidUncertainty() == true);
+    velocity.invalidateVelocity();
+    BOOST_CHECK(velocity.hasValidVelocity() == false);
+    BOOST_CHECK(velocity.hasValidUncertainty() == true);
+    velocity.invalidateUncertainty();
+    BOOST_CHECK(velocity.hasValidVelocity() == false);
+    BOOST_CHECK(velocity.hasValidUncertainty() == false);
+}
+
+BOOST_AUTO_TEST_CASE(twist_operations)
+{
+    base::Twist vel1, vel2, vel3;
+    base::Vector6d vec;
+    vec<< 1.0,1.0,1.0,0.3,0.3,0.3;
+    vel1.setVelocity(vec);
+    vel2.setVelocity(vec);
+    vel3 = vel1 * vel2;
+    BOOST_CHECK(vel3.translation() == Eigen::Vector3d::Zero());
+    BOOST_CHECK(vel3.rotation() == Eigen::Vector3d::Zero());
+    vel3 = vel1 - vel2;
+    BOOST_CHECK(vel3.translation() == Eigen::Vector3d::Zero());
+    BOOST_CHECK(vel3.rotation() == Eigen::Vector3d::Zero());
+    vel3 = -vel1 + vel2;
+    BOOST_CHECK(vel3.translation() == Eigen::Vector3d::Zero());
+    BOOST_CHECK(vel3.rotation() == Eigen::Vector3d::Zero());
+}
+
+BOOST_AUTO_TEST_CASE(body_state_validity)
+{
+    base::samples::BodyState bs;
+    bs.initUnknown();
+    // check if values are valid
+    BOOST_CHECK(bs.hasValidPose());
+    BOOST_CHECK(!bs.hasValidPoseCovariance());
+    BOOST_CHECK(bs.hasValidVelocity());
+    BOOST_CHECK(!bs.hasValidVelocityCovariance());
+
+    bs.pose.setCovariance(base::Matrix6d::Identity());
+    bs.velocity.setCovariance(base::Matrix6d::Identity());
+    BOOST_CHECK(bs.hasValidPoseCovariance());
+    BOOST_CHECK(bs.hasValidVelocityCovariance());
+    // check std::cout operator when valid uncertainty
+    std::cout<<"Body State\n"<<bs<<std::endl;
+
+    bs.invalidate();
+    // check if values are not valid
+    BOOST_CHECK(!bs.hasValidPose());
+    BOOST_CHECK(!bs.hasValidPoseCovariance());
+    BOOST_CHECK(!bs.hasValidVelocityCovariance());
+    BOOST_CHECK(!bs.hasValidVelocityCovariance());
+
+    // check std::cout operator when not valid uncertainty
+    std::cout<<"Body State\n"<<bs<<std::endl;
+}
 
 BOOST_AUTO_TEST_CASE(joint_state)
 {
@@ -355,9 +425,9 @@ BOOST_AUTO_TEST_CASE( laser_scan_test )
     BOOST_CHECK(abs(points[1].y()-( sin(M_PI*0.25+laser_scan.angular_resolution))) < 0.000001);
     BOOST_CHECK(abs(points[2].x()-( -1+2.0*cos(M_PI*0.25+laser_scan.angular_resolution*2))) < 0.000001);
     BOOST_CHECK(abs(points[2].y()-( 2.0*sin(M_PI*0.25+laser_scan.angular_resolution*2))) < 0.000001);
-    BOOST_CHECK(base::isNaN<double>(points[3].x()));
-    BOOST_CHECK(base::isNaN<double>(points[3].y()));
-    BOOST_CHECK(base::isNaN<double>(points[3].z()));
+    BOOST_CHECK(isnan(points[3].x()));
+    BOOST_CHECK(isnan(points[3].y()));
+    BOOST_CHECK(isnan(points[3].z()));
 
     //check rotation and translation
     trans.setIdentity();
@@ -374,9 +444,9 @@ BOOST_AUTO_TEST_CASE( laser_scan_test )
     y = sin(M_PI*0.25+laser_scan.angular_resolution);
     BOOST_CHECK(abs(points[1].x()-(-1+x*cos(0.1*M_PI)-y*sin(0.1*M_PI))) < 0.0000001);
     BOOST_CHECK(abs(points[1].y()-(x*sin(0.1*M_PI)+y*cos(0.1*M_PI))) < 0.0000001);
-    BOOST_CHECK(base::isNaN<double>(points[3].x()));
-    BOOST_CHECK(base::isNaN<double>(points[3].y()));
-    BOOST_CHECK(base::isNaN<double>(points[3].z()));
+    BOOST_CHECK(isnan(points[3].x()));
+    BOOST_CHECK(isnan(points[3].y()));
+    BOOST_CHECK(isnan(points[3].z()));
 
     //check skipping of invalid scan points  
     laser_scan.convertScanToPointCloud(points,trans);
@@ -390,9 +460,9 @@ BOOST_AUTO_TEST_CASE( laser_scan_test )
     y = sin(M_PI*0.25+laser_scan.angular_resolution);
     BOOST_CHECK(abs(points[1].x()-(-1+x*cos(0.1*M_PI)-y*sin(0.1*M_PI))) < 0.0000001);
     BOOST_CHECK(abs(points[1].y()-(x*sin(0.1*M_PI)+y*cos(0.1*M_PI))) < 0.0000001);
-    BOOST_CHECK(!base::isNaN<double>(points[3].x()));
-    BOOST_CHECK(!base::isNaN<double>(points[3].y()));
-    BOOST_CHECK(!base::isNaN<double>(points[3].z()));
+    BOOST_CHECK(!isnan(points[3].x()));
+    BOOST_CHECK(!isnan(points[3].y()));
+    BOOST_CHECK(!isnan(points[3].z()));
 }
 
 BOOST_AUTO_TEST_CASE(depth_map_test)
@@ -660,11 +730,6 @@ BOOST_AUTO_TEST_CASE( angle_test )
     BOOST_CHECK( (2*a).isApprox( Angle::fromDeg( 180 )) );
     BOOST_CHECK_CLOSE( (Angle::fromDeg(45)+Angle::fromDeg(-45)).getRad(), Angle::fromRad(0).getRad(), 1e-3 );
 
-    BOOST_CHECK( Angle::fromRad(-M_PI - 0.001).isApprox( Angle::fromRad( M_PI + 0.001 ), 0.01 ));
-    
-    //check for missing fabs
-    BOOST_CHECK(! Angle::fromRad(-M_PI /3*2).isApprox( Angle::fromRad( M_PI /3*2 ), 0.01 ));
-    
     {
         base::AngleSegment s(base::Angle::fromDeg(89), base::Angle::fromDeg(2).getRad());
         BOOST_CHECK( s.isInside(a) );
@@ -815,7 +880,7 @@ BOOST_AUTO_TEST_CASE( angle_test )
                         }
                     }
                     BOOST_CHECK(ret.size() == 1);
-                    BOOST_CHECK(fabs((2*M_PI - base::Angle::fromDeg(1).getRad()) - sum) < 0.000001);
+                    assert(fabs((2*M_PI - base::Angle::fromDeg(1).getRad()) - sum) < 0.000001);
                 }
                 else
                 {
@@ -828,7 +893,7 @@ BOOST_AUTO_TEST_CASE( angle_test )
                     }
 
                     BOOST_CHECK(ret.size() == 2);
-                    BOOST_CHECK(fabs((2*M_PI - base::Angle::fromDeg(2).getRad()) - sum) < 0.000001);
+                    assert(fabs((2*M_PI - base::Angle::fromDeg(2).getRad()) - sum) < 0.000001);
                 }
             }
         }
@@ -1149,24 +1214,70 @@ BOOST_AUTO_TEST_CASE( rbs_validity )
     BOOST_CHECK(!rbs.hasValidAngularVelocityCovariance());
 }
 
+BOOST_AUTO_TEST_CASE( transformation )
+{
+    // test if the relative transform also 
+    // takes the uncertainty into account
+    base::Matrix6d lt1; 
+    lt1 <<
+	0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 
+	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+	0.0, 0.0, 0.0, -3.0, 0.0, 0.0, 
+	0.0, 0.0, 0.0, 0.0, -2.0, 0.0, 
+	0.0, 0.0, 0.0, 0.0, 0.0, -1.0;
+
+    base::Transformation t1(
+	    Eigen::Affine3d(Eigen::Translation3d(Eigen::Vector3d(1,0,0)) * Eigen::AngleAxisd( M_PI/2.0, Eigen::Vector3d::UnitX()) ),
+	    lt1 );
+
+    base::Matrix6d lt2; 
+    lt2 <<
+	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+	0.0, 0.0, 0.2, 0.0, 0.0, 0.0, 
+	0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 
+	0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 
+	0.0, 0.0, 0.0, 0.0, 0.0, 3.0;
+
+    base::Transformation t2(
+	    Eigen::Affine3d(Eigen::Translation3d(Eigen::Vector3d(0,1,2)) * Eigen::AngleAxisd( M_PI/2.0, Eigen::Vector3d::UnitY()) ),
+	    lt2 );
+
+    // chain a transform with uncertainty
+    base::Transformation tr = t2 * t1;
+
+    // and recover the second transform
+    base::Transformation t2r = tr.compositionInv( t1 );
+    base::Transformation t1r = tr.preCompositionInv( t2 );
+
+    const double sigma = 1e-12;
+
+    BOOST_CHECK( t2.getTransform().matrix().isApprox( t2r.getTransform().matrix(), sigma ) );
+    BOOST_CHECK( t2.getCovariance().isApprox( t2r.getCovariance(), sigma ) );
+
+    BOOST_CHECK( t1.getTransform().matrix().isApprox( t1r.getTransform().matrix(), sigma ) );
+    BOOST_CHECK( t1.getCovariance().isApprox( t1r.getCovariance(), sigma ) );
+}
+
 #ifdef SISL_FOUND
 #include <base/geometry/spline.h>
 BOOST_AUTO_TEST_CASE( spline_to_points )
 {
     std::vector<base::Vector3d> pointsIn;
-    
+
     for(int i = 0; i < 10; i++)
         pointsIn.push_back(base::Vector3d(i, i, 0));
-    
+
     base::geometry::Spline3 spline;
     spline.interpolate(pointsIn);
-    
+
     std::vector<base::Vector3d> pointsOut = spline.sample(0.1);
     for(std::vector<base::Vector3d>::iterator it = pointsOut.begin(); it != pointsOut.end(); it++)
     {
         BOOST_CHECK(fabs(it->x() - it->y()) < 0.001);
     }
-    
+
     BOOST_CHECK(pointsOut.begin()->x() == 0);
     BOOST_CHECK(pointsOut.begin()->y() == 0);
 
@@ -1177,11 +1288,11 @@ BOOST_AUTO_TEST_CASE( spline_to_points )
 BOOST_AUTO_TEST_CASE( trajectory )
 {
     base::Trajectory tr;
-    
-    tr.speed = 5;    
+
+    tr.speed = 5;
     BOOST_CHECK(tr.driveForward());
-    
-    tr.speed = -5;    
+
+    tr.speed = -5;
     BOOST_CHECK(!tr.driveForward());
 }
 
