@@ -102,5 +102,15 @@ class TC_Eigen_MatrixX < Minitest::Test
         end
         assert m.approx?(m.dup)
     end
+    def test_dotV
+        m = Eigen::MatrixX.new(4,4)
+        4.times { |i| m[i,i] = i + 1 }
+        a = Eigen::VectorX.from_a([1, 2, 3, 4])
+        b = m.dotV(a)
+        expected = Eigen::VectorX.from_a([1, 4, 9, 16])
+        assert_kind_of Eigen::VectorX, b
+        assert(expected.approx?(b))
+    end
+
 end
 

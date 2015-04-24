@@ -178,8 +178,8 @@ struct MatrixX {
     MatrixX* scale (double scalar) const
     { return new MatrixX(*m * scalar); }
 
-    MatrixX* dotV (VectorX const& other) const
-    { return new MatrixX(*m * *other.v); }
+    VectorX* dotV (VectorX const& other) const
+    { return new VectorX(*m * *other.v); }
     
     MatrixX* dotM (MatrixX const& other) const
     { return new MatrixX(*m * (*other.m)); }
