@@ -10,7 +10,23 @@ Typelib.convert_to_ruby '/wrappers/geometry/Spline', SISL::Spline do |value|
     end
 
     kind_t = value.class['kind']
-    result.reset(value.vertices.to_a, value.knots.to_a, kind_t.value_of(value.kind.to_s))
+    arr1 = []
+    arr2 = []
+    value.vertices.each do |v|
+	if v.kind_of?(Typelib::Type)
+	    arr1 << v.to_ruby.to_f
+	else
+	    arr1 << v.to_f
+        end
+    end
+    value.knots.each do |v|
+	if v.kind_of?(Typelib::Type)
+	    arr2 << v.to_ruby.to_f
+	else
+	    arr2 << v.to_f
+        end
+    end
+    result.reset(arr1,arr2, kind_t.value_of(value.kind.to_s))
     result
 end
 
