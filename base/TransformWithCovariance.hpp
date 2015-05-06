@@ -22,7 +22,7 @@ namespace base {
      * The uncertainty information is optional. The hasValidUncertainty() method can
      * be used to see if uncertainty information is associated with the class.
      */
-    class Transformation
+    class TransformWithCovariance
     {
 
     public:
@@ -42,32 +42,32 @@ namespace base {
         Covariance cov;
 
     public:
-        explicit Transformation( const base::Affine3d& trans = base::Affine3d::Identity() ) :
+        explicit TransformWithCovariance( const base::Affine3d& trans = base::Affine3d::Identity() ) :
             trans( trans ) { invalidateUncertainty(); };
 
-        Transformation( const base::Affine3d& trans, const Covariance& cov ) :
+        TransformWithCovariance( const base::Affine3d& trans, const Covariance& cov ) :
             trans( trans ), cov( cov ) {};
 
         /** For backward compatibility with RBS **/
-        explicit Transformation( const base::samples::RigidBodyState& rbs )
+        explicit TransformWithCovariance( const base::samples::RigidBodyState& rbs )
         {
             this->operator=( rbs );
         };
 
-        static Transformation Identity()
+        static TransformWithCovariance Identity()
         {
-            return Transformation( base::Affine3d::Identity() );
+            return TransformWithCovariance( base::Affine3d::Identity() );
         };
 	
 	
         /** Default std::cout function
         */
-        friend std::ostream & operator<<(std::ostream &out, const Transformation& trans);
+        friend std::ostream & operator<<(std::ostream &out, const TransformWithCovariance& trans);
 
         /** performs a composition of this transform with the transform given.
          * The result is another transform with result = this * trans
          */
-        Transformation composition( const Transformation& trans ) const
+        TransformWithCovariance composition( const TransformWithCovariance& trans ) const
         {
             return this->operator*( trans );
         };
@@ -76,15 +76,15 @@ namespace base {
          * The result is such that result * trans = this. Note that this is different from
          * calling result = this * inv(trans), in the way the uncertainties are handled.
          */
-        Transformation compositionInv( const Transformation& trans ) const
+        TransformWithCovariance compositionInv( const TransformWithCovariance& trans ) const
         {
-            const Transformation &tf(*this);
-            const Transformation &t1(trans);
+            const TransformWithCovariance &tf(*this);
+            const TransformWithCovariance &t1(trans);
             Eigen::Affine3d t2 = tf.getTransform() * t1.getTransform().inverse( Eigen::Isometry );
 
             // short path if there is no uncertainty 
             if( !t1.hasValidUncertainty() && !tf.hasValidUncertainty() )
-                return Transformation( t2 );
+                return TransformWithCovariance( t2 );
 
             // convert the rotations of the respective transforms into quaternions
             // in order to inverse the covariances, we need to get both the t1 and t2 transformations
@@ -108,7 +108,7 @@ namespace base {
             cov = J2.inverse() * ( tf.getCovariance() - J1 * t1.getCovariance() * J1.transpose() ) * J2.transpose().inverse();
 
             // and return the resulting uncertainty transform
-            return Transformation( 
+            return TransformWithCovariance( 
                 t2, cov );
         };
 
@@ -116,15 +116,15 @@ namespace base {
          * Note that this is different from calling result = inv(trans) * this, 
          * in the way the uncertainties are handled.
          */
-        Transformation preCompositionInv( const Transformation& trans ) const
+        TransformWithCovariance preCompositionInv( const TransformWithCovariance& trans ) const
         {
-            const Transformation &tf(*this);
-            const Transformation &t2(trans);
+            const TransformWithCovariance &tf(*this);
+            const TransformWithCovariance &t2(trans);
             Eigen::Affine3d t1 = t2.getTransform().inverse( Eigen::Isometry ) * tf.getTransform(); 
 
             // short path if there is no uncertainty 
             if( !t2.hasValidUncertainty() && !tf.hasValidUncertainty() )
-                return Transformation( t1 );
+                return TransformWithCovariance( t1 );
 
             // convert the rotations of the respective transforms into quaternions
             // in order to inverse the covariances, we need to get both the t1 and t2 transformations
@@ -148,19 +148,19 @@ namespace base {
             cov = J1.inverse() * ( tf.getCovariance() - J2 * t2.getCovariance() * J2.transpose() ) * J1.transpose().inverse();
 
             // and return the resulting uncertainty transform
-            return Transformation( 
+            return TransformWithCovariance( 
                 t1, cov );
         };
 
         /** alias for the composition of two transforms
          */
-        Transformation operator*( const Transformation& trans ) const
+        TransformWithCovariance operator*( const TransformWithCovariance& trans ) const
         {
-            const Transformation &t2(*this);
-            const Transformation &t1(trans);
+            const TransformWithCovariance &t2(*this);
+            const TransformWithCovariance &t1(trans);
             // short path if there is no uncertainty 
             if( !t1.hasValidUncertainty() && !t2.hasValidUncertainty() )
-                return Transformation( t2.getTransform() * t1.getTransform() );
+                return TransformWithCovariance( t2.getTransform() * t1.getTransform() );
 
             // convert the rotations of the respective transforms into quaternions
             Eigen::Quaterniond 
@@ -192,15 +192,15 @@ namespace base {
             }
 
             // and return the resulting uncertainty transform
-            return Transformation( 
+            return TransformWithCovariance( 
                 t2.getTransform() * t1.getTransform(), cov );
         };
 	
-        Transformation inverse() const
+        TransformWithCovariance inverse() const
         {
             // short path if there is no uncertainty
             if( !hasValidUncertainty() )
-                return Transformation( Transformation( this->getTransform().inverse( Eigen::Isometry ) ) );
+                return TransformWithCovariance( TransformWithCovariance( this->getTransform().inverse( Eigen::Isometry ) ) );
 
             Eigen::Quaterniond q( getTransform().linear() );
             Eigen::Vector3d t( getTransform().translation() );
@@ -208,13 +208,13 @@ namespace base {
             J << Eigen::Matrix3d::Identity(), Eigen::Matrix3d::Zero(),
             drx_by_dr( q.inverse(), t ), q.toRotationMatrix().transpose();
 
-            return Transformation(
+            return TransformWithCovariance(
                 Eigen::Affine3d( getTransform().inverse( Eigen::Isometry ) ),
                 J*getCovariance()*J.transpose() );
         };
 
         /** For backward compatibility with RBS **/
-        Transformation& operator=( const base::samples::RigidBodyState& rbs )
+        TransformWithCovariance& operator=( const base::samples::RigidBodyState& rbs )
         {
             // extract the transform
             trans = rbs.getTransform();
@@ -359,13 +359,14 @@ namespace base {
 
     /** Default std::cout function
     */
-    inline std::ostream & operator<<(std::ostream &out, const Transformation& trans)
+    inline std::ostream & operator<<(std::ostream &out, const TransformWithCovariance& trans)
     {
         out << trans.getTransform().matrix() << "\n";
         if (trans.hasValidUncertainty())
         {
-            out << trans.getCovariance().topLeftCorner<3,3>() << "\n";
-            out << trans.getCovariance().bottomRightCorner<3,3>() << "\n";
+            out << trans.getCovariance() << "\n";
+            //out << trans.getCovariance().topLeftCorner<3,3>() << "\n";
+            //out << trans.getCovariance().bottomRightCorner<3,3>() << "\n";
         }
         return out;
     };

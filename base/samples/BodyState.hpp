@@ -4,8 +4,8 @@
 #include <base/Time.hpp>
 #include <base/Float.hpp>
 #include <base/Pose.hpp>
-#include <base/Transformation.hpp>
-#include <base/Twist.hpp>
+#include <base/TransformWithCovariance.hpp>
+#include <base/TwistWithCovariance.hpp>
 
 #include <Eigen/Core>
 #include <Eigen/LU>
@@ -39,30 +39,30 @@ namespace base { namespace samples {
                 invalidate();
         };
 
-        BodyState(const base::Transformation& pose, const base::Twist& velocity):
+        BodyState(const base::TransformWithCovariance& pose, const base::TwistWithCovariance& velocity):
             pose(pose), velocity(velocity) {};
 
         /** Time-stamp **/
         base::Time time;
 
-	    /** Name of the source reference frame */
-    	std::string sourceFrame;
+	    /** Name of the reference frame */
+    	std::string reference_frame;
 
-    	/** Name of the target reference frame */
-    	std::string targetFrame;
+    	/** Name of the target frame */
+    	std::string target_frame;
 
         /** Robot pose: translation in meters */
-        base::Transformation pose;
+        base::TransformWithCovariance pose;
 
-        /** Twist: Linear and Angular Velocity of the Pose m/s and rad/s */
-        base::Twist velocity;
+        /** TwistWithCovariance: Linear and Angular Velocity of the Pose m/s and rad/s */
+        base::TwistWithCovariance velocity;
 
-        void setPose(const base::Transformation& pose)
+        void setPose(const base::TransformWithCovariance& pose)
         {
             this->pose = pose;
         }
 
-        const base::Transformation& getPose() const
+        const base::TransformWithCovariance& getPose() const
         {
             return this->pose;
         }
@@ -152,7 +152,7 @@ namespace base { namespace samples {
 
         /** Default std::cout function
         */
-        friend std::ostream & operator<<(std::ostream &out, const Transformation& trans);
+        friend std::ostream & operator<<(std::ostream &out, const TransformWithCovariance& trans);
 
         /** performs a composition of this Body State with the Body State given.
          * The result is another Body State with result = this * trans
@@ -162,7 +162,7 @@ namespace base { namespace samples {
             return this->operator*( bs );
         };
 
-        /** alias for the composition of two transforms
+        /** alias for the composition of two body states
          */
         BodyState operator*( const BodyState& bs ) const
         {
@@ -170,8 +170,8 @@ namespace base { namespace samples {
             const BodyState &bs1(bs);
 
             /* Result Body State **/
-            return BodyState(static_cast<base::Transformation>(bs2.pose * bs1.pose),
-                    static_cast<base::Twist>(bs2.velocity + bs1.velocity));
+            return BodyState(static_cast<base::TransformWithCovariance>(bs2.pose * bs1.pose),
+                    static_cast<base::TwistWithCovariance>(bs2.velocity + bs1.velocity));
         }
     };
 

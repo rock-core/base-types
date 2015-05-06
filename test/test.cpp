@@ -32,13 +32,13 @@
 #include <base/samples/SonarBeam.hpp>
 #include <base/samples/SonarScan.hpp>
 #include <base/samples/DepthMap.hpp>
-#include <base/Transformation.hpp>
+#include <base/TransformWithCovariance.hpp>
 #include <base/Temperature.hpp>
 #include <base/Time.hpp>
 #include <base/TimeMark.hpp>
 #include <base/Trajectory.hpp>
 #include <base/Waypoint.hpp>
-#include <base/Twist.hpp>
+#include <base/TwistWithCovariance.hpp>
 
 #ifdef SISL_FOUND
 #include <base/Trajectory.hpp>
@@ -53,17 +53,17 @@
 
 using namespace std;
 
-BOOST_AUTO_TEST_CASE(twist_validity)
+BOOST_AUTO_TEST_CASE(twist_with_covariance_validity)
 {
-    base::Twist velocity;
+    base::TwistWithCovariance velocity;
     BOOST_CHECK(velocity.translation() == base::Vector3d::Zero());
     BOOST_CHECK(velocity.rotation() == base::Vector3d::Zero());
     BOOST_CHECK(velocity.hasValidVelocity() == true);
     BOOST_CHECK(velocity.hasValidUncertainty() == false);
-    std::cout<<"Printing Twist\n";
+    std::cout<<"TwistWithCovariance\n";
     std::cout<<velocity<<std::endl;
     velocity.setCovariance(base::Matrix6d::Identity());
-    std::cout<<"Printing Twist\n";
+    std::cout<<"TwistWithCovariance\n";
     std::cout<<velocity<<std::endl;
     BOOST_CHECK(velocity.hasValidUncertainty() == true);
     velocity.invalidateVelocity();
@@ -74,9 +74,9 @@ BOOST_AUTO_TEST_CASE(twist_validity)
     BOOST_CHECK(velocity.hasValidUncertainty() == false);
 }
 
-BOOST_AUTO_TEST_CASE(twist_operations)
+BOOST_AUTO_TEST_CASE(twist_with_covariance_operations)
 {
-    base::Twist vel1, vel2, vel3;
+    base::TwistWithCovariance vel1, vel2, vel3;
     base::Vector6d vec;
     vec<< 1.0,1.0,1.0,0.3,0.3,0.3;
     vel1.setVelocity(vec);
@@ -90,6 +90,41 @@ BOOST_AUTO_TEST_CASE(twist_operations)
     vel3 = -vel1 + vel2;
     BOOST_CHECK(vel3.translation() == Eigen::Vector3d::Zero());
     BOOST_CHECK(vel3.rotation() == Eigen::Vector3d::Zero());
+    vel3 = (-vel1 / 0.5) + 2.0 * vel1;
+    BOOST_CHECK(vel3.translation() == Eigen::Vector3d::Zero());
+    BOOST_CHECK(vel3.rotation() == Eigen::Vector3d::Zero());
+
+    /** Add uncertainty to the covariance **/
+    vel1.cov = 0.1 * base::Matrix6d::Identity();
+    vel2.cov = 0.2 * base::Matrix6d::Identity();
+
+    vel3.invalidateUncertainty();
+    vel3 = -vel1 + vel2;
+    BOOST_CHECK(vel3.hasValidUncertainty());
+    BOOST_CHECK(vel3.translation() == Eigen::Vector3d::Zero());
+    BOOST_CHECK(vel3.rotation() == Eigen::Vector3d::Zero());
+    std::cout<<"TwistWithCovariance add operator\n";
+    std::cout<<vel3<<std::endl;
+
+    vel3.invalidateUncertainty();
+    vel3 = vel1 - vel2;
+    BOOST_CHECK(vel3.hasValidUncertainty());
+    BOOST_CHECK(vel3.translation() == Eigen::Vector3d::Zero());
+    BOOST_CHECK(vel3.rotation() == Eigen::Vector3d::Zero());
+    std::cout<<"TwistWithCovariance subtract operator\n";
+    std::cout<<vel3<<std::endl;
+
+    vel3.invalidateUncertainty();
+    vel3 = (-vel1 / 0.5) + 2.0 * vel1;
+    BOOST_CHECK(vel3.hasValidUncertainty());
+    BOOST_CHECK(vel3.translation() == Eigen::Vector3d::Zero());
+    BOOST_CHECK(vel3.rotation() == Eigen::Vector3d::Zero());
+
+    vel3.invalidateUncertainty();
+    vel3 = vel1 * vel2;
+    BOOST_CHECK(vel3.hasValidUncertainty());
+    std::cout<<"TwistWithCovariance cross product\n";
+    std::cout<<vel3<<std::endl;
 }
 
 BOOST_AUTO_TEST_CASE(body_state_validity)
@@ -113,11 +148,29 @@ BOOST_AUTO_TEST_CASE(body_state_validity)
     // check if values are not valid
     BOOST_CHECK(!bs.hasValidPose());
     BOOST_CHECK(!bs.hasValidPoseCovariance());
-    BOOST_CHECK(!bs.hasValidVelocityCovariance());
+    BOOST_CHECK(!bs.hasValidVelocity());
     BOOST_CHECK(!bs.hasValidVelocityCovariance());
 
     // check std::cout operator when not valid uncertainty
     std::cout<<"Body State\n"<<bs<<std::endl;
+}
+
+BOOST_AUTO_TEST_CASE(body_state_operations)
+{
+    base::samples::BodyState bs1, bs2, bs3;
+    bs1.initUnknown();
+    bs2.initUnknown();
+    bs1.pose = base::TransformWithCovariance(base::Affine3d::Identity(), 0.1 * base::Matrix6d::Identity());
+    bs1.velocity = base::TwistWithCovariance(base::Vector6d::Zero(), static_cast<base::TwistWithCovariance::Covariance>(0.1 * base::TwistWithCovariance::Covariance::Identity()));
+    bs2.pose = base::TransformWithCovariance(base::Affine3d(Eigen::AngleAxisd(90.0 *
+                    M_PI/180.0, Eigen::Vector3d::UnitZ())), 0.2 * base::Matrix6d::Identity());
+    bs2.velocity = base::TwistWithCovariance(base::Vector6d::Ones(), static_cast<base::TwistWithCovariance::Covariance>(0.2 * base::TwistWithCovariance::Covariance::Identity()));
+    bs3 = bs1 * bs2;
+    std::cout<<"Body State Composition\n"<<bs3<<std::endl;
+    BOOST_CHECK(bs3.hasValidPose());
+    BOOST_CHECK(bs3.hasValidPoseCovariance());
+    BOOST_CHECK(bs3.hasValidVelocity());
+    BOOST_CHECK(bs3.hasValidVelocityCovariance());
 }
 
 BOOST_AUTO_TEST_CASE(joint_state)
@@ -1214,7 +1267,7 @@ BOOST_AUTO_TEST_CASE( rbs_validity )
     BOOST_CHECK(!rbs.hasValidAngularVelocityCovariance());
 }
 
-BOOST_AUTO_TEST_CASE( transformation )
+BOOST_AUTO_TEST_CASE( transform_with_covariance )
 {
     // test if the relative transform also 
     // takes the uncertainty into account
@@ -1227,7 +1280,7 @@ BOOST_AUTO_TEST_CASE( transformation )
 	0.0, 0.0, 0.0, 0.0, -2.0, 0.0, 
 	0.0, 0.0, 0.0, 0.0, 0.0, -1.0;
 
-    base::Transformation t1(
+    base::TransformWithCovariance t1(
 	    Eigen::Affine3d(Eigen::Translation3d(Eigen::Vector3d(1,0,0)) * Eigen::AngleAxisd( M_PI/2.0, Eigen::Vector3d::UnitX()) ),
 	    lt1 );
 
@@ -1240,16 +1293,16 @@ BOOST_AUTO_TEST_CASE( transformation )
 	0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 
 	0.0, 0.0, 0.0, 0.0, 0.0, 3.0;
 
-    base::Transformation t2(
+    base::TransformWithCovariance t2(
 	    Eigen::Affine3d(Eigen::Translation3d(Eigen::Vector3d(0,1,2)) * Eigen::AngleAxisd( M_PI/2.0, Eigen::Vector3d::UnitY()) ),
 	    lt2 );
 
     // chain a transform with uncertainty
-    base::Transformation tr = t2 * t1;
+    base::TransformWithCovariance tr = t2 * t1;
 
     // and recover the second transform
-    base::Transformation t2r = tr.compositionInv( t1 );
-    base::Transformation t1r = tr.preCompositionInv( t2 );
+    base::TransformWithCovariance t2r = tr.compositionInv( t1 );
+    base::TransformWithCovariance t1r = tr.preCompositionInv( t2 );
 
     const double sigma = 1e-12;
 
