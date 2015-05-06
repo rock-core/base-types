@@ -59,19 +59,19 @@ BOOST_AUTO_TEST_CASE(twist_with_covariance_validity)
     BOOST_CHECK(velocity.translation() == base::Vector3d::Zero());
     BOOST_CHECK(velocity.rotation() == base::Vector3d::Zero());
     BOOST_CHECK(velocity.hasValidVelocity() == true);
-    BOOST_CHECK(velocity.hasValidUncertainty() == false);
+    BOOST_CHECK(velocity.hasValidCovariance() == false);
     std::cout<<"TwistWithCovariance\n";
     std::cout<<velocity<<std::endl;
     velocity.setCovariance(base::Matrix6d::Identity());
     std::cout<<"TwistWithCovariance\n";
     std::cout<<velocity<<std::endl;
-    BOOST_CHECK(velocity.hasValidUncertainty() == true);
+    BOOST_CHECK(velocity.hasValidCovariance() == true);
     velocity.invalidateVelocity();
     BOOST_CHECK(velocity.hasValidVelocity() == false);
-    BOOST_CHECK(velocity.hasValidUncertainty() == true);
-    velocity.invalidateUncertainty();
+    BOOST_CHECK(velocity.hasValidCovariance() == true);
+    velocity.invalidateCovariance();
     BOOST_CHECK(velocity.hasValidVelocity() == false);
-    BOOST_CHECK(velocity.hasValidUncertainty() == false);
+    BOOST_CHECK(velocity.hasValidCovariance() == false);
 }
 
 BOOST_AUTO_TEST_CASE(twist_with_covariance_operations)
@@ -98,31 +98,31 @@ BOOST_AUTO_TEST_CASE(twist_with_covariance_operations)
     vel1.cov = 0.1 * base::Matrix6d::Identity();
     vel2.cov = 0.2 * base::Matrix6d::Identity();
 
-    vel3.invalidateUncertainty();
+    vel3.invalidateCovariance();
     vel3 = -vel1 + vel2;
-    BOOST_CHECK(vel3.hasValidUncertainty());
+    BOOST_CHECK(vel3.hasValidCovariance());
     BOOST_CHECK(vel3.translation() == Eigen::Vector3d::Zero());
     BOOST_CHECK(vel3.rotation() == Eigen::Vector3d::Zero());
     std::cout<<"TwistWithCovariance add operator\n";
     std::cout<<vel3<<std::endl;
 
-    vel3.invalidateUncertainty();
+    vel3.invalidateCovariance();
     vel3 = vel1 - vel2;
-    BOOST_CHECK(vel3.hasValidUncertainty());
+    BOOST_CHECK(vel3.hasValidCovariance());
     BOOST_CHECK(vel3.translation() == Eigen::Vector3d::Zero());
     BOOST_CHECK(vel3.rotation() == Eigen::Vector3d::Zero());
     std::cout<<"TwistWithCovariance subtract operator\n";
     std::cout<<vel3<<std::endl;
 
-    vel3.invalidateUncertainty();
+    vel3.invalidateCovariance();
     vel3 = (-vel1 / 0.5) + 2.0 * vel1;
-    BOOST_CHECK(vel3.hasValidUncertainty());
+    BOOST_CHECK(vel3.hasValidCovariance());
     BOOST_CHECK(vel3.translation() == Eigen::Vector3d::Zero());
     BOOST_CHECK(vel3.rotation() == Eigen::Vector3d::Zero());
 
-    vel3.invalidateUncertainty();
+    vel3.invalidateCovariance();
     vel3 = vel1 * vel2;
-    BOOST_CHECK(vel3.hasValidUncertainty());
+    BOOST_CHECK(vel3.hasValidCovariance());
     std::cout<<"TwistWithCovariance cross product\n";
     std::cout<<vel3<<std::endl;
 }
