@@ -19,7 +19,7 @@ namespace base {
      * part expressed as a scaled axis of rotation, and t the translational
      * component.
      *
-     * The uncertainty information is optional. The hasValidUncertainty() method can
+     * The uncertainty information is optional. The hasValidCovariance() method can
      * be used to see if uncertainty information is associated with the class.
      */
     class TransformWithCovariance
@@ -43,7 +43,7 @@ namespace base {
 
     public:
         explicit TransformWithCovariance( const base::Affine3d& trans = base::Affine3d::Identity() ) :
-            trans( trans ) { invalidateUncertainty(); };
+            trans( trans ) { invalidateCovariance(); };
 
         TransformWithCovariance( const base::Affine3d& trans, const Covariance& cov ) :
             trans( trans ), cov( cov ) {};
@@ -83,7 +83,7 @@ namespace base {
             Eigen::Affine3d t2 = tf.getTransform() * t1.getTransform().inverse( Eigen::Isometry );
 
             // short path if there is no uncertainty 
-            if( !t1.hasValidUncertainty() && !tf.hasValidUncertainty() )
+            if( !t1.hasValidCovariance() && !tf.hasValidCovariance() )
                 return TransformWithCovariance( t2 );
 
             // convert the rotations of the respective transforms into quaternions
@@ -123,7 +123,7 @@ namespace base {
             Eigen::Affine3d t1 = t2.getTransform().inverse( Eigen::Isometry ) * tf.getTransform(); 
 
             // short path if there is no uncertainty 
-            if( !t2.hasValidUncertainty() && !tf.hasValidUncertainty() )
+            if( !t2.hasValidCovariance() && !tf.hasValidCovariance() )
                 return TransformWithCovariance( t1 );
 
             // convert the rotations of the respective transforms into quaternions
@@ -159,7 +159,7 @@ namespace base {
             const TransformWithCovariance &t2(*this);
             const TransformWithCovariance &t1(trans);
             // short path if there is no uncertainty 
-            if( !t1.hasValidUncertainty() && !t2.hasValidUncertainty() )
+            if( !t1.hasValidCovariance() && !t2.hasValidCovariance() )
                 return TransformWithCovariance( t2.getTransform() * t1.getTransform() );
 
             // convert the rotations of the respective transforms into quaternions
@@ -173,7 +173,7 @@ namespace base {
 
             // calculate the Jacobians (this is what all the above functions are for)
             // and add to the resulting covariance
-            if( t1.hasValidUncertainty() )
+            if( t1.hasValidCovariance() )
             {
                 Eigen::Matrix<double,6,6> J1;
                 J1 << dr2r1_by_r1(q, q1, q2), Eigen::Matrix3d::Zero(),
@@ -182,7 +182,7 @@ namespace base {
                 cov += J1*t1.getCovariance()*J1.transpose();
             }
 
-            if( t2.hasValidUncertainty() )
+            if( t2.hasValidCovariance() )
             {
                 Eigen::Matrix<double,6,6> J2;
                 J2 << dr2r1_by_r2(q, q1, q2), Eigen::Matrix3d::Zero(),
@@ -199,7 +199,7 @@ namespace base {
         TransformWithCovariance inverse() const
         {
             // short path if there is no uncertainty
-            if( !hasValidUncertainty() )
+            if( !hasValidCovariance() )
                 return TransformWithCovariance( TransformWithCovariance( this->getTransform().inverse( Eigen::Isometry ) ) );
 
             Eigen::Quaterniond q( getTransform().linear() );
@@ -239,8 +239,8 @@ namespace base {
             this->setTransform(invalid_trans);
         }
 
-        bool hasValidUncertainty() const { return base::isnotnan(cov); }
-        void invalidateUncertainty()
+        bool hasValidCovariance() const { return base::isnotnan(cov); }
+        void invalidateCovariance()
         {
             cov = Covariance::Ones() * base::unknown<double>();
         }
@@ -362,7 +362,7 @@ namespace base {
     inline std::ostream & operator<<(std::ostream &out, const TransformWithCovariance& trans)
     {
         out << trans.getTransform().matrix() << "\n";
-        if (trans.hasValidUncertainty())
+        if (trans.hasValidCovariance())
         {
             out << trans.getCovariance() << "\n";
             //out << trans.getCovariance().topLeftCorner<3,3>() << "\n";

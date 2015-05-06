@@ -123,20 +123,20 @@ namespace base { namespace samples {
     	void initUnknown()
         {
             this->pose.setTransform(base::Affine3d::Identity());
-            this->pose.invalidateUncertainty();
+            this->pose.invalidateCovariance();
             this->velocity.setVelocity(base::Vector6d::Zero());
-            this->velocity.invalidateUncertainty();
+            this->velocity.invalidateCovariance();
         }
 
         bool hasValidPose() const  { return this->pose.hasValidTransform(); }
-        bool hasValidPoseCovariance() const  { return this->pose.hasValidUncertainty(); }
+        bool hasValidPoseCovariance() const  { return this->pose.hasValidCovariance(); }
         void invalidatePose() { this->pose.invalidateTransform(); }
-        void invalidatePoseCovariance() { this->pose.invalidateUncertainty(); }
+        void invalidatePoseCovariance() { this->pose.invalidateCovariance(); }
 
         bool hasValidVelocity() const  { return this->velocity.hasValidVelocity(); }
-        bool hasValidVelocityCovariance() const  { return this->velocity.hasValidUncertainty(); }
+        bool hasValidVelocityCovariance() const  { return this->velocity.hasValidCovariance(); }
         void invalidateVelocity() { this->velocity.invalidateVelocity(); }
-        void invalidateVelocityCovariance() { this->velocity.invalidateUncertainty(); }
+        void invalidateVelocityCovariance() { this->velocity.invalidateCovariance(); }
 
         void invalidateValues ( bool pose = true, bool velocity = true)
         {

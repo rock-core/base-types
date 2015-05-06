@@ -28,7 +28,7 @@ namespace base {
 
     public:
         explicit TwistWithCovariance ( const base::Vector3d& vel = base::Vector3d::Zero(),  const base::Vector3d& rot = base::Vector3d::Zero() ):
-            vel(vel), rot(rot) {this->invalidateUncertainty(); };
+            vel(vel), rot(rot) {this->invalidateCovariance(); };
 
         TwistWithCovariance(const base::Vector3d& vel, const base::Vector3d& rot, const Covariance& cov):
             vel(vel), rot(rot), cov(cov) {};
@@ -80,8 +80,8 @@ namespace base {
             this->rot = base::Vector3d::Ones() * base::unknown<double>();
         }
 
-        bool hasValidUncertainty() const { return base::isnotnan(this->cov); }
-        void invalidateUncertainty()
+        bool hasValidCovariance() const { return base::isnotnan(this->cov); }
+        void invalidateCovariance()
         {
             this->cov = Covariance::Ones() * base::unknown<double>();
         }
@@ -112,7 +112,7 @@ namespace base {
         {
             this->vel += arg.vel;
             this->rot += arg.rot;
-            if (this->hasValidUncertainty() && arg.hasValidUncertainty())
+            if (this->hasValidCovariance() && arg.hasValidCovariance())
             {
                 this->cov += arg.cov;
                 base::guaranteeSPD<Covariance>(this->cov);
@@ -129,7 +129,7 @@ namespace base {
         {
             this->vel -= arg.vel;
             this->rot -= arg.rot;
-            if (this->hasValidUncertainty() && arg.hasValidUncertainty())
+            if (this->hasValidCovariance() && arg.hasValidCovariance())
             {
                 this->cov += arg.cov;
                 base::guaranteeSPD<Covariance>(this->cov);
@@ -145,7 +145,7 @@ namespace base {
 
         inline friend TwistWithCovariance operator*(const TwistWithCovariance& lhs,double rhs)
         {
-            if (!lhs.hasValidUncertainty())
+            if (!lhs.hasValidCovariance())
             {
                 return TwistWithCovariance(static_cast<base::Vector3d>(lhs.vel*rhs),static_cast<base::Vector3d>(lhs.rot*rhs));
             }
@@ -157,7 +157,7 @@ namespace base {
 
         inline friend TwistWithCovariance operator*(double lhs, const TwistWithCovariance& rhs)
         {
-            if (!rhs.hasValidUncertainty())
+            if (!rhs.hasValidCovariance())
             {
                 return TwistWithCovariance(static_cast<base::Vector3d>(lhs*rhs.vel),static_cast<base::Vector3d>(lhs*rhs.rot));
             }
@@ -176,7 +176,7 @@ namespace base {
             tmp.rot = lhs.rot.cross(rhs.rot);
 
             /** In case the two twist have uncertainty **/
-            if (lhs.hasValidUncertainty() && rhs.hasValidUncertainty())
+            if (lhs.hasValidCovariance() && rhs.hasValidCovariance())
             {
                 Eigen::Matrix<double, 3, 6> cross_jacob;
                 Eigen::Matrix<double, 6, 6> cross_cov;
@@ -240,7 +240,7 @@ namespace base {
     inline std::ostream & operator<<(std::ostream &out, const base::TwistWithCovariance& twist)
     {
         out << twist.vel <<"\n"<< twist.rot << std::endl;
-        if (twist.hasValidUncertainty())
+        if (twist.hasValidCovariance())
         {
             out << twist.getCovariance() << "\n";
         }
