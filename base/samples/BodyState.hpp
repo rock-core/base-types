@@ -57,14 +57,14 @@ namespace base { namespace samples {
         /** TwistWithCovariance: Linear and Angular Velocity of the Pose m/s and rad/s */
         base::TwistWithCovariance velocity;
 
-        void setPose(const base::TransformWithCovariance& pose)
+        void setPose(const base::Affine3d& pose)
         {
-            this->pose = pose;
+            this->pose.setTransform(pose);
         }
 
-        const base::TransformWithCovariance& getPose() const
+        const base::Affine3d& getPose() const
         {
-            return this->pose;
+            return this->pose.getTransform();
         }
 
         double getYaw() const
