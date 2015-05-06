@@ -9,6 +9,8 @@ SonarBeamVisualization::SonarBeamVisualization()
 {
     bodyState.invalidate();
     newSonarScan = false;
+    setKeepOldData(true);
+    setMaxOldData(100);
 }
 
 osg::ref_ptr< osg::Node > SonarBeamVisualization::createMainNode()
@@ -38,24 +40,6 @@ osg::ref_ptr< osg::Node > SonarBeamVisualization::createMainNode()
  */
 void SonarBeamVisualization::updateDataIntern(const base::samples::SonarBeam& data)
 {
-    double curStep = fmodf(fabs(lastBeam.bearing.rad - data.bearing.rad),M_PI*2.0);
-    double curNumSteps = (2.0*M_PI)/curStep;
-    if(curStep < 1){
-        if(curNumSteps != numSteps){
-            lastStepsize = curStep;
-            numSteps = curNumSteps;
-            this->data.resize(numSteps+1);
-        }
-        //Make sure we got valid data, and are able to calculate them
-        if(this->data.size() > 40){
-            double currentPos = ((data.bearing.rad+M_PI)/(2.0*M_PI))*numSteps;
-            BeamHelper bm;
-            bm.beam = data;
-            bm.orientation = bodyState;
-            this->data[currentPos] = bm;
-            newSonarScan = true;
-        }
-    }
     lastBeam = data;
 }
 
@@ -66,63 +50,49 @@ void SonarBeamVisualization::updateDataIntern(const base::samples::RigidBodyStat
 
 void SonarBeamVisualization::updateMainNode(osg::Node* node)
 {
-    if (newSonarScan)
+    //Cleaning up internal structures
+    pointsOSG->clear();
+    color->clear();
+   
+    osg::Quat beamLeft, beamRight;
+    beamLeft.makeRotate(lastBeam.bearing.rad - lastBeam.beamwidth_horizontal / 2, osg::Vec3d(0,0,1));
+    beamRight.makeRotate(lastBeam.bearing.rad + lastBeam.beamwidth_horizontal / 2, osg::Vec3d(0,0,1));
+
+    for(size_t i =0;i < lastBeam.beam.size();i++)
     {
-        newSonarScan = false;
+        osg::Vec3d currentPoint(lastBeam.getSpatialResolution() * i, 0,0);
+        osg::Vec3d nextPoint(lastBeam.getSpatialResolution() * (i+1),0,0);
 
-        //Trivial check if we have data
-        if(data.size() == 0) return;
-
-        //Cleaning up internal structures
-        pointsOSG->clear();
-        color->clear();
-       
-        //Pre-initialize old heading to prevent artefacts
-        osg::Quat lastBeamOrientation;
-        lastBeamOrientation.makeRotate(data[0].orientation.getYaw() + data[0].beam.bearing.rad+M_PI - lastStepsize/2.0, osg::Vec3d(0,0,1));
-
-        for(std::vector<BeamHelper>::const_iterator it = data.begin(); it != data.end(); it++)
-        {
-            osg::Quat currrentBeamOrientation;
-            currrentBeamOrientation.makeRotate(it->orientation.getYaw() + it->beam.bearing.rad+M_PI - lastStepsize/2.0, osg::Vec3d(0,0,1));
-            for(size_t i =0;i<it->beam.beam.size();i++)
-            {
-                osg::Vec3d currentPoint(it->beam.getSpatialResolution() * i, 0,0);
-                osg::Vec3d nextPoint(it->beam.getSpatialResolution() * (i+1),0,0);
-
-                double v = it->beam.beam[i]/255.0;
-                if(v!= 0.0){
-                    color->push_back(osg::Vec4f(v,0,0,1.0));
-                    color->push_back(osg::Vec4f(v,0,0,1.0));
-                    color->push_back(osg::Vec4f(v,0,0,1.0));
-                    color->push_back(osg::Vec4f(v,0,0,1.0));
-                    color->push_back(osg::Vec4f(v,0,0,1.0));
-                    color->push_back(osg::Vec4f(v,0,0,1.0));
-                }else{
-                    color->push_back(osg::Vec4f(0.0,0.0,0.0,0.0));
-                    color->push_back(osg::Vec4f(0.0,0.0,0.0,0.0));
-                    color->push_back(osg::Vec4f(0.0,0.0,0.0,0.0));
-                    color->push_back(osg::Vec4f(0.0,0.0,0.0,0.0));
-                    color->push_back(osg::Vec4f(0.0,0.0,0.0,0.0));
-                    color->push_back(osg::Vec4f(0.0,0.0,0.0,0.0));
-                }
-                
-                //First triangle
-                pointsOSG->push_back(currrentBeamOrientation*currentPoint);
-                pointsOSG->push_back(currrentBeamOrientation*nextPoint);
-                pointsOSG->push_back(lastBeamOrientation*currentPoint);
-                //Second Triangle                
-                pointsOSG->push_back(lastBeamOrientation*currentPoint);
-                pointsOSG->push_back(lastBeamOrientation*nextPoint);
-                pointsOSG->push_back(currrentBeamOrientation*nextPoint);
-            }
-            lastBeamOrientation = currrentBeamOrientation;
+        double v = lastBeam.beam[i]/255.0;
+        if(v!= 0.0){
+            color->push_back(osg::Vec4f(v,v/4,v/4,1.0));
+            color->push_back(osg::Vec4f(v,v/4,v/4,1.0));
+            color->push_back(osg::Vec4f(v,v/4,v/4,1.0));
+            color->push_back(osg::Vec4f(v,v/4,v/4,1.0));
+            color->push_back(osg::Vec4f(v,v/4,v/4,1.0));
+            color->push_back(osg::Vec4f(v,v/4,v/4,1.0));
+        }else{
+            color->push_back(osg::Vec4f(0.0,0.0,0.0,0.0));
+            color->push_back(osg::Vec4f(0.0,0.0,0.0,0.0));
+            color->push_back(osg::Vec4f(0.0,0.0,0.0,0.0));
+            color->push_back(osg::Vec4f(0.0,0.0,0.0,0.0));
+            color->push_back(osg::Vec4f(0.0,0.0,0.0,0.0));
+            color->push_back(osg::Vec4f(0.0,0.0,0.0,0.0));
         }
-            
-        drawArrays->setCount(pointsOSG->size());
-        pointGeom->setVertexArray(pointsOSG);
-        pointGeom->setColorArray(color);
+        
+        //First triangle
+        pointsOSG->push_back(beamLeft*currentPoint);
+        pointsOSG->push_back(beamLeft*nextPoint);
+        pointsOSG->push_back(beamRight*currentPoint);
+        //Second Triangle                
+        pointsOSG->push_back(beamRight*currentPoint);
+        pointsOSG->push_back(beamRight*nextPoint);
+        pointsOSG->push_back(beamLeft*nextPoint);
     }
+            
+    drawArrays->setCount(pointsOSG->size());
+    pointGeom->setVertexArray(pointsOSG);
+    pointGeom->setColorArray(color);
 }
 
 }
