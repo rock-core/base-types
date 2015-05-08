@@ -9,12 +9,15 @@
 using namespace Rice;
 
 typedef Eigen::Matrix<double, 3, 1, Eigen::DontAlign>     Vector3d;
+typedef Eigen::Matrix<double, 4, 4, Eigen::DontAlign>     Matrix4d;
 typedef Eigen::Quaternion<double, Eigen::DontAlign>    Quaterniond;
 typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::DontAlign>
                                                        MatrixXd;
 typedef Eigen::Matrix<double, Eigen::Dynamic, 1, Eigen::DontAlign>
                                                        VectorXd;
 typedef Eigen::Transform< double, 3, Eigen::Isometry > Isometry3d;
+
+typedef Eigen::Transform< double, 3, Eigen::Affine > Affine3d;
 
 struct Vector3
 {
@@ -114,6 +117,55 @@ struct VectorX {
     bool isApprox(VectorX const& other, double tolerance)
     { return v->isApprox(*other.v, tolerance); }
 
+};
+
+struct Matrix4
+{
+    Matrix4d* mx;
+
+    Matrix4() : mx(new Matrix4d()) {}
+
+    Matrix4(Matrix4d const& _mx)
+        : mx(new Matrix4d(_mx)) {}
+
+    ~Matrix4()
+    { delete mx; }
+
+    double norm() const { return mx->norm(); }
+
+    int rows() const { return mx->rows(); }
+    int cols() const { return mx->cols(); }
+    int size() const { return mx->size(); }
+
+    double get(int i, int j ) const { return (*mx)(i,j); }
+    void set(int i, int j, double value) { (*mx)(i,j) = value; }
+
+    Matrix4* transpose() const
+    { return new Matrix4(mx->transpose()); }
+
+    Matrix4* operator + (Matrix4 const& other) const
+    { return new Matrix4(*mx + *other.mx); }
+
+    Matrix4* operator - (Matrix4 const& other) const
+    { return new Matrix4(*mx - *other.mx); }
+
+    Matrix4* operator / (double scalar) const
+    { return new Matrix4(*mx / scalar); }
+
+    Matrix4* negate() const
+    { return new Matrix4(-*mx); }
+
+    Matrix4* scale(double value) const
+    { return new Matrix4(*mx * value); }
+
+    Matrix4* dotM (Matrix4 const& other) const
+    { return new Matrix4(*mx * (*other.mx)); }
+
+    bool operator ==(Matrix4 const& other) const
+    { return (*this->mx) == (*other.mx); }
+
+    bool isApprox(Matrix4 const& other, double tolerance)
+    { return mx->isApprox(*other.mx, tolerance); }
 };
 
 struct MatrixX {
@@ -310,6 +362,52 @@ struct Isometry3
     { return t->isApprox(*other.t, tolerance); }
 };
 
+struct Affine3
+{
+    Affine3d *t;
+
+    Affine3() : t(new Affine3d()) { t->setIdentity(); }
+    Affine3(const Affine3& _m) : t(new Affine3d(*_m.t)) {}
+    Affine3(const Affine3d& _m) : t(new Affine3d(_m)) {}
+    ~Affine3() { delete t; }
+
+    Affine3* inverse() const
+    { return new Affine3( t->inverse() ); }
+
+    Vector3* translation() const
+    { return new Vector3( t->translation() ); }
+
+    Quaternion* rotation() const
+    { return new Quaternion( Eigen::Quaterniond(t->linear()) ); }
+
+    Affine3* concatenate(Affine3 const& other) const
+    { return new Affine3( *t * *other.t ); }
+
+    Vector3* transform(Vector3 const& other) const
+    { return new Vector3( *t * *other.v ); }
+
+    MatrixX* matrix() const
+    { return new MatrixX( t->matrix() ); }
+
+    void translate( Vector3 const& other ) const
+    { t->translate( *other.v ); }
+
+    void pretranslate( Vector3 const& other ) const
+    { t->pretranslate( *other.v ); }
+
+    void rotate( Quaternion const& other ) const
+    { t->rotate( *other.q ); }
+
+    void prerotate( Quaternion const& other ) const
+    { t->prerotate( *other.q ); }
+
+    bool operator ==(Affine3 const& other) const
+    { return (*this->t).matrix() == (*other.t).matrix(); }
+
+    bool isApprox(Affine3 const& other, double tolerance)
+    { return t->isApprox(*other.t, tolerance); }
+};
+
 
 // The initialization method for this module
 void Init_eigen_ext()
@@ -365,7 +463,7 @@ void Init_eigen_ext()
        .define_method("from_euler", &Quaternion::fromEuler)
        .define_method("from_angle_axis", &Quaternion::fromAngleAxis)
        .define_method("from_matrix", &Quaternion::fromMatrix);
-     
+
      Data_Type<VectorX> rb_VectorX = define_class_under<VectorX>(rb_mEigen, "VectorX")
        .define_constructor(Constructor<VectorX,int>(),
                (Arg("rows") = static_cast<int>(0)))
@@ -384,7 +482,26 @@ void Init_eigen_ext()
        .define_method("*",  &VectorX::scale)
        .define_method("dot",  &VectorX::dot)
        .define_method("approx?", &VectorX::isApprox, (Arg("v"), Arg("tolerance") = Eigen::NumTraits<double>::dummy_precision()));
-     
+
+     Data_Type<Matrix4> rb_Matrix4 = define_class_under<Matrix4>(rb_mEigen, "Matrix4")
+       .define_constructor(Constructor<Matrix4>())
+       .define_method("__equal__",  &Matrix4::operator ==)
+       .define_method("T", &Matrix4::transpose)
+       .define_method("norm",  &Matrix4::norm)
+       .define_method("rows", &Matrix4::rows)
+       .define_method("cols", &Matrix4::cols)
+       .define_method("size", &Matrix4::size)
+       .define_method("[]",  &Matrix4::get)
+       .define_method("[]=",  &Matrix4::set)
+       .define_method("+",  &Matrix4::operator +)
+       .define_method("-",  &Matrix4::operator -)
+       .define_method("/",  &Matrix4::operator /)
+       .define_method("-@", &Matrix4::negate)
+       .define_method("*",  &Matrix4::scale)
+       .define_method("dotM",  &Matrix4::dotM)
+       .define_method("approx?", &Matrix4::isApprox, (Arg("m"), Arg("tolerance") = Eigen::NumTraits<double>::dummy_precision()));
+
+
      Data_Type<MatrixX> rb_MatrixX = define_class_under<MatrixX>(rb_mEigen, "MatrixX")
        .define_constructor(Constructor<MatrixX,int,int>(),
                (Arg("rows") = static_cast<int>(0),
@@ -425,5 +542,20 @@ void Init_eigen_ext()
        .define_method("pretranslate", &Isometry3::pretranslate)
        .define_method("rotate", &Isometry3::rotate)
        .define_method("prerotate", &Isometry3::prerotate);
+
+     Data_Type<Affine3> rb_Affine3 = define_class_under<Affine3>(rb_mEigen, "Affine3")
+       .define_constructor(Constructor<Affine3>())
+       .define_method("__equal__",  &Affine3::operator ==)
+       .define_method("approx?", &Affine3::isApprox, (Arg("i"), Arg("tolerance") = Eigen::NumTraits<double>::dummy_precision()))
+       .define_method("inverse", &Affine3::inverse)
+       .define_method("translation", &Affine3::translation)
+       .define_method("rotation", &Affine3::rotation)
+       .define_method("concatenate", &Affine3::concatenate)
+       .define_method("transform", &Affine3::transform)
+       .define_method("matrix", &Affine3::matrix)
+       .define_method("translate", &Affine3::translate)
+       .define_method("pretranslate", &Affine3::pretranslate)
+       .define_method("rotate", &Affine3::rotate)
+       .define_method("prerotate", &Affine3::prerotate);
 }
 
