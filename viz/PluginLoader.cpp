@@ -4,6 +4,7 @@
 #include "MotionCommandVisualization.hpp"
 #include "TrajectoryVisualization.hpp"
 #include "RigidBodyStateVisualization.hpp"
+#include "BodyStateVisualization.hpp"
 #include "SonarGroundDistanceVisualization.hpp"
 #include "PointcloudVisualization.hpp"
 #include "SonarBeamVisualization.hpp"
@@ -28,6 +29,7 @@ namespace vizkit3d {
 	    pluginNames->push_back("TrajectoryVisualization");
 	    pluginNames->push_back("MotionCommandVisualization");
 	    pluginNames->push_back("RigidBodyStateVisualization");
+	    pluginNames->push_back("BodyStateVisualization");
 	    pluginNames->push_back("LaserScanVisualization");
 	    pluginNames->push_back("SonarGroundDistanceVisualization");
 	    pluginNames->push_back("GridVisualization");
@@ -42,19 +44,23 @@ namespace vizkit3d {
 	    vizkit3d::VizPluginBase* plugin = 0;
 	    if (pluginName == "WaypointVisualization")
 	    {
-		plugin = new vizkit3d::WaypointVisualization();
+		    plugin = new vizkit3d::WaypointVisualization();
 	    }
 	    else if (pluginName == "MotionCommandVisualization")
 	    {
-		plugin = new vizkit3d::MotionCommandVisualization();
+    		plugin = new vizkit3d::MotionCommandVisualization();
 	    }
 	    else if (pluginName == "TrajectoryVisualization")
 	    {
-		plugin = new vizkit3d::TrajectoryVisualization();
+	    	plugin = new vizkit3d::TrajectoryVisualization();
 	    }
 	    else if (pluginName == "RigidBodyStateVisualization")
 	    {
-		plugin = new vizkit3d::RigidBodyStateVisualization();
+		    plugin = new vizkit3d::RigidBodyStateVisualization();
+	    }
+	    else if (pluginName == "BodyStateVisualization")
+	    {
+    		plugin = new vizkit3d::BodyStateVisualization();
 	    }
 	    else if (pluginName == "LaserScanVisualization")
 	    {
@@ -74,12 +80,12 @@ namespace vizkit3d {
 	    }
 	    else if (pluginName == "DepthMapVisualization")
 	    {
-		plugin = new vizkit3d::DepthMapVisualization();
+	    	plugin = new vizkit3d::DepthMapVisualization();
 	    }
 
 	    if (plugin) 
 	    {
-		return plugin;
+		    return plugin;
 	    }
 	    return NULL;
         };

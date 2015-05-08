@@ -8,7 +8,7 @@
 #include <osgFX/BumpMapping>
 
 using namespace osg;
-namespace vizkit3d 
+namespace vizkit3d
 {
 
 BodyStateVisualization::BodyStateVisualization(QObject* parent)

@@ -1,5 +1,5 @@
-#ifndef __RIGID_BODY_STATE_VISUALIZATION_HPP__
-#define __RIGID_BODY_STATE_VISUALIZATION_HPP__
+#ifndef __BODY_STATE_VISUALIZATION_HPP__
+#define __BODY_STATE_VISUALIZATION_HPP__
 
 #include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <Eigen/Geometry>
