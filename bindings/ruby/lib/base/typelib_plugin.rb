@@ -5,6 +5,7 @@ require 'base/typelib/rigid_body_state'
 require 'base/typelib/spline'
 require 'base/typelib/named_vector'
 require 'base/typelib/samples/joints'
+require 'base/typelib/transform_with_covariance'
 
 ##
 # Eigen convertions
