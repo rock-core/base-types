@@ -30,10 +30,10 @@ module Eigen
             return Vector3.new(0, 0, 1)
         end
 
-	# returns the (0, 0, 0) vector
-	def self.Zero()
-	    return Vector3.new(0, 0, 0)
-	end
+        # returns the (0, 0, 0) vector
+        def self.Zero()
+            return Vector3.new(0, 0, 0)
+        end
 
         # Returns the angle formed by +self+ and +v+, oriented from +self+ to
         # +v+
@@ -152,7 +152,7 @@ module Eigen
         # 
         # Returns a vector that has the same direction than +self+ but unit
         # length
-        
+
         ##
         # Computes the signed angle between two vectors, using the provided
         # vector as "positive" rotation direction
@@ -188,9 +188,9 @@ module Eigen
         def to_a; [w, x, y, z] end
 
         # Returns the identity unit quaternion (identity rotation)
-	def self.Identity
-            Quaternion.new(1, 0, 0, 0)
-	end
+        def self.Identity
+                Quaternion.new(1, 0, 0, 0)
+        end
 
         # DEPRECATED: please use identity instead. Returns the unit quaternion (identity rotation)
         def self.Unit
@@ -198,12 +198,12 @@ module Eigen
 	    self.Identity
         end
 
-	# Creates a quaternion from an angle and axis description 
-	def self.from_angle_axis(*args)
-            q = new(1, 0, 0, 0)
-	    q.from_angle_axis(*args)
-	    q
-	end
+        # Creates a quaternion from an angle and axis description 
+        def self.from_angle_axis(*args)
+                q = new(1, 0, 0, 0)
+            q.from_angle_axis(*args)
+            q
+        end
 
         # Returns an angle,axis representation equivalent to this quaternion
         #
@@ -259,7 +259,7 @@ module Eigen
         def yaw
             to_euler[0]
         end
-        
+
         def pitch
             to_euler[1]
         end
@@ -413,7 +413,7 @@ module Eigen
         # note that 
         #
         #   self == Quaternion.from_euler(to_euler, axis0, axis1, axis2)
-        
+
         ## 
         # :method: inverse
         # :call-seq:
@@ -456,12 +456,12 @@ module Eigen
                 self[i] = array[i]
             end
         end
-        
+
         def ==(v)
             v.kind_of?(self.class) &&
                 __equal__(v)
         end
-        
+
         def to_s # :nodoc:
             str = "VectorX("
             for i in 0..size()-1
@@ -470,7 +470,7 @@ module Eigen
             str[-1] = ")"
             str
         end
-        
+
         def _dump(level) # :nodoc:
             Marshal.dump(to_a)
         end
@@ -481,7 +481,78 @@ module Eigen
             m
         end
     end
-    
+
+    # Matrix 4x4
+    class Matrix4
+        def self.from_a(*args)
+            m = new
+            m.from_a(*args)
+            m
+        end
+
+        # Returns the array value in a vector 
+        def to_a(column_major=true)
+            a = []
+            if column_major
+                for j in 0..3
+                    for i in 0..3
+                        a << self[i,j]
+                    end
+                end
+            else
+                for i in 0..3
+                    for j in 0..3
+                        a << self[i,j]
+                    end
+                end
+            end
+            a
+        end
+
+        # sets matrix from a 1d array
+        def from_a(array, column_major=true)
+            array.each_index do |i|
+                v = array[i]
+                if !v
+                    v = 0.0
+                end
+                if column_major
+                    self[i%4,i/4] = v
+                else
+                    self[i/4,i%4] = v
+                end
+            end
+        end
+
+        def ==(m)
+            m.kind_of?(self.class) &&
+                __equal__(m)
+        end
+
+        def to_s # :nodoc:
+            str = "Matrix4(\n"
+            for i in 0..3
+                for j in 0..3
+                    str += "#{self[i,j]} "
+                end
+                str[-1] = "\n"
+            end
+            str += ")"
+            str
+        end
+
+        def _dump(level) # :nodoc:
+            Marshal.dump({'rows' => rows, 'cols' => cols, 'data' => to_a})
+        end
+
+        def self._load(coordinates) # :nodoc:
+            o = Marshal.load(coordinates)
+            m = new()
+            m.from_a(o['data'])
+            m
+        end
+    end
+
     # Abritary size vector
     class MatrixX
         def dup
@@ -541,7 +612,7 @@ module Eigen
             m.kind_of?(self.class) &&
                 __equal__(m)
         end
-        
+
         def to_s # :nodoc:
             str = "MatrixX(\n"
             for i in 0..rows()-1
@@ -553,7 +624,7 @@ module Eigen
             str += ")"
             str
         end
-        
+
         def _dump(level) # :nodoc:
             Marshal.dump({'rows' => rows, 'cols' => cols, 'data' => to_a})
         end
@@ -564,19 +635,19 @@ module Eigen
             m.from_a(o['data'],o['rows'],o['cols'])
             m
         end
-    end     
+    end
 
     class Isometry3
-	def self.Identity
-	    Isometry3.new
-	end
+        def self.Identity
+            Isometry3.new
+        end
 
-	def self.from_position_orientation( v, q )
-	    i = Isometry3.Identity
-	    i.prerotate( q )
-	    i.pretranslate( v )
-	    i
-	end
+        def self.from_position_orientation( v, q )
+            i = Isometry3.Identity
+            i.prerotate( q )
+            i.pretranslate( v )
+            i
+        end
 
         def dup
             raise NotImplementedError
@@ -595,10 +666,43 @@ module Eigen
             end
         end
 
-	def to_s
-	    matrix.to_s
-	end
+        def to_s
+            matrix.to_s
+        end
     end
 
+    class Affine3
+        def self.Identity
+            Affine3.new
+        end
+
+        def self.from_position_orientation( v, q )
+            i = Affine3.Identity
+            i.prerotate( q )
+            i.pretranslate( v )
+            i
+        end
+
+        def dup
+            raise NotImplementedError
+        end
+
+        def ==(q)
+            q.kind_of?(self.class) &&
+                __equal__(q)
+        end
+
+        def *(obj)
+            if obj.kind_of?(Affine3)
+                concatenate(obj)
+            else
+                transform(obj)
+            end
+        end
+
+        def to_s
+            matrix.to_s
+        end
+    end
 end
 

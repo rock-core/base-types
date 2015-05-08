@@ -6,6 +6,19 @@ Typelib.convert_from_ruby Eigen::Vector3, '/wrappers/Matrix</double,3,1>' do |va
     t.data = value.to_a
     t
 end
+
+Typelib.convert_to_ruby '/wrappers/Matrix</double,4,4>', Eigen::Matrix4 do |value|
+    m = Eigen::Matrix4.new()
+    m.from_a(value.data.to_a)
+    m
+end
+Typelib.convert_from_ruby Eigen::Matrix4, '/wrappers/Matrix</double,4,4>' do |value, type|
+    t = type.new
+    t.data = value.to_a
+    t
+end
+
+
 Typelib.convert_to_ruby '/wrappers/Quaternion</double>', Eigen::Quaternion do |value|
     Eigen::Quaternion.new(value.re, *value.im.to_a)
 end
