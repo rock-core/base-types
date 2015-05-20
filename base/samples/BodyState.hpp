@@ -11,6 +11,7 @@
 #include <Eigen/LU>
 
 namespace base { namespace samples {
+
     /** Representation of the state of a rigid body
      *
      * This is among other things used to express frame transformations by
@@ -83,6 +84,27 @@ namespace base { namespace samples {
         {
             base::Orientation orientation(this->pose.getTransform().rotation());
             return base::getRoll(orientation);
+        }
+
+        inline Eigen::Transform<double, 3, 2, 2>::ConstTranslationPart position() const
+        {
+            return this->pose.trans.translation();
+        }
+
+        inline Eigen::Transform<double, 3, 2, 2>::TranslationPart position()
+        {
+            return this->pose.trans.translation();
+        }
+
+        /** A read-only expression of the rotation in quaternion **/
+        inline const base::Orientation orientation() const
+        {
+            return base::Orientation (this->pose.getTransform().linear());
+        }
+
+        inline void orientation(const base::Orientation &q)
+        {
+            this->pose.setTransform(base::Affine3d(q));
         }
 	
         static BodyState unknown()

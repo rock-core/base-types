@@ -171,6 +171,14 @@ BOOST_AUTO_TEST_CASE(body_state_operations)
     BOOST_CHECK(bs3.hasValidPoseCovariance());
     BOOST_CHECK(bs3.hasValidVelocity());
     BOOST_CHECK(bs3.hasValidVelocityCovariance());
+
+    bs3.position().setOnes();
+    std::cout<<"Body State Composition\n"<<bs3<<std::endl;
+    bs3.position() = bs1.position() + bs2.position();
+    std::cout<<"Body State Composition\n"<<bs3<<std::endl;
+    bs3.orientation(base::Orientation::Identity());
+    bs3.orientation(bs1.orientation() * bs2.orientation());
+    std::cout<<"Body State Composition\n"<<bs3<<std::endl;
 }
 
 BOOST_AUTO_TEST_CASE(joint_state)
