@@ -45,8 +45,8 @@ namespace base { namespace samples {
         /** Time-stamp **/
         base::Time time;
 
-	    /** Name of the reference frame */
-    	std::string reference_frame;
+	    /** Name of the source frame */
+    	std::string source_frame;
 
     	/** Name of the target frame */
     	std::string target_frame;
