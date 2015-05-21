@@ -206,7 +206,7 @@ namespace base {
         {
             // short path if there is no uncertainty
             if( !hasValidCovariance() )
-                return TransformWithCovariance( TransformWithCovariance( this->getTransform().inverse( Eigen::Isometry ) ) );
+                return TransformWithCovariance(this->rotation.inverse(), static_cast<base::Position>(-(this->rotation.inverse() * this->translation)));
 
             Eigen::Quaterniond q(this->rotation);
             Eigen::Vector3d t(this->translation);
@@ -214,9 +214,9 @@ namespace base {
             J << Eigen::Matrix3d::Identity(), Eigen::Matrix3d::Zero(),
             drx_by_dr( q.inverse(), t ), q.toRotationMatrix().transpose();
 
-            return TransformWithCovariance(
-                Eigen::Affine3d( getTransform().inverse( Eigen::Isometry ) ),
-                J*getCovariance()*J.transpose() );
+            return TransformWithCovariance(this->rotation.inverse(),
+                static_cast<base::Position>(-(this->rotation.inverse() * this->translation)),
+                J*this->getCovariance()*J.transpose());
         };
 
         /** For backward compatibility with RBS **/
