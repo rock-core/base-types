@@ -86,25 +86,25 @@ namespace base { namespace samples {
             return base::getRoll(orientation);
         }
 
-        inline Eigen::Transform<double, 3, 2, 2>::ConstTranslationPart position() const
+        inline const base::Position& position() const
         {
-            return this->pose.trans.translation();
+            return this->pose.translation;
         }
 
-        inline Eigen::Transform<double, 3, 2, 2>::TranslationPart position()
+        inline base::Position& position()
         {
-            return this->pose.trans.translation();
+            return this->pose.translation;
         }
 
         /** A read-only expression of the rotation in quaternion **/
         inline const base::Orientation orientation() const
         {
-            return base::Orientation (this->pose.getTransform().linear());
+            return base::Orientation (this->pose.rotation);
         }
 
         inline void orientation(const base::Orientation &q)
         {
-            this->pose.setTransform(base::Affine3d(q));
+            this->pose.rotation = Eigen::AngleAxisd(q);
         }
 	
         static BodyState unknown()

@@ -30,23 +30,31 @@ namespace base {
 
     public:
         /** The transformation is represented as a 4x4 homogenous matrix. Both
-         * rotation and translation in 3D are represented.
-         */
-        base::Affine3d trans;
+        * rotation and translation in 3D are represented.
+        */
+        Eigen::AngleAxisd rotation;
+
+        base::Position translation;
 
         /** The uncertainty is represented as a 6x6 matrix, which is the covariance
-         * matrix of the [r t] representation of the error. Here r is the rotational
+         * matrix of the [rotation translation] representation of the error. Here r is the rotational
          * part expressed as a scaled axis of rotation, and t the translational
          * component.
          */
         Covariance cov;
 
     public:
-        explicit TransformWithCovariance( const base::Affine3d& trans = base::Affine3d::Identity() ) :
-            trans( trans ) { invalidateCovariance(); };
+        explicit TransformWithCovariance( const base::Affine3d& trans = base::Affine3d::Identity() )
+            {this->setTransform(trans); this->invalidateCovariance();};
 
-        TransformWithCovariance( const base::Affine3d& trans, const Covariance& cov ) :
-            trans( trans ), cov( cov ) {};
+        TransformWithCovariance( const base::Affine3d& trans, const Covariance& cov )
+            {this->setTransform(trans); this->cov = cov;};
+
+        TransformWithCovariance( const Eigen::AngleAxisd& rotation, const base::Position& translation ) :
+            rotation(rotation), translation(translation){this->invalidateCovariance();};
+
+        TransformWithCovariance( const Eigen::AngleAxisd& rotation, const base::Position& translation, const Covariance& cov ) :
+            rotation(rotation), translation(translation), cov(cov){};
 
         /** For backward compatibility with RBS **/
         explicit TransformWithCovariance( const base::samples::RigidBodyState& rbs )
@@ -56,7 +64,7 @@ namespace base {
 
         static TransformWithCovariance Identity()
         {
-            return TransformWithCovariance( base::Affine3d::Identity() );
+            return TransformWithCovariance();
         };
 	
 	
@@ -89,9 +97,8 @@ namespace base {
             // convert the rotations of the respective transforms into quaternions
             // in order to inverse the covariances, we need to get both the t1 and t2 transformations
             // based on the composition tf = t2 * t1
-            Eigen::Quaterniond 
-            q1( t1.getTransform().linear() ),
-            q2( t2.linear() );
+            Eigen::Quaterniond q1( t1.rotation );
+            Eigen::Quaterniond q2( t2.linear() );
             Eigen::Quaterniond q( q2 * q1 );
 
             // initialize resulting covariance
@@ -103,7 +110,7 @@ namespace base {
 
             Eigen::Matrix<double,6,6> J2;
             J2 << dr2r1_by_r2(q, q1, q2), Eigen::Matrix3d::Zero(),
-            drx_by_dr(q2, t1.getTransform().translation()), Eigen::Matrix3d::Identity();
+            drx_by_dr(q2, t1.translation), Eigen::Matrix3d::Identity();
 
             cov = J2.inverse() * ( tf.getCovariance() - J1 * t1.getCovariance() * J1.transpose() ) * J2.transpose().inverse();
 
@@ -129,9 +136,8 @@ namespace base {
             // convert the rotations of the respective transforms into quaternions
             // in order to inverse the covariances, we need to get both the t1 and t2 transformations
             // based on the composition tf = t2 * t1
-            Eigen::Quaterniond 
-            q1( t1.linear() ),
-            q2( t2.getTransform().linear() );
+            Eigen::Quaterniond q1(t1.linear());
+            Eigen::Quaterniond q2(t2.rotation);
             Eigen::Quaterniond q( q2 * q1 );
 
             // initialize resulting covariance
@@ -164,8 +170,8 @@ namespace base {
 
             // convert the rotations of the respective transforms into quaternions
             Eigen::Quaterniond 
-            q1( t1.getTransform().linear() ),
-            q2( t2.getTransform().linear() );
+            q1( t1.rotation ),
+            q2( t2.rotation );
             Eigen::Quaterniond q( q2 * q1 );
 
             // initialize resulting covariance
@@ -186,7 +192,7 @@ namespace base {
             {
                 Eigen::Matrix<double,6,6> J2;
                 J2 << dr2r1_by_r2(q, q1, q2), Eigen::Matrix3d::Zero(),
-                drx_by_dr(q2, t1.getTransform().translation()), Eigen::Matrix3d::Identity();
+                drx_by_dr(q2, t1.translation), Eigen::Matrix3d::Identity();
 
                 cov += J2*t2.getCovariance()*J2.transpose();
             }
@@ -202,8 +208,8 @@ namespace base {
             if( !hasValidCovariance() )
                 return TransformWithCovariance( TransformWithCovariance( this->getTransform().inverse( Eigen::Isometry ) ) );
 
-            Eigen::Quaterniond q( getTransform().linear() );
-            Eigen::Vector3d t( getTransform().translation() );
+            Eigen::Quaterniond q(this->rotation);
+            Eigen::Vector3d t(this->translation);
             Eigen::Matrix<double,6,6> J;
             J << Eigen::Matrix3d::Identity(), Eigen::Matrix3d::Zero(),
             drx_by_dr( q.inverse(), t ), q.toRotationMatrix().transpose();
@@ -217,7 +223,7 @@ namespace base {
         TransformWithCovariance& operator=( const base::samples::RigidBodyState& rbs )
         {
             // extract the transform
-            trans = rbs.getTransform();
+            this->setTransform(rbs.getTransform());
 
             // and the covariance
             cov << rbs.cov_orientation, Eigen::Matrix3d::Zero(),
@@ -228,10 +234,34 @@ namespace base {
 
         const Covariance& getCovariance() const { return this->cov; }
         void setCovariance( const Covariance& cov ) { this->cov = cov; }
-        const base::Affine3d& getTransform() const { return this->trans; }
-        void setTransform( const base::Affine3d& trans ) { this->trans = trans; }
 
-        bool hasValidTransform() const { return base::isnotnan(this->trans.matrix()); }
+        const base::Affine3d getTransform() const
+        {
+            base::Affine3d trans (this->rotation);
+            trans.translation() = this->translation;
+            return trans;
+        }
+        void setTransform( const base::Affine3d& trans )
+        {
+            this->rotation = Eigen::AngleAxisd(trans.rotation());
+            this->translation = trans.translation();
+        }
+
+        const base::Orientation getOrientation() const
+        {
+            return base::Orientation(this->rotation);
+        }
+
+        void setOrientation(const base::Orientation & q)
+        {
+            this->rotation = Eigen::AngleAxisd(q);
+        }
+
+        bool hasValidTransform() const
+        {
+            return base::isnotnan(this->rotation.toRotationMatrix()) && base::isnotnan(this->translation);
+        }
+
         void invalidateTransform()
         {
             base::Affine3d invalid_trans(Eigen::AngleAxisd(base::NaN<double>(),
