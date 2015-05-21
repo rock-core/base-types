@@ -63,7 +63,7 @@ namespace base { namespace samples {
             this->pose.setTransform(pose);
         }
 
-        const base::Affine3d& getPose() const
+        const base::Affine3d getPose() const
         {
             return this->pose.getTransform();
         }
