@@ -32,7 +32,7 @@ namespace base {
         /** The transformation is represented as a 4x4 homogenous matrix. Both
         * rotation and translation in 3D are represented.
         */
-        Eigen::AngleAxisd rotation;
+        base::AngleAxisd rotation;
 
         base::Position translation;
 
@@ -50,10 +50,10 @@ namespace base {
         TransformWithCovariance( const base::Affine3d& trans, const Covariance& cov )
             {this->setTransform(trans); this->cov = cov;};
 
-        TransformWithCovariance( const Eigen::AngleAxisd& rotation, const base::Position& translation ) :
+        TransformWithCovariance( const base::AngleAxisd& rotation, const base::Position& translation ) :
             rotation(rotation), translation(translation){this->invalidateCovariance();};
 
-        TransformWithCovariance( const Eigen::AngleAxisd& rotation, const base::Position& translation, const Covariance& cov ) :
+        TransformWithCovariance( const base::AngleAxisd& rotation, const base::Position& translation, const Covariance& cov ) :
             rotation(rotation), translation(translation), cov(cov){};
 
         /** For backward compatibility with RBS **/
@@ -88,7 +88,7 @@ namespace base {
         {
             const TransformWithCovariance &tf(*this);
             const TransformWithCovariance &t1(trans);
-            Eigen::AngleAxisd r2(tf.rotation * t1.rotation.inverse());
+            base::AngleAxisd r2(tf.rotation * t1.rotation.inverse());
             base::Position p2(tf.translation + (tf.rotation * t1.inverse().translation));
 
             // short path if there is no uncertainty
@@ -127,7 +127,7 @@ namespace base {
         {
             const TransformWithCovariance &tf(*this);
             const TransformWithCovariance &t2(trans);
-            Eigen::AngleAxisd r1(t2.rotation.inverse() * tf.rotation);
+            base::AngleAxisd r1(t2.rotation.inverse() * tf.rotation);
             base::Position p1(t2.inverse().translation + (t2.rotation.inverse() * tf.translation));
 
             // short path if there is no uncertainty 
@@ -165,7 +165,7 @@ namespace base {
             const TransformWithCovariance &t2(*this);
             const TransformWithCovariance &t1(trans);
 
-            Eigen::AngleAxisd t(t2.rotation * t1.rotation);
+            base::AngleAxisd t(t2.rotation * t1.rotation);
             base::Position p(t2.translation + (t2.rotation * t1.translation));
 
             // short path if there is no uncertainty 
@@ -246,7 +246,7 @@ namespace base {
         }
         void setTransform( const base::Affine3d& trans )
         {
-            this->rotation = Eigen::AngleAxisd(trans.rotation());
+            this->rotation = base::AngleAxisd(trans.rotation());
             this->translation = trans.translation();
         }
 
@@ -257,7 +257,7 @@ namespace base {
 
         void setOrientation(const base::Orientation & q)
         {
-            this->rotation = Eigen::AngleAxisd(q);
+            this->rotation = base::AngleAxisd(q);
         }
 
         bool hasValidTransform() const
@@ -267,7 +267,7 @@ namespace base {
 
         void invalidateTransform()
         {
-            base::Affine3d invalid_trans(Eigen::AngleAxisd(base::NaN<double>(),
+            base::Affine3d invalid_trans(base::AngleAxisd(base::NaN<double>(),
                         base::Vector3d::Ones() * base::NaN<double>()));
             this->setTransform(invalid_trans);
         }
@@ -289,14 +289,14 @@ namespace base {
         {
             double theta = r.norm();
             if( fabs(theta) > 1e-5 )
-            return Eigen::Quaterniond( Eigen::AngleAxisd( theta, r/theta ) );
+            return Eigen::Quaterniond( base::AngleAxisd( theta, r/theta ) );
             else
             return Eigen::Quaterniond::Identity();
         }
 
         static Eigen::Vector3d q_to_r( const Eigen::Quaterniond& q )
         {
-            Eigen::AngleAxisd aa( q );
+            base::AngleAxisd aa( q );
             return aa.axis() * aa.angle();
         }
 

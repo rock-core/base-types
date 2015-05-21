@@ -30,7 +30,8 @@ namespace base
     typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::DontAlign> 
                                                               MatrixXd;
 
-    typedef Eigen::Quaternion<double, Eigen::DontAlign>    Quaterniond;
+    typedef Eigen::Quaternion<double, Eigen::DontAlign>   Quaterniond;
+    typedef Eigen::AngleAxis<double>    AngleAxisd;
     typedef Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign> Affine3d;
     typedef Eigen::Transform<double, 3, Eigen::Isometry, Eigen::DontAlign> Isometry3d;
 
