@@ -31,8 +31,9 @@ namespace base
                                                               MatrixXd;
 
     typedef Eigen::Quaternion<double, Eigen::DontAlign>    Quaterniond;
-    typedef Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign> 
-							      Affine3d;
+    typedef Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign> Affine3d;
+    typedef Eigen::Transform<double, 3, Eigen::Isometry, Eigen::DontAlign> Isometry3d;
+
     // alias for backward compatibility
     typedef Affine3d					   Transform3d;
 
