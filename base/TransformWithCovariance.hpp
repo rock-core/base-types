@@ -1,5 +1,7 @@
-#ifndef __BASE_TRANSFORMATION_HPP__
-#define __BASE_TRANSFORMATION_HPP__
+#ifndef __BASE_TRANSFORM_WITH_COVARIANCE_HPP__
+#define __BASE_TRANSFORM_WITH_COVARIANCE_HPP__
+
+#include <iomanip> // std::setprecision
 
 #include <Eigen/Core>
 #include <Eigen/LU>
@@ -29,17 +31,16 @@ namespace base {
 	    typedef base::Matrix6d Covariance;
 
     public:
-        /** The transformation is represented as a 4x4 homogenous matrix. Both
-        * rotation and translation in 3D are represented.
+        /** The transformation is represented 6D vector [rotation translation]
+        * Here rotation is the rotational part expressed as a scaled axis of
+        * rotation, and t the translational component.
         */
         base::AngleAxisd rotation;
 
         base::Position translation;
 
         /** The uncertainty is represented as a 6x6 matrix, which is the covariance
-         * matrix of the [rotation translation] representation of the error. Here r is the rotational
-         * part expressed as a scaled axis of rotation, and t the translational
-         * component.
+         * matrix of the [rotation translation] representation of the error.
          */
         Covariance cov;
 
@@ -394,13 +395,26 @@ namespace base {
     */
     inline std::ostream & operator<<(std::ostream &out, const TransformWithCovariance& trans)
     {
-        out << trans.getTransform().matrix() << "\n";
-        if (trans.hasValidCovariance())
+        /** cout the 6D pose vector (scaled axis rotation and translation) with its associated covariance matrix **/
+        base::Vector3d scaled_axis;
+        scaled_axis = trans.rotation.axis() * trans.rotation.angle();
+        for (register unsigned short i=0; i<trans.getCovariance().rows(); ++i)
         {
-            out << trans.getCovariance() << "\n";
-            //out << trans.getCovariance().topLeftCorner<3,3>() << "\n";
-            //out << trans.getCovariance().bottomRightCorner<3,3>() << "\n";
+            if (i<3)
+            {
+                out<<std::fixed<<std::setprecision(3)<<scaled_axis[i]<<"\t|";
+            }
+            else
+            {
+                out<<std::fixed<<std::setprecision(3)<<trans.translation[i-3]<<"\t|";
+            }
+            for (register unsigned short j=0; j<trans.getCovariance().cols(); ++j)
+            {
+                out<<std::fixed<<std::setprecision(3)<<trans.getCovariance().row(i)[j]<<"\t";
+            }
+            out<<"\n";
         }
+        out.unsetf(std::ios_base::floatfield);
         return out;
     };
 } // namespaces
