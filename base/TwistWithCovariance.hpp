@@ -64,6 +64,14 @@ namespace base {
         const base::Vector3d& translation() const {return this->getTranslation(); }
         const base::Vector3d& rotation() const {return this->getRotation(); }
 
+        const base::Vector6d getVelocity() const
+        {
+            base::Vector6d all_velocities;
+            all_velocities.block<3,1>(0,0) = this->vel;
+            all_velocities.block<3,1>(3,0) = this->rot;
+            return all_velocities;
+        }
+
         void setVelocity(const base::Vector6d& velocity)
         {
             this->vel = velocity.block<3,1>(0,0);
@@ -94,7 +102,7 @@ namespace base {
             this->invalidateCovariance();
         }
 
-        TwistWithCovariance Zero()
+        static TwistWithCovariance Zero()
         {
             return TwistWithCovariance(static_cast<const base::Vector3d>(base::Vector3d::Zero()), static_cast<const base::Vector3d>(base::Vector3d::Zero()));
         }
