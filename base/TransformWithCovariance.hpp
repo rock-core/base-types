@@ -8,8 +8,9 @@
 #include <Eigen/Geometry>
 #include <Eigen/SVD>
 
+#include <base/Float.hpp>
+#include <base/Pose.hpp>
 #include <base/Eigen.hpp>
-#include <base/samples/RigidBodyState.hpp> /** For backward compatibility with RBS **/
 
 namespace base {
 
@@ -17,8 +18,8 @@ namespace base {
      * Class which represents a 3D Transformation with associated uncertainty information.
      *
      * The uncertainty is represented as a 6x6 matrix, which is the covariance
-     * matrix of the [r t] representation of the error. Here r is the rotational
-     * part expressed as a scaled axis of rotation, and t the translational
+     * matrix of the [r t] representation of the error. Here r is the rotation orientation
+     * part expressed as a scaled axis of orientation, and t the translational
      * component.
      *
      * The uncertainty information is optional. The hasValidCovariance() method can
@@ -31,16 +32,16 @@ namespace base {
 	    typedef base::Matrix6d Covariance;
 
     public:
-        /** The transformation is represented 6D vector [rotation translation]
-        * Here rotation is the rotational part expressed as a scaled axis of
-        * rotation, and t the translational component.
+        /** The transformation is represented 6D vector [orientation translation]
+        * Here orientation is the rotational part expressed as a scaled axis of
+        * orientation, and t the translational component.
         */
-        base::AngleAxisd rotation;
+        base::AngleAxisd orientation;
 
         base::Position translation;
 
         /** The uncertainty is represented as a 6x6 matrix, which is the covariance
-         * matrix of the [rotation translation] representation of the error.
+         * matrix of the [orientation translation] representation of the error.
          */
         Covariance cov;
 
@@ -51,17 +52,11 @@ namespace base {
         TransformWithCovariance( const base::Affine3d& trans, const Covariance& cov )
             {this->setTransform(trans); this->cov = cov;};
 
-        TransformWithCovariance( const base::AngleAxisd& rotation, const base::Position& translation ) :
-            rotation(rotation), translation(translation){this->invalidateCovariance();};
+        TransformWithCovariance( const base::AngleAxisd& orientation, const base::Position& translation ) :
+            orientation(orientation), translation(translation){this->invalidateCovariance();};
 
-        TransformWithCovariance( const base::AngleAxisd& rotation, const base::Position& translation, const Covariance& cov ) :
-            rotation(rotation), translation(translation), cov(cov){};
-
-        /** For backward compatibility with RBS **/
-        explicit TransformWithCovariance( const base::samples::RigidBodyState& rbs )
-        {
-            this->operator=( rbs );
-        };
+        TransformWithCovariance( const base::AngleAxisd& orientation, const base::Position& translation, const Covariance& cov ) :
+            orientation(orientation), translation(translation), cov(cov){};
 
         static TransformWithCovariance Identity()
         {
@@ -89,17 +84,17 @@ namespace base {
         {
             const TransformWithCovariance &tf(*this);
             const TransformWithCovariance &t1(trans);
-            base::AngleAxisd r2(tf.rotation * t1.rotation.inverse());
-            base::Position p2(tf.translation + (tf.rotation * t1.inverse().translation));
+            base::AngleAxisd r2(tf.orientation * t1.orientation.inverse());
+            base::Position p2(tf.translation + (tf.orientation * t1.inverse().translation));
 
             // short path if there is no uncertainty
             if( !t1.hasValidCovariance() && !tf.hasValidCovariance() )
                 return TransformWithCovariance(r2, p2);
 
-            // convert the rotations of the respective transforms into quaternions
+            // convert the orientations of the respective transforms into quaternions
             // in order to inverse the covariances, we need to get both the t1 and t2=[r2 p2] transformations
             // based on the composition tf = t2 * t1
-            Eigen::Quaterniond q1( t1.rotation );
+            Eigen::Quaterniond q1( t1.orientation );
             Eigen::Quaterniond q2( r2 );
             Eigen::Quaterniond q( q2 * q1 );
 
@@ -128,18 +123,18 @@ namespace base {
         {
             const TransformWithCovariance &tf(*this);
             const TransformWithCovariance &t2(trans);
-            base::AngleAxisd r1(t2.rotation.inverse() * tf.rotation);
-            base::Position p1(t2.inverse().translation + (t2.rotation.inverse() * tf.translation));
+            base::AngleAxisd r1(t2.orientation.inverse() * tf.orientation);
+            base::Position p1(t2.inverse().translation + (t2.orientation.inverse() * tf.translation));
 
             // short path if there is no uncertainty 
             if( !t2.hasValidCovariance() && !tf.hasValidCovariance() )
                 return TransformWithCovariance( r1, p1 );
 
-            // convert the rotations of the respective transforms into quaternions
+            // convert the orientations of the respective transforms into quaternions
             // in order to inverse the covariances, we need to get both the t1=[r1 p1] and t2 transformations
             // based on the composition tf = t2 * t1
             Eigen::Quaterniond q1(r1);
-            Eigen::Quaterniond q2(t2.rotation);
+            Eigen::Quaterniond q2(t2.orientation);
             Eigen::Quaterniond q( q2 * q1 );
 
             // initialize resulting covariance
@@ -166,8 +161,8 @@ namespace base {
             const TransformWithCovariance &t2(*this);
             const TransformWithCovariance &t1(trans);
 
-            base::AngleAxisd t(t2.rotation * t1.rotation);
-            base::Position p(t2.translation + (t2.rotation * t1.translation));
+            base::AngleAxisd t(t2.orientation * t1.orientation);
+            base::Position p(t2.translation + (t2.orientation * t1.translation));
 
             // short path if there is no uncertainty 
             if( !t1.hasValidCovariance() && !t2.hasValidCovariance() )
@@ -175,9 +170,9 @@ namespace base {
                 return TransformWithCovariance(t, p);
             }
 
-            // convert the rotations of the respective transforms into quaternions
-            Eigen::Quaterniond q1( t1.rotation ), q2( t2.rotation );
-            Eigen::Quaterniond q( t2.rotation * t1.rotation );
+            // convert the orientations of the respective transforms into quaternions
+            Eigen::Quaterniond q1( t1.orientation ), q2( t2.orientation );
+            Eigen::Quaterniond q( t2.orientation * t1.orientation );
 
             // initialize resulting covariance
             Eigen::Matrix<double,6,6> cov = Eigen::Matrix<double,6,6>::Zero();
@@ -210,60 +205,52 @@ namespace base {
         {
             // short path if there is no uncertainty
             if( !hasValidCovariance() )
-                return TransformWithCovariance(this->rotation.inverse(), static_cast<base::Position>(-(this->rotation.inverse() * this->translation)));
+                return TransformWithCovariance(this->orientation.inverse(), static_cast<base::Position>(-(this->orientation.inverse() * this->translation)));
 
-            Eigen::Quaterniond q(this->rotation);
+            Eigen::Quaterniond q(this->orientation);
             Eigen::Vector3d t(this->translation);
             Eigen::Matrix<double,6,6> J;
             J << Eigen::Matrix3d::Identity(), Eigen::Matrix3d::Zero(),
             drx_by_dr( q.inverse(), t ), q.toRotationMatrix().transpose();
 
-            return TransformWithCovariance(this->rotation.inverse(),
-                static_cast<base::Position>(-(this->rotation.inverse() * this->translation)),
+            return TransformWithCovariance(this->orientation.inverse(),
+                static_cast<base::Position>(-(this->orientation.inverse() * this->translation)),
                 J*this->getCovariance()*J.transpose());
-        };
-
-        /** For backward compatibility with RBS **/
-        TransformWithCovariance& operator=( const base::samples::RigidBodyState& rbs )
-        {
-            // extract the transform
-            this->setTransform(rbs.getTransform());
-
-            // and the covariance
-            cov << rbs.cov_orientation, Eigen::Matrix3d::Zero(),
-            Eigen::Matrix3d::Zero(), rbs.cov_position;
-
-            return *this;
         };
 
         const Covariance& getCovariance() const { return this->cov; }
         void setCovariance( const Covariance& cov ) { this->cov = cov; }
 
+        const base::Matrix3d getOrientationCov() const { return this->cov.topLeftCorner<3,3>(); }
+        void setOrientationCov(const base::Matrix3d& cov) { this->cov.topLeftCorner<3,3>() = cov; }
+        const base::Matrix3d getTranslationCov() const { return this->cov.bottomRightCorner<3,3>(); }
+        void setTranslationCov(const base::Matrix3d& cov) { this->cov.bottomRightCorner<3,3>() = cov; }
+
         const base::Affine3d getTransform() const
         {
-            base::Affine3d trans (this->rotation);
+            base::Affine3d trans (this->orientation);
             trans.translation() = this->translation;
             return trans;
         }
         void setTransform( const base::Affine3d& trans )
         {
-            this->rotation = base::AngleAxisd(trans.rotation());
+            this->orientation = base::AngleAxisd(trans.rotation());
             this->translation = trans.translation();
         }
 
         const base::Orientation getOrientation() const
         {
-            return base::Orientation(this->rotation);
+            return base::Orientation(this->orientation);
         }
 
         void setOrientation(const base::Orientation & q)
         {
-            this->rotation = base::AngleAxisd(q);
+            this->orientation = base::AngleAxisd(q);
         }
 
         bool hasValidTransform() const
         {
-            return base::isnotnan(this->rotation.toRotationMatrix()) && base::isnotnan(this->translation);
+            return base::isnotnan(this->orientation.toRotationMatrix()) && base::isnotnan(this->translation);
         }
 
         void invalidateTransform()
@@ -395,9 +382,9 @@ namespace base {
     */
     inline std::ostream & operator<<(std::ostream &out, const TransformWithCovariance& trans)
     {
-        /** cout the 6D pose vector (scaled axis rotation and translation) with its associated covariance matrix **/
+        /** cout the 6D pose vector (scaled axis orientation and translation) with its associated covariance matrix **/
         base::Vector3d scaled_axis;
-        scaled_axis = trans.rotation.axis() * trans.rotation.angle();
+        scaled_axis = trans.orientation.axis() * trans.orientation.angle();
         for (register unsigned short i=0; i<trans.getCovariance().rows(); ++i)
         {
             if (i<3)

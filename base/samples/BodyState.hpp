@@ -6,6 +6,7 @@
 #include <base/Pose.hpp>
 #include <base/TransformWithCovariance.hpp>
 #include <base/TwistWithCovariance.hpp>
+#include <base/samples/RigidBodyState.hpp> /** For backward compatibility with RBS **/
 
 #include <Eigen/Core>
 #include <Eigen/LU>
@@ -70,20 +71,17 @@ namespace base { namespace samples {
 
         double getYaw() const
         {
-            base::Orientation orientation(this->pose.getTransform().rotation());
-            return base::getYaw(orientation);
+            return base::getYaw(this->pose.orientation);
         }
 	
         double getPitch() const
         {
-            base::Orientation orientation(this->pose.getTransform().rotation());
-            return base::getPitch(orientation);
+            return base::getPitch(this->pose.orientation);
         }
 	
         double getRoll() const
         {
-            base::Orientation orientation(this->pose.getTransform().rotation());
-            return base::getRoll(orientation);
+            return base::getRoll(this->pose.orientation);
         }
 
         inline const base::Position& position() const
@@ -96,17 +94,82 @@ namespace base { namespace samples {
             return this->pose.translation;
         }
 
-        /** A read-only expression of the rotation in quaternion **/
-        inline const base::Orientation orientation() const
+        /** A read-only expression of the rotation **/
+        inline const base::AngleAxisd& orientation() const
         {
-            return base::Orientation (this->pose.rotation);
+            return this->pose.orientation;
         }
 
-        inline void orientation(const base::Orientation &q)
+        inline base::AngleAxisd& orientation()
         {
-            this->pose.rotation = Eigen::AngleAxisd(q);
+            return this->pose.orientation;
         }
-	
+
+        inline const base::Vector3d& linear_velocity() const
+        {
+            return this->velocity.vel;
+        }
+
+        inline base::Position& linear_velocity()
+        {
+            return this->velocity.vel;
+        }
+
+        inline const base::Vector3d& angular_velocity() const
+        {
+            return this->velocity.rot;
+        }
+
+        inline base::Position& angular_velocity()
+        {
+            return this->velocity.rot;
+        }
+
+
+        /** A read-only expression of the pose covariance **/
+        inline const base::Matrix6d& cov_pose() const
+        {
+            return this->pose.cov;
+        }
+
+        inline base::Matrix6d& cov_pose()
+        {
+            return this->pose.cov;
+        }
+
+        /** A read-only expression of the covariance rotation **/
+        inline const base::Matrix3d cov_orientation() const
+        {
+            return this->pose.getOrientationCov();
+        }
+
+        inline void cov_orientation(const base::Matrix3d& cov)
+        {
+            return this->pose.setOrientationCov(cov);
+        }
+
+        /** A read-only expression of the rotation in quaternion **/
+        inline const base::Matrix3d cov_position() const
+        {
+            return this->pose.getTranslationCov();
+        }
+
+        inline void cov_position(const base::Matrix3d& cov)
+        {
+            return this->pose.setTranslationCov(cov);
+        }
+
+        /** A read-only expression of the velocity covariance **/
+        inline const base::Matrix6d& cov_velocity() const
+        {
+            return this->velocity.cov;
+        }
+
+        inline base::Matrix6d& cov_velocity()
+        {
+            return this->velocity.cov;
+        }
+
         static BodyState unknown()
         {
             BodyState result(false);
@@ -171,6 +234,28 @@ namespace base { namespace samples {
             if (pose) this->invalidatePoseCovariance();
             if (velocity) this->invalidateVelocityCovariance();
         }
+
+        /** For backward compatibility with RBS **/
+        BodyState& operator=( const base::samples::RigidBodyState& rbs )
+        {
+            /** extract the transformation **/
+            this->pose.setTransform(rbs.getTransform());
+
+            /** and the transformation covariance **/
+            this->pose.cov << rbs.cov_orientation, Eigen::Matrix3d::Zero(),
+                              Eigen::Matrix3d::Zero(), rbs.cov_position;
+
+            /** Extract the velocity **/
+            this->velocity.vel = rbs.velocity;
+            this->velocity.rot = rbs.angular_velocity;
+
+            /** Extract the velocity covariance **/
+            this->velocity.cov << rbs.cov_velocity, Eigen::Matrix3d::Zero(),
+                              Eigen::Matrix3d::Zero(), rbs.cov_angular_velocity;
+
+            return *this;
+        };
+
 
         /** Default std::cout function
         */
