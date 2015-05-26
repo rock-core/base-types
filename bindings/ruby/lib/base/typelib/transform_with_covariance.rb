@@ -1,9 +1,10 @@
 Typelib.specialize_model '/base/TransformWithCovariance_m' do
     def invalid
-        trans = { :data => [NaN] * 16 }
+        translation = { :data => [NaN] * 3 }
         cov = { :data => [NaN] * 36 }
         new(
-            :trans => trans,
+            :rotation => { :angle => NaN, :axis => [NaN, NaN, NaN]},
+            :translation => translation,
             :cov => cov)
     end
 

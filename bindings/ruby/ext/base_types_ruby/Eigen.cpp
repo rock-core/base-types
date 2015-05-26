@@ -16,8 +16,8 @@ typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::DontAlign>
 typedef Eigen::Matrix<double, Eigen::Dynamic, 1, Eigen::DontAlign>
                                                        VectorXd;
 typedef Eigen::Transform< double, 3, Eigen::Isometry > Isometry3d;
-
 typedef Eigen::Transform< double, 3, Eigen::Affine > Affine3d;
+typedef Eigen::AngleAxis<double> AngleAxisd;
 
 struct Vector3
 {
@@ -314,6 +314,79 @@ struct Quaternion
     }
 };
 
+struct AngleAxis
+{
+    AngleAxisd* aa;
+    AngleAxis(double angle, Vector3 const& axis)
+        : aa(new AngleAxisd(angle, Eigen::Vector3d(*axis.v))){}
+    AngleAxis(AngleAxis const& aa)
+        : aa(new AngleAxisd(*aa.aa)) { }
+    AngleAxis(AngleAxisd const& _aa)
+        : aa(new AngleAxisd(_aa)) {}
+
+    ~AngleAxis()
+    { delete aa; }
+
+    bool operator ==(AngleAxis const& other) const
+    { return angle() == other.angle() && axis() == other.axis(); }
+
+    double angle() const { return aa->angle(); }
+    Vector3* axis() const { return new Vector3(aa->axis()); }
+
+    AngleAxis* concatenate(AngleAxis const& other) const
+    { return new AngleAxis(static_cast<AngleAxisd>((*aa) * (*other.aa))); }
+
+    Vector3* transform(Vector3 const& v) const
+    { return new Vector3((*aa) * (*v.v)); }
+
+    AngleAxis* inverse() const
+    { return new AngleAxis(aa->inverse()); }
+
+    MatrixX* matrix() const
+    {
+        return new MatrixX(aa->matrix());
+    }
+
+    void fromQuaternion(Quaternion const& q)
+    {
+        *(this->aa) = Eigen::Quaterniond(q.w(), q.x(), q.y(), q.z());
+    }
+
+    void fromEuler(Vector3 const& angles, int axis0, int axis1, int axis2)
+    {
+        *(this->aa) =
+            Eigen::AngleAxisd(angles.x(), Eigen::Vector3d::Unit(axis0)) *
+            Eigen::AngleAxisd(angles.y(), Eigen::Vector3d::Unit(axis1)) *
+            Eigen::AngleAxisd(angles.z(), Eigen::Vector3d::Unit(axis2));
+    }
+
+    void fromMatrix(MatrixX const& matrix)
+    {
+	    *(this->aa) =
+            AngleAxisd(Eigen::Matrix3d(*matrix.m));
+    }
+
+    bool isApprox(AngleAxis const& other, double tolerance)
+    {
+        return aa->isApprox(*other.aa, tolerance);
+    }
+
+    Vector3* toEuler()
+    {
+        const Eigen::Matrix3d m = aa->toRotationMatrix();
+        double i = Eigen::Vector2d(m.coeff(2,2) , m.coeff(2,1)).norm();
+        double y = atan2(-m.coeff(2,0), i);
+        double x=0,z=0;
+        if (i > Eigen::NumTraits<double>::dummy_precision()){
+            x = ::atan2(m.coeff(1,0), m.coeff(0,0));
+            z = ::atan2(m.coeff(2,1), m.coeff(2,2));
+        }else{
+            z = (m.coeff(2,0)>0?1:-1)* ::atan2(-m.coeff(0,1), m.coeff(1,1));
+        }
+        return new Vector3(x,y,z);
+    }
+};
+
 #include <iostream>
 
 struct Isometry3
@@ -464,6 +537,21 @@ void Init_eigen_ext()
        .define_method("from_angle_axis", &Quaternion::fromAngleAxis)
        .define_method("from_matrix", &Quaternion::fromMatrix);
 
+     Data_Type<AngleAxis> rb_AngleAxis = define_class_under<AngleAxis>(rb_mEigen, "AngleAxis")
+       .define_constructor(Constructor<AngleAxis,double,Vector3 const&>())
+       .define_method("__equal__", &AngleAxis::operator ==)
+       .define_method("angle",  &AngleAxis::angle)
+       .define_method("axis",  &AngleAxis::axis)
+       .define_method("concatenate", &AngleAxis::concatenate)
+       .define_method("inverse", &AngleAxis::inverse)
+       .define_method("transform", &AngleAxis::transform)
+       .define_method("matrix", &AngleAxis::matrix)
+       .define_method("approx?", &AngleAxis::isApprox, (Arg("q"), Arg("tolerance") = Eigen::NumTraits<double>::dummy_precision()))
+       .define_method("to_euler", &AngleAxis::toEuler)
+       .define_method("from_euler", &AngleAxis::fromEuler)
+       .define_method("from_quaternion", &AngleAxis::fromQuaternion)
+       .define_method("from_matrix", &AngleAxis::fromMatrix);
+
      Data_Type<VectorX> rb_VectorX = define_class_under<VectorX>(rb_mEigen, "VectorX")
        .define_constructor(Constructor<VectorX,int>(),
                (Arg("rows") = static_cast<int>(0)))
@@ -500,7 +588,6 @@ void Init_eigen_ext()
        .define_method("*",  &Matrix4::scale)
        .define_method("dotM",  &Matrix4::dotM)
        .define_method("approx?", &Matrix4::isApprox, (Arg("m"), Arg("tolerance") = Eigen::NumTraits<double>::dummy_precision()));
-
 
      Data_Type<MatrixX> rb_MatrixX = define_class_under<MatrixX>(rb_mEigen, "MatrixX")
        .define_constructor(Constructor<MatrixX,int,int>(),

@@ -18,6 +18,16 @@ Typelib.convert_from_ruby Eigen::Matrix4, '/wrappers/Matrix</double,4,4>' do |va
     t
 end
 
+Typelib.convert_to_ruby '/wrappers/AngleAxisd', Eigen::AngleAxis do |value|
+    Eigen::Quaternion.new(value.angle, *value.axis.to_a)
+end
+Typelib.convert_from_ruby Eigen::AngleAxis, '/wrappers/AngleAxisd' do |value, type|
+    data = value.to_a
+    t = type.new
+    t.angle = data[0]
+    t.axis = data[1, 3]
+    t
+end
 
 Typelib.convert_to_ruby '/wrappers/Quaternion</double>', Eigen::Quaternion do |value|
     Eigen::Quaternion.new(value.re, *value.im.to_a)
