@@ -1,6 +1,8 @@
 #ifndef __BASE_TWIST_WITH_COVARIANCE_HPP__
 #define __BASE_TWIST_WITH_COVARIANCE_HPP__
 
+#include <iomanip> // std::setprecision
+
 #include <Eigen/Core>
 #include <Eigen/LU>
 #include <Eigen/Geometry>
@@ -46,7 +48,7 @@ namespace base {
 
         /** Get and Set Methods **/
         const base::Vector3d& getTranslation() const { return this->vel; }
-        void setTranslation(const base::Vector3d& trans) { this->vel = trans; }
+        void setTranslation(const base::Vector3d& vel) { this->vel = vel; }
 
         const base::Vector3d& getRotation() const { return this->rot; }
         void setRotation(const base::Vector3d& rot) { this->rot = rot; }
@@ -55,7 +57,7 @@ namespace base {
         void setCovariance( const Covariance& cov ) { this->cov = cov; }
 
         const base::Vector3d& getLinearVelocity() const {return this->getTranslation(); }
-        void setLinearVelocity(const base::Vector3d& trans) { return this->setTranslation(trans); }
+        void setLinearVelocity(const base::Vector3d& vel) { return this->setTranslation(vel); }
         const base::Vector3d& getAngularVelocity() const {return this->getRotation(); }
         void setAngularVelocity(const base::Vector3d& rot) { return this->setRotation(rot); }
 
@@ -84,6 +86,12 @@ namespace base {
         void invalidateCovariance()
         {
             this->cov = Covariance::Ones() * base::unknown<double>();
+        }
+
+        void invalidate()
+        {
+            this->invalidateVelocity();
+            this->invalidateCovariance();
         }
 
         TwistWithCovariance Zero()
@@ -239,11 +247,24 @@ namespace base {
     */
     inline std::ostream & operator<<(std::ostream &out, const base::TwistWithCovariance& twist)
     {
-        out << twist.vel <<"\n"<< twist.rot << std::endl;
-        if (twist.hasValidCovariance())
+        /** cout the 6D twist vector (linear first and rotational second) with its associated covariance matrix **/
+        for (register unsigned short i=0; i<twist.getCovariance().rows(); ++i)
         {
-            out << twist.getCovariance() << "\n";
+            if (i<3)
+            {
+                out<<std::fixed<<std::setprecision(3)<<twist.vel[i]<<"\t|";
+            }
+            else
+            {
+                out<<std::fixed<<std::setprecision(3)<<twist.rot[i-3]<<"\t|";
+            }
+            for (register unsigned short j=0; j<twist.getCovariance().cols(); ++j)
+            {
+                out<<std::fixed<<std::setprecision(3)<<twist.getCovariance().row(i)[j]<<"\t";
+            }
+            out<<"\n";
         }
+        out.unsetf(std::ios_base::floatfield);
         return out;
     };
 
