@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <vector>
 #include <algorithm>
+#include <string>
 
 namespace base
 {
