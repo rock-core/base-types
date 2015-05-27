@@ -176,8 +176,8 @@ BOOST_AUTO_TEST_CASE(body_state_operations)
     std::cout<<"Body State Composition\n"<<bs3<<std::endl;
     bs3.position() = bs1.position() + bs2.position();
     std::cout<<"Body State Composition\n"<<bs3<<std::endl;
-    bs3.orientation(base::Orientation::Identity());
-    bs3.orientation(bs1.orientation() * bs2.orientation());
+    bs3.orientation() = base::Orientation::Identity();
+    bs3.orientation() = bs1.orientation() * bs2.orientation();
     std::cout<<"Body State Composition\n"<<bs3<<std::endl;
 }
 
