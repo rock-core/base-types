@@ -250,8 +250,8 @@ namespace base { namespace samples {
             this->velocity.rot = rbs.angular_velocity;
 
             /** Extract the velocity covariance **/
-            this->velocity.cov << rbs.cov_velocity, Eigen::Matrix3d::Zero(),
-                              Eigen::Matrix3d::Zero(), rbs.cov_angular_velocity;
+            this->velocity.cov << rbs.cov_angular_velocity, Eigen::Matrix3d::Zero(),
+                              Eigen::Matrix3d::Zero(), rbs.cov_velocity;
 
             return *this;
         };

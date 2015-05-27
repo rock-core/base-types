@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(twist_with_covariance_operations)
 {
     base::TwistWithCovariance vel1, vel2, vel3;
     base::Vector6d vec;
-    vec<< 1.0,1.0,1.0,0.3,0.3,0.3;
+    vec<< 0.3,0.3,0.3,1.0,1.0,1.0;
     vel1.setVelocity(vec);
     vel2.setVelocity(vec);
     vel3 = vel1 * vel2;
