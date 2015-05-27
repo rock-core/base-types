@@ -204,22 +204,22 @@ namespace base {
                 cross_cov << lhs.cov.block<3,3>(0,0), base::Matrix3d::Zero(),
                             base::Matrix3d::Zero(), rhs.cov.block<3,3>(3,3);
 
-                /** Linear fist block **/
-                tmp.cov.block<3,3>(0,0) = cross_jacob * cross_cov * cross_jacob.transpose();
+                /** Linear velocity is at the second covariance block **/
+                tmp.cov.block<3,3>(3,3) = cross_jacob * cross_cov * cross_jacob.transpose();
 
                 cross_jacob = TwistWithCovariance::crossJacobian(lhs.vel, rhs.rot);
                 cross_cov << lhs.cov.block<3,3>(3,3), base::Matrix3d::Zero(),
                            base::Matrix3d::Zero(),rhs.cov.block<3,3>(0,0);
 
-                /** Linear fist block **/
-                tmp.cov.block<3,3>(0,0) += cross_jacob * cross_cov * cross_jacob.transpose();
+                /** Linear velocity is at the second covariance block **/
+                tmp.cov.block<3,3>(3,3) += cross_jacob * cross_cov * cross_jacob.transpose();
 
                 cross_jacob = TwistWithCovariance::crossJacobian(lhs.rot, rhs.rot);
                 cross_cov << lhs.cov.block<3,3>(0,0), base::Matrix3d::Zero(),
                            base::Matrix3d::Zero(),rhs.cov.block<3,3>(0,0);
 
-                /** Angular second block **/
-                tmp.cov.block<3,3>(3,3) = cross_jacob * cross_cov * cross_jacob.transpose();
+                /** Angular velocity is at the first covariance block **/
+                tmp.cov.block<3,3>(0,0) = cross_jacob * cross_cov * cross_jacob.transpose();
 
                 base::guaranteeSPD<Covariance>(tmp.cov);
             }
