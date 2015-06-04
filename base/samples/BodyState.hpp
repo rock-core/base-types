@@ -47,16 +47,13 @@ namespace base { namespace samples {
         /** Time-stamp **/
         base::Time time;
 
-	    /** Name of the source frame */
-    	std::string source_frame;
-
-    	/** Name of the target frame */
-    	std::string target_frame;
-
-        /** Robot pose: translation in meters */
+        /** Robot pose: rotation in radians and translation in meters */
         base::TransformWithCovariance pose;
 
-        /** TwistWithCovariance: Linear and Angular Velocity of the Pose m/s and rad/s */
+        /** TwistWithCovariance: Linear[m/s] and Angular[rad/s] Velocity of the Body */
+        /** It is assumed here that velocity is the derivative of a delta pose for
+         * a given interval. When such interval tends to zero, one could talk
+         * of instantaneous velocity **/
         base::TwistWithCovariance velocity;
 
         void setPose(const base::Affine3d& pose)
@@ -276,9 +273,29 @@ namespace base { namespace samples {
             const BodyState &bs2(*this);
             const BodyState &bs1(bs);
 
+            /** The composition of two body states is here defined as the
+             * composition of the pose transformation as it is defined in the
+             * TransformWithCovariance. The velocity held by the last body
+             * state (here bs1) is assumed to be the current "instantaneous"
+             * body state velocity and of the resulting body state.
+             **/
+            base::TransformWithCovariance result_pose (static_cast<base::TransformWithCovariance>(bs2.pose * bs1.pose));
+            base::TwistWithCovariance result_velocity (bs1.velocity);
+
+            /** Resulting velocity and covariance with respect to the pose base frame **/
+            result_velocity.vel = result_pose.orientation * result_velocity.vel;
+            result_velocity.rot = result_pose.orientation * result_velocity.rot;
+            if (result_velocity.hasValidCovariance())
+            {
+                Eigen::Matrix3d rot_matrix(result_pose.orientation.toRotationMatrix());
+                result_velocity.cov.block<3,3>(0,0) = (rot_matrix.transpose() * result_velocity.cov.block<3,3>(0,0) * rot_matrix);
+                result_velocity.cov.block<3,3>(3,3) = (rot_matrix.transpose() * result_velocity.cov.block<3,3>(3,3) * rot_matrix);
+                result_velocity.cov.block<3,3>(3,0) = (rot_matrix.transpose() * result_velocity.cov.block<3,3>(3,0) * rot_matrix);
+                result_velocity.cov.block<3,3>(0,3) = (rot_matrix.transpose() * result_velocity.cov.block<3,3>(0,3) * rot_matrix);
+            }
+
             /* Result Body State **/
-            return BodyState(static_cast<base::TransformWithCovariance>(bs2.pose * bs1.pose),
-                    static_cast<base::TwistWithCovariance>(bs2.velocity + bs1.velocity));
+            return BodyState(result_pose, result_velocity);
         }
     };
 

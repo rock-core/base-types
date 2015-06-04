@@ -14,7 +14,7 @@ end
 
 Typelib.specialize '/base/TransformWithCovariance_m' do
     def transform
-	    Eigen::Affine3.from_position_orientation( position, orientation )
+	    Eigen::Isometry3.from_position_orientation( position, orientation )
     end
 
     def transform= t

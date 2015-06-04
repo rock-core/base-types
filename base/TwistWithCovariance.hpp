@@ -54,7 +54,12 @@ namespace base {
         void setRotation(const base::Vector3d& rot) { this->rot = rot; }
 
         const Covariance& getCovariance() const { return this->cov; }
-        void setCovariance( const Covariance& cov ) { this->cov = cov; }
+        void setCovariance(const Covariance& cov) { this->cov = cov; }
+
+        const base::Matrix3d getAngularVelocityCov() const { return this->cov.block<3,3>(0,0); }
+        void setAngularVelocityCov(const base::Matrix3d& cov) { this->cov.block<3,3>(0,0) = cov; }
+        const base::Matrix3d getLinearVelocityCov() const { return this->cov.block<3,3>(3,3); }
+        void setLinearVelocityCov(const base::Matrix3d& cov) { this->cov.block<3,3>(3,3) = cov; }
 
         const base::Vector3d& getLinearVelocity() const {return this->getTranslation(); }
         void setLinearVelocity(const base::Vector3d& vel) { return this->setTranslation(vel); }
