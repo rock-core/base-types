@@ -70,20 +70,20 @@ namespace base
 
     /** 
      * Represents a pose update threshold, with a number of test methods to see
-     * of the threshold was met.
+     * if the threshold was met.
      */
     struct PoseUpdateThreshold
     {
 	PoseUpdateThreshold() {};
 
 	/** 
-	 * constructor with distance and angle thresholds
+	 * Constructor with distance and angle thresholds
 	 */
 	PoseUpdateThreshold( double distance, double angle )
 	    : distance( distance ), angle( angle ) {};
 
 	/** 
-	 * test if distance or angle is greater than the 
+	 * Test if distance or angle is greater than the 
 	 * stored threshold.
 	 */
 	bool test( double distance, double angle )
@@ -92,7 +92,7 @@ namespace base
 	}
 
 	/** 
-	 * test if the provided delta transformation is greater in 
+	 * Test if the provided delta transformation is greater in 
 	 * either distance or angle than the threshold
 	 */
 	bool test( const Eigen::Affine3d& pdelta )
@@ -101,7 +101,7 @@ namespace base
 	}
 
 	/** 
-	 * test if the delta of the provided transformations is greater in 
+	 * Test if the delta of the provided transformations is greater in 
 	 * either distance or angle than the threshold.
 	 *
 	 * @param a2b the initial transformation from A to B
@@ -131,7 +131,7 @@ namespace base
         Orientation orientation;
 
 	/** 
-	 * @brief default constructor will initialize to zero
+	 * @brief Default constructor will initialize to zero
 	 */
         Pose()
             : position(Position::Zero()), orientation(Orientation::Identity()) {}
@@ -140,7 +140,7 @@ namespace base
             : position(p), orientation(o) {}
 
 	/** 
-	 * @brief constructor based on a 4x4 transform matrix
+	 * @brief Constructor based on a 4x4 transform matrix
 	 *
 	 * @param t 4x4 homogenous transform matrix, for which the upper-left
 	 *	3x3 matrix needs to be a rotation matrix.
@@ -156,7 +156,7 @@ namespace base
 	}
 
 	/** 
-	 * @brief set the pose based on a 4x4 matrix
+	 * @brief Set the pose based on a 4x4 matrix
 	 *
 	 * @param t 4x4 homogenous transform matrix, for which the upper-left
 	 *	3x3 matrix needs to be a rotation matrix.
@@ -168,7 +168,7 @@ namespace base
 	}
 
 	/**
-	 * @brief transform matrix which represents the pose transform as a 4x4
+	 * @brief Transform matrix which represents the pose transform as a 4x4
 	 *  homogenous matrix
 	 *
 	 * @result 4x4 homogenous transform matrix
@@ -182,7 +182,7 @@ namespace base
 	}
 
 	/** 
-	 * @brief set pose based on compact scaled-axis representation
+	 * @brief Set pose based on compact scaled-axis representation
 	 *
 	 * @param v compact 6 vector [r t], where r is a 3 vector representing
 	 *  the rotation in scaled axis form, and t is the translation 3 vector.
@@ -199,9 +199,9 @@ namespace base
 	}
 
 	/**
-	 * @brief get compact scaled-axis representation of pose
+	 * @brief Get compact scaled-axis representation of pose
 	 *
-	 * @result compact 6 vector [r t], where r is a 3 vector representing
+	 * @result Compact 6 vector [r t], where r is a 3 vector representing
 	 *  the rotation in scaled axis form, and t is the translation 3 vector.
 	 */
 	Vector6d toVector6d() const
@@ -215,7 +215,7 @@ namespace base
 	}
 
 	/**
-	 * @result yaw (rotation around z-axis) part of the rotational part of the pose
+	 * @result Yaw (rotation around z-axis) part of the rotational part of the pose
 	 */
         double getYaw() const
         {
