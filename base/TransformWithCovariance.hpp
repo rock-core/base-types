@@ -389,15 +389,15 @@ namespace base {
         {
             if (i<3)
             {
-                out<<std::fixed<<std::setprecision(3)<<scaled_axis[i]<<"\t|";
+                out<<std::fixed<<std::setprecision(5)<<scaled_axis[i]<<"\t|";
             }
             else
             {
-                out<<std::fixed<<std::setprecision(3)<<trans.translation[i-3]<<"\t|";
+                out<<std::fixed<<std::setprecision(5)<<trans.translation[i-3]<<"\t|";
             }
             for (register unsigned short j=0; j<trans.getCovariance().cols(); ++j)
             {
-                out<<std::fixed<<std::setprecision(3)<<trans.getCovariance().row(i)[j]<<"\t";
+                out<<std::fixed<<std::setprecision(5)<<trans.getCovariance().row(i)[j]<<"\t";
             }
             out<<"\n";
         }

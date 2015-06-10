@@ -260,20 +260,20 @@ namespace base {
     */
     inline std::ostream & operator<<(std::ostream &out, const base::TwistWithCovariance& twist)
     {
-        /** cout the 6D twist vector (linear first and rotational second) with its associated covariance matrix **/
+        /** cout the 6D twist vector (rotational first and linear second) with its associated covariance matrix **/
         for (register unsigned short i=0; i<twist.getCovariance().rows(); ++i)
         {
             if (i<3)
             {
-                out<<std::fixed<<std::setprecision(3)<<twist.rot[i]<<"\t|";
+                out<<std::fixed<<std::setprecision(5)<<twist.rot[i]<<"\t|";
             }
             else
             {
-                out<<std::fixed<<std::setprecision(3)<<twist.vel[i-3]<<"\t|";
+                out<<std::fixed<<std::setprecision(5)<<twist.vel[i-3]<<"\t|";
             }
             for (register unsigned short j=0; j<twist.getCovariance().cols(); ++j)
             {
-                out<<std::fixed<<std::setprecision(3)<<twist.getCovariance().row(i)[j]<<"\t";
+                out<<std::fixed<<std::setprecision(5)<<twist.getCovariance().row(i)[j]<<"\t";
             }
             out<<"\n";
         }
