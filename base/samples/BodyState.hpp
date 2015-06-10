@@ -287,11 +287,13 @@ namespace base { namespace samples {
             result_velocity.rot = result_pose.orientation * result_velocity.rot;
             if (result_velocity.hasValidCovariance())
             {
+                /** Uncertainty propagation through assuming linear transformation. From R. Astudillo and R.Kolossa Chapter 3 Uncertainty Propagation **/
+                /** Improvement at this point(TO-DO): change to Jacobian derivation since the propagation is not linear **/
                 Eigen::Matrix3d rot_matrix(result_pose.orientation.toRotationMatrix());
-                result_velocity.cov.block<3,3>(0,0) = (rot_matrix.transpose() * result_velocity.cov.block<3,3>(0,0) * rot_matrix);
-                result_velocity.cov.block<3,3>(3,3) = (rot_matrix.transpose() * result_velocity.cov.block<3,3>(3,3) * rot_matrix);
-                result_velocity.cov.block<3,3>(3,0) = (rot_matrix.transpose() * result_velocity.cov.block<3,3>(3,0) * rot_matrix);
-                result_velocity.cov.block<3,3>(0,3) = (rot_matrix.transpose() * result_velocity.cov.block<3,3>(0,3) * rot_matrix);
+                result_velocity.cov.block<3,3>(0,0) = (rot_matrix * result_velocity.cov.block<3,3>(0,0) * rot_matrix.transpose());
+                result_velocity.cov.block<3,3>(3,3) = (rot_matrix * result_velocity.cov.block<3,3>(3,3) * rot_matrix.transpose());
+                result_velocity.cov.block<3,3>(3,0) = (rot_matrix * result_velocity.cov.block<3,3>(3,0) * rot_matrix.transpose());
+                result_velocity.cov.block<3,3>(0,3) = (rot_matrix * result_velocity.cov.block<3,3>(0,3) * rot_matrix.transpose());
             }
 
             /* Result Body State **/
