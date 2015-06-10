@@ -86,7 +86,7 @@ struct VectorX {
     VectorX* normalize() const { return new VectorX(v->normalized()); }
     void normalizeBang() const { v->normalize(); }
 
-    int size() { return v->size(); }
+    unsigned int size() { return v->size(); }
 
     double get(int i) const { return (*v)[i]; }
     void set(int i, double value) { (*v)[i] = value; }
@@ -131,9 +131,9 @@ struct MatrixX {
     
     double norm() const { return m->norm(); }
 
-    int rows() const { return m->rows(); }
-    int cols() const { return m->cols(); }
-    int size() const { return m->size(); }
+    unsigned int rows() const { return m->rows(); }
+    unsigned int cols() const { return m->cols(); }
+    unsigned int size() const { return m->size(); }
 
     double get(int i, int j ) const { return (*m)(i,j); }
     void set(int i, int j, double value) { (*m)(i,j) = value; }
