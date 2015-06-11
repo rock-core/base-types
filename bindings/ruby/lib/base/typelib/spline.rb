@@ -1,7 +1,7 @@
 
 ##
-# base/geometry/Spline to BaseTypes::Geometry::Spline convertions
-require 'base/geometry/spline'
+# base/geometry/Spline to SISL::Spline convertions
+require 'sisl/spline'
 Typelib.convert_to_ruby '/wrappers/geometry/Spline', SISL::Spline do |value|
     if value.dimension == 3
         result = SISL::Spline3.new(value.geometric_resolution, value.curve_order)
