@@ -134,7 +134,7 @@ namespace base { namespace samples {
             return this->pose.cov;
         }
 
-        /** A read-only expression of the covariance rotation **/
+        /** A read-only expression of the rotation covariance **/
         inline const base::Matrix3d cov_orientation() const
         {
             return this->pose.getOrientationCov();
@@ -145,7 +145,7 @@ namespace base { namespace samples {
             return this->pose.setOrientationCov(cov);
         }
 
-        /** A read-only expression of the rotation in quaternion **/
+        /** A read-only expression of the position covariance **/
         inline const base::Matrix3d cov_position() const
         {
             return this->pose.getTranslationCov();
@@ -165,6 +165,28 @@ namespace base { namespace samples {
         inline base::Matrix6d& cov_velocity()
         {
             return this->velocity.cov;
+        }
+
+        /** A read-only expression of the linear velocity covariance **/
+        inline const base::Matrix3d cov_linear_velocity() const
+        {
+            return this->velocity.getLinearVelocityCov();
+        }
+
+        inline void cov_linear_velocity(const base::Matrix3d& cov)
+        {
+            return this->velocity.setLinearVelocityCov(cov);
+        }
+
+        /** A read-only expression of the angular velocity covariance **/
+        inline const base::Matrix3d cov_angular_velocity() const
+        {
+            return this->velocity.getAngularVelocityCov();
+        }
+
+        inline void cov_angular_velocity(const base::Matrix3d& cov)
+        {
+            return this->velocity.setAngularVelocityCov(cov);
         }
 
         static BodyState unknown()
