@@ -5,6 +5,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <Eigen/SVD>
 
 using namespace Rice;
 
@@ -116,6 +117,21 @@ struct VectorX {
 
 };
 
+struct JacobiSVD {
+    typedef Eigen::JacobiSVD<Eigen::MatrixXd::PlainObject> EigenT;
+    EigenT* j;
+
+    JacobiSVD( EigenT const& j )
+    : j(new EigenT(j)) {}
+    JacobiSVD( JacobiSVD const& j )
+    : j(new EigenT(*j.j)) {}
+    ~JacobiSVD()
+    { delete j; }
+
+    VectorX* solve(VectorX* y)
+    { return new VectorX(j->solve(*y->v)); }
+};
+
 struct MatrixX {
 
     MatrixXd* m;
@@ -162,11 +178,14 @@ struct MatrixX {
     MatrixX* scale (double scalar) const
     { return new MatrixX(*m * scalar); }
 
-    MatrixX* dotV (VectorX const& other) const
-    { return new MatrixX(*m * *other.v); }
+    VectorX* dotV (VectorX const& other) const
+    { return new VectorX(*m * *other.v); }
     
     MatrixX* dotM (MatrixX const& other) const
     { return new MatrixX(*m * (*other.m)); }
+
+    JacobiSVD* jacobiSvd(int flags = 0) const
+    { return new JacobiSVD(m->jacobiSvd(flags)); }
 
     bool operator ==(MatrixX const& other) const
     { return (*this->m) == (*other.m); }
@@ -384,6 +403,13 @@ void Init_eigen_ext()
        .define_method("*",  &VectorX::scale)
        .define_method("dot",  &VectorX::dot)
        .define_method("approx?", &VectorX::isApprox, (Arg("v"), Arg("tolerance") = Eigen::NumTraits<double>::dummy_precision()));
+
+     rb_mEigen.const_set("ComputeFullU", INT2FIX(Eigen::ComputeFullU));
+     rb_mEigen.const_set("ComputeThinU", INT2FIX(Eigen::ComputeThinU));
+     rb_mEigen.const_set("ComputeThinV", INT2FIX(Eigen::ComputeThinV));
+
+     Data_Type<JacobiSVD> rb_JacobiSVD = define_class_under<JacobiSVD>(rb_mEigen, "JacobiSVD")
+        .define_method("solve", &JacobiSVD::solve);
      
      Data_Type<MatrixX> rb_MatrixX = define_class_under<MatrixX>(rb_mEigen, "MatrixX")
        .define_constructor(Constructor<MatrixX,int,int>(),
@@ -409,6 +435,7 @@ void Init_eigen_ext()
        .define_method("*",  &MatrixX::scale)
        .define_method("dotV",  &MatrixX::dotV)
        .define_method("dotM",  &MatrixX::dotM)
+       .define_method("jacobiSvd", &MatrixX::jacobiSvd, (Arg("flags") = 0))
        .define_method("approx?", &MatrixX::isApprox, (Arg("m"), Arg("tolerance") = Eigen::NumTraits<double>::dummy_precision()));
 
      Data_Type<Isometry3> rb_Isometry3 = define_class_under<Isometry3>(rb_mEigen, "Isometry3")
