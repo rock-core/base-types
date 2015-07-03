@@ -147,7 +147,7 @@ void SplineBase::getPointAndTangentHelper(double* result, double _param, bool wi
     }
 }
 
-double SplineBase::getCurvature(double _param)
+double SplineBase::getCurvature(double _param) const
 {
     // Limits the input paramter to the curve limit
     if(!checkAndNormalizeParam(_param)) 

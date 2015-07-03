@@ -84,7 +84,7 @@ namespace geometry {
          * @throws out_of_range if _param is not in [start_param,
          * end_param] and runtime_error if SISL returns an error
          */
-        double getCurvature(double _param);
+        double getCurvature(double _param) const;
 
         /** Returns the first order derivative of the curvature at the given
          * position
