@@ -21,11 +21,11 @@ namespace base { namespace samples {
      * Per [Rock's conventions](http://rock.opendfki.de/wiki/WikiStart/Standards), you
      * should use a X-forward, right handed coordinate system when assigning
      * frames to bodies (i.e.  X=forward, Y=left, Z=up). In addition,
-     * world-fixed frames should be aligned to North (North-East-Up)
+     * world-fixed frames should be aligned to North (North-West-Up, aka NWU)
      *
      * For instance, if sourceFrame is "body" and targetFrame is "world", then
      * the RigidBodyState object is the state of body in the world frame
-     * (usually, the world frame has an arbitrary origin and a North-East-Up
+     * (usually, the world frame has an arbitrary origin and a North-West-Up
      * orientation).
      */
     struct RigidBodyState
