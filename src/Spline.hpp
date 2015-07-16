@@ -84,7 +84,7 @@ namespace geometry {
          * @throws out_of_range if _param is not in [start_param,
          * end_param] and runtime_error if SISL returns an error
          */
-        double getCurvature(double _param);
+        double getCurvature(double _param) const;
 
         /** Returns the first order derivative of the curvature at the given
          * position
@@ -448,12 +448,25 @@ namespace geometry {
             double d = (start_p - end_p).norm();
             if (d < _geores)
             {
-                cur_length += d;
-                if (cur_length > target)
+                if(target < 0)
                 {
-                    result = end;
-                    return true;
+                    cur_length -= d;
+                    if (cur_length < target)
+                    {
+                        result = end;
+                        return true;
+                    }
                 }
+                else
+                {
+                    cur_length += d;
+                    if (cur_length > target)
+                    {
+                        result = end;
+                        return true;
+                    }
+                }
+                  
                 return false;
             }
 
@@ -480,10 +493,19 @@ namespace geometry {
         {
             double result_t = 0;
             double result_d = 0;
-            if (!doAdvance(result_t, result_d, length, t, getPoint(t), this->getEndParam(), getPoint(this->getEndParam()), _geores))
-                return std::make_pair(this->getEndParam(), result_d);
+            if(length < 0)
+            {
+                if (!doAdvance(result_t, result_d, length, t, getPoint(t), this->getStartParam(), getPoint(this->getStartParam()), _geores))
+                    return std::make_pair(this->getStartParam(), result_d);
+            }
+            else
+            {
+                if (!doAdvance(result_t, result_d, length, t, getPoint(t), this->getEndParam(), getPoint(this->getEndParam()), _geores))
+                    return std::make_pair(this->getEndParam(), result_d);
+            }
             return std::make_pair(result_t, result_d);
         }
+
 
         /** Computes the length of a curve segment
          *
