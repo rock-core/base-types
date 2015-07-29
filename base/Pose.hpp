@@ -13,8 +13,8 @@ namespace base
     typedef double            Orientation2D;
 
     /*
-     * Decomposes the orientation in euler angles so that this can be
-     * obtained by applying the following rotations in order:
+     * Decomposes the orientation in euler angles (non-proper, Tait-Bryan angles)
+     * so that this can be obtained by applying the following rotations in order:
      *
      *  rotation of a2 around x-axis
      *  rotation of a1 around y-axis
