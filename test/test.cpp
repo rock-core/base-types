@@ -31,6 +31,7 @@
 #include <base/samples/SonarBeam.hpp>
 #include <base/samples/SonarScan.hpp>
 #include <base/samples/DepthMap.hpp>
+#include <base/TransformWithUncertainty.hpp>
 #include <base/Temperature.hpp>
 #include <base/Time.hpp>
 #include <base/TimeMark.hpp>
@@ -1147,6 +1148,52 @@ BOOST_AUTO_TEST_CASE( rbs_validity )
     BOOST_CHECK(!rbs.hasValidVelocityCovariance());
     BOOST_CHECK(!rbs.hasValidAngularVelocity());
     BOOST_CHECK(!rbs.hasValidAngularVelocityCovariance());
+}
+
+BOOST_AUTO_TEST_CASE( transform_with_uncertainty )
+{
+    // test if the relative transform also 
+    // takes the uncertainty into account
+    base::Matrix6d lt1; 
+    lt1 <<
+	0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 
+	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+	0.0, 0.0, 0.0, -3.0, 0.0, 0.0, 
+	0.0, 0.0, 0.0, 0.0, -2.0, 0.0, 
+	0.0, 0.0, 0.0, 0.0, 0.0, -1.0;
+
+    base::TransformWithUncertainty t1(
+	    Eigen::Affine3d(Eigen::Translation3d(Eigen::Vector3d(1,0,0)) * Eigen::AngleAxisd( M_PI/2.0, Eigen::Vector3d::UnitX()) ),
+	    lt1 );
+
+    base::Matrix6d lt2; 
+    lt2 <<
+	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+	0.0, 0.0, 0.2, 0.0, 0.0, 0.0, 
+	0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 
+	0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 
+	0.0, 0.0, 0.0, 0.0, 0.0, 3.0;
+
+    base::TransformWithUncertainty t2(
+	    Eigen::Affine3d(Eigen::Translation3d(Eigen::Vector3d(0,1,2)) * Eigen::AngleAxisd( M_PI/2.0, Eigen::Vector3d::UnitY()) ),
+	    lt2 );
+
+    // chain a transform with uncertainty
+    base::TransformWithUncertainty tr = t2 * t1;
+
+    // and recover the second transform
+    base::TransformWithUncertainty t2r = tr.compositionInv( t1 );
+    base::TransformWithUncertainty t1r = tr.preCompositionInv( t2 );
+
+    const double sigma = 1e-12;
+
+    BOOST_CHECK( t2.getTransform().matrix().isApprox( t2r.getTransform().matrix(), sigma ) );
+    BOOST_CHECK( t2.getCovariance().isApprox( t2r.getCovariance(), sigma ) );
+
+    BOOST_CHECK( t1.getTransform().matrix().isApprox( t1r.getTransform().matrix(), sigma ) );
+    BOOST_CHECK( t1.getCovariance().isApprox( t1r.getCovariance(), sigma ) );
 }
 
 #ifdef SISL_FOUND
