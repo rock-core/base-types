@@ -33,7 +33,7 @@ public:
     Angle() {}
     
 protected:
-    explicit Angle( double rad ) : rad(rad) 
+    explicit Angle( double _rad ) : rad(_rad)
     { 
 	canonize(); 
     }
@@ -264,7 +264,7 @@ public:
     {
     }
 
-    AngleSegment(const Angle &start, double width): width(width), startRad(start.getRad()), endRad(startRad + width)
+    AngleSegment(const Angle &start, double _width): width(_width), startRad(start.getRad()), endRad(startRad + width)
     {
         if(width < 0)
             throw std::runtime_error("Error got segment with negative width");

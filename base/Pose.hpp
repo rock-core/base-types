@@ -79,16 +79,16 @@ namespace base
 	/** 
 	 * Constructor with distance and angle thresholds
 	 */
-	PoseUpdateThreshold( double distance, double angle )
-	    : distance( distance ), angle( angle ) {};
+	PoseUpdateThreshold( double _distance, double _angle )
+	    : distance( _distance ), angle( _angle ) {};
 
 	/** 
 	 * Test if distance or angle is greater than the 
 	 * stored threshold.
 	 */
-	bool test( double distance, double angle )
+	bool test( double otherDistance, double otherAngle )
 	{
-	    return distance > this->distance || angle > this->angle;
+	    return otherDistance > distance || otherAngle > angle;
 	}
 
 	/** 
