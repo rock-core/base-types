@@ -31,6 +31,7 @@
 #include <base/samples/SonarBeam.hpp>
 #include <base/samples/SonarScan.hpp>
 #include <base/samples/DepthMap.hpp>
+#include <base/samples/Sonar.hpp>
 #include <base/Temperature.hpp>
 #include <base/Time.hpp>
 #include <base/TimeMark.hpp>

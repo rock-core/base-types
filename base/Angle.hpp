@@ -6,6 +6,7 @@
 #include <base/Eigen.hpp>
 #include <iostream>
 #include <base/Deprecated.hpp>
+#include <base/Float.hpp>
 
 namespace base
 {
@@ -94,6 +95,15 @@ public:
     static inline Angle fromDeg( double deg )
     {
 	return Angle( deg / 180.0 * M_PI );
+    }
+
+    /** Use this method to represent an unknown angle
+     */
+    static inline Angle unknown()
+    {
+        Angle result;
+        result.rad = base::unknown<double>();
+        return result;
     }
 
     /**
