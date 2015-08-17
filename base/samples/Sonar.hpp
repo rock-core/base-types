@@ -84,6 +84,20 @@ public:
      */
     base::Time bin_duration;
     
+    /** Opening of the beam orthogonal to the device's Z direction
+     *
+     * This is usually along the scanning axis (for a scanning sonar), or in the
+     * common plane of all the beams (for a multibeam sonar)
+     */
+    base::Angle beam_width;
+    
+    /** Opening of the beam along the device's Z direction
+     *
+     * This is usually orthogonal to the scanning axis (for a scanning sonar),
+     * or orthogonal to the common plane of all the beams (for a multibeam sonar)
+     */
+    base::Angle beam_height;
+
     /** Each beam's bearing
      *
      * This is the position of the beam center with respect to the "front" of
@@ -112,42 +126,51 @@ public:
      */
     std::vector<float> bins;
 
+    static float getSpeedOfSoundInWater() { return 1497.0; }
+
     Sonar() : speed_of_sound(1497), bin_count(0), beam_count(0) {}
 
-    Sonar(base::Time time, int bin_count, int beam_count = 0, bool init_to_unknown = true)
-        : speed_of_sound(1497)
+    Sonar(base::Time time, base::Time bin_duration, int bin_count, base::Angle beam_width, base::Angle beam_height)
+        : time(time)
+        , bin_duration(bin_duration)
+        , beam_width(beam_width)
+        , beam_height(beam_height)
+        , speed_of_sound(getSpeedOfSoundInWater())
+        , bin_count(bin_count)
+        , beam_count(0)
     {
-        init(time, beam_count, bin_count, init_to_unknown);
     }
 
-    /** Initializes a Sonar structure to represent a single beam
-     */
-    static void fromSingleBeam(base::Time time, std::vector<float> const& bins, base::Angle bearing = base::Angle())
+    Sonar(base::Time time, base::Time bin_duration, int bin_count, base::Angle beam_width, base::Angle beam_height,
+            int beam_count, bool per_beam_timestamps)
+        : time(time)
+        , bin_duration(bin_duration)
+        , beam_width(beam_width)
+        , beam_height(beam_height)
+        , speed_of_sound(getSpeedOfSoundInWater())
+        , bin_count(bin_count)
+        , beam_count(beam_count)
     {
-        Sonar sample;(time, 1, 0, false);
-        sample.pushBeam(bins, bearing);
-        return sample;
+        resize(bin_count, beam_count, per_beam_timestamps);
     }
 
-    /** Initializes the structure to be valid for the given beam and bin count
-     *
-     * A good way to build a Sonar structure is to call this method with only a
-     * beam count and then call @c pushBeam
-     */
-    void init(base::Time time, int bin_count, int beam_count = 0, bool init_to_unknown = true)
+    void resize(int bin_count, int beam_count, bool per_beam_timestamps)
     {
-        this->time = time;
-        this->beam_count = beam_count;
-        this->bin_count = bin_count;
-        timestamps.clear();
+        if (per_beam_timestamps)
+            timestamps.resize(beam_count);
+
         bins.resize(beam_count * bin_count, base::unknown<float>());
         bearings.resize(beam_count, base::Angle::unknown());
     }
 
-    /** Reset the sample */
-    void reset()
+    /** Initializes a Sonar structure to represent a single beam
+     */
+    static Sonar fromSingleBeam(base::Time time, base::Time bin_duration, base::Angle beam_width, base::Angle beam_height,
+            std::vector<float> const& bins, base::Angle bearing = base::Angle())
     {
-        *this = Sonar();
+        Sonar sample(time, bin_duration, bins.size(), beam_width, beam_height);
+        sample.pushBeam(bins, bearing);
+        return sample;
     }
 
     /** The start of a bin in the time domain, relative to the beam's
@@ -200,14 +223,10 @@ public:
     }
 
     /** Add data for one beam
-     */
-    void pushBeam(std::vector<float> const& bins, base::Angle bearing)
-    {
-        pushBeam(bins);
-        bearings.push_back(bearing);
-    }
-
-    /** Add data for one beam
+     *
+     * @raise std::invalid_argument if the structure is using per-beam
+     *   timestamps. In this case, use the overload that sets the beam time as
+     *   well
      */
     void pushBeam(std::vector<float> const& bins)
     {
@@ -219,9 +238,9 @@ public:
 
     /** Add data for one beam
      */
-    void pushBeam(base::Time const& beam_time, std::vector<float> const& beam_bins, base::Angle bearing)
+    void pushBeam(std::vector<float> const& bins, base::Angle bearing)
     {
-        pushBeam(beam_time, beam_bins);
+        pushBeam(bins);
         bearings.push_back(bearing);
     }
 
@@ -233,10 +252,21 @@ public:
         timestamps.push_back(beam_time);
     }
 
+    /** Add data for one beam
+     */
+    void pushBeam(base::Time const& beam_time, std::vector<float> const& beam_bins, base::Angle bearing)
+    {
+        pushBeam(beam_time, beam_bins);
+        bearings.push_back(bearing);
+    }
+
     /** Adds a set of bins to the bin set, updating beam_bins
      *
      * One usually does not use this method directly, but one of the overloaded
      * pushBeam method
+     *
+     * @raise std::invalid_argument if the number of bins in the argument does
+     *   not match bin_count
      */
     void pushBeamBins(std::vector<float> const& beam_bins)
     {
@@ -244,6 +274,59 @@ public:
             throw std::invalid_argument("pushBeam: the provided beam does not match the expected bin_count");
         bins.insert(bins.end(), beam_bins.begin(), beam_bins.end());
         beam_count++;
+    }
+
+    /** Set data for one beam
+     *
+     * @raise std::invalid_argument if the structure is using per-beam
+     *   timestamps. In this case, use the overload that sets the beam time as
+     *   well
+     */
+    void setBeam(int beam, std::vector<float> const& bins)
+    {
+        if (!timestamps.empty())
+            throw std::invalid_argument("cannot call setBeam(bins): the structure uses per-beam timestamps, use setBeams(time, bins) instead");
+
+        setBeamBins(beam, bins);
+    }
+
+    /** Add data for one beam
+     */
+    void setBeam(int beam, std::vector<float> const& bins, base::Angle bearing)
+    {
+        setBeam(beam, bins);
+        bearings[beam] = bearing;
+    }
+
+    /** Add data for one beam
+     */
+    void setBeam(int beam, base::Time const& beam_time, std::vector<float> const& beam_bins)
+    {
+        setBeamBins(beam, beam_bins);
+        timestamps[beam] = beam_time;
+    }
+
+    /** Add data for one beam
+     */
+    void setBeam(int beam, base::Time const& beam_time, std::vector<float> const& beam_bins, base::Angle bearing)
+    {
+        setBeam(beam, beam_time, beam_bins);
+        bearings[beam] = bearing;
+    }
+
+    /** Adds a set of bins to the bin set, updating beam_bins
+     *
+     * One usually does not use this method directly, but one of the overloaded
+     * setBeam method
+     *
+     * @raise std::invalid_argument if the number of bins in the argument does
+     *   not match bin_count
+     */
+    void setBeamBins(int beam, std::vector<float> const& beam_bins)
+    {
+        if (beam_bins.size() != bin_count)
+            throw std::invalid_argument("pushBeam: the provided beam does not match the expected bin_count");
+        std::copy(beam_bins.begin(), beam_bins.end(), bins.begin() + beam * bin_count);
     }
 
     /** Returns the bearing of a given beam
@@ -260,7 +343,7 @@ public:
     std::vector<float> getBeamBins(int beam) const
     {
         std::vector<float> bins;
-        getBeamBins(bins);
+        getBeamBins(beam, bins);
         return bins;
     }
 
@@ -268,7 +351,20 @@ public:
     void getBeamBins(int beam, std::vector<float>& beam_bins) const
     {
         beam_bins.resize(bin_count);
-        std::copy(beam_bins.begin(), beam_bins.end(); &bins[beam * bin_count]);
+        std::vector<float>::const_iterator ptr = bins.begin() + beam * bin_count;
+        std::copy(ptr, ptr + bin_count, beam_bins.begin());
+    }
+
+    /** Returns the data structure that represents a single beam */
+    Sonar getBeam(int beam) const
+    {
+        return fromSingleBeam(
+                getBeamAcquisitionStartTime(beam),
+                bin_duration,
+                beam_width,
+                beam_height,
+                getBeamBins(beam),
+                getBeamBearing(beam));
     }
 
     /** Verify this structure's consistency
