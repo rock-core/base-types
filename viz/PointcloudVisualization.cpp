@@ -1,6 +1,7 @@
 #include "PointcloudVisualization.hpp"
 #include <osg/Geode>
 #include <osg/Point>
+#include <vizkit3d/Vizkit3DWidget.hpp>
 
 namespace vizkit3d
 {
@@ -31,6 +32,11 @@ osg::ref_ptr< osg::Node > PointcloudVisualization::createMainNode()
     pointGeom->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF); 
     drawArrays = new osg::DrawArrays( osg::PrimitiveSet::POINTS, 0, pointsOSG->size() );
     pointGeom->addPrimitiveSet(drawArrays.get());
+
+    //This fixes the Visualization for one point
+    //See http://forum.openscenegraph.org/viewtopic.php?t=6980&view=previous
+    osg::View* view = getWidget()->getView(0);
+    view->getCamera()->setCullingMode(view->getCamera()->getCullingMode() & ~osg::CullSettings::SMALL_FEATURE_CULLING);
 
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
     geode->addDrawable(pointGeom.get());
