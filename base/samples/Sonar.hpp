@@ -5,6 +5,11 @@
 #include <base/Float.hpp>
 #include <base/Time.hpp>
 #include <base/Angle.hpp>
+#include <base/Deprecated.hpp>
+BASE_TYPES_DEPRECATED_SUPPRESS_START
+#include <base/samples/SonarBeam.hpp>
+#include <base/samples/SonarScan.hpp>
+BASE_TYPES_DEPRECATED_SUPPRESS_STOP
 
 namespace base { namespace samples {
 
@@ -378,6 +383,49 @@ public:
         if (bearings.size() != beam_count)
             throw std::logic_error("the number of elements in 'bearings' does not match the beam count");
     }
+
+BASE_TYPES_DEPRECATED_SUPPRESS_START
+    explicit Sonar(SonarScan const& old, float gain = 1)
+        : time(old.time)
+        , timestamps(old.time_beams)
+        , bin_duration(base::Time::fromSeconds(old.getSpatialResolution() / old.speed_of_sound))
+        , beam_width(old.beamwidth_horizontal)
+        , beam_height(old.beamwidth_vertical)
+        , speed_of_sound(old.speed_of_sound)
+        , bin_count(old.number_of_bins)
+        , beam_count(old.number_of_beams)
+    {
+        if (!old.polar_coordinates)
+            throw std::invalid_argument("there's not such thing as a non-polar sonar device, fix your driver");
+
+        bins.resize(bin_count * beam_count);
+
+        SonarScan scan(old);
+        if (old.memory_layout_column)
+            scan.toggleMemoryLayout();
+        for (unsigned int i = 0; i < bins.size(); ++i)
+            bins[i] = static_cast<float>(scan.data[i]) * gain;
+
+        setRegularBeamBearings(old.getStartBearing(), old.getAngularResolution());
+        validate();
+    }
+
+    explicit Sonar(SonarBeam const& old, float gain = 1)
+        : time(old.time)
+        , timestamps()
+        , bin_duration(base::Time::fromSeconds(old.sampling_interval / 2.0))
+        , beam_width(base::Angle::fromRad(old.beamwidth_horizontal))
+        , beam_height(base::Angle::fromRad(old.beamwidth_vertical))
+        , speed_of_sound(old.speed_of_sound)
+        , bin_count(old.beam.size())
+        , beam_count(0)
+    {
+        std::vector<float> bins;
+        for (unsigned int i = 0; i < bin_count; ++i)
+            bins[i] = static_cast<float>(old.beam[i]) * gain;
+        pushBeam(bins, old.bearing);
+    }
+BASE_TYPES_DEPRECATED_SUPPRESS_STOP
 };
 
 }} // namespaces
