@@ -224,7 +224,7 @@ public:
      */
     void setRegularBeamBearings(base::Angle start, base::Angle interval)
     {
-        base::Angle angle;
+        base::Angle angle(start);
         bearings.resize(beam_count);
         for (uint32_t i = 0; i < beam_count; ++i, angle += interval)
             bearings[i] = angle;
