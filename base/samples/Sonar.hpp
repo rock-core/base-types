@@ -214,9 +214,9 @@ public:
 
     /** Returns the distance of the start of one bin relative to the sonar's
      * emission point */
-    base::Time getBinStartDistance(int bin) const
+    float getBinStartDistance(unsigned int bin) const
     {
-        return getBinRelativeStartTime(bin) * speed_of_sound;
+        return getBinRelativeStartTime(bin).toSeconds() * speed_of_sound;
     }
 
     /** Sets the bearing field for a regular sampling
