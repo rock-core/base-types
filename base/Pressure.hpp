@@ -1,6 +1,8 @@
 #ifndef __BASE_PRESSURE_HPP__
 #define __BASE_PRESSURE_HPP__
 
+#include<base/Float.hpp>
+
 namespace base
 {
     /** Representation of a pressure value
@@ -19,6 +21,11 @@ namespace base
          * the initializers / accessors
          */
         float pascal;
+
+        /** 
+         * default constructor, which will initialize the value to unknown (NaN)
+         */
+        Pressure() : pascal(base::unknown<float>()) {}
 
     public:
         /** Create a pressure object using a value in pascals */
