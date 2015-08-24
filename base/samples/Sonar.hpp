@@ -184,14 +184,14 @@ public:
     /** The start of a bin in the time domain, relative to the beam's
      * acquisition time
      */
-    base::Time getBinRelativeStartTime(int bin_idx) const
+    base::Time getBinRelativeStartTime(unsigned int bin_idx) const
     {
         return bin_duration * bin_idx;
     }
 
     /** The acquisition start of a beam
      */
-    base::Time getBeamAcquisitionStartTime(int beam) const
+    base::Time getBeamAcquisitionStartTime(unsigned int beam) const
     {
         if (timestamps.empty())
             return time;
@@ -201,9 +201,9 @@ public:
 
     /** The start of a bin in the time domain, absolute
      */
-    base::Time getBinTime(int beam, int bin_idx) const
+    base::Time getBinTime(unsigned int bin, unsigned int beam) const
     {
-        return getBeamAcquisitionStartTime(beam) + getBinRelativeStartTime(bin_idx);
+        return getBeamAcquisitionStartTime(beam) + getBinRelativeStartTime(bin);
     }
 
     /** Returns the distance of the start of one bin relative to the sonar's
@@ -290,7 +290,7 @@ public:
      *   timestamps. In this case, use the overload that sets the beam time as
      *   well
      */
-    void setBeam(int beam, std::vector<float> const& bins)
+    void setBeam(unsigned int beam, std::vector<float> const& bins)
     {
         if (!timestamps.empty())
             throw std::invalid_argument("cannot call setBeam(bins): the structure uses per-beam timestamps, use setBeams(time, bins) instead");
@@ -300,7 +300,7 @@ public:
 
     /** Add data for one beam
      */
-    void setBeam(int beam, std::vector<float> const& bins, base::Angle bearing)
+    void setBeam(unsigned int beam, std::vector<float> const& bins, base::Angle bearing)
     {
         setBeam(beam, bins);
         bearings[beam] = bearing;
@@ -308,7 +308,7 @@ public:
 
     /** Add data for one beam
      */
-    void setBeam(int beam, base::Time const& beam_time, std::vector<float> const& beam_bins)
+    void setBeam(unsigned int beam, base::Time const& beam_time, std::vector<float> const& beam_bins)
     {
         setBeamBins(beam, beam_bins);
         timestamps[beam] = beam_time;
@@ -316,7 +316,7 @@ public:
 
     /** Add data for one beam
      */
-    void setBeam(int beam, base::Time const& beam_time, std::vector<float> const& beam_bins, base::Angle bearing)
+    void setBeam(unsigned int beam, base::Time const& beam_time, std::vector<float> const& beam_bins, base::Angle bearing)
     {
         setBeam(beam, beam_time, beam_bins);
         bearings[beam] = bearing;
@@ -330,7 +330,7 @@ public:
      * @raise std::invalid_argument if the number of bins in the argument does
      *   not match bin_count
      */
-    void setBeamBins(int beam, std::vector<float> const& beam_bins)
+    void setBeamBins(unsigned int beam, std::vector<float> const& beam_bins)
     {
         if (beam_bins.size() != bin_count)
             throw std::invalid_argument("pushBeam: the provided beam does not match the expected bin_count");
@@ -342,13 +342,13 @@ public:
      * This is the bearing of the center of the beam. A zero bearing means the
      * front of the device
      */
-    base::Angle getBeamBearing(int beam) const
+    base::Angle getBeamBearing(unsigned int beam) const
     {
         return bearings[beam];
     }
 
     /** Returns the bins of a given beam */
-    std::vector<float> getBeamBins(int beam) const
+    std::vector<float> getBeamBins(unsigned int beam) const
     {
         std::vector<float> bins;
         getBeamBins(beam, bins);
@@ -356,7 +356,7 @@ public:
     }
 
     /** Copies the bins of a given beam */
-    void getBeamBins(int beam, std::vector<float>& beam_bins) const
+    void getBeamBins(unsigned int beam, std::vector<float>& beam_bins) const
     {
         beam_bins.resize(bin_count);
         std::vector<float>::const_iterator ptr = bins.begin() + beam * bin_count;
@@ -364,7 +364,7 @@ public:
     }
 
     /** Returns the data structure that represents a single beam */
-    Sonar getBeam(int beam) const
+    Sonar getBeam(unsigned int beam) const
     {
         return fromSingleBeam(
                 getBeamAcquisitionStartTime(beam),
