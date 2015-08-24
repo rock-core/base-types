@@ -167,8 +167,10 @@ public:
         if (per_beam_timestamps)
             timestamps.resize(beam_count);
 
-        bins.resize(beam_count * bin_count, base::unknown<float>());
         bearings.resize(beam_count, base::Angle::unknown());
+        bins.resize(beam_count * bin_count, base::unknown<float>());
+        this->bin_count = bin_count;
+        this->beam_count = beam_count;
     }
 
     /** Initializes a Sonar structure to represent a single beam
