@@ -330,7 +330,7 @@ public:
      * @raise std::invalid_argument if the number of bins in the argument does
      *   not match bin_count
      */
-    void setBeamBins(unsigned int beam, std::vector<float> const& beam_bins)
+    void setBeamBins(int beam, std::vector<float> const& beam_bins)
     {
         if (beam_bins.size() != bin_count)
             throw std::invalid_argument("pushBeam: the provided beam does not match the expected bin_count");
