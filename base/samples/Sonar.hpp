@@ -194,7 +194,7 @@ public:
     base::Time getBeamAcquisitionStartTime(int beam) const
     {
         if (timestamps.empty())
-            return timestamps.front();
+            return time;
         else
             return timestamps[beam];
     }
