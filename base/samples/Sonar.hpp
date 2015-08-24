@@ -166,6 +166,8 @@ public:
     {
         if (per_beam_timestamps)
             timestamps.resize(beam_count);
+        else
+            timestamps.clear();
 
         bearings.resize(beam_count, base::Angle::unknown());
         bins.resize(beam_count * bin_count, base::unknown<float>());
