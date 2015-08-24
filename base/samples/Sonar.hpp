@@ -174,9 +174,11 @@ public:
     /** Initializes a Sonar structure to represent a single beam
      */
     static Sonar fromSingleBeam(base::Time time, base::Time bin_duration, base::Angle beam_width, base::Angle beam_height,
-            std::vector<float> const& bins, base::Angle bearing = base::Angle())
+            std::vector<float> const& bins, base::Angle bearing = base::Angle(),
+            float speed_of_sound = getSpeedOfSoundInWater())
     {
         Sonar sample(time, bin_duration, bins.size(), beam_width, beam_height);
+        sample.speed_of_sound = speed_of_sound;
         sample.pushBeam(bins, bearing);
         return sample;
     }
@@ -372,7 +374,8 @@ public:
                 beam_width,
                 beam_height,
                 getBeamBins(beam),
-                getBeamBearing(beam));
+                getBeamBearing(beam),
+                speed_of_sound);
     }
 
     /** Verify this structure's consistency
