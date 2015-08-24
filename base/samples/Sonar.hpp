@@ -133,7 +133,10 @@ public:
 
     static float getSpeedOfSoundInWater() { return 1497.0; }
 
-    Sonar() : speed_of_sound(1497), bin_count(0), beam_count(0) {}
+    Sonar()
+        : speed_of_sound(getSpeedOfSoundInWater())
+        , bin_count(0)
+        , beam_count(0) {}
 
     Sonar(base::Time time, base::Time bin_duration, int bin_count, base::Angle beam_width, base::Angle beam_height)
         : time(time)
