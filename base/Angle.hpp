@@ -97,6 +97,15 @@ public:
 	return Angle( deg / 180.0 * M_PI );
     }
 
+    /** Use this method to represent an unknown angle
+     */
+    static inline Angle unknown()
+    {
+        Angle result;
+        result.rad = base::unknown<double>();
+        return result;
+    }
+
     /**
      * @return canonical value of the angle in radians
      */
