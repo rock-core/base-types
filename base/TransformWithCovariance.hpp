@@ -32,16 +32,16 @@ namespace base {
 	    typedef base::Matrix6d Covariance;
 
     public:
-        /** The transformation is represented 6D vector [orientation translation]
-        * Here orientation is the rotational part expressed as a scaled axis of
+        /** The transformation is represented 6D vector [translation orientation]
+        * Here orientation is the rotational part expressed as a quaternion
         * orientation, and t the translational component.
         */
-        base::AngleAxisd orientation;
-
         base::Position translation;
 
+        base::Quaterniond orientation;
+
         /** The uncertainty is represented as a 6x6 matrix, which is the covariance
-         * matrix of the [orientation translation] representation of the error.
+         * matrix of the [translation orientation] representation of the error.
          */
         Covariance cov;
 
@@ -52,11 +52,11 @@ namespace base {
         TransformWithCovariance( const base::Affine3d& trans, const Covariance& cov )
             {this->setTransform(trans); this->cov = cov;};
 
-        TransformWithCovariance( const base::AngleAxisd& orientation, const base::Position& translation ) :
-            orientation(orientation), translation(translation){this->invalidateCovariance();};
+        TransformWithCovariance(const base::Position& translation, const base::Quaterniond& orientation) :
+            translation(translation), orientation(orientation) {this->invalidateCovariance();};
 
-        TransformWithCovariance( const base::AngleAxisd& orientation, const base::Position& translation, const Covariance& cov ) :
-            orientation(orientation), translation(translation), cov(cov){};
+        TransformWithCovariance(const base::Position& translation, const base::Quaterniond& orientation, const Covariance& cov ) :
+            translation(translation), orientation(orientation), cov(cov){};
 
         static TransformWithCovariance Identity()
         {
@@ -84,35 +84,34 @@ namespace base {
         {
             const TransformWithCovariance &tf(*this);
             const TransformWithCovariance &t1(trans);
-            base::AngleAxisd r2(tf.orientation * t1.orientation.inverse());
             base::Position p2(tf.translation + (tf.orientation * t1.inverse().translation));
+            Eigen::Quaterniond q2( tf.orientation * t1.orientation.inverse());
 
             // short path if there is no uncertainty
             if( !t1.hasValidCovariance() && !tf.hasValidCovariance() )
-                return TransformWithCovariance(r2, p2);
+                return TransformWithCovariance(p2, q2);
 
             // convert the orientations of the respective transforms into quaternions
             // in order to inverse the covariances, we need to get both the t1 and t2=[r2 p2] transformations
             // based on the composition tf = t2 * t1
             Eigen::Quaterniond q1( t1.orientation );
-            Eigen::Quaterniond q2( r2 );
             Eigen::Quaterniond q( q2 * q1 );
 
             // initialize resulting covariance
             Eigen::Matrix<double,6,6> cov = Eigen::Matrix<double,6,6>::Zero();
 
             Eigen::Matrix<double,6,6> J1;
-            J1 << dr2r1_by_r1(q, q1, q2), Eigen::Matrix3d::Zero(),
-            Eigen::Matrix3d::Zero(), r2.toRotationMatrix();
+            J1 << q2.toRotationMatrix(), Eigen::Matrix3d::Zero(),
+            Eigen::Matrix3d::Zero(), dr2r1_by_r1(q, q1, q2);
 
             Eigen::Matrix<double,6,6> J2;
-            J2 << dr2r1_by_r2(q, q1, q2), Eigen::Matrix3d::Zero(),
-            drx_by_dr(q2, t1.translation), Eigen::Matrix3d::Identity();
+            J2 << Eigen::Matrix3d::Identity(), drx_by_dr(q2, t1.translation),
+            Eigen::Matrix3d::Zero(), dr2r1_by_r2(q, q1, q2);
 
             cov = J2.inverse() * ( tf.getCovariance() - J1 * t1.getCovariance() * J1.transpose() ) * J2.transpose().inverse();
 
             // and return the resulting uncertainty transform
-            return TransformWithCovariance( r2, p2, cov );
+            return TransformWithCovariance( p2, q2, cov );
         };
 
         /** Same as compositionInv, just that the result is such that trans * result = this.
@@ -123,17 +122,16 @@ namespace base {
         {
             const TransformWithCovariance &tf(*this);
             const TransformWithCovariance &t2(trans);
-            base::AngleAxisd r1(t2.orientation.inverse() * tf.orientation);
             base::Position p1(t2.inverse().translation + (t2.orientation.inverse() * tf.translation));
+            Eigen::Quaterniond q1(t2.orientation.inverse() * tf.orientation);
 
             // short path if there is no uncertainty 
             if( !t2.hasValidCovariance() && !tf.hasValidCovariance() )
-                return TransformWithCovariance( r1, p1 );
+                return TransformWithCovariance( p1, q1 );
 
             // convert the orientations of the respective transforms into quaternions
-            // in order to inverse the covariances, we need to get both the t1=[r1 p1] and t2 transformations
+            // in order to inverse the covariances, we need to get both the t1=[p1 q1] and t2 transformations
             // based on the composition tf = t2 * t1
-            Eigen::Quaterniond q1(r1);
             Eigen::Quaterniond q2(t2.orientation);
             Eigen::Quaterniond q( q2 * q1 );
 
@@ -141,17 +139,17 @@ namespace base {
             Eigen::Matrix<double,6,6> cov = Eigen::Matrix<double,6,6>::Zero();
 
             Eigen::Matrix<double,6,6> J1;
-            J1 << dr2r1_by_r1(q, q1, q2), Eigen::Matrix3d::Zero(),
-            Eigen::Matrix3d::Zero(), t2.getTransform().linear();
+            J1 << t2.getTransform().linear(), Eigen::Matrix3d::Zero(),
+            Eigen::Matrix3d::Zero(), dr2r1_by_r1(q, q1, q2);
 
             Eigen::Matrix<double,6,6> J2;
-            J2 << dr2r1_by_r2(q, q1, q2), Eigen::Matrix3d::Zero(),
-            drx_by_dr(q2, p1), Eigen::Matrix3d::Identity();
+            J2 << Eigen::Matrix3d::Identity(), drx_by_dr(q2, p1),
+            Eigen::Matrix3d::Zero(), dr2r1_by_r2(q, q1, q2);
 
             cov = J1.inverse() * ( tf.getCovariance() - J2 * t2.getCovariance() * J2.transpose() ) * J1.transpose().inverse();
 
             // and return the resulting uncertainty transform
-            return TransformWithCovariance( r1, p1, cov );
+            return TransformWithCovariance( p1, q1, cov );
         };
 
         /** alias for the composition of two transforms
@@ -161,13 +159,13 @@ namespace base {
             const TransformWithCovariance &t2(*this);
             const TransformWithCovariance &t1(trans);
 
-            base::AngleAxisd t(t2.orientation * t1.orientation);
+            base::Quaterniond t(t2.orientation * t1.orientation);
             base::Position p(t2.translation + (t2.orientation * t1.translation));
 
             // short path if there is no uncertainty 
             if( !t1.hasValidCovariance() && !t2.hasValidCovariance() )
             {
-                return TransformWithCovariance(t, p);
+                return TransformWithCovariance(p, t);
             }
 
             // convert the orientations of the respective transforms into quaternions
@@ -182,8 +180,8 @@ namespace base {
             if( t1.hasValidCovariance() )
             {
                 Eigen::Matrix<double,6,6> J1;
-                J1 << dr2r1_by_r1(q, q1, q2), Eigen::Matrix3d::Zero(),
-                Eigen::Matrix3d::Zero(), t2.getTransform().linear();
+                J1 << t2.getTransform().linear(), Eigen::Matrix3d::Zero(),
+                Eigen::Matrix3d::Zero(), dr2r1_by_r1(q, q1, q2);
 
                 cov += J1*t1.getCovariance()*J1.transpose();
             }
@@ -191,40 +189,41 @@ namespace base {
             if( t2.hasValidCovariance() )
             {
                 Eigen::Matrix<double,6,6> J2;
-                J2 << dr2r1_by_r2(q, q1, q2), Eigen::Matrix3d::Zero(),
-                drx_by_dr(q2, t1.translation), Eigen::Matrix3d::Identity();
+                J2 << Eigen::Matrix3d::Identity(), drx_by_dr(q2, t1.translation),
+                Eigen::Matrix3d::Zero(), dr2r1_by_r2(q, q1, q2);
 
                 cov += J2*t2.getCovariance()*J2.transpose();
             }
 
             // and return the resulting uncertainty transform
-            return TransformWithCovariance(t, p, cov);
+            return TransformWithCovariance(p, t, cov);
         };
 	
         TransformWithCovariance inverse() const
         {
             // short path if there is no uncertainty
             if( !hasValidCovariance() )
-                return TransformWithCovariance(this->orientation.inverse(), static_cast<base::Position>(-(this->orientation.inverse() * this->translation)));
+                return TransformWithCovariance(static_cast<base::Position>(-(this->orientation.inverse() * this->translation)), this->orientation.inverse());
 
             Eigen::Quaterniond q(this->orientation);
             Eigen::Vector3d t(this->translation);
             Eigen::Matrix<double,6,6> J;
-            J << Eigen::Matrix3d::Identity(), Eigen::Matrix3d::Zero(),
-            drx_by_dr( q.inverse(), t ), q.toRotationMatrix().transpose();
+            J << q.toRotationMatrix().transpose(), drx_by_dr( q.inverse(), t ),
+            Eigen::Matrix3d::Zero(), Eigen::Matrix3d::Identity();
 
-            return TransformWithCovariance(this->orientation.inverse(),
-                static_cast<base::Position>(-(this->orientation.inverse() * this->translation)),
-                J*this->getCovariance()*J.transpose());
+            return TransformWithCovariance(static_cast<base::Position>(-(this->orientation.inverse() * this->translation)),
+                                        this->orientation.inverse(),
+                                        J*this->getCovariance()*J.transpose());
         };
 
         const Covariance& getCovariance() const { return this->cov; }
         void setCovariance( const Covariance& cov ) { this->cov = cov; }
 
-        const base::Matrix3d getOrientationCov() const { return this->cov.topLeftCorner<3,3>(); }
-        void setOrientationCov(const base::Matrix3d& cov) { this->cov.topLeftCorner<3,3>() = cov; }
-        const base::Matrix3d getTranslationCov() const { return this->cov.bottomRightCorner<3,3>(); }
-        void setTranslationCov(const base::Matrix3d& cov) { this->cov.bottomRightCorner<3,3>() = cov; }
+        const base::Matrix3d getTranslationCov() const { return this->cov.topLeftCorner<3,3>(); }
+        void setTranslationCov(const base::Matrix3d& cov) { this->cov.topLeftCorner<3,3>() = cov; }
+
+        const base::Matrix3d getOrientationCov() const { return this->cov.bottomRightCorner<3,3>(); }
+        void setOrientationCov(const base::Matrix3d& cov) { this->cov.bottomRightCorner<3,3>() = cov; }
 
         const base::Affine3d getTransform() const
         {
@@ -234,8 +233,8 @@ namespace base {
         }
         void setTransform( const base::Affine3d& trans )
         {
-            this->orientation = base::AngleAxisd(trans.rotation());
             this->translation = trans.translation();
+            this->orientation = base::Quaterniond(trans.rotation());
         }
 
         const base::Orientation getOrientation() const
@@ -245,7 +244,7 @@ namespace base {
 
         void setOrientation(const base::Orientation & q)
         {
-            this->orientation = base::AngleAxisd(q);
+            this->orientation = base::Quaterniond(q);
         }
 
         bool hasValidTransform() const
@@ -255,8 +254,7 @@ namespace base {
 
         void invalidateTransform()
         {
-            base::Affine3d invalid_trans(base::AngleAxisd(base::NaN<double>(),
-                        base::Vector3d::Ones() * base::NaN<double>()));
+            base::Affine3d invalid_trans(base::Quaterniond(base::Vector4d::Ones() * base::NaN<double>()));
             this->setTransform(invalid_trans);
         }
 
@@ -277,9 +275,9 @@ namespace base {
         {
             double theta = r.norm();
             if( fabs(theta) > 1e-5 )
-            return Eigen::Quaterniond( base::AngleAxisd( theta, r/theta ) );
+                return Eigen::Quaterniond( base::AngleAxisd( theta, r/theta ) );
             else
-            return Eigen::Quaterniond::Identity();
+                return Eigen::Quaterniond::Identity();
         }
 
         static Eigen::Vector3d q_to_r( const Eigen::Quaterniond& q )
@@ -382,18 +380,19 @@ namespace base {
     */
     inline std::ostream & operator<<(std::ostream &out, const TransformWithCovariance& trans)
     {
-        /** cout the 6D pose vector (scaled axis orientation and translation) with its associated covariance matrix **/
+        /** cout the 6D pose vector (translation and scaled axis orientation) with its associated covariance matrix **/
         base::Vector3d scaled_axis;
-        scaled_axis = trans.orientation.axis() * trans.orientation.angle();
+        base::AngleAxisd angle_axis (trans.orientation);
+        scaled_axis = angle_axis.axis() * angle_axis.angle();
         for (register unsigned short i=0; i<trans.getCovariance().rows(); ++i)
         {
             if (i<3)
             {
-                out<<std::fixed<<std::setprecision(5)<<scaled_axis[i]<<"\t|";
+                out<<std::fixed<<std::setprecision(5)<<trans.translation[i]<<"\t|";
             }
             else
             {
-                out<<std::fixed<<std::setprecision(5)<<trans.translation[i-3]<<"\t|";
+                out<<std::fixed<<std::setprecision(5)<<scaled_axis[i-3]<<"\t|";
             }
             for (register unsigned short j=0; j<trans.getCovariance().cols(); ++j)
             {

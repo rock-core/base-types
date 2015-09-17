@@ -92,12 +92,12 @@ namespace base { namespace samples {
         }
 
         /** A read-only expression of the rotation **/
-        inline const base::AngleAxisd& orientation() const
+        inline const base::Quaterniond& orientation() const
         {
             return this->pose.orientation;
         }
 
-        inline base::AngleAxisd& orientation()
+        inline base::Quaterniond& orientation()
         {
             return this->pose.orientation;
         }

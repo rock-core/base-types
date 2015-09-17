@@ -19,27 +19,26 @@ namespace base {
 	    typedef base::Matrix6d Covariance;
 
     public:
+
+        /** Velocity in m/s **/
+        base::Vector3d vel;
+
         /** Rotation rate in rad/s **/
         base::Vector3d rot;
-
-        /** Veloicty in m/s **/
-        base::Vector3d vel;
 
         /** Uncertainty **/
         Covariance cov;
 
     public:
-        explicit TwistWithCovariance ( const base::Vector3d& rot = base::Vector3d::Zero(),  const base::Vector3d& vel = base::Vector3d::Zero() ):
-            rot(rot), vel(vel) {this->invalidateCovariance(); };
+        explicit TwistWithCovariance (const base::Vector3d& vel = base::Vector3d::Zero(), const base::Vector3d& rot = base::Vector3d::Zero() ):
+             vel(vel), rot(rot){this->invalidateCovariance(); };
 
-        TwistWithCovariance(const base::Vector3d& rot, const base::Vector3d& vel, const Covariance& cov):
-            rot(rot), vel(vel), cov(cov) {};
+        TwistWithCovariance(const base::Vector3d& vel, const base::Vector3d& rot, const Covariance& cov):
+             vel(vel), rot(rot), cov(cov) {};
 
         TwistWithCovariance(const base::Vector6d& velocity, const Covariance& cov)
         {
-            /** Linear velocity at first place, Angular velocity at second place **/
-            this->rot = velocity.block<3,1>(0,0);
-            this->vel = velocity.block<3,1>(3,0);
+            this->setVelocity(velocity);
             this->cov = cov;
         }
 
@@ -56,10 +55,10 @@ namespace base {
         const Covariance& getCovariance() const { return this->cov; }
         void setCovariance(const Covariance& cov) { this->cov = cov; }
 
-        const base::Matrix3d getAngularVelocityCov() const { return this->cov.block<3,3>(0,0); }
-        void setAngularVelocityCov(const base::Matrix3d& cov) { this->cov.block<3,3>(0,0) = cov; }
-        const base::Matrix3d getLinearVelocityCov() const { return this->cov.block<3,3>(3,3); }
-        void setLinearVelocityCov(const base::Matrix3d& cov) { this->cov.block<3,3>(3,3) = cov; }
+        const base::Matrix3d getLinearVelocityCov() const { return this->cov.block<3,3>(0,0); }
+        void setLinearVelocityCov(const base::Matrix3d& cov) { this->cov.block<3,3>(0,0) = cov; }
+        const base::Matrix3d getAngularVelocityCov() const { return this->cov.block<3,3>(3,3); }
+        void setAngularVelocityCov(const base::Matrix3d& cov) { this->cov.block<3,3>(3,3) = cov; }
 
         const base::Vector3d& getLinearVelocity() const {return this->getTranslation(); }
         void setLinearVelocity(const base::Vector3d& vel) { return this->setTranslation(vel); }
@@ -72,27 +71,28 @@ namespace base {
         const base::Vector6d getVelocity() const
         {
             base::Vector6d all_velocities;
-            all_velocities.block<3,1>(0,0) = this->rot;
-            all_velocities.block<3,1>(3,0) = this->vel;
+            all_velocities.block<3,1>(0,0) = this->vel;
+            all_velocities.block<3,1>(3,0) = this->rot;
             return all_velocities;
         }
 
         void setVelocity(const base::Vector6d& velocity)
         {
-            this->rot = velocity.block<3,1>(0,0);
-            this->vel = velocity.block<3,1>(3,0);
+            /** Linear velocity at first place, Angular velocity at second place **/
+            this->vel = velocity.block<3,1>(0,0);
+            this->rot = velocity.block<3,1>(3,0);
         }
 
         /** Check Methods **/
         bool hasValidVelocity() const
         {
-            return base::isnotnan(this->rot) && base::isnotnan(this->vel);
+            return base::isnotnan(this->vel) && base::isnotnan(this->rot);
         }
 
         void invalidateVelocity()
         {
-            this->rot = base::Vector3d::Ones() * base::unknown<double>();
             this->vel = base::Vector3d::Ones() * base::unknown<double>();
+            this->rot = base::Vector3d::Ones() * base::unknown<double>();
         }
 
         bool hasValidCovariance() const { return base::isnotnan(this->cov); }
@@ -115,24 +115,24 @@ namespace base {
         double& operator[](int i)
         {
             if (i<3)
-                return this->rot(i);
+                return this->vel(i);
             else
-                return this->vel(i-3);
+                return this->rot(i-3);
         }
 
         double operator[](int i) const
         {
             if (i<3)
-                return this->rot(i);
+                return this->vel(i);
             else
-                return this->vel(i-3);
+                return this->rot(i-3);
         }
 
 
         inline TwistWithCovariance& operator+=(const TwistWithCovariance& arg)
         {
-            this->rot += arg.rot;
             this->vel += arg.vel;
+            this->rot += arg.rot;
             if (this->hasValidCovariance() && arg.hasValidCovariance())
             {
                 this->cov += arg.cov;
@@ -148,8 +148,8 @@ namespace base {
 
         inline TwistWithCovariance& operator-=(const TwistWithCovariance& arg)
         {
-            this->rot -= arg.rot;
             this->vel -= arg.vel;
+            this->rot -= arg.rot;
             if (this->hasValidCovariance() && arg.hasValidCovariance())
             {
                 this->cov += arg.cov;
@@ -168,11 +168,11 @@ namespace base {
         {
             if (!lhs.hasValidCovariance())
             {
-                return TwistWithCovariance(static_cast<base::Vector3d>(lhs.rot*rhs),static_cast<base::Vector3d>(lhs.vel*rhs));
+                return TwistWithCovariance(static_cast<base::Vector3d>(lhs.vel*rhs), static_cast<base::Vector3d>(lhs.rot*rhs));
             }
             else
             {
-                return TwistWithCovariance(static_cast<base::Vector3d>(lhs.rot*rhs),static_cast<base::Vector3d>(lhs.vel*rhs), static_cast<Covariance>((rhs*rhs)*lhs.cov));
+                return TwistWithCovariance(static_cast<base::Vector3d>(lhs.vel*rhs), static_cast<base::Vector3d>(lhs.rot*rhs), static_cast<Covariance>((rhs*rhs)*lhs.cov));
             }
         }
 
@@ -180,11 +180,11 @@ namespace base {
         {
             if (!rhs.hasValidCovariance())
             {
-                return TwistWithCovariance(static_cast<base::Vector3d>(lhs*rhs.rot),static_cast<base::Vector3d>(lhs*rhs.vel));
+                return TwistWithCovariance(static_cast<base::Vector3d>(lhs*rhs.vel), static_cast<base::Vector3d>(lhs*rhs.rot));
             }
             else
             {
-                return TwistWithCovariance(static_cast<base::Vector3d>(lhs*rhs.rot),static_cast<base::Vector3d>(lhs*rhs.vel), static_cast<Covariance>((lhs*lhs)*rhs.cov));
+                return TwistWithCovariance(static_cast<base::Vector3d>(lhs*rhs.vel), static_cast<base::Vector3d>(lhs*rhs.rot), static_cast<Covariance>((lhs*lhs)*rhs.cov));
             }
         }
 
@@ -206,25 +206,25 @@ namespace base {
                 tmp.cov.setZero();
 
                 cross_jacob = TwistWithCovariance::crossJacobian(lhs.rot, rhs.vel);
-                cross_cov << lhs.cov.block<3,3>(0,0), base::Matrix3d::Zero(),
-                            base::Matrix3d::Zero(), rhs.cov.block<3,3>(3,3);
+                cross_cov << lhs.cov.block<3,3>(3,3), base::Matrix3d::Zero(),
+                            base::Matrix3d::Zero(), rhs.cov.block<3,3>(0,0);
 
-                /** Linear velocity is at the second covariance block **/
-                tmp.cov.block<3,3>(3,3) = cross_jacob * cross_cov * cross_jacob.transpose();
+                /** Linear velocity is at the first covariance block **/
+                tmp.cov.block<3,3>(0,0) = cross_jacob * cross_cov * cross_jacob.transpose();
 
                 cross_jacob = TwistWithCovariance::crossJacobian(lhs.vel, rhs.rot);
-                cross_cov << lhs.cov.block<3,3>(3,3), base::Matrix3d::Zero(),
-                           base::Matrix3d::Zero(),rhs.cov.block<3,3>(0,0);
+                cross_cov << lhs.cov.block<3,3>(0,0), base::Matrix3d::Zero(),
+                           base::Matrix3d::Zero(),rhs.cov.block<3,3>(3,3);
 
-                /** Linear velocity is at the second covariance block **/
-                tmp.cov.block<3,3>(3,3) += cross_jacob * cross_cov * cross_jacob.transpose();
+                /** Linear velocity is at the first covariance block **/
+                tmp.cov.block<3,3>(0,0) += cross_jacob * cross_cov * cross_jacob.transpose();
 
                 cross_jacob = TwistWithCovariance::crossJacobian(lhs.rot, rhs.rot);
-                cross_cov << lhs.cov.block<3,3>(0,0), base::Matrix3d::Zero(),
-                           base::Matrix3d::Zero(),rhs.cov.block<3,3>(0,0);
+                cross_cov << lhs.cov.block<3,3>(3,3), base::Matrix3d::Zero(),
+                           base::Matrix3d::Zero(),rhs.cov.block<3,3>(3,3);
 
                 /** Angular velocity is at the first covariance block **/
-                tmp.cov.block<3,3>(0,0) = cross_jacob * cross_cov * cross_jacob.transpose();
+                tmp.cov.block<3,3>(3,3) = cross_jacob * cross_cov * cross_jacob.transpose();
 
                 base::guaranteeSPD<Covariance>(tmp.cov);
             }
@@ -234,14 +234,14 @@ namespace base {
 
         inline friend TwistWithCovariance operator/(const TwistWithCovariance& lhs,double rhs)
         {
-            return TwistWithCovariance(static_cast<base::Vector3d>(lhs.rot/rhs), static_cast<base::Vector3d>(lhs.vel/rhs), static_cast<Covariance>((1.0/(rhs *rhs))*lhs.cov));
+            return TwistWithCovariance(static_cast<base::Vector3d>(lhs.vel/rhs), static_cast<base::Vector3d>(lhs.rot/rhs), static_cast<Covariance>((1.0/(rhs *rhs))*lhs.cov));
         }
 
 
         /** unary - **/
         inline friend TwistWithCovariance operator-(const TwistWithCovariance& arg)
         {
-            return TwistWithCovariance(static_cast<base::Vector3d>(-arg.rot),static_cast<base::Vector3d>(-arg.vel), arg.cov);
+            return TwistWithCovariance(static_cast<base::Vector3d>(-arg.vel), static_cast<base::Vector3d>(-arg.rot), arg.cov);
         }
 
         static Eigen::Matrix<double, 3, 6> crossJacobian(const base::Vector3d& u, const base::Vector3d& v)
@@ -265,11 +265,11 @@ namespace base {
         {
             if (i<3)
             {
-                out<<std::fixed<<std::setprecision(5)<<twist.rot[i]<<"\t|";
+                out<<std::fixed<<std::setprecision(5)<<twist.vel[i]<<"\t|";
             }
             else
             {
-                out<<std::fixed<<std::setprecision(5)<<twist.vel[i-3]<<"\t|";
+                out<<std::fixed<<std::setprecision(5)<<twist.rot[i-3]<<"\t|";
             }
             for (register unsigned short j=0; j<twist.getCovariance().cols(); ++j)
             {
