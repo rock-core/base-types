@@ -15,8 +15,8 @@ namespace base
     typedef double            Orientation2D;
 
     /*
-     * Decomposes the orientation in euler angles so that this can be
-     * obtained by applying the following rotations in order:
+     * Decomposes the orientation in euler angles (non-proper, Tait-Bryan angles)
+     * so that this can be obtained by applying the following rotations in order:
      *
      *  rotation of a2 around x-axis
      *  rotation of a1 around y-axis
@@ -126,52 +126,52 @@ namespace base
 
     /** 
      * Represents a pose update threshold, with a number of test methods to see
-     * of the threshold was met.
+     * if the threshold was met.
      */
     struct PoseUpdateThreshold
     {
-        PoseUpdateThreshold() {};
+	PoseUpdateThreshold() {};
 
-        /** 
-         * constructor with distance and angle thresholds
-         */
-        PoseUpdateThreshold( double distance, double angle )
-            : distance( distance ), angle( angle ) {};
+	/** 
+	 * Constructor with distance and angle thresholds
+	 */
+	PoseUpdateThreshold( double _distance, double _angle )
+	    : distance( _distance ), angle( _angle ) {};
 
-        /** 
-         * test if distance or angle is greater than the 
-         * stored threshold.
-         */
-        bool test( double distance, double angle )
-        {
-            return distance > this->distance || angle > this->angle;
-        }
+	/** 
+	 * Test if distance or angle is greater than the 
+	 * stored threshold.
+	 */
+	bool test( double other_distance, double other_angle )
+	{
+	    return other_distance > distance || other_angle > angle;
+	}
 
-        /** 
-         * test if the provided delta transformation is greater in 
-         * either distance or angle than the threshold
-         */
-        bool test( const Eigen::Affine3d& pdelta )
-        {
-            return test( pdelta.translation().norm(), Eigen::AngleAxisd( pdelta.linear() ).angle() );
-        }
+	/** 
+	 * Test if the provided delta transformation is greater in 
+	 * either distance or angle than the threshold
+	 */
+	bool test( const Eigen::Affine3d& pdelta )
+	{
+	    return test( pdelta.translation().norm(), Eigen::AngleAxisd( pdelta.linear() ).angle() );
+	}
 
-        /** 
-         * test if the delta of the provided transformations is greater in 
-         * either distance or angle than the threshold.
-         *
-         * @param a2b the initial transformation from A to B
-         * @param aprime2b the next transformation from A' to B
-         *
-         * @result true if the transformation A' to A is greater than the stored thresholds
-         */
-        bool test( const Eigen::Affine3d& a2b, const Eigen::Affine3d& aprime2b )
-        {
-            return test( a2b.inverse() * aprime2b );
-        }
+	/** 
+	 * Test if the delta of the provided transformations is greater in 
+	 * either distance or angle than the threshold.
+	 *
+	 * @param a2b the initial transformation from A to B
+	 * @param aprime2b the next transformation from A' to B
+	 *
+	 * @result true if the transformation A' to A is greater than the stored thresholds
+	 */
+	bool test( const Eigen::Affine3d& a2b, const Eigen::Affine3d& aprime2b )
+	{
+	    return test( a2b.inverse() * aprime2b );
+	}
 
-        double distance;
-        double angle;
+	double distance;
+	double angle;
     };
 
     /**
@@ -186,16 +186,16 @@ namespace base
         Position    position;
         Orientation orientation;
 
-        /** 
-         * @brief default constructor will initialize to zero
-         */
+	/**
+	 * @brief Default constructor will initialize to zero
+	 */
         Pose()
             : position(Position::Zero()), orientation(Orientation::Identity()) {}
 
         Pose(Position const& p, Orientation const& o)
             : position(p), orientation(o) {}
 
-        /** 
+        /**
          * @brief constructor based on a 4x4 transform matrix
          *
          * @param t 4x4 homogenous transform matrix, for which the upper-left
@@ -271,8 +271,8 @@ namespace base
         }
 
         /**
-         * @result yaw (rotation around z-axis) part of the rotational part of the pose
-         */
+        * @result yaw (rotation around z-axis) part of the rotational part of the pose
+        */
         double getYaw() const
         {
             return base::getYaw(orientation);

@@ -696,6 +696,15 @@ module Eigen
             end
         end
 
+        def pretty_print(pp)
+            for i in 0..rows()-1
+                for j in 0..cols()-1
+                    pp.text " #{self[i,j]}"
+                end
+                pp.text "\n"
+            end
+        end
+
         def ==(m)
             m.kind_of?(self.class) &&
                 __equal__(m)

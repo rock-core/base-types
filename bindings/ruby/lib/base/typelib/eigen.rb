@@ -40,6 +40,12 @@ Typelib.convert_from_ruby Eigen::Quaternion, '/wrappers/Quaternion</double>' do 
     t
 end
 
+Typelib.specialize '/wrappers/MatrixX</double>' do
+    def initialize
+        self.rows = self.cols = 0
+        super
+    end
+end
 Typelib.convert_to_ruby '/wrappers/MatrixX</double>', Eigen::MatrixX do |value|
     m = Eigen::MatrixX.new(value.rows,value.cols)
     m.from_a(value.data.to_a,value.rows,value.cols)

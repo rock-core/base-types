@@ -5,6 +5,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <Eigen/SVD>
 
 using namespace Rice;
 
@@ -89,7 +90,7 @@ struct VectorX {
     VectorX* normalize() const { return new VectorX(v->normalized()); }
     void normalizeBang() const { v->normalize(); }
 
-    int size() { return v->size(); }
+    unsigned int size() { return v->size(); }
 
     double get(int i) const { return (*v)[i]; }
     void set(int i, double value) { (*v)[i] = value; }
@@ -168,6 +169,21 @@ struct Matrix4
     { return mx->isApprox(*other.mx, tolerance); }
 };
 
+struct JacobiSVD {
+    typedef Eigen::JacobiSVD<Eigen::MatrixXd::PlainObject> EigenT;
+    EigenT* j;
+
+    JacobiSVD( EigenT const& j )
+    : j(new EigenT(j)) {}
+    JacobiSVD( JacobiSVD const& j )
+    : j(new EigenT(*j.j)) {}
+    ~JacobiSVD()
+    { delete j; }
+
+    VectorX* solve(VectorX* y)
+    { return new VectorX(j->solve(*y->v)); }
+};
+
 struct MatrixX {
 
     MatrixXd* m;
@@ -180,12 +196,12 @@ struct MatrixX {
 
     void resize(int rows, int cols) { m->resize(rows,cols); }
     void conservativeResize(int rows, int cols) { m->conservativeResize(rows,cols); }
-    
+
     double norm() const { return m->norm(); }
 
-    int rows() const { return m->rows(); }
-    int cols() const { return m->cols(); }
-    int size() const { return m->size(); }
+    unsigned int rows() const { return m->rows(); }
+    unsigned int cols() const { return m->cols(); }
+    unsigned int size() const { return m->size(); }
 
     double get(int i, int j ) const { return (*m)(i,j); }
     void set(int i, int j, double value) { (*m)(i,j) = value; }
@@ -214,11 +230,14 @@ struct MatrixX {
     MatrixX* scale (double scalar) const
     { return new MatrixX(*m * scalar); }
 
-    MatrixX* dotV (VectorX const& other) const
-    { return new MatrixX(*m * *other.v); }
+    VectorX* dotV (VectorX const& other) const
+    { return new VectorX(*m * *other.v); }
     
     MatrixX* dotM (MatrixX const& other) const
     { return new MatrixX(*m * (*other.m)); }
+
+    JacobiSVD* jacobiSvd(int flags = 0) const
+    { return new JacobiSVD(m->jacobiSvd(flags)); }
 
     bool operator ==(MatrixX const& other) const
     { return (*this->m) == (*other.m); }
@@ -589,6 +608,13 @@ void Init_eigen_ext()
        .define_method("dotM",  &Matrix4::dotM)
        .define_method("approx?", &Matrix4::isApprox, (Arg("m"), Arg("tolerance") = Eigen::NumTraits<double>::dummy_precision()));
 
+     rb_mEigen.const_set("ComputeFullU", INT2FIX(Eigen::ComputeFullU));
+     rb_mEigen.const_set("ComputeThinU", INT2FIX(Eigen::ComputeThinU));
+     rb_mEigen.const_set("ComputeThinV", INT2FIX(Eigen::ComputeThinV));
+
+     Data_Type<JacobiSVD> rb_JacobiSVD = define_class_under<JacobiSVD>(rb_mEigen, "JacobiSVD")
+        .define_method("solve", &JacobiSVD::solve);
+
      Data_Type<MatrixX> rb_MatrixX = define_class_under<MatrixX>(rb_mEigen, "MatrixX")
        .define_constructor(Constructor<MatrixX,int,int>(),
                (Arg("rows") = static_cast<int>(0),
@@ -613,6 +639,7 @@ void Init_eigen_ext()
        .define_method("*",  &MatrixX::scale)
        .define_method("dotV",  &MatrixX::dotV)
        .define_method("dotM",  &MatrixX::dotM)
+       .define_method("jacobiSvd", &MatrixX::jacobiSvd, (Arg("flags") = 0))
        .define_method("approx?", &MatrixX::isApprox, (Arg("m"), Arg("tolerance") = Eigen::NumTraits<double>::dummy_precision()));
 
      Data_Type<Isometry3> rb_Isometry3 = define_class_under<Isometry3>(rb_mEigen, "Isometry3")

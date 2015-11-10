@@ -6,6 +6,7 @@
 #include <base/Eigen.hpp>
 #include <iostream>
 #include <base/Deprecated.hpp>
+#include <base/Float.hpp>
 
 namespace base
 {
@@ -28,12 +29,12 @@ public:
     double rad;
 
     /** 
-     * default constructor, which will leave the angle uninitialized.
+     * default constructor, which will initialize the value to unknown (NaN)
      */
-    Angle() {}
+    Angle() : rad(base::unknown<double>()) {}
     
 protected:
-    explicit Angle( double rad ) : rad(rad) 
+    explicit Angle( double _rad ) : rad(_rad)
     { 
 	canonize(); 
     }
@@ -94,6 +95,15 @@ public:
     static inline Angle fromDeg( double deg )
     {
 	return Angle( deg / 180.0 * M_PI );
+    }
+
+    /** Use this method to represent an unknown angle
+     */
+    static inline Angle unknown()
+    {
+        Angle result;
+        result.rad = base::unknown<double>();
+        return result;
     }
 
     /**
@@ -264,7 +274,7 @@ public:
     {
     }
 
-    AngleSegment(const Angle &start, double width): width(width), startRad(start.getRad()), endRad(startRad + width)
+    AngleSegment(const Angle &start, double _width): width(_width), startRad(start.getRad()), endRad(startRad + width)
     {
         if(width < 0)
             throw std::runtime_error("Error got segment with negative width");

@@ -1,4 +1,4 @@
-require 'base/geometry/spline'
+require 'sisl/spline'
 require 'base/typelib/joint_state'
 require 'base/typelib/time'
 require 'base/typelib/rigid_body_state'
