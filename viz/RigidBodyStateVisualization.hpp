@@ -21,6 +21,7 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         Q_OBJECT
         Q_PROPERTY(double size READ getSize WRITE setSize)
         Q_PROPERTY(double sphereSize READ getMainSphereSize WRITE setMainSphereSize)
+        Q_PROPERTY(double textSize READ getTextSize WRITE setTextSize)
         Q_PROPERTY(bool displayCovariance READ isCovarianceDisplayed WRITE displayCovariance)
         Q_PROPERTY(bool displayCovarianceWithSamples READ isCovarianceDisplayedWithSamples WRITE displayCovarianceWithSamples)
         Q_PROPERTY(bool forcePositionDisplay READ isPositionDisplayForced WRITE setPositionDisplayForceFlag)
@@ -73,6 +74,13 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
          */
         double getMainSphereSize() const;
 
+        /** Sets the text size relative to the size of the complete object.
+         * If text size is positive, the name of the source frame is rendered in the visualization.
+         * The default is 0.0
+         */
+        void setTextSize(double size);
+        double getTextSize() const;
+
         void displayCovariance(bool enable);
         bool isCovarianceDisplayed() const;
         void displayCovarianceWithSamples(bool enable);
@@ -110,6 +118,7 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         base::Vector3d color;
         double total_size;
         double main_size;
+        double text_size;
 
         osg::Vec3 translation;
         osg::Quat rotation;
