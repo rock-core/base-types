@@ -189,14 +189,14 @@ namespace base { namespace samples {
             return this->velocity.setAngularVelocityCov(cov);
         }
 
-        static BodyState unknown()
+        static BodyState Unknown()
         {
             BodyState result(false);
             result.initUnknown();
             return result;
         };
 
-        static BodyState invalid()
+        static BodyState Invalid()
         {
             BodyState result(true);
             return result;

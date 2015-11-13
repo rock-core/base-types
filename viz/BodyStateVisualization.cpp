@@ -26,7 +26,7 @@ BodyStateVisualization::BodyStateVisualization(QObject* parent)
     , forcePositionDisplay(false)
     , forceOrientationDisplay(false)
 {
-    state = base::samples::BodyState::invalid();
+    state = base::samples::BodyState::Invalid();
     state.initUnknown();
 }
 
