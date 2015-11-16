@@ -6,6 +6,7 @@
 #include <osgDB/ReadFile>
 #include <osg/Material>
 #include <osgFX/BumpMapping>
+#include <osgText/Text>
 
 using namespace osg;
 namespace vizkit3d 
@@ -18,6 +19,7 @@ RigidBodyStateVisualization::RigidBodyStateVisualization(QObject* parent)
     , color(1, 1, 1)
     , total_size(1)
     , main_size(0.1)
+    , text_size(0.0)
     , translation(0, 0, 0)
     , rotation(0, 0, 0, 1)
     , body_type(BODY_NONE)
@@ -173,6 +175,16 @@ ref_ptr<Group> RigidBodyStateVisualization::createSimpleBody(double size)
     ref_ptr<ShapeDrawable> spd = new ShapeDrawable(sp);
     spd->setColor(Vec4f(color.x(), color.y(), color.z(), 1.0));
     geode->addDrawable(spd);
+    if(text_size>0.0)
+    {
+        double actual_size = text_size * size;
+        ref_ptr<osgText::Text> text= new osgText::Text;
+        text->setText(state.sourceFrame);
+        text->setCharacterSize(actual_size);
+        text->setPosition(osg::Vec3d(actual_size/2,actual_size/2,0));
+        geode->addDrawable(text);
+    }
+
     group->addChild(geode);
     
     //up
@@ -213,6 +225,19 @@ void RigidBodyStateVisualization::setMainSphereSize(double size)
 {
     main_size = size;
     emit propertyChanged("sphereSize");
+    // This triggers an update of the model if we don't have a custom model
+    setSize(total_size);
+}
+
+double RigidBodyStateVisualization::getTextSize() const
+{
+    return text_size;
+}
+
+void RigidBodyStateVisualization::setTextSize(double size)
+{
+    text_size = size;
+    emit propertyChanged("textSize");
     // This triggers an update of the model if we don't have a custom model
     setSize(total_size);
 }
