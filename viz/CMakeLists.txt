@@ -5,6 +5,7 @@ rock_vizkit_plugin(base-viz
         LaserScanVisualization.cpp 
         MotionCommandVisualization.cpp 
         RigidBodyStateVisualization.cpp 
+        BodyStateVisualization.cpp 
         TrajectoryVisualization.cpp 
         WaypointVisualization.cpp 
         SonarGroundDistanceVisualization.cpp 
@@ -18,6 +19,7 @@ rock_vizkit_plugin(base-viz
         LaserScanVisualization.hpp 
         MotionCommandVisualization.hpp 
         RigidBodyStateVisualization.hpp 
+        BodyStateVisualization.hpp 
         TrajectoryVisualization.hpp 
         WaypointVisualization.hpp 
         SonarGroundDistanceVisualization.hpp 
