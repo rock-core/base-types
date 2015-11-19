@@ -53,6 +53,13 @@ public:
 	UNIT_Y = 1,
 	UNIT_Z = 2
     };
+
+    /** Reference timestamp for the depth map sample.
+     * This timestamp is used for temporal alignment to other data samples
+     * and transformations. 
+     * It is important to always set here a meaningful value.
+     */
+    base::Time time;
     
     /** The timestamps can be either one timestamp for all measurements,
      * two for interpolation, per vertical entries, per horizontal entries
