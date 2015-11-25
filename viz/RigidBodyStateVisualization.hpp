@@ -29,9 +29,9 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         Q_PROPERTY(QString modelPath READ getModelPath WRITE loadModel)
 
     public:
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-	RigidBodyStateVisualization(QObject* parent = NULL);
-	virtual ~RigidBodyStateVisualization();
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+        RigidBodyStateVisualization(QObject* parent = NULL);
+        virtual ~RigidBodyStateVisualization();
 
         Q_INVOKABLE void updateData( const base::samples::RigidBodyState& state )
         { return Vizkit3DPlugin<base::samples::RigidBodyState>::updateData(state); }
@@ -40,8 +40,8 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
 
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
-	virtual void updateMainNode(osg::Node* node);
-	void updateDataIntern( const base::samples::RigidBodyState& state );
+        virtual void updateMainNode(osg::Node* node);
+        void updateDataIntern( const base::samples::RigidBodyState& state );
         base::samples::RigidBodyState state;
     
     public slots: 
@@ -54,7 +54,7 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         void setSize(double size);
 
         void resetModel(double size);
-	void resetModelSphere(double size);
+        void resetModelSphere(double size);
 	
         QString getModelPath() const;
         void loadModel(std::string const& path);
@@ -95,7 +95,7 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
          */
         void setColor(base::Vector3d const& color);
 	
-	void setColor(const osg::Vec4d& color, osg::Geode* geode);
+        void setColor(const osg::Vec4d& color, osg::Geode* geode);
 	
         void setTexture(QString const& path);
         void setTexture(std::string const& path);
@@ -127,9 +127,9 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         { BODY_NONE, BODY_SIMPLE, BODY_SPHERE, BODY_CUSTOM_MODEL };
 
         BODY_TYPES body_type;
-	osg::ref_ptr<osg::Node>  body_model;
+        osg::ref_ptr<osg::Node>  body_model;
         osg::ref_ptr<osg::Group> createSimpleBody(double size);
-	osg::ref_ptr<osg::Group> createSimpleSphere(double size);
+        osg::ref_ptr<osg::Group> createSimpleSphere(double size);
 
         osg::ref_ptr<osg::Image> image;
         osg::ref_ptr<osg::Texture2D> texture;

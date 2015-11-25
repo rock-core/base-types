@@ -51,15 +51,22 @@ void RigidBodyStateVisualization::setColor(const Vec4d& color, Geode* geode)
 
 bool RigidBodyStateVisualization::isPositionDisplayForced() const
 { return forcePositionDisplay; }
+
 void RigidBodyStateVisualization::setPositionDisplayForceFlag(bool flag)
 { forcePositionDisplay = flag; emit propertyChanged("forcePositionDisplay"); }
+
 bool RigidBodyStateVisualization::isOrientationDisplayForced() const
 { return forceOrientationDisplay; }
+
 void RigidBodyStateVisualization::setOrientationDisplayForceFlag(bool flag)
-{ forceOrientationDisplay = flag; emit propertyChanged("forceOrientationDisplay"); }
+{ 
+    forceOrientationDisplay = flag; 
+    emit propertyChanged("forceOrientationDisplay"); 
+}
 
 void RigidBodyStateVisualization::setTexture(QString const& path)
 { return setTexture(path.toStdString()); }
+
 void RigidBodyStateVisualization::setTexture(std::string const& path)
 {
     if (path.empty())
@@ -78,8 +85,11 @@ void RigidBodyStateVisualization::clearTexture()
 void RigidBodyStateVisualization::addBumpMapping(
                 QString const& diffuse_color_map_path,
                 QString const& normal_map_path)
-{ return addBumpMapping(diffuse_color_map_path.toStdString(),
-        normal_map_path.toStdString()); }
+{
+    return addBumpMapping(diffuse_color_map_path.toStdString(), 
+            normal_map_path.toStdString()); 
+}
+        
 void RigidBodyStateVisualization::addBumpMapping(
                 std::string const& diffuse_color_map_path,
                 std::string const& normal_map_path)
@@ -175,7 +185,7 @@ ref_ptr<Group> RigidBodyStateVisualization::createSimpleBody(double size)
     ref_ptr<ShapeDrawable> spd = new ShapeDrawable(sp);
     spd->setColor(Vec4f(color.x(), color.y(), color.z(), 1.0));
     geode->addDrawable(spd);
-    if(text_size>0.0)
+    if(text_size > 0.0)
     {
         double actual_size = text_size * size;
         ref_ptr<osgText::Text> text= new osgText::Text;
@@ -332,10 +342,12 @@ void RigidBodyStateVisualization::loadModel(std::string const& path)
     setDirty();
     emit propertyChanged("modelPath");
 }
+
 QVector3D RigidBodyStateVisualization::getTranslation() const
 {
     return QVector3D(translation.x(), translation.y(), translation.z());
 }
+
 void RigidBodyStateVisualization::setTranslation(QVector3D const& v)
 {
     translation = osg::Vec3(v.x(), v.y(), v.z());
@@ -350,6 +362,7 @@ void RigidBodyStateVisualization::setRotation(QQuaternion const& q)
 
 void RigidBodyStateVisualization::displayCovariance(bool enable)
 { covariance = enable; emit propertyChanged("displayCovariance"); }
+
 bool RigidBodyStateVisualization::isCovarianceDisplayed() const
 { return covariance; }
 
@@ -357,15 +370,18 @@ void RigidBodyStateVisualization::setColor(base::Vector3d const& color)
 { this->color = color; }
 
 void RigidBodyStateVisualization::displayCovarianceWithSamples(bool enable)
-{ covariance_with_samples = enable; emit propertyChanged("displayCovarianceWithSamples"); }
+{
+    covariance_with_samples = enable; 
+    emit propertyChanged("displayCovarianceWithSamples"); 
+}
+
 bool RigidBodyStateVisualization::isCovarianceDisplayedWithSamples() const
 { return covariance_with_samples; }
 
 ref_ptr<Node> RigidBodyStateVisualization::createMainNode()
 {
     Group* group = new Group;
-    PositionAttitudeTransform* body_pose =
-        new PositionAttitudeTransform();
+    PositionAttitudeTransform* body_pose = new PositionAttitudeTransform();
     if (!body_model)
         resetModel(total_size);
     body_pose->addChild(body_model);
@@ -430,8 +446,7 @@ void RigidBodyStateVisualization::updateMainNode(Node* node)
 
     if (forcePositionDisplay || state.hasValidPosition())
     {
-	osg::Vec3d pos(
-                state.position.x(), state.position.y(), state.position.z());
+	    osg::Vec3d pos(state.position.x(), state.position.y(), state.position.z());
         
         body_pose->setPosition(pos + translation);
     }
