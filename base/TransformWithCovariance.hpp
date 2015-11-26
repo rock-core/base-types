@@ -258,6 +258,7 @@ namespace base {
             this->setTransform(invalid_trans);
         }
 
+        /** @warning This method is computationally expensive. Use with care! */
         bool hasValidCovariance() const { return !cov.hasNaN(); }
         void invalidateCovariance()
         {
