@@ -249,7 +249,7 @@ namespace base {
 
         bool hasValidTransform() const
         {
-            return base::isnotnan(this->orientation.toRotationMatrix()) && base::isnotnan(this->translation);
+            return !translation.hasNaN() && !orientation.coeffs().hasNaN();
         }
 
         void invalidateTransform()
@@ -258,7 +258,7 @@ namespace base {
             this->setTransform(invalid_trans);
         }
 
-        bool hasValidCovariance() const { return base::isnotnan(cov); }
+        bool hasValidCovariance() const { return !cov.hasNaN(); }
         void invalidateCovariance()
         {
             cov = Covariance::Ones() * base::unknown<double>();
