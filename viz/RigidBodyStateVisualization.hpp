@@ -16,7 +16,8 @@ namespace osgFX
 namespace vizkit3d 
 {
 
-class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBodyState>
+class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBodyState>,
+        public VizPluginAddType<std::vector <base::samples::RigidBodyState> >
 {
         Q_OBJECT
         Q_PROPERTY(double size READ getSize WRITE setSize)
@@ -37,12 +38,15 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         { return Vizkit3DPlugin<base::samples::RigidBodyState>::updateData(state); }
         Q_INVOKABLE void updateRigidBodyState( const base::samples::RigidBodyState& state )
         { return updateData(state); }
+        Q_INVOKABLE void updateData( const std::vector<base::samples::RigidBodyState>& states )
+        { return Vizkit3DPlugin<base::samples::RigidBodyState>::updateData(states); }
 
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
         virtual void updateMainNode(osg::Node* node);
         void updateDataIntern( const base::samples::RigidBodyState& state );
-        base::samples::RigidBodyState state;
+        void updateDataIntern( const std::vector<base::samples::RigidBodyState>& states );
+        std::vector<base::samples::RigidBodyState> states;
     
     public slots: 
         bool isPositionDisplayForced() const;

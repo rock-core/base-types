@@ -14,6 +14,7 @@ namespace vizkit3d
 
 RigidBodyStateVisualization::RigidBodyStateVisualization(QObject* parent)
     : Vizkit3DPlugin<base::samples::RigidBodyState>(parent)
+    , states()
     , covariance(false)
     , covariance_with_samples(false)
     , color(1, 1, 1)
@@ -27,10 +28,8 @@ RigidBodyStateVisualization::RigidBodyStateVisualization(QObject* parent)
     , bump_mapping_dirty(false)
     , forcePositionDisplay(false)
     , forceOrientationDisplay(false)
+    , model_path()
 {
-    state = base::samples::RigidBodyState::invalid();
-    state.position = base::Vector3d::Zero();
-    state.orientation = base::Quaterniond::Identity();
 }
 
 RigidBodyStateVisualization::~RigidBodyStateVisualization()
@@ -185,6 +184,7 @@ ref_ptr<Group> RigidBodyStateVisualization::createSimpleBody(double size)
     ref_ptr<ShapeDrawable> spd = new ShapeDrawable(sp);
     spd->setColor(Vec4f(color.x(), color.y(), color.z(), 1.0));
     geode->addDrawable(spd);
+    /*
     if(text_size > 0.0)
     {
         double actual_size = text_size * size;
@@ -194,6 +194,7 @@ ref_ptr<Group> RigidBodyStateVisualization::createSimpleBody(double size)
         text->setPosition(osg::Vec3d(actual_size/2,actual_size/2,0));
         geode->addDrawable(text);
     }
+    */
 
     group->addChild(geode);
     
@@ -381,11 +382,6 @@ bool RigidBodyStateVisualization::isCovarianceDisplayedWithSamples() const
 ref_ptr<Node> RigidBodyStateVisualization::createMainNode()
 {
     Group* group = new Group;
-    PositionAttitudeTransform* body_pose = new PositionAttitudeTransform();
-    if (!body_model)
-        resetModel(total_size);
-    body_pose->addChild(body_model);
-    group->addChild(body_pose);
 
     texture = new osg::Texture2D;
     texture->setWrap(Texture::WRAP_S, Texture::REPEAT);
@@ -409,26 +405,54 @@ ref_ptr<Node> RigidBodyStateVisualization::createMainNode()
 void RigidBodyStateVisualization::updateMainNode(Node* node)
 {
     Group* group = node->asGroup();
-    PositionAttitudeTransform* body_pose =
-        dynamic_cast<PositionAttitudeTransform*>(group->getChild(0));
-
-    // Check if we need an uncertainty representation node, and manage the
-    // uncertainty child accordingly
-    bool needs_uncertainty = covariance && state.hasValidPositionCovariance();
-    Uncertainty* uncertainty = 0;
-    if (group->getNumChildren() > 1)
-    {
-        if (needs_uncertainty)
-            uncertainty = dynamic_cast<Uncertainty*>(group->getChild(1));
-        else
-            group->removeChild(1);
+    
+    group->removeChildren(0, group->getNumChildren());
+    
+    if (!body_model)
+        resetModel(total_size);
+    if (texture_dirty)
+        updateTexture();
+    // Bump mapping not added yet, seems not to work anyway.
+    //if (bump_mapping_dirty)
+    //    updateBumpMapping();
+    
+    std::vector<base::samples::RigidBodyState>::iterator it;
+    for(it = states.begin(); it != states.end(); it++) {
+        PositionAttitudeTransform* body_pose = new PositionAttitudeTransform();
+        
+        body_pose->addChild(body_model);
+        group->addChild(body_pose);
+        
+        if (forcePositionDisplay || it->hasValidPosition()) {
+            osg::Vec3d pos(it->position.x(), it->position.y(), it->position.z());
+            body_pose->setPosition(pos + translation);
+        }
+        
+        if (forceOrientationDisplay || it->hasValidOrientation()) {
+            osg::Quat orientation(it->orientation.x(),
+                    it->orientation.y(),
+                    it->orientation.z(),
+                    it->orientation.w());
+            body_pose->setAttitude(rotation * orientation);
+        } 
+        
+        // Add uncertainties if required.
+        bool needs_uncertainty = covariance && it->hasValidPositionCovariance();
+        if(needs_uncertainty) {
+            Uncertainty* uncertainty = new Uncertainty;
+            uncertainty->setMean(static_cast<Eigen::Vector3d>(it->position));
+            uncertainty->setCovariance(static_cast<Eigen::Matrix3d>(it->cov_position));
+            group->addChild(uncertainty);
+            
+            if (covariance_with_samples) {
+                uncertainty->showSamples();
+            } else {
+                uncertainty->hideSamples();
+            }
+        }
     }
-    else if (needs_uncertainty)
-    {
-        uncertainty = new Uncertainty;
-        group->addChild(uncertainty);
-    }
-
+    
+    /*    
     // Reset the body model if needed
     Node* body_node = body_pose->getChild(0);
     if (bump_mapping && body_node != bump_mapping)
@@ -437,42 +461,20 @@ void RigidBodyStateVisualization::updateMainNode(Node* node)
         body_pose->setChild(0, bump_mapping);
     }
     else if (body_node != body_model)
-        body_pose->setChild(0, body_model);
-
-    if (texture_dirty)
-        updateTexture();
-    if (bump_mapping_dirty)
-        updateBumpMapping();
-
-    if (forcePositionDisplay || state.hasValidPosition())
-    {
-	    osg::Vec3d pos(state.position.x(), state.position.y(), state.position.z());
-        
-        body_pose->setPosition(pos + translation);
-    }
-    if (needs_uncertainty)
-    {
-        if (covariance_with_samples)
-            uncertainty->showSamples();
-        else
-            uncertainty->hideSamples();
-
-        uncertainty->setMean(static_cast<Eigen::Vector3d>(state.position));
-        uncertainty->setCovariance(static_cast<Eigen::Matrix3d>(state.cov_position));
-    }
-    if (forceOrientationDisplay || state.hasValidOrientation())
-    {
-	osg::Quat orientation(state.orientation.x(),
-                state.orientation.y(),
-                state.orientation.z(),
-                state.orientation.w());
-        body_pose->setAttitude(rotation * orientation);
-    }
+        body_pose->setChild(0, body_model);    
+    */
 }
 
 void RigidBodyStateVisualization::updateDataIntern( const base::samples::RigidBodyState& state )
 {
-    this->state = state;
+    states.clear();
+    states.resize(1);
+    states[0] = state;
+}
+
+void RigidBodyStateVisualization::updateDataIntern( const std::vector<base::samples::RigidBodyState>& states )
+{
+    this->states = states; 
 }
 
 }
