@@ -55,9 +55,6 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         bool isOrientationDisplayForced() const;
         void setOrientationDisplayForceFlag(bool flag);
 
-        double getSize() const;
-        void setSize(double size);
-
         void resetModel(double size);
         void resetModelSphere(double size);
 	
@@ -78,6 +75,9 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
          * The default is 0.1
          */
         double getMainSphereSize() const;
+        
+        double getSize() const;
+        void setSize(double size);
 
         /** Sets the text size relative to the size of the complete object.
          * If text size is positive, the name of the source frame is rendered in the visualization.
@@ -99,14 +99,13 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
          * apply the new color
          */
         void setColor(base::Vector3d const& color);
-	
         void setColor(const osg::Vec4d& color, osg::Geode* geode);
 	
         void setTexture(QString const& path);
         void setTexture(std::string const& path);
-        QString getTexture() const;
-        
+        QString getTexture() const;     
         void clearTexture();
+        
         void addBumpMapping(
                 QString const& diffuse_color_map_path,
                 QString const& normal_map_path);
@@ -135,13 +134,10 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
 
         BODY_TYPES body_type;
         osg::ref_ptr<osg::Node>  body_model;
-        osg::ref_ptr<osg::Group> createSimpleBody(double size);
-        osg::ref_ptr<osg::Group> createSimpleSphere(double size);
 
         osg::ref_ptr<osg::Image> image;
         osg::ref_ptr<osg::Texture2D> texture;
         bool texture_dirty;
-        void updateTexture();
 
         osg::ref_ptr<osg::Image> diffuse_image;
         osg::ref_ptr<osg::Image> normal_image;
@@ -149,7 +145,6 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         osg::ref_ptr<osg::Texture2D> normal_texture;
         osg::ref_ptr<osgFX::BumpMapping> bump_mapping;
         bool bump_mapping_dirty;
-        void updateBumpMapping();
 
         bool forcePositionDisplay;
         bool forceOrientationDisplay;
@@ -157,6 +152,10 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         QString model_path;
         std::string texture_path;
         
+        osg::ref_ptr<osg::Group> createSimpleBody(double size);
+        osg::ref_ptr<osg::Group> createSimpleSphere(double size);
+        void updateTexture();
+        void updateBumpMapping();
         QString createAbsolutePath(std::string const& path);
 };
 
