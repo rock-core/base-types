@@ -192,18 +192,6 @@ ref_ptr<Group> RigidBodyStateVisualization::createSimpleBody(double size)
     ref_ptr<ShapeDrawable> spd = new ShapeDrawable(sp);
     spd->setColor(Vec4f(color.x(), color.y(), color.z(), 1.0));
     geode->addDrawable(spd);
-    /*
-    if(text_size > 0.0)
-    {
-        double actual_size = text_size * size;
-        ref_ptr<osgText::Text> text= new osgText::Text;
-        text->setText(state.sourceFrame);
-        text->setCharacterSize(actual_size);
-        text->setPosition(osg::Vec3d(actual_size/2,actual_size/2,0));
-        geode->addDrawable(text);
-    }
-    */
-
     group->addChild(geode);
     
     //up
@@ -428,8 +416,11 @@ void RigidBodyStateVisualization::updateMainNode(Node* node)
     if (!body_model) {
         resetModel(total_size);
     }
-    //if (texture_dirty)
+    
+    //if (texture_dirty) {
     //    updateTexture();
+    //}
+    
     // Bump mapping not added yet, seems not to work anyway.
     //if (bump_mapping_dirty)
     //    updateBumpMapping();
@@ -437,6 +428,19 @@ void RigidBodyStateVisualization::updateMainNode(Node* node)
     std::vector<base::samples::RigidBodyState>::iterator it;
     for(it = states.begin(); it != states.end(); it++) {
         PositionAttitudeTransform* body_pose = new PositionAttitudeTransform();
+        
+        // Add texture.
+        if(text_size > 0.0 && !it->sourceFrame.empty())
+        {
+            ref_ptr<Geode> geode = new Geode();
+            double actual_size = text_size * total_size;
+            ref_ptr<osgText::Text> text= new osgText::Text;
+            text->setText(it->sourceFrame);
+            text->setCharacterSize(actual_size);
+            text->setPosition(osg::Vec3d(actual_size/2,actual_size/2,0));
+            geode->addDrawable(text);
+            body_pose->addChild(geode);
+        }
         
         body_pose->addChild(body_model);
         group->addChild(body_pose);
