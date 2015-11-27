@@ -7,6 +7,7 @@
 #include <osg/Material>
 #include <osgFX/BumpMapping>
 #include <osgText/Text>
+#include <QDir>
 
 using namespace osg;
 namespace vizkit3d 
@@ -92,10 +93,17 @@ void RigidBodyStateVisualization::addBumpMapping(
 void RigidBodyStateVisualization::addBumpMapping(
                 std::string const& diffuse_color_map_path,
                 std::string const& normal_map_path)
-{
-    if (!body_model->asGeode())
-    {
-        std::cerr << "model is not a geometry, cannot use bump mapping" << std::endl;
+{   
+    if(body_model == NULL) {
+        return;
+    }
+           
+    if (!body_model->asGeode()) {
+        std::cerr << "model is not a geode, cannot use bump mapping" << std::endl;
+        return;
+    } else if ( !body_model->asGeode()->getDrawable(0) || 
+                !body_model->asGeode()->getDrawable(0)->asGeometry()) {
+        std::cerr << "model does not contain a mesh, cannot use bump mapping" << std::endl;
         return;
     }
 
@@ -310,18 +318,25 @@ void RigidBodyStateVisualization::loadModel(std::string const& path)
         return;
     }
 
-    ref_ptr<Node> model = osgDB::readNodeFile(path);
+    // Creates an absolute file path.
+    QString qt_path(path.c_str());
+    if (qt_path.startsWith ("~/")) {
+        qt_path.replace (0, 1, QDir::homePath());
+    }   
+    QDir dir(qt_path);
+    qt_path = dir.absolutePath();
+    
+    // If the model cannot be opened, NULL will be returned.
+    ref_ptr<Node> model = osgDB::readNodeFile(qt_path.toStdString());
+    if(model == NULL) {
+        return;
+    }
+    
     body_type  = BODY_CUSTOM_MODEL;
     body_model = model;
-    if (!body_model->asGeode())
-        std::cerr << "model is not a geode, using bump mapping will not be possible" << std::endl;
-    else if (!body_model->asGeode()->getDrawable(0))
-        std::cerr << "model does not contain a mesh, using bump mapping will not be possible" << std::endl;
-    else if (!body_model->asGeode()->getDrawable(0)->asGeometry())
-        std::cerr << "model does not contain a mesh, using bump mapping will not be possible" << std::endl;
-
-    model_path = QString::fromStdString(path);
-    //set plugin name
+    model_path = qt_path;
+    
+    // Set plugin name.
     if(vizkit3d_plugin_name.isEmpty())
     {
         size_t found;
@@ -331,12 +346,14 @@ void RigidBodyStateVisualization::loadModel(std::string const& path)
             str = path;
         else
             str = path.substr(found+1);
+            
         found = str.find_last_of(".");
         if(found != std::string::npos)
         {
             str = str.substr(0,found);
-            if(!str.empty())
+            if(!str.empty()) {
                 setPluginName(QString::fromStdString(str));
+            }
         }
     }
 
@@ -408,10 +425,11 @@ void RigidBodyStateVisualization::updateMainNode(Node* node)
     
     group->removeChildren(0, group->getNumChildren());
     
-    if (!body_model)
+    if (!body_model) {
         resetModel(total_size);
-    if (texture_dirty)
-        updateTexture();
+    }
+    //if (texture_dirty)
+    //    updateTexture();
     // Bump mapping not added yet, seems not to work anyway.
     //if (bump_mapping_dirty)
     //    updateBumpMapping();
