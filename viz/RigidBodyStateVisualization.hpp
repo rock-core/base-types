@@ -28,6 +28,7 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         Q_PROPERTY(bool forcePositionDisplay READ isPositionDisplayForced WRITE setPositionDisplayForceFlag)
         Q_PROPERTY(bool forceOrientationDisplay READ isOrientationDisplayForced WRITE setOrientationDisplayForceFlag)
         Q_PROPERTY(QString modelPath READ getModelPath WRITE loadModel)
+        Q_PROPERTY(QString texturePath READ getTexture WRITE setTexture)
 
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -103,6 +104,8 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
 	
         void setTexture(QString const& path);
         void setTexture(std::string const& path);
+        QString getTexture() const;
+        
         void clearTexture();
         void addBumpMapping(
                 QString const& diffuse_color_map_path,
@@ -152,7 +155,9 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         bool forceOrientationDisplay;
         
         QString model_path;
-
+        std::string texture_path;
+        
+        QString createAbsolutePath(std::string const& path);
 };
 
 }

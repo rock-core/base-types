@@ -71,9 +71,19 @@ void RigidBodyStateVisualization::setTexture(std::string const& path)
 {
     if (path.empty())
         return clearTexture();
-
-    image = osgDB::readImageFile(path);
+    
+    QString qt_path = createAbsolutePath(path);
+    
+    image = osgDB::readImageFile(qt_path.toStdString());
+    if(image == NULL) {
+        return;
+    }
     texture_dirty = true;
+    texture_path = path;
+}
+
+QString RigidBodyStateVisualization::getTexture() const {
+    return QString(texture_path.c_str());
 }
 
 void RigidBodyStateVisualization::clearTexture()
@@ -149,7 +159,6 @@ void RigidBodyStateVisualization::updateBumpMapping()
     }
     else
     {
-
         ref_ptr<Geometry> geometry = body_model->asGeode()->getDrawable(0)->asGeometry();
         ref_ptr<Array> tex_coord = geometry->getTexCoordArray(0);
         geometry->setTexCoordArray(1, tex_coord);
@@ -306,13 +315,7 @@ void RigidBodyStateVisualization::loadModel(std::string const& path)
         return;
     }
 
-    // Creates an absolute file path.
-    QString qt_path(path.c_str());
-    if (qt_path.startsWith ("~/")) {
-        qt_path.replace (0, 1, QDir::homePath());
-    }   
-    QDir dir(qt_path);
-    qt_path = dir.absolutePath();
+    QString qt_path = createAbsolutePath(path);
     
     // If the model cannot be opened, NULL will be returned.
     ref_ptr<Node> model = osgDB::readNodeFile(qt_path.toStdString());
@@ -417,9 +420,9 @@ void RigidBodyStateVisualization::updateMainNode(Node* node)
         resetModel(total_size);
     }
     
-    //if (texture_dirty) {
-    //    updateTexture();
-    //}
+    if (texture_dirty) {
+        updateTexture();
+    }
     
     // Bump mapping not added yet, seems not to work anyway.
     //if (bump_mapping_dirty)
@@ -499,4 +502,14 @@ void RigidBodyStateVisualization::updateDataIntern( const std::vector<base::samp
     this->states = states; 
 }
 
+QString RigidBodyStateVisualization::createAbsolutePath(std::string const& path){
+    QString qt_path(path.c_str());
+    if (qt_path.startsWith ("~/")) {
+        qt_path.replace (0, 1, QDir::homePath());
+    }   
+    QDir dir(qt_path);
+    qt_path = dir.absolutePath();
+    return qt_path;
 }
+
+} // end namespace vizkit3d 
