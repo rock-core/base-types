@@ -258,15 +258,15 @@ namespace base {
 
         void invalidateTransform()
         {
-            base::Affine3d invalid_trans(base::Quaterniond(base::Vector4d::Ones() * base::NaN<double>()));
-            this->setTransform(invalid_trans);
+            translation = base::Position::Ones() * base::NaN<double>();
+            orientation.coeffs() = base::Vector4d::Ones() * base::NaN<double>();
         }
 
         /** @warning This method is computationally expensive. Use with care! */
         bool hasValidCovariance() const { return !cov.hasNaN(); }
         void invalidateCovariance()
         {
-            cov = Covariance::Ones() * base::unknown<double>();
+            cov = Covariance::Ones() * base::NaN<double>();
         }
 
     protected:
