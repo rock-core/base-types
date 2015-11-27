@@ -163,8 +163,8 @@ namespace base {
             const TransformWithCovariance &t2(*this);
             const TransformWithCovariance &t1(trans);
 
-            base::Quaterniond t(t2.orientation * t1.orientation);
-            base::Position p(t2.translation + (t2.orientation * t1.translation));
+            const base::Quaterniond t(t2.orientation * t1.orientation);
+            const base::Position p(t2.translation + (t2.orientation * t1.translation));
 
             // short path if there is no uncertainty 
             if( !t1.hasValidCovariance() && !t2.hasValidCovariance() )
@@ -173,8 +173,8 @@ namespace base {
             }
 
             // convert the orientations of the respective transforms into quaternions
-            Eigen::Quaterniond q1( t1.orientation ), q2( t2.orientation );
-            Eigen::Quaterniond q( t2.orientation * t1.orientation );
+            const Eigen::Quaterniond q1( t1.orientation ), q2( t2.orientation );
+            const Eigen::Quaterniond q( t2.orientation * t1.orientation );
 
             // initialize resulting covariance
             Eigen::Matrix<double,6,6> cov = Eigen::Matrix<double,6,6>::Zero();
