@@ -46,7 +46,11 @@ namespace base {
         Covariance cov;
 
     public:
-        explicit TransformWithCovariance( const base::Affine3d& trans = base::Affine3d::Identity() )
+      
+        TransformWithCovariance() : translation(base::Position::Zero()), 
+            orientation(base::Quaterniond::Identity()) {this->invalidateCovariance();}
+      
+        explicit TransformWithCovariance( const base::Affine3d& trans)
             {this->setTransform(trans); this->invalidateCovariance();};
 
         TransformWithCovariance( const base::Affine3d& trans, const Covariance& cov )
