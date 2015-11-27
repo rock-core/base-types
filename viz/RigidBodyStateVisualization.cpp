@@ -206,7 +206,7 @@ void RigidBodyStateVisualization::loadModel(std::string const& path)
         resetModelSphere(total_size);
         return;
     }
-    else if (path == "simple")
+    else if (path == "simple" || path.empty())
     {
         resetModel(total_size);
         return;
