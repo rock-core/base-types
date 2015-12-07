@@ -46,7 +46,11 @@ namespace base {
         Covariance cov;
 
     public:
-        explicit TransformWithCovariance( const base::Affine3d& trans = base::Affine3d::Identity() )
+      
+        TransformWithCovariance() : translation(base::Position::Zero()), 
+            orientation(base::Quaterniond::Identity()) {this->invalidateCovariance();}
+      
+        explicit TransformWithCovariance( const base::Affine3d& trans)
             {this->setTransform(trans); this->invalidateCovariance();};
 
         TransformWithCovariance( const base::Affine3d& trans, const Covariance& cov )
@@ -159,8 +163,8 @@ namespace base {
             const TransformWithCovariance &t2(*this);
             const TransformWithCovariance &t1(trans);
 
-            base::Quaterniond t(t2.orientation * t1.orientation);
-            base::Position p(t2.translation + (t2.orientation * t1.translation));
+            const base::Quaterniond t(t2.orientation * t1.orientation);
+            const base::Position p(t2.translation + (t2.orientation * t1.translation));
 
             // short path if there is no uncertainty 
             if( !t1.hasValidCovariance() && !t2.hasValidCovariance() )
@@ -169,8 +173,8 @@ namespace base {
             }
 
             // convert the orientations of the respective transforms into quaternions
-            Eigen::Quaterniond q1( t1.orientation ), q2( t2.orientation );
-            Eigen::Quaterniond q( t2.orientation * t1.orientation );
+            const Eigen::Quaterniond q1( t1.orientation ), q2( t2.orientation );
+            const Eigen::Quaterniond q( t2.orientation * t1.orientation );
 
             // initialize resulting covariance
             Eigen::Matrix<double,6,6> cov = Eigen::Matrix<double,6,6>::Zero();
@@ -249,19 +253,20 @@ namespace base {
 
         bool hasValidTransform() const
         {
-            return base::isnotnan(this->orientation.toRotationMatrix()) && base::isnotnan(this->translation);
+            return !translation.hasNaN() && !orientation.coeffs().hasNaN();
         }
 
         void invalidateTransform()
         {
-            base::Affine3d invalid_trans(base::Quaterniond(base::Vector4d::Ones() * base::NaN<double>()));
-            this->setTransform(invalid_trans);
+            translation = base::Position::Ones() * base::NaN<double>();
+            orientation.coeffs() = base::Vector4d::Ones() * base::NaN<double>();
         }
 
-        bool hasValidCovariance() const { return base::isnotnan(cov); }
+        /** @warning This method is computationally expensive. Use with care! */
+        bool hasValidCovariance() const { return !cov.hasNaN(); }
         void invalidateCovariance()
         {
-            cov = Covariance::Ones() * base::unknown<double>();
+            cov = Covariance::Ones() * base::NaN<double>();
         }
 
     protected:
