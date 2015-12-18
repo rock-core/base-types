@@ -414,7 +414,7 @@ BASE_TYPES_DEPRECATED_SUPPRESS_START
         if (old.memory_layout_column)
             scan.toggleMemoryLayout();
         for (unsigned int i = 0; i < bins.size(); ++i)
-            bins[i] = static_cast<float>(scan.data[i]) * gain;
+            bins[i] = static_cast<float>(scan.data[i] * 1.0 / 255)  * gain;
 
         setRegularBeamBearings(old.getStartBearing(), old.getAngularResolution());
         validate();
@@ -431,8 +431,9 @@ BASE_TYPES_DEPRECATED_SUPPRESS_START
         , beam_count(0)
     {
         std::vector<float> bins;
+        bins.resize(bin_count);
         for (unsigned int i = 0; i < bin_count; ++i)
-            bins[i] = static_cast<float>(old.beam[i]) * gain;
+            bins[i] = static_cast<float>(old.beam[i] * 1.0 / 255) * gain;
         pushBeam(bins, old.bearing);
     }
 BASE_TYPES_DEPRECATED_SUPPRESS_STOP
