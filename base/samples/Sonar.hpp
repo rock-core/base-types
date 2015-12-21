@@ -436,6 +436,48 @@ BASE_TYPES_DEPRECATED_SUPPRESS_START
             bins[i] = static_cast<float>(old.beam[i] * 1.0 / 255) * gain;
         pushBeam(bins, old.bearing);
     }
+
+    /** Convert the new sonar structure to the old one (SonarScan)*/
+    base::samples::SonarScan convertToSonarScan(base::samples::Sonar const &sonar) {
+        base::samples::SonarScan sonar_scan;
+
+        sonar_scan.time = sonar.time;
+        sonar_scan.time_beams = sonar.timestamps;
+        sonar_scan.speed_of_sound = sonar.speed_of_sound;
+        sonar_scan.start_bearing = sonar.bearings[0];
+        sonar_scan.angular_resolution = base::Angle::fromRad(sonar.beam_width.rad / sonar.beam_count);
+        sonar_scan.beamwidth_horizontal = sonar.beam_width;
+        sonar_scan.beamwidth_vertical = sonar.beam_height;
+        sonar_scan.number_of_beams = sonar.beam_count;
+        sonar_scan.number_of_bins = sonar.bin_count;
+        sonar_scan.memory_layout_column = false;
+        sonar_scan.polar_coordinates = true;
+
+        sonar_scan.data.clear();
+        for (unsigned int i = 0; i < sonar.bins.size(); ++i)
+            sonar_scan.data.push_back((uint8_t) (sonar.bins[i] * 255));
+
+        return sonar_scan;
+    }
+
+    /** Convert the new sonar structure to the old one (SonarBeam)*/
+    base::samples::SonarBeam convertToSonarBeam(base::samples::Sonar const &sonar) {
+        base::samples::SonarBeam sonar_beam;
+
+        sonar_beam.time = sonar.time;
+        sonar_beam.beamwidth_horizontal = sonar.beam_width.rad;
+        sonar_beam.beamwidth_vertical = sonar.beam_height.rad;
+        sonar_beam.bearing = sonar.bearings[0];
+        sonar_beam.speed_of_sound = sonar.speed_of_sound;
+        sonar_beam.sampling_interval = sonar.bin_duration.toSeconds() * 2.0;
+
+        sonar_beam.beam.clear();
+        for (unsigned int i = 0; i < sonar.bins.size(); ++i)
+            sonar_beam.beam.push_back((uint8_t) (sonar.bins[i] * 255));
+
+        return sonar_beam;
+    }
+
 BASE_TYPES_DEPRECATED_SUPPRESS_STOP
 };
 
