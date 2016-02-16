@@ -65,7 +65,8 @@ namespace base { namespace samples { namespace frame {
             COMPRESSED_MODES = 256,                      //if an image is compressed it has no relationship
                                                          //between number of pixels and number of bytes
 	    MODE_PJPG = COMPRESSED_MODES + 1,
-            MODE_JPEG = COMPRESSED_MODES + 2
+            MODE_JPEG = COMPRESSED_MODES + 2,
+            MODE_PNG = COMPRESSED_MODES + 3
 	};
 
 	enum frame_status_t {
@@ -256,6 +257,7 @@ namespace base { namespace samples { namespace frame {
                     return 4;
                 case MODE_PJPG:
                 case MODE_JPEG:
+                case MODE_PNG:
                     return 1;
 		default:
                     throw std::runtime_error("Frame::getChannelCount: Unknown frame_mode");
@@ -297,6 +299,8 @@ namespace base { namespace samples { namespace frame {
                 return MODE_PJPG;
               else if (str == "MODE_JPEG")
                 return MODE_JPEG;
+              else if (str == "MODE_PNG")
+                return MODE_PNG;
               else
                 return MODE_UNDEFINED;
             };
