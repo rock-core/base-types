@@ -20,7 +20,7 @@ if (INSTALL_BOOST_IF_REQUIRED)
     endif()
 
 else()
-    rock_find_cmake(Boost REQUIRED)
+    rock_find_cmake(Boost COMPONENTS system REQUIRED)
 endif()
 
 rock_find_pkgconfig(Eigen3 eigen3 REQUIRED)
