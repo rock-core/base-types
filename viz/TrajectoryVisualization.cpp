@@ -151,13 +151,14 @@ double TrajectoryVisualization::getLineWidth()
 void TrajectoryVisualization::setLineWidth(double line_width)
 {
     this->line_width = line_width;
-
-    osg::StateSet* stateset = geode->getOrCreateStateSet();
-    osg::LineWidth* linewidth = new osg::LineWidth();
-    linewidth->setWidth(line_width);
-    stateset->setAttributeAndModes(linewidth,osg::StateAttribute::ON);
-    stateset->setMode(GL_LIGHTING,osg::StateAttribute::OFF);
-
+    if(geode)
+    {
+        osg::StateSet* stateset = geode->getOrCreateStateSet();
+        osg::LineWidth* linewidth = new osg::LineWidth();
+        linewidth->setWidth(line_width);
+        stateset->setAttributeAndModes(linewidth,osg::StateAttribute::ON);
+        stateset->setMode(GL_LIGHTING,osg::StateAttribute::OFF);
+    }
     emit propertyChanged("LineWidth");
 }
 }
