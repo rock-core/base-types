@@ -82,7 +82,7 @@ Priority Logger::getLogLevelFromEnv() const
     std::transform(priority.begin(), priority.end(),priority.begin(), (int(*)(int)) std::toupper);
     
     int index = 0;
-    std::vector<std::string>::iterator it = mPriorityNames.begin();
+    std::vector<std::string>::const_iterator it = mPriorityNames.begin();
     for(;it != mPriorityNames.end(); it++)
     {
         if(*it != priority)
@@ -115,7 +115,7 @@ LogFormat Logger::getLogFormatFromEnv() const
     std::string logtype_str(logtype);
     std::transform(logtype_str.begin(), logtype_str.end(),logtype_str.begin(), (int(*)(int)) std::toupper);
 
-    std::vector<std::string>::iterator it = mLogFormatNames.begin();
+    std::vector<std::string>::const_iterator it = mLogFormatNames.begin();
     int index = 0;
     for(;it != mLogFormatNames.end(); it++)
     {
@@ -159,7 +159,7 @@ void Logger::logBuffer(Priority priority, const char* function, const char* file
         gettimeofday(&tv,0);
         int milliSecs = tv.tv_usec/1000;
 
-        strftime(currentTime, 25, "%Y%m%d-%H:%M:%S", current);
+        strftime(currentTime, sizeof(currentTime), "%Y%m%d-%H:%M:%S", current);
 
         //Todo: optional log pattern, e.g. %t(ime) %p(rio) %f(unc) %m(sg) %F(ile) %L(ine)
         //could be optimized to a jumplist, so no performance issue
