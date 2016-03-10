@@ -174,7 +174,7 @@ enum Priority	{ UNKNOWN = 0, UNKNOWN_P = 0, FATAL = 1, FATAL_P =1, ERROR = 2, ER
 #endif
  
 
-enum LogFormat	{ DEFAULT = 0, MULTILINE, SHORT};
+enum LogFormat	{ DEFAULT = 0, MULTILINE, SHORT, ENDLOGFORMATS};
 
 /**
  * @class Logger

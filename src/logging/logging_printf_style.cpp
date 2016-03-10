@@ -16,7 +16,7 @@
 namespace base {
 namespace logging { 
 
-Logger::Logger() : mStream(stderr), mPriorityNames(10), mLogFormatNames(3)
+Logger::Logger() : mStream(stderr), mPriorityNames(ENDPRIORITIES), mLogFormatNames(ENDLOGFORMATS)
 {
     mPriorityNames[INFO_P] = "INFO";
     mPriorityNames[DEBUG_P] = "DEBUG";
@@ -165,6 +165,7 @@ void Logger::logBuffer(Priority priority, const char* function, const char* file
         //could be optimized to a jumplist, so no performance issue
         switch (mLogFormat)
         {
+            case ENDLOGFORMATS:
             case DEFAULT:
                 fprintf(mStream, "[%s:%03d] %s[%5s] - %s::%s%s (%s:%d - %s)\n", currentTime, milliSecs, mpLogColor[priority], mPriorityNames[priority].c_str(), name_space, buffer, mpColorEnd, file, line, function);
                 break;
