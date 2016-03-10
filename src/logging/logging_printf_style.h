@@ -223,30 +223,30 @@ public:
 	* @param format printf like format string
 	* @param ... variable argument list
 	*/
-	void log(Priority priority, const char* function, const char* filename, int line, const char* name_space, const char* format, ...);
+	void log(Priority priority, const char* function, const char* filename, int line, const char* name_space, const char* format, ...) const;
 
 	/**
 	 * used by log(...)
 	 * logs the text contained in buffer.
 	 */
-	void logBuffer(Priority priority, const char* function, const char* file, int line, const char* name_space, const char* buffer);
+	void logBuffer(Priority priority, const char* function, const char* file, int line, const char* name_space, const char* buffer) const;
 
 private:
         /**
         * Retrieve the log level from the enviroment
         */
-        Priority getLogLevelFromEnv();
+        Priority getLogLevelFromEnv() const;
 
         /**
         * Retrieve log level from the enviroment variable BASE_LOG_TYPE
         * Get log color from enviroment
         */
-        bool getLogColorFromEnv();
+        bool getLogColorFromEnv() const;
 
         /** 
         * Retrieve log level from the enviroment variable BASE_LOG_FORMAT
         */
-        LogFormat getLogFormatFromEnv();
+        LogFormat getLogFormatFromEnv() const;
 
         FILE* mStream;
         std::vector<std::string> mPriorityNames;

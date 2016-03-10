@@ -72,7 +72,7 @@ void Logger::configure(Priority priority, FILE* outputStream)
         mStream = outputStream;
 }
 
-Priority Logger::getLogLevelFromEnv()
+Priority Logger::getLogLevelFromEnv() const
 {
     char* loglevel = getenv("BASE_LOG_LEVEL");
     if(!loglevel)
@@ -96,7 +96,7 @@ Priority Logger::getLogLevelFromEnv()
     return UNKNOWN_P;
 }
 
-bool Logger::getLogColorFromEnv()
+bool Logger::getLogColorFromEnv() const
 {
     char* color = getenv("BASE_LOG_COLOR");
     if(color)
@@ -106,7 +106,7 @@ bool Logger::getLogColorFromEnv()
 }
 
 
-LogFormat Logger::getLogFormatFromEnv()
+LogFormat Logger::getLogFormatFromEnv() const
 {
     char* logtype = getenv("BASE_LOG_FORMAT");
     if(!logtype)
@@ -131,7 +131,7 @@ LogFormat Logger::getLogFormatFromEnv()
 }
 
 
-void Logger::log(Priority priority, const char* function, const char* file, int line, const char* name_space, const char* format, ...)
+void Logger::log(Priority priority, const char* function, const char* file, int line, const char* name_space, const char* format, ...) const
 {
     if(priority <= mPriority)
     {
@@ -146,7 +146,7 @@ void Logger::log(Priority priority, const char* function, const char* file, int 
     }
 }
 
-void Logger::logBuffer(Priority priority, const char* function, const char* file, int line, const char* name_space, const char* buffer)
+void Logger::logBuffer(Priority priority, const char* function, const char* file, int line, const char* name_space, const char* buffer) const
 {
     if(priority <= mPriority)
     {
