@@ -74,7 +74,7 @@ void Logger::configure(Priority priority, FILE* outputStream)
 
 Priority Logger::getLogLevelFromEnv() const
 {
-    char* loglevel = getenv("BASE_LOG_LEVEL");
+    const char* loglevel = getenv("BASE_LOG_LEVEL");
     if(!loglevel)
         return UNKNOWN_P;
 
@@ -98,7 +98,7 @@ Priority Logger::getLogLevelFromEnv() const
 
 bool Logger::getLogColorFromEnv() const
 {
-    char* color = getenv("BASE_LOG_COLOR");
+    const char* color = getenv("BASE_LOG_COLOR");
     if(color)
         return true;
 
@@ -108,7 +108,7 @@ bool Logger::getLogColorFromEnv() const
 
 LogFormat Logger::getLogFormatFromEnv() const
 {
-    char* logtype = getenv("BASE_LOG_FORMAT");
+    const char* logtype = getenv("BASE_LOG_FORMAT");
     if(!logtype)
         return DEFAULT;
 
