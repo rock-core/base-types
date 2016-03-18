@@ -487,9 +487,9 @@ BOOST_AUTO_TEST_CASE( laser_scan_test )
     BOOST_CHECK(abs(points[1].y()-( sin(M_PI*0.25+laser_scan.angular_resolution))) < 0.000001);
     BOOST_CHECK(abs(points[2].x()-( -1+2.0*cos(M_PI*0.25+laser_scan.angular_resolution*2))) < 0.000001);
     BOOST_CHECK(abs(points[2].y()-( 2.0*sin(M_PI*0.25+laser_scan.angular_resolution*2))) < 0.000001);
-    BOOST_CHECK(isnan(points[3].x()));
-    BOOST_CHECK(isnan(points[3].y()));
-    BOOST_CHECK(isnan(points[3].z()));
+    BOOST_CHECK(std::isnan(points[3].x()));
+    BOOST_CHECK(std::isnan(points[3].y()));
+    BOOST_CHECK(std::isnan(points[3].z()));
 
     //check rotation and translation
     trans.setIdentity();
@@ -506,9 +506,9 @@ BOOST_AUTO_TEST_CASE( laser_scan_test )
     y = sin(M_PI*0.25+laser_scan.angular_resolution);
     BOOST_CHECK(abs(points[1].x()-(-1+x*cos(0.1*M_PI)-y*sin(0.1*M_PI))) < 0.0000001);
     BOOST_CHECK(abs(points[1].y()-(x*sin(0.1*M_PI)+y*cos(0.1*M_PI))) < 0.0000001);
-    BOOST_CHECK(isnan(points[3].x()));
-    BOOST_CHECK(isnan(points[3].y()));
-    BOOST_CHECK(isnan(points[3].z()));
+    BOOST_CHECK(std::isnan(points[3].x()));
+    BOOST_CHECK(std::isnan(points[3].y()));
+    BOOST_CHECK(std::isnan(points[3].z()));
 
     //check skipping of invalid scan points  
     laser_scan.convertScanToPointCloud(points,trans);
@@ -522,9 +522,9 @@ BOOST_AUTO_TEST_CASE( laser_scan_test )
     y = sin(M_PI*0.25+laser_scan.angular_resolution);
     BOOST_CHECK(abs(points[1].x()-(-1+x*cos(0.1*M_PI)-y*sin(0.1*M_PI))) < 0.0000001);
     BOOST_CHECK(abs(points[1].y()-(x*sin(0.1*M_PI)+y*cos(0.1*M_PI))) < 0.0000001);
-    BOOST_CHECK(!isnan(points[3].x()));
-    BOOST_CHECK(!isnan(points[3].y()));
-    BOOST_CHECK(!isnan(points[3].z()));
+    BOOST_CHECK(!std::isnan(points[3].x()));
+    BOOST_CHECK(!std::isnan(points[3].y()));
+    BOOST_CHECK(!std::isnan(points[3].z()));
 }
 
 BOOST_AUTO_TEST_CASE(depth_map_test)
