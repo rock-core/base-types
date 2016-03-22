@@ -437,7 +437,7 @@ BASE_TYPES_DEPRECATED_SUPPRESS_START
         pushBeam(bins, old.bearing);
     }
 
-    base::samples::SonarBeam convert2SonarBeam() {
+    base::samples::SonarBeam toSonarBeam() {
         base::samples::SonarBeam sonar_beam;
         sonar_beam.time = time;
         sonar_beam.speed_of_sound = speed_of_sound;
@@ -454,7 +454,7 @@ BASE_TYPES_DEPRECATED_SUPPRESS_START
         return sonar_beam;
     }
 
-    base::samples::SonarScan convert2SonarScan() {
+    base::samples::SonarScan toSonarScan() {
         base::samples::SonarScan sonar_scan;
         sonar_scan.time = time;
         sonar_scan.time_beams = timestamps;
