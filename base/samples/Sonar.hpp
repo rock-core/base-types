@@ -453,6 +453,27 @@ BASE_TYPES_DEPRECATED_SUPPRESS_START
         sonar_beam.beam = data;
         return sonar_beam;
     }
+
+    base::samples::SonarScan convert2SonarScan() {
+        base::samples::SonarScan sonar_scan;
+        sonar_scan.time = time;
+        sonar_scan.time_beams = timestamps;
+        sonar_scan.speed_of_sound = speed_of_sound;
+        sonar_scan.number_of_bins = bin_count;
+        sonar_scan.number_of_beams = beam_count;
+        sonar_scan.beamwidth_horizontal = beam_width;
+        sonar_scan.beamwidth_vertical = beam_height;
+        sonar_scan.memory_layout_column = false;
+        sonar_scan.polar_coordinates = true;
+        sonar_scan.start_bearing = bearings[0];
+
+        std::vector<float> temp(bins.begin(), bins.end());
+        std::transform(temp.begin(), temp.end(), temp.begin(), std::bind2nd(std::multiplies<float>(), 255));
+
+        std::vector<uint8_t> data(temp.begin(), temp.end());
+        sonar_scan.data = data;
+        return sonar_scan;
+    }
 BASE_TYPES_DEPRECATED_SUPPRESS_STOP
 };
 
