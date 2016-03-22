@@ -436,6 +436,23 @@ BASE_TYPES_DEPRECATED_SUPPRESS_START
             bins[i] = static_cast<float>(old.beam[i] * 1.0 / 255) * gain;
         pushBeam(bins, old.bearing);
     }
+
+    base::samples::SonarBeam convert2SonarBeam() {
+        base::samples::SonarBeam sonar_beam;
+        sonar_beam.time = time;
+        sonar_beam.speed_of_sound = speed_of_sound;
+        sonar_beam.beamwidth_horizontal = beam_width.rad;
+        sonar_beam.beamwidth_vertical = beam_height.rad;
+        sonar_beam.bearing = bearings[0];
+        sonar_beam.sampling_interval = 0;
+
+        std::vector<float> temp(bins.begin(), bins.end());
+        std::transform(temp.begin(), temp.end(), temp.begin(), std::bind2nd(std::multiplies<float>(), 255));
+
+        std::vector<uint8_t> data(temp.begin(), temp.end());
+        sonar_beam.beam = data;
+        return sonar_beam;
+    }
 BASE_TYPES_DEPRECATED_SUPPRESS_STOP
 };
 
