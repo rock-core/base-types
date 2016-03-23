@@ -436,6 +436,55 @@ BASE_TYPES_DEPRECATED_SUPPRESS_START
             bins[i] = static_cast<float>(old.beam[i] * 1.0 / 255) * gain;
         pushBeam(bins, old.bearing);
     }
+
+    base::samples::SonarBeam toSonarBeam(float gain = 1) {
+        base::samples::SonarBeam sonar_beam;
+        sonar_beam.time = time;
+        sonar_beam.speed_of_sound = speed_of_sound;
+        sonar_beam.beamwidth_horizontal = beam_width.rad;
+        sonar_beam.beamwidth_vertical = beam_height.rad;
+        sonar_beam.bearing = bearings[0];
+        sonar_beam.sampling_interval = bin_duration.toSeconds() * 2.0;
+
+        // if any value of sonar data is higher than 1, normalize it
+        std::vector<float> raw_data(bins.begin(), bins.end());
+        std::vector<float>::iterator max = std::max_element(raw_data.begin(), raw_data.end());
+        if (*max > 1)
+            std::transform(raw_data.begin(), raw_data.end(), raw_data.begin(), std::bind2nd(std::divides<float>(), *max));
+
+        std::transform(raw_data.begin(), raw_data.end(), raw_data.begin(), std::bind2nd(std::multiplies<float>(), 255 * gain));
+
+        std::vector<uint8_t> data(raw_data.begin(), raw_data.end());
+        sonar_beam.beam = data;
+        return sonar_beam;
+    }
+
+    base::samples::SonarScan toSonarScan(float gain = 1) {
+        base::samples::SonarScan sonar_scan;
+        sonar_scan.time = time;
+        sonar_scan.time_beams = timestamps;
+        sonar_scan.speed_of_sound = speed_of_sound;
+        sonar_scan.number_of_bins = bin_count;
+        sonar_scan.number_of_beams = beam_count;
+        sonar_scan.beamwidth_horizontal = beam_width;
+        sonar_scan.beamwidth_vertical = beam_height;
+        sonar_scan.start_bearing = bearings[0];
+        sonar_scan.angular_resolution = base::Angle::fromRad(beam_width.rad / beam_count);
+        sonar_scan.memory_layout_column = false;
+        sonar_scan.polar_coordinates = true;
+
+        // if any value of sonar data is higher than 1, normalize it
+        std::vector<float> raw_data(bins.begin(), bins.end());
+        std::vector<float>::iterator max = std::max_element(raw_data.begin(), raw_data.end());
+        if (*max > 1)
+            std::transform(raw_data.begin(), raw_data.end(), raw_data.begin(), std::bind2nd(std::divides<float>(), *max));
+
+        std::transform(raw_data.begin(), raw_data.end(), raw_data.begin(), std::bind2nd(std::multiplies<float>(), 255 * gain));
+
+        std::vector<uint8_t> data(raw_data.begin(), raw_data.end());
+        sonar_scan.data = data;
+        return sonar_scan;
+    }
 BASE_TYPES_DEPRECATED_SUPPRESS_STOP
 };
 
