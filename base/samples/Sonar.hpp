@@ -444,7 +444,7 @@ BASE_TYPES_DEPRECATED_SUPPRESS_START
         sonar_beam.beamwidth_horizontal = beam_width.rad;
         sonar_beam.beamwidth_vertical = beam_height.rad;
         sonar_beam.bearing = bearings[0];
-        sonar_beam.sampling_interval = 0;
+        sonar_beam.sampling_interval = bin_duration.toSeconds() * 2.0;
 
         std::vector<float> temp(bins.begin(), bins.end());
         std::transform(temp.begin(), temp.end(), temp.begin(), std::bind2nd(std::multiplies<float>(), 255));
@@ -463,9 +463,10 @@ BASE_TYPES_DEPRECATED_SUPPRESS_START
         sonar_scan.number_of_beams = beam_count;
         sonar_scan.beamwidth_horizontal = beam_width;
         sonar_scan.beamwidth_vertical = beam_height;
+        sonar_scan.start_bearing = bearings[0];
+        sonar_scan.angular_resolution = base::Angle::fromRad(beam_width.rad / beam_count);
         sonar_scan.memory_layout_column = false;
         sonar_scan.polar_coordinates = true;
-        sonar_scan.start_bearing = bearings[0];
 
         std::vector<float> temp(bins.begin(), bins.end());
         std::transform(temp.begin(), temp.end(), temp.begin(), std::bind2nd(std::multiplies<float>(), 255));
