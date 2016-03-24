@@ -182,7 +182,10 @@ ref_ptr<Group> RigidBodyStateVisualization::createSimpleBody(double size)
     {
         double actual_size = text_size * size;
         ref_ptr<osgText::Text> text= new osgText::Text;
-        text->setText(state.sourceFrame);
+        if(states.size() == 1)
+        {
+            text->setText(states[0].sourceFrame);
+        }
         text->setCharacterSize(actual_size);
         text->setPosition(osg::Vec3d(actual_size/2,actual_size/2,0));
         geode->addDrawable(text);
