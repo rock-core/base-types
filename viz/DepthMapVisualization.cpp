@@ -73,6 +73,10 @@ void DepthMapVisualization::updateMainNode ( osg::Node* node )
     
     //set color binding
     osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
+    if(show_remission && !scan_sample.remissions.empty() && scan_sample.remissions.size() != points.size())
+    {
+        throw std::runtime_error("Remission and depth image sizes are incompatible");
+    }
     if(colorize_magnitude || colorize_altitude)
     {
         for(unsigned i = 0; i < points.size(); i++)
