@@ -15,24 +15,25 @@ struct TimeMark
     TimeMark(const std::string& label) : label(label), mark( Time::now() ), clock( ::clock() ) {};
 
     /** Return the time that has passed since the recorded time and now */
-    Time passed()
+    Time passed() const
     {
 	return (Time::now() - mark);
     }
 
-    clock_t cycles()
+    clock_t cycles() const
     {
 	return ::clock() - clock;
     }
 };
 
-}
 
-inline std::ostream &operator<<(std::ostream &stream, base::TimeMark ob)
+inline std::ostream &operator<<(std::ostream &stream, const TimeMark &ob)
 {
     stream << ob.cycles() << "cyc (" << ob.passed() << "s) since " << ob.label;
     return stream;
 }
+
+} // namespace base
 
 
 #endif
