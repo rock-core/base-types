@@ -20,6 +20,7 @@ DepthMapVisualization::DepthMapVisualization() :
 {
     scan_orientation = Eigen::Quaterniond::Identity();
     scan_position.setZero();
+    default_feature_color = osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 DepthMapVisualization::~DepthMapVisualization()
@@ -83,8 +84,9 @@ void DepthMapVisualization::updateMainNode ( osg::Node* node )
 		    hue = (points[i].z() - std::floor(points[i].z() / colorize_interval) * colorize_interval) / colorize_interval;
 		else
 		    hue = (points[i].norm() - std::floor(points[i].norm() / colorize_interval) * colorize_interval) / colorize_interval;
+		float remission = (show_remission && !scan_sample.remissions.empty()) ? scan_sample.remissions[i] : 0.5;
 		osg::Vec4 color( 1.0, 1.0, 1.0, 1.0 );
-		hslToRgb(hue, 1.0, 0.5, color.r(), color.g(), color.b());
+		hslToRgb(hue, 1.0, remission, color.r(), color.g(), color.b());
 		colors->push_back(color);
 	    }
         }
@@ -98,10 +100,15 @@ void DepthMapVisualization::updateMainNode ( osg::Node* node )
     }
     else if(show_remission && !scan_sample.remissions.empty())
     {
-        for(unsigned i = 0; i < scan_sample.remissions.size(); i++)
+        for(unsigned i = 0; i < points.size(); i++)
         {
 	    if(scan_sample.isIndexValid(i))
-		colors->push_back(osg::Vec4(0,0,scan_sample.remissions[i],0.5));
+	    {
+	        float re = scan_sample.remissions[i];
+	        osg::Vec4f color = default_feature_color * re;
+	        color.w() = default_feature_color.w();
+		colors->push_back(color);
+	    }
         }
 
 	#if OSG_MIN_VERSION_REQUIRED(3,1,8)
@@ -113,7 +120,7 @@ void DepthMapVisualization::updateMainNode ( osg::Node* node )
     }
     else
     {
-        colors->push_back(osg::Vec4(1.0,0,0.3,0.8));
+        colors->push_back(default_feature_color);
 	
 	#if OSG_MIN_VERSION_REQUIRED(3,1,8)
 	    slope_geom->setColorArray(colors, osg::Array::BIND_OVERALL);
@@ -248,4 +255,20 @@ void DepthMapVisualization::setShowSlope(bool value)
 {
     show_slope = value;
     emit propertyChanged("ShowSlope");
+}
+
+QColor DepthMapVisualization::getDefaultFeatureColor()
+{
+    QColor color;
+    color.setRgbF(default_feature_color.x(), default_feature_color.y(), default_feature_color.z(), default_feature_color.w());
+    return color;
+}
+
+void DepthMapVisualization::setDefaultFeatureColor(QColor color)
+{
+    default_feature_color.x() = color.redF();
+    default_feature_color.y() = color.greenF();
+    default_feature_color.z() = color.blueF();
+    default_feature_color.w() = color.alphaF();
+    emit propertyChanged("defaultFeatureColor");
 }

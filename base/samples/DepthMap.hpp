@@ -160,7 +160,7 @@ public:
 	return getMeasurementState(distances[index]);
     }
 
-    /** Returns the measurement state of a given vertrical and horizontal index.
+    /** Returns the measurement state of a given vertical and horizontal index.
      *
      * @param v_index
      * @param h_index
@@ -170,7 +170,7 @@ public:
 	if(!checkSizeConfig())
 	    throw std::out_of_range("Vertical and horizontal size does not match the distance array size.");
 	if(v_index >= vertical_size || h_index >= horizontal_size)
-	    throw std::out_of_range("Invalid vertrical or horizontal index given.");
+	    throw std::out_of_range("Invalid vertical or horizontal index given.");
 	
 	return getMeasurementState(distances[getIndex(v_index,h_index)]);
     }
@@ -204,7 +204,7 @@ public:
 	return isMeasurementValid(distances[index]);
     }
 
-    /** Returns true if the measurement at the given vertrical and 
+    /** Returns true if the measurement at the given vertical and
      * horizontal index is valid.
      * 
      * @param v_index
@@ -215,7 +215,7 @@ public:
 	if(!checkSizeConfig())
 	    throw std::out_of_range("Vertical and horizontal size does not match the distance array size.");
 	if(v_index >= vertical_size || h_index >= horizontal_size)
-	    throw std::out_of_range("Invalid vertrical or horizontal index given.");
+	    throw std::out_of_range("Invalid vertical or horizontal index given.");
 	
 	return isMeasurementValid(distances[getIndex(v_index,h_index)]);
     }
@@ -230,7 +230,7 @@ public:
     }
 
     /** Computes the index in the distance and remission vector 
-     * of a given vertrical and horizontal index. 
+     * of a given vertical and horizontal index.
      * Note that the data is stored in row major form.
      */
     inline size_t getIndex(uint32_t v_index, uint32_t h_index) const
