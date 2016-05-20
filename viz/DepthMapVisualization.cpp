@@ -20,7 +20,7 @@ DepthMapVisualization::DepthMapVisualization() :
 {
     scan_orientation = Eigen::Quaterniond::Identity();
     scan_position.setZero();
-    default_feature_color = osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
+    default_feature_color = osg::Vec4f(1.0f,0.f,0.3f,0.8f);
 }
 
 DepthMapVisualization::~DepthMapVisualization()
