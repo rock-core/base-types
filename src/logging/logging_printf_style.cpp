@@ -16,7 +16,7 @@
 namespace base {
 namespace logging { 
 
-Logger::Logger() : mStream(stderr), mPriorityNames(10), mLogFormatNames(3)
+Logger::Logger() : mStream(stderr), mPriorityNames(ENDPRIORITIES), mLogFormatNames(ENDLOGFORMATS)
 {
     mPriorityNames[INFO_P] = "INFO";
     mPriorityNames[DEBUG_P] = "DEBUG";
@@ -72,9 +72,9 @@ void Logger::configure(Priority priority, FILE* outputStream)
         mStream = outputStream;
 }
 
-Priority Logger::getLogLevelFromEnv()
+Priority Logger::getLogLevelFromEnv() const
 {
-    char* loglevel = getenv("BASE_LOG_LEVEL");
+    const char* loglevel = getenv("BASE_LOG_LEVEL");
     if(!loglevel)
         return UNKNOWN_P;
 
@@ -82,7 +82,7 @@ Priority Logger::getLogLevelFromEnv()
     std::transform(priority.begin(), priority.end(),priority.begin(), (int(*)(int)) std::toupper);
     
     int index = 0;
-    std::vector<std::string>::iterator it = mPriorityNames.begin();
+    std::vector<std::string>::const_iterator it = mPriorityNames.begin();
     for(;it != mPriorityNames.end(); it++)
     {
         if(*it != priority)
@@ -96,9 +96,9 @@ Priority Logger::getLogLevelFromEnv()
     return UNKNOWN_P;
 }
 
-bool Logger::getLogColorFromEnv()
+bool Logger::getLogColorFromEnv() const
 {
-    char* color = getenv("BASE_LOG_COLOR");
+    const char* color = getenv("BASE_LOG_COLOR");
     if(color)
         return true;
 
@@ -106,16 +106,16 @@ bool Logger::getLogColorFromEnv()
 }
 
 
-LogFormat Logger::getLogFormatFromEnv()
+LogFormat Logger::getLogFormatFromEnv() const
 {
-    char* logtype = getenv("BASE_LOG_FORMAT");
+    const char* logtype = getenv("BASE_LOG_FORMAT");
     if(!logtype)
         return DEFAULT;
 
     std::string logtype_str(logtype);
     std::transform(logtype_str.begin(), logtype_str.end(),logtype_str.begin(), (int(*)(int)) std::toupper);
 
-    std::vector<std::string>::iterator it = mLogFormatNames.begin();
+    std::vector<std::string>::const_iterator it = mLogFormatNames.begin();
     int index = 0;
     for(;it != mLogFormatNames.end(); it++)
     {
@@ -131,7 +131,7 @@ LogFormat Logger::getLogFormatFromEnv()
 }
 
 
-void Logger::log(Priority priority, const char* function, const char* file, int line, const char* name_space, const char* format, ...)
+void Logger::log(Priority priority, const char* function, const char* file, int line, const char* name_space, const char* format, ...) const
 {
     if(priority <= mPriority)
     {
@@ -146,7 +146,7 @@ void Logger::log(Priority priority, const char* function, const char* file, int 
     }
 }
 
-void Logger::logBuffer(Priority priority, const char* function, const char* file, int line, const char* name_space, const char* buffer)
+void Logger::logBuffer(Priority priority, const char* function, const char* file, int line, const char* name_space, const char* buffer) const
 {
     if(priority <= mPriority)
     {
@@ -159,12 +159,13 @@ void Logger::logBuffer(Priority priority, const char* function, const char* file
         gettimeofday(&tv,0);
         int milliSecs = tv.tv_usec/1000;
 
-        strftime(currentTime, 25, "%Y%m%d-%H:%M:%S", current);
+        strftime(currentTime, sizeof(currentTime), "%Y%m%d-%H:%M:%S", current);
 
         //Todo: optional log pattern, e.g. %t(ime) %p(rio) %f(unc) %m(sg) %F(ile) %L(ine)
         //could be optimized to a jumplist, so no performance issue
         switch (mLogFormat)
         {
+            case ENDLOGFORMATS:
             case DEFAULT:
                 fprintf(mStream, "[%s:%03d] %s[%5s] - %s::%s%s (%s:%d - %s)\n", currentTime, milliSecs, mpLogColor[priority], mPriorityNames[priority].c_str(), name_space, buffer, mpColorEnd, file, line, function);
                 break;

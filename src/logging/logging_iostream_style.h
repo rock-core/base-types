@@ -5,7 +5,7 @@
  * @brief Wrapper for logging.h, adds iostream-style logging
  *
  * @details adds an iostream-style interface to logging.h, appends trailing '_S' for the
- *          iostream interafce. Example:
+ *          iostream interface. Example:
  *
  *          LOG_WARN_S << "some warning message";
  *

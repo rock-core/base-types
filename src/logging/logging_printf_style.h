@@ -19,8 +19,8 @@
 #define _BASE_LOGGING_PRINTF_STYLE_H_
 
 // Need to map to logging::Priority order
-// ALlowing to set a log level via CFLAGS - method call will not be compiled into the system
-// Setting the enviroment variable BASE_LOG_LEVEL does only have any effect if the compiled
+// Allowing to set a log level via CFLAGS - method call will not be compiled into the system
+// Setting the environment variable BASE_LOG_LEVEL does only have any effect if the compiled
 // level is equal or higher (closer to FATAL) than the one request
 //
 #if defined(BASE_LOG_DISABLE)
@@ -174,7 +174,7 @@ enum Priority	{ UNKNOWN = 0, UNKNOWN_P = 0, FATAL = 1, FATAL_P =1, ERROR = 2, ER
 #endif
  
 
-enum LogFormat	{ DEFAULT = 0, MULTILINE, SHORT};
+enum LogFormat	{ DEFAULT = 0, MULTILINE, SHORT, ENDLOGFORMATS};
 
 /**
  * @class Logger
@@ -182,17 +182,23 @@ enum LogFormat	{ DEFAULT = 0, MULTILINE, SHORT};
  * with minimal impact on performance and minimal configuration
  * requirements
  * 
- * Use the enviroment variable BASE_LOG_LEVEL to define the 
- * requested logging level, e.g. 
- * export BASE_LOG_LEVEL="WARN" 
+ * Use the environment variable BASE_LOG_LEVEL to define the requested logging
+ * level, e.g.:
+  \code{.sh}
+  export BASE_LOG_LEVEL="WARN"
+  \endcode
+ *
  * 
  * A library designer can decide using the BASE_LOG_xxx flag at compile time which log level
  * should be available. 
  * 
- * If a different output stream is requested BASE_LOG_CONFIGURE(priority,ostream)
- * can be used.
- * Ostream request a FILE* ptr 
- * 
+ * So switch the output stream (for example logging into a file) the following
+ * can be used:
+ *
+   \verbatim
+   BASE_LOG_CONFIGURE(priority,ostream)
+   \endverbatim
+ *
  */
 class Logger : public Singleton<Logger>
 {
@@ -208,8 +214,10 @@ public:
 	virtual ~Logger();
 
         /** 
-        * Configure logger - this is for the library developer so he can set a maximum log
-        * level, which cannot be further limited to higher log priorities via setting BASE_LOG_LEVEL
+        * Configure logger - this is for the library developer so he can set a
+        * maximum log level, which cannot be further limited to higher log
+        * priorities via setting BASE_LOG_LEVEL.
+        *
         * If no previous configuration is given, no output logging will be done
         */
         void configure(Priority priority, FILE* outputStream);
@@ -223,30 +231,32 @@ public:
 	* @param format printf like format string
 	* @param ... variable argument list
 	*/
-	void log(Priority priority, const char* function, const char* filename, int line, const char* name_space, const char* format, ...);
+	void log(Priority priority, const char* function, const char* filename, int line, const char* name_space, const char* format, ...) const;
 
 	/**
 	 * used by log(...)
 	 * logs the text contained in buffer.
 	 */
-	void logBuffer(Priority priority, const char* function, const char* file, int line, const char* name_space, const char* buffer);
+	void logBuffer(Priority priority, const char* function, const char* file, int line, const char* name_space, const char* buffer) const;
 
 private:
         /**
-        * Retrieve the log level from the enviroment
+        * Retrieve the log level from the environment variable BASE_LOG_LEVEL.
+        * Allows to influence verbosity of logging.
         */
-        Priority getLogLevelFromEnv();
+        Priority getLogLevelFromEnv() const;
 
         /**
-        * Retrieve log level from the enviroment variable BASE_LOG_TYPE
-        * Get log color from enviroment
+        * Query environment for the existence of BASE_LOG_COLOR variable. If
+        * set, the output will be coloured.
         */
-        bool getLogColorFromEnv();
+        bool getLogColorFromEnv() const;
 
         /** 
-        * Retrieve log level from the enviroment variable BASE_LOG_FORMAT
+        * Retrieve log level from the environment variable BASE_LOG_FORMAT.
+        * Allows to set single- or multi line output.
         */
-        LogFormat getLogFormatFromEnv();
+        LogFormat getLogFormatFromEnv() const;
 
         FILE* mStream;
         std::vector<std::string> mPriorityNames;
