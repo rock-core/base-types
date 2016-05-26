@@ -32,7 +32,6 @@ namespace vizkit3d {
 	    pluginNames->push_back("BodyStateVisualization");
 	    pluginNames->push_back("LaserScanVisualization");
 	    pluginNames->push_back("SonarGroundDistanceVisualization");
-	    pluginNames->push_back("GridVisualization");
 	    pluginNames->push_back("PointcloudVisualization");
 	    pluginNames->push_back("SonarBeamVisualization");
 	    pluginNames->push_back("DepthMapVisualization");
