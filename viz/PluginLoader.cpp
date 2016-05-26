@@ -11,11 +11,11 @@
 #include "DepthMapVisualization.hpp"
 
 namespace vizkit3d {
-    class QtPluginVizkit : public vizkit3d::VizkitPluginFactory {
+    class QtPluginVizkitBase : public vizkit3d::VizkitPluginFactory {
     private:
     public:
 	
-	QtPluginVizkit() {
+	QtPluginVizkitBase() {
 	}
 	
 	/**
@@ -89,5 +89,5 @@ namespace vizkit3d {
 	    return NULL;
         };
     };
-    Q_EXPORT_PLUGIN2(QtPluginVizkit, QtPluginVizkit)
+    Q_EXPORT_PLUGIN2(QtPluginVizkitBase, QtPluginVizkitBase)
 }
