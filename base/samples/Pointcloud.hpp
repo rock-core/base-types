@@ -17,10 +17,10 @@ namespace base {
     std::vector<base::Point> points;
     
     /*
-    * Colors of each point if availible,
-    * leave empty if points are uncolored
-    * otherwise it should have the same size 
-    * than the points vector
+    * Colors of each point if available,
+    * leave empty if points are uncolored.
+    * Otherwise, it should have the same size
+    * as the points vector.
     */
     std::vector<base::Vector4d> colors;
   };
