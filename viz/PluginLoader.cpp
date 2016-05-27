@@ -11,11 +11,11 @@
 #include "DepthMapVisualization.hpp"
 
 namespace vizkit3d {
-    class QtPluginVizkit : public vizkit3d::VizkitPluginFactory {
+    class QtPluginVizkitBase : public vizkit3d::VizkitPluginFactory {
     private:
     public:
 	
-	QtPluginVizkit() {
+	QtPluginVizkitBase() {
 	}
 	
 	/**
@@ -32,7 +32,6 @@ namespace vizkit3d {
 	    pluginNames->push_back("BodyStateVisualization");
 	    pluginNames->push_back("LaserScanVisualization");
 	    pluginNames->push_back("SonarGroundDistanceVisualization");
-	    pluginNames->push_back("GridVisualization");
 	    pluginNames->push_back("PointcloudVisualization");
 	    pluginNames->push_back("SonarBeamVisualization");
 	    pluginNames->push_back("DepthMapVisualization");
@@ -90,5 +89,5 @@ namespace vizkit3d {
 	    return NULL;
         };
     };
-    Q_EXPORT_PLUGIN2(QtPluginVizkit, QtPluginVizkit)
+    Q_EXPORT_PLUGIN2(QtPluginVizkitBase, QtPluginVizkitBase)
 }
