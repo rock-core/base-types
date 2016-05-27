@@ -11,7 +11,6 @@ Vizkit::UiLoader.register_3d_plugin('RigidBodyStateVisualization',"base", 'Rigid
 Vizkit::UiLoader.register_3d_plugin_for('RigidBodyStateVisualization', "/base/samples/RigidBodyState", :updateRigidBodyState)
 Vizkit::UiLoader.register_3d_plugin('BodyStateVisualization',"base", 'BodyStateVisualization')
 Vizkit::UiLoader.register_3d_plugin_for('BodyStateVisualization', "/base/samples/BodyState", :updateBodyState)
-Vizkit::UiLoader.register_3d_plugin_for('RigidBodyStateVisualization', "/std/vector</base/samples/RigidBodyState>", :updateData)
 Vizkit::UiLoader.register_3d_plugin('LaserScanVisualization',"base", 'LaserScanVisualization')
 Vizkit::UiLoader.register_3d_plugin_for('LaserScanVisualization', "/base/samples/LaserScan", :updateLaserScan)
 Vizkit::UiLoader.register_3d_plugin('MotionCommandVisualization',"base", 'MotionCommandVisualization')
