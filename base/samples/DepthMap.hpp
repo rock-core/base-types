@@ -338,8 +338,8 @@ public:
 	computeLocalTransformations(rows2column, columns2pointcloud, use_lut);
 	
 	Eigen::Matrix<typename T::Scalar,3,1> translation_delta = last_transformation.translation() - first_transformation.translation();
-	Eigen::Quaterniond first_rotation = Eigen::Quaterniond(first_transformation.linear());
-	Eigen::Quaterniond last_rotation = Eigen::Quaterniond(last_transformation.linear());
+	Eigen::Quaternion<typename T::Scalar> first_rotation = Eigen::Quaternion<typename T::Scalar>(first_transformation.linear());
+	Eigen::Quaternion<typename T::Scalar> last_rotation = Eigen::Quaternion<typename T::Scalar>(last_transformation.linear());
 	
 	// apply global interpolated transformations
 	if(!apply_transforms_vertically)
