@@ -612,7 +612,29 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     BOOST_CHECK(scan_points.size() == 8);
     for(unsigned i = 0; i < scan_points.size(); i++)
 	BOOST_CHECK(scan_points[i].isApprox(transformations[(i%2==0)?0:1] * ref_points[i], 1e-12));
-    
+
+    // check transformation with float types
+    std::vector<Eigen::Vector3f> scan_points_f;
+    Eigen::Affine3f transform_f = Eigen::Affine3f::Identity();
+    scan.convertDepthMapToPointCloud(scan_points_f, transform_f);
+    BOOST_CHECK(scan_points_f.size() == 8);
+    for(unsigned i = 0; i < scan_points_f.size(); i++)
+        BOOST_CHECK(scan_points_f[i].isApprox(ref_points[i].cast<float>(), 1e-6));
+
+    scan_points_f.clear();
+    scan.convertDepthMapToPointCloud(scan_points_f, transform_f, transform_f);
+    BOOST_CHECK(scan_points_f.size() == 8);
+    for(unsigned i = 0; i < scan_points_f.size(); i++)
+        BOOST_CHECK(scan_points_f[i].isApprox(ref_points[i].cast<float>(), 1e-6));
+
+    scan_points_f.clear();
+    std::vector<Eigen::Affine3f> transformations_f;
+    transformations_f.push_back(transform_f);
+    transformations_f.push_back(transform_f);
+    scan.convertDepthMapToPointCloud(scan_points_f, transformations_f, true, true, false);
+    BOOST_CHECK(scan_points_f.size() == 8);
+    for(unsigned i = 0; i < scan_points_f.size(); i++)
+        BOOST_CHECK(scan_points_f[i].isApprox(ref_points[i].cast<float>(), 1e-6));
     
     
     // Test vertical irregular transformation
