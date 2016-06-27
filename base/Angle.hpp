@@ -7,6 +7,7 @@
 #include <iostream>
 #include <base/Deprecated.hpp>
 #include <base/Float.hpp>
+#include <limits>
 
 namespace base
 {
@@ -104,6 +105,20 @@ public:
         Angle result;
         result.rad = base::unknown<double>();
         return result;
+    }
+
+    /** Use this method to get the minimum acceptable angle
+     */
+    static inline Angle Min()
+    {
+        return Angle(-M_PI + std::numeric_limits<double>::epsilon());
+    }
+
+    /** Use this method to get the maximum acceptable angle
+     */
+    static inline Angle Max()
+    {
+        return Angle(M_PI);
     }
 
     /**
