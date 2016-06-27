@@ -7,7 +7,7 @@
 #include <base/Float.hpp>
 #include <base/Time.hpp>
 #include <base/Angle.hpp>
-#include <base/Singleton.hpp>
+#include <base-logging/Singleton.hpp>
 
 namespace base { namespace samples {
 
