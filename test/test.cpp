@@ -46,7 +46,7 @@
 #endif
 
 #define BASE_LOG_DEBUG
-#include <base/Logging.hpp>
+#include <base-logging/Logging.hpp>
 
 #include <Eigen/SVD>
 #include <Eigen/LU>
