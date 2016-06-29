@@ -7,7 +7,6 @@
 #include <iostream>
 #include <base/Deprecated.hpp>
 #include <base/Float.hpp>
-#include <limits>
 
 namespace base
 {
@@ -111,7 +110,7 @@ public:
      */
     static inline Angle Min()
     {
-        return Angle(-M_PI + std::numeric_limits<double>::epsilon());
+        return Angle( nextafter(-M_PI, 0) );
     }
 
     /** Use this method to get the maximum acceptable angle
