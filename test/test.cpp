@@ -985,6 +985,26 @@ BOOST_AUTO_TEST_CASE( angle_test )
 
 }
 
+BOOST_AUTO_TEST_CASE( min_max_angle_test )
+{
+    using namespace base;
+
+    Angle max = Angle::Max();
+    BOOST_CHECK( max.isApprox( Angle::fromRad(  M_PI )) );
+    BOOST_CHECK( max.isApprox( Angle::fromRad(  M_PI_2 * 2 )) );
+    BOOST_CHECK( max.isApprox( Angle::fromRad( -M_PI )) );
+    BOOST_CHECK( max.isApprox( Angle::fromRad( -M_PI_2 * 2 )) );
+
+    Angle min = Angle::Min();
+    BOOST_CHECK( !(min == max) );
+    BOOST_CHECK( min == Angle::fromRad( nextafter( -M_PI, 0 )) );
+    BOOST_CHECK( min == Angle::fromRad( nextafter( -M_PI_2 * 2, 0 )) );
+    BOOST_CHECK( !(min == Angle::fromRad( -M_PI )) );
+    BOOST_CHECK( !(min == Angle::fromRad( -M_PI_2 * 2 )) );
+    BOOST_CHECK( min.getRad() > -M_PI );
+    BOOST_CHECK( min.getRad() > -M_PI_2 * 2 );
+}
+
 BOOST_AUTO_TEST_CASE( yaw_test )
 {
     using namespace base;
