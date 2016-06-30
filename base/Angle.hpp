@@ -106,14 +106,16 @@ public:
         return result;
     }
 
-    /** Use this method to get the minimum acceptable angle
+    /** Returns the minimum angle possible after normalization
+     *  @return representation of the minimum angle
      */
     static inline Angle Min()
     {
         return Angle( nextafter(-M_PI, 0) );
     }
 
-    /** Use this method to get the maximum acceptable angle
+    /** Returns the maximum angle possible after normalization
+     *  @return representation of the maximum angle
      */
     static inline Angle Max()
     {
