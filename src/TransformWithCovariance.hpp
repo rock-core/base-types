@@ -136,7 +136,7 @@ namespace base {
 
     /** Default std::cout function
     */
-    inline std::ostream & operator<<(std::ostream &out, const TransformWithCovariance& trans);
+    std::ostream & operator<<(std::ostream &out, const TransformWithCovariance& trans);
 } // namespaces
 
 #endif
