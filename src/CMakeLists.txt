@@ -1,6 +1,7 @@
 set(SOURCES
         Angle.cpp
         Pose.cpp
+        Temperature.cpp
         Time.cpp
         TimeMark.cpp
         Timeout.cpp
@@ -17,6 +18,7 @@ set(HEADERS
         Logging.hpp
         Pose.hpp
         Singleton.hpp 
+        Temperature.hpp
         Time.hpp
         TimeMark.hpp
         Timeout.hpp
