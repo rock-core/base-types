@@ -117,7 +117,7 @@ void base::TwistWithCovariance::setVelocity(const base::Vector6d& velocity)
 
 bool base::TwistWithCovariance::hasValidVelocity() const
 {
-    return base::isnotnan(this->vel) && base::isnotnan(this->rot);
+    return this->vel.allFinite() && this->rot.allFinite();
 }
 
 void base::TwistWithCovariance::invalidateVelocity()
@@ -128,7 +128,7 @@ void base::TwistWithCovariance::invalidateVelocity()
 
 bool base::TwistWithCovariance::hasValidCovariance() const
 {
-    return base::isnotnan(this->cov);
+    return this->cov.allFinite();
 }
 
 void base::TwistWithCovariance::invalidateCovariance()
