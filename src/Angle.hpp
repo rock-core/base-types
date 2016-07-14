@@ -6,6 +6,8 @@
 #include <base/Float.hpp>
 #include <base/Eigen.hpp>
 
+#include <vector>
+
 namespace base
 {
 

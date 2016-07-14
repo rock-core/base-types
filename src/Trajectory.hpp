@@ -8,9 +8,7 @@ namespace base
 
 struct Trajectory
 {
-    Trajectory(): speed(0)
-    {
-    }
+    Trajectory();
     
     /**
      * The speed in which the trajectory should be 
@@ -23,9 +21,7 @@ struct Trajectory
      * on the trajectory. 
      * False if the robot should drive backwards.
      * */
-    bool driveForward() const{
-	return speed >= 0;
-    }
+    bool driveForward() const;
     
     /**
      * A spline representing the trajectory that should 

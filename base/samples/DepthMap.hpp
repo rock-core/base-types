@@ -9,6 +9,8 @@
 #include <base/Angle.hpp>
 #include <base-logging/Singleton.hpp>
 
+#include <boost/cstdint.hpp>
+
 namespace base { namespace samples {
 
 /**

@@ -1,7 +1,7 @@
 #ifndef __BASE_POSE_HH__
 #define __BASE_POSE_HH__
 
-#include <base/Eigen.hpp>
+#include "Eigen.hpp"
 #include "Angle.hpp"
 
 namespace base

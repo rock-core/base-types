@@ -1,5 +1,40 @@
 #include "TwistWithCovariance.hpp"
 
+#include <iomanip> // std::setprecision
+
+#include <Eigen/Core>
+#include <Eigen/LU>
+#include <Eigen/Geometry>
+#include <Eigen/SVD>
+
+#include <base/Float.hpp>
+
+// Guarantee Semi-Positive Definite (SPD) matrix.
+template <typename _MatrixType>
+static _MatrixType guaranteeSPD (const _MatrixType &A)
+{
+    _MatrixType spdA;
+    Eigen::VectorXd s;
+    s.resize(A.rows(), 1);
+
+    /**
+    * Single Value Decomposition
+    */
+    Eigen::JacobiSVD <Eigen::MatrixXd > svdOfA (A, Eigen::ComputeThinU | Eigen::ComputeThinV);
+
+    s = svdOfA.singularValues(); //!eigenvalues
+
+    for (register int i=0; i<s.size(); ++i)
+    {
+        if (s(i) < 0.00)
+            s(i) = 0.00;
+    }
+    spdA = svdOfA.matrixU() * s.matrix().asDiagonal() * svdOfA.matrixV().transpose();
+
+    return spdA;
+};
+
+
 typedef base::TwistWithCovariance::Covariance Covariance;
 
 base::TwistWithCovariance::TwistWithCovariance(const base::Vector3d& vel, const base::Vector3d& rot)
@@ -170,7 +205,7 @@ base::TwistWithCovariance& base::TwistWithCovariance::operator+=(const base::Twi
     if (this->hasValidCovariance() && arg.hasValidCovariance())
     {
         this->cov += arg.cov;
-        base::guaranteeSPD<Covariance>(this->cov);
+        guaranteeSPD<Covariance>(this->cov);
     }
     return *this;
 }
@@ -187,7 +222,7 @@ base::TwistWithCovariance& base::TwistWithCovariance::operator-=(const base::Twi
     if (this->hasValidCovariance() && arg.hasValidCovariance())
     {
         this->cov += arg.cov;
-        base::guaranteeSPD<Covariance>(this->cov);
+        guaranteeSPD<Covariance>(this->cov);
     }
 
     return *this;
@@ -258,7 +293,7 @@ base::TwistWithCovariance operator*(const base::TwistWithCovariance& lhs, const 
         /** Angular velocity is at the first covariance block **/
         tmp.cov.block<3,3>(3,3) = cross_jacob * cross_cov * cross_jacob.transpose();
 
-        base::guaranteeSPD<Covariance>(tmp.cov);
+        guaranteeSPD<Covariance>(tmp.cov);
     }
 
     return tmp;

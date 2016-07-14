@@ -1,14 +1,6 @@
 #ifndef __BASE_TRANSFORM_WITH_COVARIANCE_HPP__
 #define __BASE_TRANSFORM_WITH_COVARIANCE_HPP__
 
-#include <iomanip> // std::setprecision
-
-#include <Eigen/Core>
-#include <Eigen/LU>
-#include <Eigen/Geometry>
-#include <Eigen/SVD>
-
-#include <base/Float.hpp>
 #include <base/Pose.hpp>
 #include <base/Eigen.hpp>
 

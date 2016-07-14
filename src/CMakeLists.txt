@@ -1,16 +1,27 @@
 set(SOURCES
         Angle.cpp
         Pose.cpp
+        Timeout.cpp
+        Trajectory.cpp
         TransformWithCovariance.cpp
         TwistWithCovariance.cpp
         Waypoint.cpp
 )
 
 set(HEADERS 
-        Logging.hpp 
+        Angle.hpp
+        Eigen.hpp
+        Float.hpp
+        Logging.hpp
+        Pose.hpp
         Singleton.hpp 
+        Timeout.hpp
+        Trajectory.hpp
+        TransformWithCovariance.hpp
+        TwistWithCovariance.hpp
         logging/logging_iostream_style.h 
         logging/logging_printf_style.h
+        Waypoint.hpp
         Wrench.hpp
 )
 

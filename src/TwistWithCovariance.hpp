@@ -1,42 +1,9 @@
 #ifndef __BASE_TWIST_WITH_COVARIANCE_HPP__
 #define __BASE_TWIST_WITH_COVARIANCE_HPP__
 
-#include <iomanip> // std::setprecision
-
-#include <Eigen/Core>
-#include <Eigen/LU>
-#include <Eigen/Geometry>
-#include <Eigen/SVD>
-
-#include <base/Float.hpp>
 #include <base/Eigen.hpp>
 
 namespace base {
-
-    // Guarantee Semi-Positive Definite (SPD) matrix.
-    template <typename _MatrixType>
-    static _MatrixType guaranteeSPD (const _MatrixType &A)
-    {
-        _MatrixType spdA;
-        Eigen::VectorXd s;
-        s.resize(A.rows(), 1);
-
-        /**
-        * Single Value Decomposition
-        */
-        Eigen::JacobiSVD <Eigen::MatrixXd > svdOfA (A, Eigen::ComputeThinU | Eigen::ComputeThinV);
-
-        s = svdOfA.singularValues(); //!eigenvalues
-
-        for (register int i=0; i<s.size(); ++i)
-        {
-            if (s(i) < 0.00)
-                s(i) = 0.00;
-        }
-        spdA = svdOfA.matrixU() * s.matrix().asDiagonal() * svdOfA.matrixV().transpose();
-
-        return spdA;
-    };
 
     
     struct TwistWithCovariance
@@ -112,27 +79,27 @@ namespace base {
         double operator[](int i) const;
 
 
-        inline TwistWithCovariance& operator+=(const TwistWithCovariance& arg);
+        TwistWithCovariance& operator+=(const TwistWithCovariance& arg);
 
 
-        inline friend TwistWithCovariance operator+(TwistWithCovariance lhs,const TwistWithCovariance& rhs);
+        friend TwistWithCovariance operator+(TwistWithCovariance lhs,const TwistWithCovariance& rhs);
 
-        inline TwistWithCovariance& operator-=(const TwistWithCovariance& arg);
+        TwistWithCovariance& operator-=(const TwistWithCovariance& arg);
 
-        inline friend TwistWithCovariance operator-(TwistWithCovariance lhs, const TwistWithCovariance& rhs);
+        friend TwistWithCovariance operator-(TwistWithCovariance lhs, const TwistWithCovariance& rhs);
 
-        inline friend TwistWithCovariance operator*(const TwistWithCovariance& lhs,double rhs);
+        friend TwistWithCovariance operator*(const TwistWithCovariance& lhs,double rhs);
 
-        inline friend TwistWithCovariance operator*(double lhs, const TwistWithCovariance& rhs);
+        friend TwistWithCovariance operator*(double lhs, const TwistWithCovariance& rhs);
 
         //Spatial Cross product
-        inline friend TwistWithCovariance operator*(const TwistWithCovariance& lhs, const TwistWithCovariance& rhs);
+        friend TwistWithCovariance operator*(const TwistWithCovariance& lhs, const TwistWithCovariance& rhs);
 
-        inline friend TwistWithCovariance operator/(const TwistWithCovariance& lhs,double rhs);
+        friend TwistWithCovariance operator/(const TwistWithCovariance& lhs,double rhs);
 
 
         /** unary - **/
-        inline friend TwistWithCovariance operator-(const TwistWithCovariance& arg);
+        friend TwistWithCovariance operator-(const TwistWithCovariance& arg);
 
         static Eigen::Matrix<double, 3, 6> crossJacobian(const base::Vector3d& u, const base::Vector3d& v);
 
@@ -140,7 +107,7 @@ namespace base {
 
     /** Default std::cout function
     */
-    inline std::ostream & operator<<(std::ostream &out, const base::TwistWithCovariance& twist);
+    std::ostream & operator<<(std::ostream &out, const base::TwistWithCovariance& twist);
 
 } // namespaces
 

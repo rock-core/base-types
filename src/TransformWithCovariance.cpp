@@ -1,5 +1,14 @@
 #include "TransformWithCovariance.hpp"
 
+#include <iomanip> // std::setprecision
+
+#include <Eigen/Core>
+#include <Eigen/LU>
+#include <Eigen/Geometry>
+#include <Eigen/SVD>
+
+#include <base/Float.hpp>
+
 base::TransformWithCovariance::TransformWithCovariance() 
     : translation(base::Position::Zero()) , orientation(base::Quaterniond::Identity())
 {
