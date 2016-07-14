@@ -1,12 +1,10 @@
 #ifndef __BASE_ANGLE_HH__
 #define __BASE_ANGLE_HH__
 
-#include <boost/format.hpp>
 #include <math.h>
-#include <base/Eigen.hpp>
 #include <iostream>
-#include <base/Deprecated.hpp>
 #include <base/Float.hpp>
+#include <base/Eigen.hpp>
 
 namespace base
 {
@@ -203,23 +201,6 @@ public:
         return Angle::fromRad( getRad() * val );
     }
 
-BASE_TYPES_DEPRECATED_SUPPRESS_START
-    /**
-     * @deprecated this function does not work is right_limit == left_limit.
-     *             From the API one can't differenciate between small interval 
-     *             or a full cycle. Use base::AngleSegment instead
-    * @return true if the angle is insight the given interval
-    */
-    bool isInRange(const Angle& left_limit, const Angle& right_limit) const BASE_TYPES_DEPRECATED
-    {
-        if((right_limit-left_limit).rad < 0)
-            return !isInRange(right_limit,left_limit);
-        if((*this -left_limit).getRad() >= 0 && (right_limit -*this).getRad() >= 0) 
-            return true;
-        return false;
-    }
-BASE_TYPES_DEPRECATED_SUPPRESS_STOP
-
     /**
      * Returns a new angle which is the inverse of tis object.
      * */
@@ -242,12 +223,8 @@ BASE_TYPES_DEPRECATED_SUPPRESS_STOP
 
     /** Computes the unsigned angle of the rotation that makes +a+ colinear with +b+
      */
-    static Angle vectorToVector(const base::Vector3d& a, const base::Vector3d& b)
-    {
-        double dot = a.dot(b);
-        double norm = a.norm() * b.norm();
-        return fromRad(acos(dot / norm));
-    }
+    static Angle vectorToVector(const base::Vector3d& a, const base::Vector3d& b);
+
 
     /** Computes the angle of the rotation that makes +a+ colinear with +b+
      *
@@ -255,16 +232,7 @@ BASE_TYPES_DEPRECATED_SUPPRESS_STOP
      * @c positive vector defining the positive rotation direction. @c positive
      * is required to be of unit length.
      */
-    static Angle vectorToVector(const base::Vector3d& a, const base::Vector3d& b, const base::Vector3d& positive)
-    {
-        double cos = a.dot(b) / (a.norm() * b.norm());
-
-        bool is_positive = (a.cross(b).dot(positive) > 0);
-        if (is_positive)
-            return fromRad(acos(cos));
-        else
-            return fromRad(-acos(cos));
-    }
+    static Angle vectorToVector(const base::Vector3d& a, const base::Vector3d& b, const base::Vector3d& positive);
 };
 
 static inline Angle operator*( double a, Angle b )
@@ -272,11 +240,7 @@ static inline Angle operator*( double a, Angle b )
     return Angle::fromRad( a * b.getRad() );
 }
 
-static inline std::ostream& operator << (std::ostream& os, Angle angle)
-{
-    os << angle.getRad() << boost::format("[%3.1fdeg]") % angle.getDeg();
-    return os;
-}
+std::ostream& operator << (std::ostream& os, Angle angle);
 
 /**
  * This class represents a Segment of a Circle. 
@@ -286,51 +250,23 @@ static inline std::ostream& operator << (std::ostream& os, Angle angle)
 class AngleSegment
 {
 public:
-    AngleSegment(): width(0), startRad(0), endRad(0)
-    {
-    }
+    AngleSegment();
 
-    AngleSegment(const Angle &start, double _width): width(_width), startRad(start.getRad()), endRad(startRad + width)
-    {
-        if(width < 0)
-            throw std::runtime_error("Error got segment with negative width");
-    }
+    AngleSegment(const Angle &start, double _width);
     
     /**
      * Tests if the given angle is inside of the segment.
      * @param angle - angle to be tested
      * @return true if angle is inside the segment
      * */
-    bool isInside(const Angle &angle) const
-    {
-        double angleRad = angle.getRad();
-        if(angleRad < startRad)
-            angleRad += 2*M_PI;
-        
-        if(angleRad <= endRad) //startRad <= angleRad && 
-            return true;
-        
-        return false;
-    };
+    bool isInside(const Angle &angle) const;
 
     /**
      * Tests if the given segment is inside of this segment.
      * @param segment - segment to be tested
      * @return true if the given segment is inside of this segment
      * */
-    bool isInside(const AngleSegment &segment) const
-    {
-        double otherStart = segment.startRad;
-        if(otherStart < startRad)
-            otherStart += 2*M_PI;
-
-        double otherEnd = otherStart + segment.width;
-        
-        if(otherEnd <= endRad)
-            return true;
-        
-        return false;
-    };
+    bool isInside(const AngleSegment &segment) const;
 
     bool split(const Angle &angle, AngleSegment &rest)
     {
@@ -347,97 +283,7 @@ public:
      * @param b The segment wich schould be tested
      * @return A vector, containing a segment for each intersecting part of the segments.
      * */
-    std::vector<AngleSegment> getIntersections(const AngleSegment &b) const
-    {
-        std::vector<AngleSegment> ret;
-        //special case, this segment is a whole circle
-        if(width >= 2*M_PI)
-        {
-            ret.push_back(b);
-            return ret;
-        }
-        
-        //special case, other segment is a whole circle
-        if(b.width >= 2*M_PI)
-        {
-            ret.push_back(*this);
-            return ret;
-        }
-
-        double startA = startRad;
-        double startB = b.startRad;
-        double widthA = width;
-        double widthB = b.width;
-        
-        //make A the smaller angle
-        if(startA > startB)
-        {
-            std::swap(startA, startB);
-            std::swap(widthA, widthB);
-        }
-        double endA = startA + widthA;
-        double endB = startB + widthB;
-
-        //test if segemnts do not intersect at all
-        if(endA < startB)
-        {
-            //wrap case
-            if(endB > M_PI)
-            {
-                //check if segments intersect after wrap correction
-                if(startA < endB - 2*M_PI)
-                {
-                    //this means the start of A is inside of B
-                    //drop first part of B and realign it to -M_PI
-                    //also switch A and B as B is now the 'lower' one
-                    double newWidthA = widthB - (M_PI - startB);
-                    startB = startA;
-                    widthB = widthA;
-                    startA = - M_PI;
-                    widthA = newWidthA;
-                    endA = startA + widthA;
-                    endB = startB + widthB;
-                    //no return, still need 
-                    //to check for intersection
-                }
-                else
-                    //no intersection
-                    return ret;
-            } else
-                    //no intersection
-                return ret;
-        }
-
-        //normal case, no wrap around
-        double newStart = startB;        
-        double newEnd = 0;
-        
-        if(endA < endB)
-        {
-            newEnd = endA;
-        }
-        else
-        {
-            newEnd = endB;
-        }
-        
-        double newWidth = newEnd - newStart;
-
-        //filter invalid segments
-        if(newWidth > 1e-10)
-            ret.push_back(AngleSegment(Angle::fromRad(newStart), newWidth));
-        
-        newStart = endB - 2*M_PI;
-        if(newStart > startA)
-        {
-            newWidth = newStart - startA;
-            //filter invalid segments
-            if(newWidth > 1e-10)
-                ret.push_back(AngleSegment(Angle::fromRad(startA), newWidth));
-        }
-        
-        return ret;
-    }
+    std::vector<AngleSegment> getIntersections(const AngleSegment &b) const;
 
     /**
      * Returns the width of the segment in radians
@@ -452,10 +298,7 @@ public:
      * Returns the start angle of the segement
      * @return the start angle of the segement
      * */
-    base::Angle getStart() const
-    {
-        return base::Angle::fromRad(startRad);
-    }
+    base::Angle getStart() const;
 
     /**
      * Returns the end angle of the segement
@@ -465,10 +308,7 @@ public:
      * getStart + getWidth;
      * @return the end angle of the segement
      * */
-    base::Angle getEnd() const
-    {
-        return base::Angle::fromRad(endRad);
-    }
+    base::Angle getEnd() const;
     
     /**
      * Widht of the segment in radians
@@ -486,11 +326,7 @@ public:
     double endRad;
 };
 
-static inline std::ostream& operator << (std::ostream& os, AngleSegment seg)
-{
-    os << " Segmend start " << seg.startRad/M_PI *180.0 << " end  " << seg.endRad/M_PI * 180.0 << " width " << seg.width /M_PI * 180.0;
-    return os;
-}
+std::ostream& operator << (std::ostream& os, AngleSegment seg);
 
 }
 

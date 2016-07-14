@@ -1,4 +1,4 @@
-set(SOURCES )
+set(SOURCES Angle.cpp)
 
 set(HEADERS Logging.hpp Singleton.hpp logging/logging_iostream_style.h logging/logging_printf_style.h)
 
