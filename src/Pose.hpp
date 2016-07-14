@@ -25,19 +25,7 @@ namespace base
      * assuming angles in range of: a0:(-pi,pi), a1:(-pi/2,pi/2), a2:(-pi/2,pi/2)
      *
      */
-    static base::Vector3d getEuler(const base::Orientation &orientation){
-        const Eigen::Matrix3d m = orientation.toRotationMatrix();
-        double x = base::Vector2d(m.coeff(2,2) , m.coeff(2,1)).norm();
-        base::Vector3d res(0,::atan2(-m.coeff(2,0), x),0);
-        if (x > Eigen::NumTraits<double>::dummy_precision()){
-            res[0] = ::atan2(m.coeff(1,0), m.coeff(0,0));
-            res[2] = ::atan2(m.coeff(2,1), m.coeff(2,2));
-        }else{
-            res[0] = 0;
-            res[2] = (m.coeff(2,0)>0?1:-1)* ::atan2(-m.coeff(0,1), m.coeff(1,1));
-        }
-        return res;
-    }
+    base::Vector3d getEuler(const base::Orientation &orientation);
 
     /*
      * Decomposes the orientation in euler angles so that this can be
@@ -50,79 +38,32 @@ namespace base
      * assuming angles in range of: a0:(-pi,pi), a1:(-pi/2,pi/2), a2:(-pi/2,pi/2)
      *
      */
-    static base::Vector3d getEuler(const base::AngleAxisd &orientation){
-        const Eigen::Matrix3d m = orientation.toRotationMatrix();
-        double x = base::Vector2d(m.coeff(2,2) , m.coeff(2,1)).norm();
-        base::Vector3d res(0,::atan2(-m.coeff(2,0), x),0);
-        if (x > Eigen::NumTraits<double>::dummy_precision()){
-            res[0] = ::atan2(m.coeff(1,0), m.coeff(0,0));
-            res[2] = ::atan2(m.coeff(2,1), m.coeff(2,2));
-        }else{
-            res[0] = 0;
-            res[2] = (m.coeff(2,0)>0?1:-1)* ::atan2(-m.coeff(0,1), m.coeff(1,1));
-        }
-        return res;
-    }
+    base::Vector3d getEuler(const base::AngleAxisd &orientation);
 
-    static double getYaw(const base::Orientation& orientation)
-    {
-        return base::getEuler(orientation)[0];
-    }
+    double getYaw(const base::Orientation& orientation);
+    
 
-    static double getYaw(const base::AngleAxisd& orientation)
-    {
-        return base::getEuler(orientation)[0];
-    }
+    double getYaw(const base::AngleAxisd& orientation);
 
-    static double getPitch(const base::Orientation& orientation)
-    {
-        return base::getEuler(orientation)[1];
-    }
+    double getPitch(const base::Orientation& orientation);
 
-    static double getPitch(const base::AngleAxisd& orientation)
-    {
-        return base::getEuler(orientation)[1];
-    }
+    double getPitch(const base::AngleAxisd& orientation);
 
-    static double getRoll(const base::Orientation& orientation)
-    {
-        return base::getEuler(orientation)[2];
-    }
+    double getRoll(const base::Orientation& orientation);
 
-    static double getRoll(const base::AngleAxisd& orientation)
-    {
-        return base::getEuler(orientation)[2];
-    }
+    double getRoll(const base::AngleAxisd& orientation);
 
-    static inline base::Orientation removeYaw(const base::Orientation& orientation)
-    {
-	    return Eigen::AngleAxisd( -getYaw(orientation), Eigen::Vector3d::UnitZ()) * orientation;
-    }
+    base::Orientation removeYaw(const base::Orientation& orientation);
 
-    static inline base::Orientation removeYaw(const base::AngleAxisd& orientation)
-    {
-	    return Eigen::AngleAxisd( -getYaw(orientation), Eigen::Vector3d::UnitZ()) * orientation;
-    }
+    base::Orientation removeYaw(const base::AngleAxisd& orientation);
 
-    static inline base::Orientation removePitch(const base::Orientation& orientation)
-    {
-	    return Eigen::AngleAxisd( -getPitch(orientation), Eigen::Vector3d::UnitY()) * orientation;
-    }
+    base::Orientation removePitch(const base::Orientation& orientation);
 
-    static inline base::Orientation removePitch(const base::AngleAxisd& orientation)
-    {
-	    return Eigen::AngleAxisd( -getPitch(orientation), Eigen::Vector3d::UnitY()) * orientation;
-    }
+    base::Orientation removePitch(const base::AngleAxisd& orientation);
 
-    static inline base::Orientation removeRoll(const base::Orientation& orientation)
-    {
-    	return Eigen::AngleAxisd( -getRoll(orientation), Eigen::Vector3d::UnitX()) * orientation;
-    }
+    base::Orientation removeRoll(const base::Orientation& orientation);
 
-    static inline base::Orientation removeRoll(const base::AngleAxisd& orientation)
-    {
-    	return Eigen::AngleAxisd( -getRoll(orientation), Eigen::Vector3d::UnitX()) * orientation;
-    }
+    base::Orientation removeRoll(const base::AngleAxisd& orientation);
 
     /** 
      * Represents a pose update threshold, with a number of test methods to see
@@ -130,31 +71,24 @@ namespace base
      */
     struct PoseUpdateThreshold
     {
-	PoseUpdateThreshold() {};
+	PoseUpdateThreshold();
 
 	/** 
 	 * Constructor with distance and angle thresholds
 	 */
-	PoseUpdateThreshold( double _distance, double _angle )
-	    : distance( _distance ), angle( _angle ) {};
+	PoseUpdateThreshold( double _distance, double _angle );
 
 	/** 
 	 * Test if distance or angle is greater than the 
 	 * stored threshold.
 	 */
-	bool test( double other_distance, double other_angle )
-	{
-	    return other_distance > distance || other_angle > angle;
-	}
+	bool test( double other_distance, double other_angle );
 
 	/** 
 	 * Test if the provided delta transformation is greater in 
 	 * either distance or angle than the threshold
 	 */
-	bool test( const Eigen::Affine3d& pdelta )
-	{
-	    return test( pdelta.translation().norm(), Eigen::AngleAxisd( pdelta.linear() ).angle() );
-	}
+	bool test( const Eigen::Affine3d& pdelta );
 
 	/** 
 	 * Test if the delta of the provided transformations is greater in 
@@ -165,10 +99,7 @@ namespace base
 	 *
 	 * @result true if the transformation A' to A is greater than the stored thresholds
 	 */
-	bool test( const Eigen::Affine3d& a2b, const Eigen::Affine3d& aprime2b )
-	{
-	    return test( a2b.inverse() * aprime2b );
-	}
+	bool test( const Eigen::Affine3d& a2b, const Eigen::Affine3d& aprime2b );
 
 	double distance;
 	double angle;
@@ -243,16 +174,7 @@ namespace base
          * @param v compact 6 vector [r t], where r is a 3 vector representing
          *  the rotation in scaled axis form, and t is the translation 3 vector.
          */
-        void fromVector6d( const Vector6d &v )
-        {
-            const Eigen::Vector3d saxis = v.head<3>();
-            if( saxis.norm() > 1e-9 )
-            orientation = Eigen::AngleAxisd( saxis.norm(), saxis.normalized() );
-            else
-            orientation = Eigen::Quaterniond::Identity();
-
-            position = v.tail<3>();
-        }
+        void fromVector6d( const Vector6d &v );
 
         /**
          * @brief get compact scaled-axis representation of pose
@@ -260,15 +182,7 @@ namespace base
          * @result compact 6 vector [r t], where r is a 3 vector representing
          *  the rotation in scaled axis form, and t is the translation 3 vector.
          */
-        Vector6d toVector6d() const
-        {
-            Vector6d res;
-            Eigen::AngleAxisd aa(orientation);
-            res.head<3>() = aa.axis() * aa.angle();
-            res.tail<3>() = position;
-
-            return res;
-        }
+        Vector6d toVector6d() const;
 
         /**
         * @result yaw (rotation around z-axis) part of the rotational part of the pose
@@ -279,17 +193,7 @@ namespace base
         }
     };
 
-    inline std::ostream& operator << (std::ostream& io, base::Pose const& pose)
-    {
-        io << "Position "
-           << pose.position.transpose()
-           << " Orientation (RPY)" 
-           << getRoll(pose.orientation) << " " 
-           << getPitch(pose.orientation) << " " 
-           << getYaw(pose.orientation);
-;
-        return io;
-    }
+    std::ostream& operator << (std::ostream& io, base::Pose const& pose);
 
     /**
      * Representation for a pose in 2D
@@ -319,16 +223,7 @@ namespace base
 
     };
 
-    inline std::ostream& operator << (std::ostream& io, base::Pose2D const& pose)
-    {
-
-        io << "Position "
-           << pose.position.transpose()
-           << " Orientation (Theta) " 
-           << pose.orientation ;
-;
-        return io;
-    }
+    std::ostream& operator << (std::ostream& io, base::Pose2D const& pose);
 }
 
 #endif
