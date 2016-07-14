@@ -13,6 +13,32 @@
 
 namespace base {
 
+    // Guarantee Semi-Positive Definite (SPD) matrix.
+    template <typename _MatrixType>
+    static _MatrixType guaranteeSPD (const _MatrixType &A)
+    {
+        _MatrixType spdA;
+        Eigen::VectorXd s;
+        s.resize(A.rows(), 1);
+
+        /**
+        * Single Value Decomposition
+        */
+        Eigen::JacobiSVD <Eigen::MatrixXd > svdOfA (A, Eigen::ComputeThinU | Eigen::ComputeThinV);
+
+        s = svdOfA.singularValues(); //!eigenvalues
+
+        for (register int i=0; i<s.size(); ++i)
+        {
+            if (s(i) < 0.00)
+                s(i) = 0.00;
+        }
+        spdA = svdOfA.matrixU() * s.matrix().asDiagonal() * svdOfA.matrixV().transpose();
+
+        return spdA;
+    };
+
+    
     struct TwistWithCovariance
     {
     public:

@@ -8,6 +8,7 @@
 
 namespace base
 {
+    
     // We define these typedefs to workaround alignment requirements for normal
     // Eigen types. This reduces the amount of knowledge people have to have to
     // manipulate these types -- as well as the structures that use them -- and
@@ -76,6 +77,7 @@ namespace base
 
         return spdA;
     };
+
 
 }
 
