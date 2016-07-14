@@ -1,6 +1,7 @@
 set(SOURCES
         Angle.cpp
         Pose.cpp
+        Pressure.cpp
         Temperature.cpp
         Time.cpp
         TimeMark.cpp
@@ -18,6 +19,7 @@ set(HEADERS
         Logging.hpp
         Point.hpp
         Pose.hpp
+        Pressure.hpp
         Singleton.hpp 
         Temperature.hpp
         Time.hpp

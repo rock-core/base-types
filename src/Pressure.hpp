@@ -1,8 +1,6 @@
 #ifndef __BASE_PRESSURE_HPP__
 #define __BASE_PRESSURE_HPP__
 
-#include<base/Float.hpp>
-
 namespace base
 {
     /** Representation of a pressure value
@@ -25,46 +23,26 @@ namespace base
         /** 
          * default constructor, which will initialize the value to unknown (NaN)
          */
-        Pressure() : pascal(base::unknown<float>()) {}
+        Pressure();
 
     public:
         /** Create a pressure object using a value in pascals */
-        static Pressure fromPascal(float pascal)
-        {
-            Pressure result;
-            result.pascal = pascal;
-            return result;
-        }
+        static Pressure fromPascal(float pascal);
 
         /** Create a pressure object using a value in bars */
-        static Pressure fromBar(float bar)
-        {
-            return fromPascal(bar * 100000);
-        }
+        static Pressure fromBar(float bar);
 
         /** Create a pressure object using a value in PSI */
-        static Pressure fromPSI(float psi)
-        {
-            return fromPascal(psi * 6894.75729);
-        }
+        static Pressure fromPSI(float psi);
 
         /** Returns the raw pressure value in pascals */
-        float toPa() const
-        {
-            return pascal;
-        }
+        float toPa() const;
 
         /** Returns the raw pressure value in bar */
-        float toBar() const
-        {
-            return pascal / 100000;
-        }
+        float toBar() const;
 
         /** Returns the raw pressure value in psi */
-        float toPSI() const
-        {
-            return pascal / 6894.75729;
-        }
+        float toPSI() const;
     };
 }
 
