@@ -16,6 +16,7 @@ set(HEADERS
         Eigen.hpp
         Float.hpp
         Logging.hpp
+        Point.hpp
         Pose.hpp
         Singleton.hpp 
         Temperature.hpp
