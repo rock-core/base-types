@@ -86,7 +86,7 @@ namespace base {
         /** Check Methods **/
         bool hasValidVelocity() const
         {
-            return base::isnotnan(this->vel) && base::isnotnan(this->rot);
+            return this->vel.allFinite() && this->rot.allFinite();
         }
 
         void invalidateVelocity()
@@ -95,7 +95,7 @@ namespace base {
             this->rot = base::Vector3d::Ones() * base::unknown<double>();
         }
 
-        bool hasValidCovariance() const { return base::isnotnan(this->cov); }
+        bool hasValidCovariance() const { return this->cov.allFinite(); }
         void invalidateCovariance()
         {
             this->cov = Covariance::Ones() * base::unknown<double>();
