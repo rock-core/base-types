@@ -1,6 +1,7 @@
 set(SOURCES
         Angle.cpp
         Pose.cpp
+        TimeMark.cpp
         Timeout.cpp
         Trajectory.cpp
         TransformWithCovariance.cpp
@@ -15,6 +16,7 @@ set(HEADERS
         Logging.hpp
         Pose.hpp
         Singleton.hpp 
+        TimeMark.hpp
         Timeout.hpp
         Trajectory.hpp
         TransformWithCovariance.hpp
