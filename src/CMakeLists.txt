@@ -1,6 +1,7 @@
 set(SOURCES
         Angle.cpp
         Pose.cpp
+        Time.cpp
         TimeMark.cpp
         Timeout.cpp
         Trajectory.cpp
@@ -16,6 +17,7 @@ set(HEADERS
         Logging.hpp
         Pose.hpp
         Singleton.hpp 
+        Time.hpp
         TimeMark.hpp
         Timeout.hpp
         Trajectory.hpp
