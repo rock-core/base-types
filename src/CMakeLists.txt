@@ -1,7 +1,9 @@
-set(SOURCES
+rock_library(
+    base-types 
         Angle.cpp
         Pose.cpp
         Pressure.cpp
+        Spline.cpp
         Temperature.cpp
         Time.cpp
         TimeMark.cpp
@@ -10,9 +12,7 @@ set(SOURCES
         TransformWithCovariance.cpp
         TwistWithCovariance.cpp
         Waypoint.cpp
-)
-
-set(HEADERS 
+    HEADERS
         Angle.hpp
         Eigen.hpp
         Float.hpp
@@ -21,6 +21,7 @@ set(HEADERS
         Pose.hpp
         Pressure.hpp
         Singleton.hpp 
+        Spline.hpp
         Temperature.hpp
         Time.hpp
         TimeMark.hpp
@@ -28,30 +29,19 @@ set(HEADERS
         Trajectory.hpp
         TransformWithCovariance.hpp
         TwistWithCovariance.hpp
-        logging/logging_iostream_style.h 
-        logging/logging_printf_style.h
         Waypoint.hpp
         Wrench.hpp
+        logging/logging_iostream_style.h 
+        logging/logging_printf_style.h
+    DEPS_CMAKE 
+        SISL
+    DEPS_PKGCONFIG 
+        base-logging
+        eigen3
 )
 
-
-# Using SISL as optional dependency
-find_package(SISL)
-if(SISL_FOUND)
-    rock_library(base ${SOURCES} Spline.cpp
-	    DEPS_CMAKE SISL
-	    HEADERS ${HEADERS} Spline.hpp
-	    DEPS_PKGCONFIG base-logging)
-    add_definitions(-DSISL_FOUND)
-else(SISL_FOUND)
-    message(STATUS "Compiling ${PROJECT_NAME} without 'spline' support")
-    rock_library(base ${SOURCES}
-	    HEADERS ${HEADERS}
-	    DEPS_PKGCONFIG base-logging)
-endif(SISL_FOUND)
-    
-configure_file(${CMAKE_SOURCE_DIR}/base-lib.pc.in ${CMAKE_BINARY_DIR}/base-lib.pc @ONLY)
-install(FILES ${CMAKE_BINARY_DIR}/base-lib.pc DESTINATION lib/pkgconfig)
 install(FILES ${CMAKE_SOURCE_DIR}/src/Spline.hpp
 	DESTINATION include/base/geometry)
 
+configure_file(base-lib.pc.in ${CMAKE_BINARY_DIR}/base-lib.pc @ONLY)
+install(FILES ${CMAKE_BINARY_DIR}/base-lib.pc DESTINATION lib/pkgconfig)
