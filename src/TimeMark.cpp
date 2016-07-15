@@ -1,6 +1,6 @@
 #include "TimeMark.hpp"
 
-base::TimeMark::TimeMark(const std::__cxx11::string& label) : label(label), mark( Time::now() ), clock( ::clock() )
+base::TimeMark::TimeMark(const std::string& label) : label(label), mark( Time::now() ), clock( ::clock() )
 {
 
 }

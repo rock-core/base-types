@@ -85,7 +85,7 @@ timeval base::Time::toTimeval() const
     return tv;
 }
 
-std::__cxx11::string base::Time::toString(base::Time::Resolution resolution, const std::__cxx11::string& mainFormat) const
+std::string base::Time::toString(base::Time::Resolution resolution, const std::string& mainFormat) const
 {
     struct timeval tv = toTimeval();
     int uSecs = tv.tv_usec;
@@ -185,7 +185,7 @@ base::Time base::Time::fromTimeValues(int year, int month, int day, int hour, in
     return Time(timeVal); 
 }
 
-base::Time base::Time::fromString(const std::__cxx11::string& stringTime, base::Time::Resolution resolution, const std::__cxx11::string& mainFormat)
+base::Time base::Time::fromString(const std::string& stringTime, base::Time::Resolution resolution, const std::string& mainFormat)
 {
     std::string mainTime = stringTime;
     int32_t usecs = 0;
