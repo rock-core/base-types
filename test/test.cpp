@@ -45,9 +45,6 @@
 #include <base/Trajectory.hpp>
 #endif
 
-#define BASE_LOG_DEBUG
-#include <base-logging/Logging.hpp>
-
 #include <Eigen/SVD>
 #include <Eigen/LU>
 #include <Eigen/Geometry>
@@ -1128,46 +1125,6 @@ BOOST_AUTO_TEST_CASE( angle_between_vectors )
     BOOST_CHECK_SMALL(M_PI - Angle::vectorToVector(Vector3d(2, 0, 0), Vector3d(-3, -0.001, 0)).getRad(), 1e-3);
     BOOST_CHECK_SMALL(-M_PI - Angle::vectorToVector(Vector3d(2, 0, 0), Vector3d(-3, -0.001, 0), Vector3d::UnitZ()).getRad(), 1e-3);
     BOOST_CHECK_SMALL(M_PI - Angle::vectorToVector(Vector3d(2, 0, 0), Vector3d(-3, -0.001, 0), -Vector3d::UnitZ()).getRad(), 1e-3);
-}
-
-BOOST_AUTO_TEST_CASE( logging_test )
-{
-#ifdef BASE_LONG_NAMES
-        FILE* s = fopen("test.out", "w");
-
-#ifdef WIN32
-        BASE_LOG_CONFIGURE(INFO_P, s);
-#else
-        BASE_LOG_CONFIGURE(INFO, s);
-#endif
-        BASE_LOG_INFO("info-message")
-#else
-        FILE* s = fopen("test.out", "w");
-#ifdef WIN32
-        LOG_CONFIGURE(INFO_P, s);
-#else 
-	LOG_CONFIGURE(INFO, s);
-#endif
-
-        LOG_INFO("info-message")
-#endif
-
-        std::string test("additional-argument");
-
-        int number = 1000000;
-        time_t start,stop;
-        time(&start);
-        for(int i = 0; i < number; i++)
-        {
-#ifdef BASE_LONG_NAMES
-            BASE_LOG_FATAL("test fatal log %s", test.c_str())
-#else
-            LOG_FATAL("test fatal log %s", test.c_str())
-#endif
-        }
-        time(&stop);
-        double seconds = difftime(stop, start)/(number*1.0);
-        printf("Estimated time per log msg %f seconds", seconds);
 }
 
 #include <base/Float.hpp>
