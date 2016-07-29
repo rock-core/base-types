@@ -170,8 +170,7 @@ void DepthMapVisualization::updateMainNode ( osg::Node* node )
                     slope_vertices->push_back(eigenVectorToOsgVec3(point2));
                     
                     Eigen::Vector3d v_diff = point2 - point1;
-                    Eigen::Vector3d v_ground = Eigen::Vector3d(v_diff.x(), v_diff.y(), 0.0);
-                    double v_angle = acos((v_diff.dot(v_ground)) / (v_diff.norm() * v_ground.norm()));
+                    double v_angle = std::abs(std::atan2(v_diff.head<2>().norm(), v_diff.z()));
                     
                     osg::Vec4 color( 1.0, 1.0, 1.0, 1.0 );
                     hslToRgb(v_angle/M_PI, 1.0, 0.5, color.r(), color.g(), color.b());
