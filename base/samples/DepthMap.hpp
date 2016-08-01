@@ -573,7 +573,7 @@ protected:
 	    else if(horizontal_projection == POLAR)
 	    {
 		for(unsigned h = 0; h < horizontal_size; h++)
-		    horizontal_angles[h] = base::Angle::fromRad(horizontal_interval.front() - ((double)h * step_resolution));
+		    horizontal_angles[h] = base::Angle::fromRad(horizontal_interval.front() + ((double)h * step_resolution));
 	    }
 	    else
 		throw std::invalid_argument("Invalid argument for horizontal projection type.");
@@ -653,7 +653,7 @@ protected:
 		step_resolution = (2.0 * M_PI) / (double)(elements-1);
 	    else
 	    {
-		double diff = std::abs(base::Angle::normalizeRad(interval.back() - interval.front()));
+		double diff = interval.back() - interval.front();
 		step_resolution = diff / (double)(elements-1);
 	    }
 	}
