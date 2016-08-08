@@ -55,33 +55,11 @@ struct JointsTrajectory
 
     /** @return true if the structure is valid
      */
-    bool isValid() const
-    {
-	size_t samples = getTimeSteps();
-
-	for(size_t i=0; i<elements.size(); ++i)
-	{
-	    if( elements[i].size() != samples )
-		return false;
-	}
-
-	if( !times.empty() && times.size() != samples )
-	    return false;
-
-	return true;
-    }
+    bool isValid() const;
     
-    void resize(int num_joints, int num_samples){
-        this->resize(num_joints);
-        for(size_t i=0; i<elements.size(); i++){
-            elements[i].resize(num_samples);
-        }
-    }
+    void resize(int num_joints, int num_samples);
     
-    void resize(int num_joints){
-        elements.resize(num_joints);
-        names.resize(num_joints);
-    }
+    void resize(int num_joints);
     
     /**
      * @brief Extracts the base::samples::Joints structure at a given time step
@@ -91,56 +69,27 @@ struct JointsTrajectory
      * @throws InvalidTimeStep if the given time_step does not exist in the
      *         trajectory.
      */
-    void getJointsAtTimeStep(size_t time_step, base::samples::Joints& joints){
-        if(time_step > getTimeSteps())
-            throw(InvalidTimeStep(time_step));
-            
-        joints.resize(getNumberOfJoints());
-        joints.names = names;
-        for(size_t i=0; i<getNumberOfJoints(); i++){
-            joints.elements[i] = elements[i][time_step];
-        }
-    }
+    void getJointsAtTimeStep(size_t time_step, base::samples::Joints& joints);
 
     /**
      * @return true if the JointState series has timing information
      */
-    bool isTimed() const
-    {
-	return !times.empty();
-    }
+    bool isTimed() const;
 
     /**
      * @return the number of time steps in the trajectory
      */
-    size_t getTimeSteps() const
-    {
-	size_t steps = 0;
-	if( !elements.empty() )
-	    steps = elements[0].size();
-	return steps;
-    }
+    size_t getTimeSteps() const;
     
     /**
      * @return the number of joints in the trajectory
      */
-    size_t getNumberOfJoints() const
-    {
-	return elements.size();
-    }
+    size_t getNumberOfJoints() const;
    
     /** 
      * @return the total duration of the time series if time information is available
      */
-    base::Time getDuration() const
-    {
-	base::Time summed;
-	for(size_t i=0; i<times.size(); i++)
-	{
-	    summed = summed+times[i];
-	}
-	return summed;
-    }
+    base::Time getDuration() const;
 }; 
 
 }
