@@ -1,6 +1,7 @@
 #ifndef BASE_SAMPLES_LASER_H__
 #define BASE_SAMPLES_LASER_H__
 
+#include <vector>
 #include <Eigen/Geometry>
 #include <base/Float.hpp>
 #include <boost/cstdint.hpp>

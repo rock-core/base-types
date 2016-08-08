@@ -1,6 +1,5 @@
 #include "LaserScan.hpp"
 
-#include <vector>
 #include <stdexcept>
 
 bool base::samples::LaserScan::isValidBeam(const unsigned int i) const
