@@ -2,6 +2,10 @@ rock_library(
     base-types 
         Angle.cpp
         JointLimitRange.cpp
+        JointLimits.cpp
+        JointState.cpp
+        JointsTrajectory.cpp
+        JointTransform.cpp
         Pose.cpp
         Pressure.cpp
         Spline.cpp
@@ -20,7 +24,13 @@ rock_library(
         Eigen.hpp
         Float.hpp
         JointLimitRange.cpp
+        JointLimits.hpp
+        JointState.hpp
+        JointsTrajectory.hpp
+        JointTransform.hpp
         Logging.hpp
+        NamedVector.hpp
+        Odometry.hpp
         Point.hpp
         Pose.hpp
         Pressure.hpp
