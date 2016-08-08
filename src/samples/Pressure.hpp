@@ -22,20 +22,11 @@ namespace base
                 : base::Pressure(pressure)
                 , time(time) {}
 
-            static Pressure fromPascal(base::Time const& time, float pascal)
-            {
-                return Pressure(time, base::Pressure::fromPascal(pascal));
-            }
+            static Pressure fromPascal(base::Time const& time, float pascal);
 
-            static Pressure fromBar(base::Time const& time, float bar)
-            {
-                return Pressure(time, base::Pressure::fromBar(bar));
-            }
+            static Pressure fromBar(base::Time const& time, float bar);
 
-            static Pressure fromPSI(base::Time const& time, float psi)
-            {
-                return Pressure(time, base::Pressure::fromPSI(psi));
-            }
+            static Pressure fromPSI(base::Time const& time, float psi);
         };
     }
 }

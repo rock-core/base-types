@@ -1,12 +1,9 @@
 #ifndef BASE_SAMPLES_LASER_H__
 #define BASE_SAMPLES_LASER_H__
 
-#include <vector>
-#include <boost/cstdint.hpp>
 #include <Eigen/Geometry>
-#include <stdexcept>
-
 #include <base/Float.hpp>
+#include <boost/cstdint.hpp>
 #include <base/Time.hpp>
 #include <base/Deprecated.hpp>
 
@@ -64,29 +61,12 @@ namespace base { namespace samples {
         LaserScan()
             : start_angle(0), angular_resolution(0), speed(0), minRange(0), maxRange(0) {}
             
-        bool isValidBeam(const unsigned int i) const {
-	    if(i > ranges.size())
-		throw std::out_of_range("Invalid beam index given");
-            return isRangeValid(ranges[i]);
-	}
+        bool isValidBeam(const unsigned int i) const;
         
         //resets the sample
-        void reset()
-        {
-          speed = 0.0;
-          start_angle = 0.0;
-          minRange = 0;
-          maxRange = 0;
-          ranges.clear();
-          remission.clear();
-        }
+        void reset();
 
-        inline bool isRangeValid(uint32_t range) const
-        {
-	    if(range >= minRange && range <= maxRange && range >= END_LASER_RANGE_ERRORS)
-		return true;
-	    return false;
-        }
+        bool isRangeValid(uint32_t range) const;
 
         /** converts the laser scan into a point cloud according to the given transformation matrix,
          *  the start_angle and the angular_resolution. If the transformation matrix is set to 
@@ -135,53 +115,17 @@ namespace base { namespace samples {
          * Helper function that converts range 'i' to a point.
 	 * The origin ot the point will be the laserScanner
          */
-        bool getPointFromScanBeamXForward(const unsigned int i, Eigen::Vector3d &point) const 
-	{
-	    if(!isValidBeam(i))
-		return false;
-	    
-	    //get a vector with the right length
-	    point = Eigen::Vector3d(ranges[i] / 1000.0, 0.0, 0.0);
-	    //rotate
-	    point = Eigen::Quaterniond(Eigen::AngleAxisd(start_angle + i * angular_resolution, Eigen::Vector3d::UnitZ())) * point;
-	    
-	    return true;
-	}
+        bool getPointFromScanBeamXForward(const unsigned int i, Eigen::Vector3d &point) const;
 
         /** \deprecated - 
          * returns the points in a wrong coordinate system
          */
-        bool getPointFromScanBeam(const unsigned int i, Eigen::Vector3d &point) const 
-	{
-	    if(!isValidBeam(i))
-		return false;
-	    
-	    //get a vector with the right length
-	    point = Eigen::Vector3d(0.0 , ranges[i] / 1000.0, 0.0);
-	    //rotate
-	    point = Eigen::Quaterniond(Eigen::AngleAxisd(start_angle + i * angular_resolution, Eigen::Vector3d::UnitZ())) * point;
-	    
-	    return true;
-	}
+        bool getPointFromScanBeam(const unsigned int i, Eigen::Vector3d &point) const;
 
         /** \deprecated - 
          * returns the points in a wrong coordinate system
          */
-	std::vector<Eigen::Vector3d> convertScanToPointCloud(const Eigen::Affine3d& transform) const BASE_TYPES_DEPRECATED
-	{
-	    std::vector<Eigen::Vector3d> pointCloud;
-            pointCloud.reserve(ranges.size());
-	    
-	    for(unsigned int i = 0; i < ranges.size(); i++) {
-		Eigen::Vector3d point;
-		if(getPointFromScanBeam(i, point)) {
-		    point = transform * point;
-		    pointCloud.push_back(point);
-		}
-	    }
-	    
-	    return pointCloud;
-	}
+	std::vector<Eigen::Vector3d> convertScanToPointCloud(const Eigen::Affine3d& transform) const BASE_TYPES_DEPRECATED;
     };
 }} // namespaces
 

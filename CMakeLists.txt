@@ -34,5 +34,3 @@ endif()
 
 rock_standard_layout()
 
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/base DESTINATION include)
-

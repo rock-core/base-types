@@ -4,7 +4,7 @@
 #include <base/samples/Frame.hpp>
 
 namespace base { namespace samples { namespace frame { 
-	enum frame_compressed_mode_t {
+	enum class frame_compressed_mode_t {
 	    MODE_COMPRESSED_UNDEFINED = 0,
 	    MODE_PJPG = 1	
 	};
@@ -27,18 +27,12 @@ namespace base { namespace samples { namespace frame {
 	    /** The image size in pixels */
 	    frame_size_t            size;
 
-	    frame_compressed_mode_t            frame_mode;
+	    frame_compressed_mode_t frame_mode;
 
             /** Status flag */
 	    frame_status_t	    frame_status;
             
-            static frame_compressed_mode_t toFrameMode(const std::string &str)
-            {
-              if(str == "MODE_COMPRESSED_UNDEFINED")
-                return MODE_COMPRESSED_UNDEFINED;
-              else if (str == "MODE_PJPG")
-                return MODE_PJPG;
-            }
+            static frame_compressed_mode_t toFrameMode(const std::string &str);
         };
 
 

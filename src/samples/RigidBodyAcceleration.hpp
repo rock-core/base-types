@@ -15,10 +15,7 @@ namespace base { namespace samples {
 	 */
         base::Matrix3d cov_acceleration;
 
-	void invalidateOrientation() {
-	    cov_acceleration = Eigen::Matrix3d::Identity();
-	    cov_acceleration *= INFINITY;
-	}
+	void invalidateOrientation();
 	
     };
 }}

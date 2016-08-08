@@ -4,9 +4,8 @@
 #include <vector>
 #include <Eigen/Geometry>
 
-#include <base/Float.hpp>
-#include <base/Time.hpp>
 #include <base/Angle.hpp>
+#include <base/Time.hpp>
 #include <base-logging/Singleton.hpp>
 
 #include <boost/cstdint.hpp>
@@ -129,82 +128,38 @@ public:
 		vertical_size(0), horizontal_size(0) {}
 
     /** Reset the sample */
-    void reset()
-    {
-	timestamps.clear();
-	vertical_projection = POLAR;
-	horizontal_projection = POLAR;
-	vertical_interval.clear();
-	horizontal_interval.clear();
-	vertical_size = 0;
-	horizontal_size = 0;
-	distances.clear();
-	remissions.clear();
-    }
+    void reset();
     
     /** Creates a mapping to a eigen matrix with dynamic sizes */
-    inline DepthMatrixMap getDistanceMatrixMap() 
-	{ return (DepthMatrixMap(distances.data(), vertical_size, horizontal_size)); }
+    DepthMatrixMap getDistanceMatrixMap();
     
     /** Creates a mapping to a const eigen matrix with dynamic sizes */
-    inline DepthMatrixMapConst getDistanceMatrixMapConst() const 
-	{ return (DepthMatrixMapConst(distances.data(), vertical_size, horizontal_size)); }
+    DepthMatrixMapConst getDistanceMatrixMapConst() const;
     
     /** Returns the measurement state of a given index.
      * 
      * @param index of the measurement
      */
-    DEPTH_MEASUREMENT_STATE getIndexState(size_t index) const
-    {
-	if(index >= distances.size())
-	    throw std::out_of_range("Invalid measurement index given");
-	
-	return getMeasurementState(distances[index]);
-    }
+    DEPTH_MEASUREMENT_STATE getIndexState(size_t index) const;
 
     /** Returns the measurement state of a given vertical and horizontal index.
      *
      * @param v_index
      * @param h_index
      */
-    DEPTH_MEASUREMENT_STATE getMeasurementState(uint32_t v_index, uint32_t h_index) const
-    {
-	if(!checkSizeConfig())
-	    throw std::out_of_range("Vertical and horizontal size does not match the distance array size.");
-	if(v_index >= vertical_size || h_index >= horizontal_size)
-	    throw std::out_of_range("Invalid vertical or horizontal index given.");
-	
-	return getMeasurementState(distances[getIndex(v_index,h_index)]);
-    }
+    DEPTH_MEASUREMENT_STATE getMeasurementState(uint32_t v_index, uint32_t h_index) const;
 
     /** Returns the measurement state of a given measurement 
      * 
      * @param distance measurement
      */
-    DEPTH_MEASUREMENT_STATE getMeasurementState(scalar distance) const
-    {
-	if(base::isNaN<scalar>(distance))
-	    return MEASUREMENT_ERROR;
-	else if(base::isInfinity<scalar>(distance))
-	    return TOO_FAR;
-	else if(distance <= 0.0)
-	    return TOO_NEAR;
-	else
-	    return VALID_MEASUREMENT;
-	    
-    }
+    DEPTH_MEASUREMENT_STATE getMeasurementState(scalar distance) const;
 
     /** Returns true if the measurement at the given index is valid.
      * 
      * @param index of the measurement
      */
-    bool isIndexValid(size_t index) const
-    {
-	if(index >= distances.size())
-	    throw std::out_of_range("Invalid measurement index given");
-	
-	return isMeasurementValid(distances[index]);
-    }
+    bool isIndexValid(size_t index) const;
 
     /** Returns true if the measurement at the given vertical and
      * horizontal index is valid.
@@ -212,33 +167,19 @@ public:
      * @param v_index
      * @param h_index
      */
-    bool isMeasurementValid(uint32_t v_index, uint32_t h_index) const
-    {
-	if(!checkSizeConfig())
-	    throw std::out_of_range("Vertical and horizontal size does not match the distance array size.");
-	if(v_index >= vertical_size || h_index >= horizontal_size)
-	    throw std::out_of_range("Invalid vertical or horizontal index given.");
-	
-	return isMeasurementValid(distances[getIndex(v_index,h_index)]);
-    }
+    bool isMeasurementValid(uint32_t v_index, uint32_t h_index) const;
 
     /** Returns true if the measurement is valid.
      * 
      * @param distance measurement
      */
-    bool isMeasurementValid(scalar distance) const
-    {
-	return getMeasurementState(distance) == VALID_MEASUREMENT;
-    }
+    bool isMeasurementValid(scalar distance) const;
 
     /** Computes the index in the distance and remission vector 
      * of a given vertical and horizontal index.
      * Note that the data is stored in row major form.
      */
-    inline size_t getIndex(uint32_t v_index, uint32_t h_index) const
-    {
-	return ((size_t)v_index * (size_t)horizontal_size + (size_t)h_index);
-    }
+    size_t getIndex(uint32_t v_index, uint32_t h_index) const;
     
     /** Converts the depth map to a pointcloud in the coordinate system of the sensor 
      * (x-axis = forward, y-axis = to the left, z-axis = upwards).
@@ -666,10 +607,8 @@ protected:
     };
 
     /** Checks if the vertical and horizontal sizes match the size of distance vector. */
-    inline bool checkSizeConfig() const
-    {
-	return ((((size_t)vertical_size * (size_t)horizontal_size) == distances.size()) ? true : false);
-    }
+    bool checkSizeConfig() const;
+
     
 private:
     /** Lookup table for rotations around one unit axis */

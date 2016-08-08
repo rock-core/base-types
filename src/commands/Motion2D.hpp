@@ -21,8 +21,8 @@ namespace base
         Motion2D(double translation, double rotation):translation(translation), rotation(rotation), heading(base::Angle::fromRad(0)){};
         Motion2D(double translation, double rotation, base::Angle heading):translation(translation), rotation(rotation), heading(heading){};
     };
-    inline bool operator==(const Motion2D& lhs, const Motion2D& rhs){ return lhs.translation == rhs.translation && lhs.rotation == rhs.rotation && lhs.heading == rhs.heading;}
-    inline bool operator!=(const Motion2D& lhs, const Motion2D& rhs){ return !(lhs == rhs); }
+    bool operator==(const Motion2D& lhs, const Motion2D& rhs);
+    bool operator!=(const Motion2D& lhs, const Motion2D& rhs);
 
     }
 }

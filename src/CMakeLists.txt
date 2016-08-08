@@ -17,6 +17,20 @@ rock_library(
         TransformWithCovariance.cpp
         TwistWithCovariance.cpp
         Waypoint.cpp
+        commands/Motion2D.cpp
+        samples/BodyState.cpp
+        samples/CompressedFrame.cpp
+        samples/DepthMap.cpp
+        samples/DistanceImage.cpp
+        samples/Frame.cpp
+        samples/Joints.cpp
+        samples/LaserScan.cpp
+        samples/Pressure.cpp
+        samples/RigidBodyAcceleration.cpp
+        samples/RigidBodyState.cpp
+        samples/Sonar.cpp
+        samples/SonarBeam.cpp
+        samples/SonarScan.cpp
     HEADERS
         Angle.hpp
         CircularBuffer.hpp
@@ -30,7 +44,6 @@ rock_library(
         JointTransform.hpp
         Logging.hpp
         NamedVector.hpp
-        Odometry.hpp
         Point.hpp
         Pose.hpp
         Pressure.hpp
@@ -45,8 +58,30 @@ rock_library(
         TwistWithCovariance.hpp
         Waypoint.hpp
         Wrench.hpp
+        commands/Joints.hpp
+        commands/Motion2D.hpp
+        commands/Speed6D.hpp
         logging/logging_iostream_style.h 
         logging/logging_printf_style.h
+        samples/BodyState.hpp
+        samples/CommandSamples.hpp
+        samples/CompressedFrame.hpp
+        samples/DepthMap.hpp
+        samples/DistanceImage.hpp
+        samples/Frame.hpp
+        samples/IMUSensors.hpp
+        samples/Joints.hpp
+        samples/LaserScan.hpp
+        samples/Pointcloud.hpp
+        samples/Pressure.hpp
+        samples/RigidBodyAcceleration.hpp
+        samples/RigidBodyState.hpp
+        samples/Sonar.hpp
+        samples/SonarBeam.hpp
+        samples/SonarScan.hpp
+        samples/Wrench.hpp
+        samples/Wrenches.hpp
+        templates/TimeStamped.hpp
     DEPS_CMAKE 
         SISL
     DEPS_PKGCONFIG 
