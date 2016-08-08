@@ -1,6 +1,7 @@
 rock_library(
     base-types 
         Angle.cpp
+        JointLimitRange.cpp
         Pose.cpp
         Pressure.cpp
         Spline.cpp
@@ -14,8 +15,11 @@ rock_library(
         Waypoint.cpp
     HEADERS
         Angle.hpp
+        CircularBuffer.hpp
+        Deprecated.hpp
         Eigen.hpp
         Float.hpp
+        JointLimitRange.cpp
         Logging.hpp
         Point.hpp
         Pose.hpp
