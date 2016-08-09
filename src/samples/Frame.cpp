@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <iterator>
 
-void base::samples::frame::frame_attrib_t::set(const std::__cxx11::string& name, const std::string& data)
+void base::samples::frame::frame_attrib_t::set(const std::string& name, const std::string& data)
 {
     name_ = name;
     data_ = data;
@@ -203,7 +203,7 @@ uint32_t base::samples::frame::Frame::getChannelCount(base::samples::frame::fram
     }
 }
 
-base::samples::frame::frame_mode_t base::samples::frame::Frame::toFrameMode(const std::__cxx11::string& str)
+base::samples::frame::frame_mode_t base::samples::frame::Frame::toFrameMode(const std::string& str)
 {
     if(str == "MODE_UNDEFINED")
         return MODE_UNDEFINED;
@@ -374,7 +374,7 @@ const uint8_t* base::samples::frame::Frame::getLastConstByte() const
     return static_cast<const uint8_t *>(&this->image.back());
 }
 
-bool base::samples::frame::Frame::hasAttribute(const std::__cxx11::string& name) const
+bool base::samples::frame::Frame::hasAttribute(const std::string& name) const
 {
     std::vector<frame_attrib_t>::const_iterator _iter = attributes.begin();
     for (;_iter != attributes.end();_iter++)
@@ -385,7 +385,7 @@ bool base::samples::frame::Frame::hasAttribute(const std::__cxx11::string& name)
     return false;
 }
 
-bool base::samples::frame::Frame::deleteAttribute(const std::__cxx11::string& name)
+bool base::samples::frame::Frame::deleteAttribute(const std::string& name)
 {
     std::vector<frame_attrib_t>::iterator _iter = attributes.begin();
     for (;_iter != attributes.end();_iter++)

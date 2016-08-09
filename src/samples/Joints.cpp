@@ -9,7 +9,7 @@ base::samples::Joints base::samples::Joints::Positions(const std::vector< double
     return result;
 }
 
-base::samples::Joints base::samples::Joints::Positions(const std::vector< double >& positions, const std::vector< std::__cxx11::string >& names)
+base::samples::Joints base::samples::Joints::Positions(const std::vector< double >& positions, const std::vector< std::string >& names)
 {
     Joints result = Positions(positions);
     if (result.elements.size() != names.size())
@@ -27,7 +27,7 @@ base::samples::Joints base::samples::Joints::Speeds(const std::vector< float >& 
     return result;
 }
 
-base::samples::Joints base::samples::Joints::Speeds(const std::vector< float >& speeds, const std::vector< std::__cxx11::string >& names)
+base::samples::Joints base::samples::Joints::Speeds(const std::vector< float >& speeds, const std::vector< std::string >& names)
 {
     Joints result = Speeds(speeds);
     if (result.elements.size() != names.size())
@@ -45,7 +45,7 @@ base::samples::Joints base::samples::Joints::Efforts(const std::vector< float >&
     return result;
 }
 
-base::samples::Joints base::samples::Joints::Efforts(const std::vector< float >& efforts, const std::vector< std::__cxx11::string >& names)
+base::samples::Joints base::samples::Joints::Efforts(const std::vector< float >& efforts, const std::vector< std::string >& names)
 {
     Joints result = Efforts(efforts);
     if (result.elements.size() != names.size())
@@ -63,7 +63,7 @@ base::samples::Joints base::samples::Joints::Raw(const std::vector< float >& raw
     return result;
 }
 
-base::samples::Joints base::samples::Joints::Raw(const std::vector< float >& raw, const std::vector< std::__cxx11::string >& names)
+base::samples::Joints base::samples::Joints::Raw(const std::vector< float >& raw, const std::vector< std::string >& names)
 {
     Joints result = Raw(raw);
     if (result.elements.size() != names.size())
@@ -81,7 +81,7 @@ base::samples::Joints base::samples::Joints::Accelerations(const std::vector< fl
     return result;
 }
 
-base::samples::Joints base::samples::Joints::Accelerations(const std::vector< float >& acceleration, const std::vector< std::__cxx11::string >& names)
+base::samples::Joints base::samples::Joints::Accelerations(const std::vector< float >& acceleration, const std::vector< std::string >& names)
 {
     Joints result = Accelerations(acceleration);
     if (result.elements.size() != names.size())
