@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <vector>
 #include <sstream>
-
+#include <stdexcept>
 #include <base/Time.hpp>
 
 
