@@ -76,6 +76,33 @@ namespace base
 
         return spdA;
     };
+    
+    /** Component wise fuzzy equality check.
+     *  This method is similar to numpy.allclose() in python.
+     *  @param rtol Relative tolerance.
+     *  @param atol Absolut tolerance.
+     *  
+     *  @return True if @p a and @p b are nearly identical. I.e.
+     *          if abs(a - b) <= (atol + rtol * abs(b))
+     * 
+     *  @note The equation is not symmetric in a and b,
+     *        so that allclose(a, b) might be different
+     *        from allclose(b, a) in some rare cases.
+     *  @note The standard rules for comparision with nan and inf apply. I.e.:
+     *        * Comparision with nan is never true. If @p a or @p b contain nan,
+     *          the result will be false.
+     *        * Everything is smaller than inf, thus the result is false if @p a
+     *          or @p b contain inf.
+     *        * Comparing inf with itself returns false.*/
+    template<typename DerivedA, typename DerivedB>
+    static bool allClose(const Eigen::DenseBase<DerivedA>& a,
+                         const Eigen::DenseBase<DerivedB>& b,
+                         const typename DerivedA::RealScalar& rtol = Eigen::NumTraits<typename DerivedA::RealScalar>::dummy_precision(),
+                         const typename DerivedA::RealScalar& atol = Eigen::NumTraits<typename DerivedA::RealScalar>::epsilon())
+    {
+      return ((a.derived() - b.derived()).array().abs()
+              <= (atol + rtol * b.derived().array().abs())).all();
+    }
 
 }
 
