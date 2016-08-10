@@ -1,22 +1,21 @@
-set(SOURCES 
-        logging/logging_printf_style.cpp)
+set(SOURCES )
 
-set(HEADERS Logging.hpp
-        logging/logging_printf_style.h
-        logging/logging_iostream_style.h
-        Singleton.hpp)
+set(HEADERS Logging.hpp Singleton.hpp logging/logging_iostream_style.h logging/logging_printf_style.h)
+
 
 # Using SISL as optional dependency
 find_package(SISL)
 if(SISL_FOUND)
     rock_library(base ${SOURCES} Spline.cpp
 	    DEPS_CMAKE SISL
-	    HEADERS ${HEADERS})
+	    HEADERS ${HEADERS} Spline.hpp
+	    DEPS_PKGCONFIG base-logging)
     add_definitions(-DSISL_FOUND)
 else(SISL_FOUND)
     message(STATUS "Compiling ${PROJECT_NAME} without 'spline' support")
     rock_library(base ${SOURCES}
-	    HEADERS ${HEADERS})
+	    HEADERS ${HEADERS}
+	    DEPS_PKGCONFIG base-logging)
 endif(SISL_FOUND)
     
 configure_file(${CMAKE_SOURCE_DIR}/base-lib.pc.in ${CMAKE_BINARY_DIR}/base-lib.pc @ONLY)

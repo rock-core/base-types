@@ -4,7 +4,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry> 
 
-#include <Eigen/SVD> 
+#include <Eigen/Eigenvalues>
 
 namespace base
 {
@@ -53,27 +53,26 @@ namespace base
         return isnotnan(x - x);
     };
 
-    // Guarantee Semi-Positive Definite (SPD) matrix.
+    /**
+     * Guarantee Symmetric (semi-) Positive Definite (SPD) matrix.
+     * The input matrix must be symmetric already (only the lower triangular part will be considered)
+     */
     template <typename _MatrixType>
-    static _MatrixType guaranteeSPD (const _MatrixType &A)
+    static typename _MatrixType::PlainObject guaranteeSPD (const _MatrixType &A, const typename _MatrixType::RealScalar& minEig = 0.0)
     {
-        _MatrixType spdA;
-        Eigen::VectorXd s;
-        s.resize(A.rows(), 1);
+        typedef typename _MatrixType::PlainObject Matrix;
+        typedef Eigen::SelfAdjointEigenSolver<Matrix> EigenDecomp;
+        typedef typename EigenDecomp::RealVectorType EigenValues;
 
-        /**
-        * Single Value Decomposition
-        */
-        Eigen::JacobiSVD <Eigen::MatrixXd > svdOfA (A, Eigen::ComputeThinU | Eigen::ComputeThinV);
+        // Eigenvalue decomposition
+        Eigen::SelfAdjointEigenSolver<Matrix> eigOfA (A, Eigen::ComputeEigenvectors);
 
-        s = svdOfA.singularValues(); //!eigenvalues
+        // truncate Eigenvalues:
+        EigenValues s = eigOfA.eigenvalues();
+        s = s.cwiseMax(minEig);
 
-        for (register int i=0; i<s.size(); ++i)
-        {
-            if (s(i) < 0.00)
-                s(i) = 0.00;
-        }
-        spdA = svdOfA.matrixU() * s.matrix().asDiagonal() * svdOfA.matrixV().transpose();
+        // re-compose matrix:
+        Matrix spdA = eigOfA.eigenvectors() * s.asDiagonal() * eigOfA.eigenvectors().adjoint();
 
         return spdA;
     };

@@ -45,9 +45,6 @@
 #include <base/Trajectory.hpp>
 #endif
 
-#define BASE_LOG_DEBUG
-#include <base/Logging.hpp>
-
 #include <Eigen/SVD>
 #include <Eigen/LU>
 #include <Eigen/Geometry>
@@ -612,7 +609,29 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     BOOST_CHECK(scan_points.size() == 8);
     for(unsigned i = 0; i < scan_points.size(); i++)
 	BOOST_CHECK(scan_points[i].isApprox(transformations[(i%2==0)?0:1] * ref_points[i], 1e-12));
-    
+
+    // check transformation with float types
+    std::vector<Eigen::Vector3f> scan_points_f;
+    Eigen::Affine3f transform_f = Eigen::Affine3f::Identity();
+    scan.convertDepthMapToPointCloud(scan_points_f, transform_f);
+    BOOST_CHECK(scan_points_f.size() == 8);
+    for(unsigned i = 0; i < scan_points_f.size(); i++)
+        BOOST_CHECK(scan_points_f[i].isApprox(ref_points[i].cast<float>(), 1e-6));
+
+    scan_points_f.clear();
+    scan.convertDepthMapToPointCloud(scan_points_f, transform_f, transform_f);
+    BOOST_CHECK(scan_points_f.size() == 8);
+    for(unsigned i = 0; i < scan_points_f.size(); i++)
+        BOOST_CHECK(scan_points_f[i].isApprox(ref_points[i].cast<float>(), 1e-6));
+
+    scan_points_f.clear();
+    std::vector<Eigen::Affine3f> transformations_f;
+    transformations_f.push_back(transform_f);
+    transformations_f.push_back(transform_f);
+    scan.convertDepthMapToPointCloud(scan_points_f, transformations_f, true, true, false);
+    BOOST_CHECK(scan_points_f.size() == 8);
+    for(unsigned i = 0; i < scan_points_f.size(); i++)
+        BOOST_CHECK(scan_points_f[i].isApprox(ref_points[i].cast<float>(), 1e-6));
     
     
     // Test vertical irregular transformation
@@ -963,6 +982,26 @@ BOOST_AUTO_TEST_CASE( angle_test )
 
 }
 
+BOOST_AUTO_TEST_CASE( min_max_angle_test )
+{
+    using namespace base;
+
+    Angle max = Angle::Max();
+    BOOST_CHECK( max.isApprox( Angle::fromRad(  M_PI )) );
+    BOOST_CHECK( max.isApprox( Angle::fromRad(  M_PI_2 * 2 )) );
+    BOOST_CHECK( max.isApprox( Angle::fromRad( -M_PI )) );
+    BOOST_CHECK( max.isApprox( Angle::fromRad( -M_PI_2 * 2 )) );
+
+    Angle min = Angle::Min();
+    BOOST_CHECK( !(min == max) );
+    BOOST_CHECK( min == Angle::fromRad( nextafter( -M_PI, 0 )) );
+    BOOST_CHECK( min == Angle::fromRad( nextafter( -M_PI_2 * 2, 0 )) );
+    BOOST_CHECK( !(min == Angle::fromRad( -M_PI )) );
+    BOOST_CHECK( !(min == Angle::fromRad( -M_PI_2 * 2 )) );
+    BOOST_CHECK( min.getRad() > -M_PI );
+    BOOST_CHECK( min.getRad() > -M_PI_2 * 2 );
+}
+
 BOOST_AUTO_TEST_CASE( yaw_test )
 {
     using namespace base;
@@ -1086,46 +1125,6 @@ BOOST_AUTO_TEST_CASE( angle_between_vectors )
     BOOST_CHECK_SMALL(M_PI - Angle::vectorToVector(Vector3d(2, 0, 0), Vector3d(-3, -0.001, 0)).getRad(), 1e-3);
     BOOST_CHECK_SMALL(-M_PI - Angle::vectorToVector(Vector3d(2, 0, 0), Vector3d(-3, -0.001, 0), Vector3d::UnitZ()).getRad(), 1e-3);
     BOOST_CHECK_SMALL(M_PI - Angle::vectorToVector(Vector3d(2, 0, 0), Vector3d(-3, -0.001, 0), -Vector3d::UnitZ()).getRad(), 1e-3);
-}
-
-BOOST_AUTO_TEST_CASE( logging_test )
-{
-#ifdef BASE_LONG_NAMES
-        FILE* s = fopen("test.out", "w");
-
-#ifdef WIN32
-        BASE_LOG_CONFIGURE(INFO_P, s);
-#else
-        BASE_LOG_CONFIGURE(INFO, s);
-#endif
-        BASE_LOG_INFO("info-message")
-#else
-        FILE* s = fopen("test.out", "w");
-#ifdef WIN32
-        LOG_CONFIGURE(INFO_P, s);
-#else 
-	LOG_CONFIGURE(INFO, s);
-#endif
-
-        LOG_INFO("info-message")
-#endif
-
-        std::string test("additional-argument");
-
-        int number = 1000000;
-        time_t start,stop;
-        time(&start);
-        for(int i = 0; i < number; i++)
-        {
-#ifdef BASE_LONG_NAMES
-            BASE_LOG_FATAL("test fatal log %s", test.c_str())
-#else
-            LOG_FATAL("test fatal log %s", test.c_str())
-#endif
-        }
-        time(&stop);
-        double seconds = difftime(stop, start)/(number*1.0);
-        printf("Estimated time per log msg %f seconds", seconds);
 }
 
 #include <base/Float.hpp>

@@ -106,6 +106,22 @@ public:
         return result;
     }
 
+    /** Returns the minimum angle possible after normalization
+     *  @return representation of the minimum angle
+     */
+    static inline Angle Min()
+    {
+        return Angle( nextafter(-M_PI, 0) );
+    }
+
+    /** Returns the maximum angle possible after normalization
+     *  @return representation of the maximum angle
+     */
+    static inline Angle Max()
+    {
+        return Angle(M_PI);
+    }
+
     /**
      * @return canonical value of the angle in radians
      */
