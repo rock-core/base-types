@@ -6,41 +6,43 @@
 #include <stdexcept>
 #include <iterator>
 
-void base::samples::frame::frame_attrib_t::set(const std::string& name, const std::string& data)
+namespace base { namespace samples {
+
+void frame::frame_attrib_t::set(const std::string& name, const std::string& data)
 {
     name_ = name;
     data_ = data;
 }
 
-bool base::samples::frame::frame_size_t::operator==(const base::samples::frame::frame_size_t& other) const
+bool frame::frame_size_t::operator==(const frame::frame_size_t& other) const
 {
     if(width == other.width && height==other.height)
         return true;
     return false;
 }
 
-bool base::samples::frame::frame_size_t::operator!=(const base::samples::frame::frame_size_t& other) const
+bool frame::frame_size_t::operator!=(const frame::frame_size_t& other) const
 {
     return !(*this == other);
 }
 
-base::samples::frame::Frame::Frame() : image(), size(), data_depth(0), pixel_size(0), frame_mode()
+frame::Frame::Frame() : image(), size(), data_depth(0), pixel_size(0), frame_mode()
 {
     setDataDepth(0);
     reset();
 }
 
-base::samples::frame::Frame::Frame(uint16_t width, uint16_t height, uint8_t depth, base::samples::frame::frame_mode_t mode, const uint8_t val, size_t sizeInBytes)
+frame::Frame::Frame(uint16_t width, uint16_t height, uint8_t depth, frame::frame_mode_t mode, const uint8_t val, size_t sizeInBytes)
 {
     init(width,height,depth,mode,val,sizeInBytes);
 }
 
-base::samples::frame::Frame::Frame(const base::samples::frame::Frame& other, bool bcopy)
+frame::Frame::Frame(const frame::Frame& other, bool bcopy)
 {
     init(other,bcopy);
 }
 
-void base::samples::frame::Frame::copyImageIndependantAttributes(const base::samples::frame::Frame& other)
+void frame::Frame::copyImageIndependantAttributes(const frame::Frame& other)
 {
     std::vector<frame_attrib_t>::const_iterator iter = other.attributes.begin();
     for(;iter!= other.attributes.end();++iter)
@@ -50,7 +52,7 @@ void base::samples::frame::Frame::copyImageIndependantAttributes(const base::sam
     frame_status = other.frame_status;
 }
 
-void base::samples::frame::Frame::init(const base::samples::frame::Frame& other, bool bcopy)
+void frame::Frame::init(const frame::Frame& other, bool bcopy)
 {
     //hdr is copied by attributes = other.attributes;
     init(other.getWidth(),other.getHeight(),other.getDataDepth(), other.getFrameMode(),-1,other.getNumberOfBytes());
@@ -59,7 +61,7 @@ void base::samples::frame::Frame::init(const base::samples::frame::Frame& other,
     copyImageIndependantAttributes(other);
 }
 
-void base::samples::frame::Frame::init(uint16_t width, uint16_t height, uint8_t depth, base::samples::frame::frame_mode_t mode, const uint8_t val, size_t sizeInBytes)
+void frame::Frame::init(uint16_t width, uint16_t height, uint8_t depth, frame::frame_mode_t mode, const uint8_t val, size_t sizeInBytes)
 {
     //change size if the frame does not fit
     if(this->size.height != height || this->size.width !=  width || this->frame_mode != mode || 
@@ -83,9 +85,9 @@ void base::samples::frame::Frame::init(uint16_t width, uint16_t height, uint8_t 
     reset(val);
 }
 
-void base::samples::frame::Frame::reset(const int val)
+void frame::Frame::reset(const int val)
 {
-    this->time = base::Time();
+    this->time = Time();
     if (this->image.size() > 0 && val >= 0) {
         memset(&this->image[0], val%256, this->image.size());
     }
@@ -93,15 +95,15 @@ void base::samples::frame::Frame::reset(const int val)
     attributes.clear();
 }
 
-void base::samples::frame::Frame::swap(base::samples::frame::Frame& frame)
+void frame::Frame::swap(frame::Frame& frame)
 {
     //swap vector
     image.swap(frame.image);
     attributes.swap(frame.attributes);
 
     //copy values to temp
-    base::Time temp_time = frame.time;
-    base::Time temp_received_time = frame.received_time;
+    Time temp_time = frame.time;
+    Time temp_received_time = frame.received_time;
     frame_size_t temp_size = frame.size;
     uint32_t temp_data_depth = frame.data_depth;
     uint32_t temp_pixel_size = frame.pixel_size;
@@ -129,52 +131,52 @@ void base::samples::frame::Frame::swap(base::samples::frame::Frame& frame)
     frame_status = temp_frame_status;
 }
 
-bool base::samples::frame::Frame::isHDR() const
+bool frame::Frame::isHDR() const
 {
     return (hasAttribute("hdr")&&getAttribute<bool>("hdr"));
 }
 
-void base::samples::frame::Frame::setHDR(bool value)
+void frame::Frame::setHDR(bool value)
 {
     setAttribute<bool>("hdr",true);
 }
 
-bool base::samples::frame::Frame::isCompressed() const
+bool frame::Frame::isCompressed() const
 {
     return frame_mode >= COMPRESSED_MODES;
 }
 
-bool base::samples::frame::Frame::isGrayscale() const
+bool frame::Frame::isGrayscale() const
 {
     return this->frame_mode == MODE_GRAYSCALE;
 }
 
-bool base::samples::frame::Frame::isRGB() const
+bool frame::Frame::isRGB() const
 {
     return this->frame_mode == MODE_RGB;
 }
 
-bool base::samples::frame::Frame::isBayer() const
+bool frame::Frame::isBayer() const
 {
     return (this->frame_mode == MODE_BAYER || this->frame_mode == MODE_BAYER_RGGB || this->frame_mode == MODE_BAYER_GRBG || this->frame_mode == MODE_BAYER_BGGR || this->frame_mode == MODE_BAYER_GBRG);
 }
 
-void base::samples::frame::Frame::setStatus(const base::samples::frame::frame_status_t value)
+void frame::Frame::setStatus(const frame::frame_status_t value)
 {
     frame_status = value;
 }
 
-base::samples::frame::frame_status_t base::samples::frame::Frame::getStatus() const
+frame::frame_status_t frame::Frame::getStatus() const
 {
     return frame_status;
 }
 
-uint32_t base::samples::frame::Frame::getChannelCount() const
+uint32_t frame::Frame::getChannelCount() const
 {
     return getChannelCount(this->frame_mode);
 }
 
-uint32_t base::samples::frame::Frame::getChannelCount(base::samples::frame::frame_mode_t mode)
+uint32_t frame::Frame::getChannelCount(frame::frame_mode_t mode)
 {
     switch (mode)
     {
@@ -203,7 +205,7 @@ uint32_t base::samples::frame::Frame::getChannelCount(base::samples::frame::fram
     }
 }
 
-base::samples::frame::frame_mode_t base::samples::frame::Frame::toFrameMode(const std::string& str)
+frame::frame_mode_t frame::Frame::toFrameMode(const std::string& str)
 {
     if(str == "MODE_UNDEFINED")
         return MODE_UNDEFINED;
@@ -241,39 +243,39 @@ base::samples::frame::frame_mode_t base::samples::frame::Frame::toFrameMode(cons
         return MODE_UNDEFINED;
 }
 
-base::samples::frame::frame_mode_t base::samples::frame::Frame::getFrameMode() const
+frame::frame_mode_t frame::Frame::getFrameMode() const
 {
     return this->frame_mode;
 }
 
-uint32_t base::samples::frame::Frame::getPixelSize() const
+uint32_t frame::Frame::getPixelSize() const
 {
     return this->pixel_size;
 }
 
-uint32_t base::samples::frame::Frame::getRowSize() const
+uint32_t frame::Frame::getRowSize() const
 {
     if(isCompressed())
         throw std::runtime_error("Frame::getRowSize: There is no raw size for an compressed image!");
     return this->row_size;
 }
 
-uint32_t base::samples::frame::Frame::getNumberOfBytes() const
+uint32_t frame::Frame::getNumberOfBytes() const
 {
     return image.size();
 }
 
-uint32_t base::samples::frame::Frame::getPixelCount() const
+uint32_t frame::Frame::getPixelCount() const
 {
     return size.width * size.height;
 }
 
-uint32_t base::samples::frame::Frame::getDataDepth() const
+uint32_t frame::Frame::getDataDepth() const
 {
     return this->data_depth;
 }
 
-void base::samples::frame::Frame::setDataDepth(uint32_t value)
+void frame::Frame::setDataDepth(uint32_t value)
 {
     this->data_depth = value;
 
@@ -288,7 +290,7 @@ void base::samples::frame::Frame::setDataDepth(uint32_t value)
         this->row_size = this->pixel_size * getWidth();
 }
 
-void base::samples::frame::Frame::setFrameMode(base::samples::frame::frame_mode_t mode)
+void frame::Frame::setFrameMode(frame::frame_mode_t mode)
 {
     this->frame_mode = mode;
 
@@ -303,27 +305,27 @@ void base::samples::frame::Frame::setFrameMode(base::samples::frame::frame_mode_
         this->row_size = this->pixel_size * getWidth();
 }
 
-base::samples::frame::frame_size_t base::samples::frame::Frame::getSize() const
+frame::frame_size_t frame::Frame::getSize() const
 {
     return this->size;
 }
 
-uint16_t base::samples::frame::Frame::getWidth() const
+uint16_t frame::Frame::getWidth() const
 {
     return this->size.width;
 }
 
-uint16_t base::samples::frame::Frame::getHeight() const
+uint16_t frame::Frame::getHeight() const
 {
     return this->size.height;
 }
 
-const std::vector< uint8_t >& base::samples::frame::Frame::getImage() const
+const std::vector< uint8_t >& frame::Frame::getImage() const
 {
     return this->image;
 }
 
-void base::samples::frame::Frame::validateImageSize(size_t sizeToValidate) const
+void frame::Frame::validateImageSize(size_t sizeToValidate) const
 {
     size_t expected_size = getPixelSize()*getPixelCount();
     if (!isCompressed() && sizeToValidate != expected_size){
@@ -336,45 +338,45 @@ void base::samples::frame::Frame::validateImageSize(size_t sizeToValidate) const
     }
 }
 
-void base::samples::frame::Frame::setImage(const std::vector< uint8_t >& newImage)
+void frame::Frame::setImage(const std::vector< uint8_t >& newImage)
 {
     // calling the overloading function wich uses the "char*" interface
     return setImage(newImage.data(), newImage.size());
 }
 
-void base::samples::frame::Frame::setImage(const char* data, size_t newImageSize)
+void frame::Frame::setImage(const char* data, size_t newImageSize)
 {
     return setImage(reinterpret_cast<const uint8_t*>(data), newImageSize);
 }
 
-void base::samples::frame::Frame::setImage(const uint8_t* data, size_t newImageSize)
+void frame::Frame::setImage(const uint8_t* data, size_t newImageSize)
 {
     validateImageSize(newImageSize);
     image.resize(newImageSize);
     memcpy(&this->image[0], data, newImageSize);
 }
 
-uint8_t* base::samples::frame::Frame::getImagePtr()
+uint8_t* frame::Frame::getImagePtr()
 {
     return static_cast<uint8_t *>(image.data());
 }
 
-const uint8_t* base::samples::frame::Frame::getImageConstPtr() const
+const uint8_t* frame::Frame::getImageConstPtr() const
 {
     return static_cast<const uint8_t *>(image.data());
 }
 
-uint8_t* base::samples::frame::Frame::getLastByte()
+uint8_t* frame::Frame::getLastByte()
 {
     return static_cast<uint8_t *>(&this->image.back());
 }
 
-const uint8_t* base::samples::frame::Frame::getLastConstByte() const
+const uint8_t* frame::Frame::getLastConstByte() const
 {
     return static_cast<const uint8_t *>(&this->image.back());
 }
 
-bool base::samples::frame::Frame::hasAttribute(const std::string& name) const
+bool frame::Frame::hasAttribute(const std::string& name) const
 {
     std::vector<frame_attrib_t>::const_iterator _iter = attributes.begin();
     for (;_iter != attributes.end();_iter++)
@@ -385,7 +387,7 @@ bool base::samples::frame::Frame::hasAttribute(const std::string& name) const
     return false;
 }
 
-bool base::samples::frame::Frame::deleteAttribute(const std::string& name)
+bool frame::Frame::deleteAttribute(const std::string& name)
 {
     std::vector<frame_attrib_t>::iterator _iter = attributes.begin();
     for (;_iter != attributes.end();_iter++)
@@ -399,7 +401,7 @@ bool base::samples::frame::Frame::deleteAttribute(const std::string& name)
     return false;
 }
 
-
+}} //end namespace base::samples
 
 
 

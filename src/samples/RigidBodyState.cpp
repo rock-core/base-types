@@ -1,18 +1,20 @@
 #include "RigidBodyState.hpp"
 
-base::samples::RigidBodyState::RigidBodyState(bool doInvalidation)
+namespace base { namespace samples {
+
+RigidBodyState::RigidBodyState(bool doInvalidation)
 {
     if(doInvalidation)
         invalidate();
 }
 
-void base::samples::RigidBodyState::setTransform(const Eigen::Affine3d& transform)
+void RigidBodyState::setTransform(const Eigen::Affine3d& transform)
 {
     position = transform.translation();
     orientation = Eigen::Quaterniond( transform.linear() );
 }
 
-Eigen::Affine3d base::samples::RigidBodyState::getTransform() const
+Eigen::Affine3d RigidBodyState::getTransform() const
 {
     Eigen::Affine3d ret;
     ret.setIdentity();
@@ -21,51 +23,51 @@ Eigen::Affine3d base::samples::RigidBodyState::getTransform() const
     return ret;
 }
 
-void base::samples::RigidBodyState::setPose(const base::Pose& pose)
+void RigidBodyState::setPose(const Pose& pose)
 {
     orientation = pose.orientation;
     position = pose.position;
 }
 
-base::Pose base::samples::RigidBodyState::getPose() const
+Pose RigidBodyState::getPose() const
 {
-    return base::Pose( position, orientation );
+    return Pose( position, orientation );
 }
 
-double base::samples::RigidBodyState::getYaw() const
+double RigidBodyState::getYaw() const
 {
     return base::getYaw(orientation);
 }
 
-double base::samples::RigidBodyState::getPitch() const
+double RigidBodyState::getPitch() const
 {
     return base::getPitch(orientation);
 }
 
-double base::samples::RigidBodyState::getRoll() const
+double RigidBodyState::getRoll() const
 {
     return base::getRoll(orientation);
 }
 
-base::samples::RigidBodyState base::samples::RigidBodyState::unknown()
+RigidBodyState RigidBodyState::unknown()
 {
     RigidBodyState result(false);
     result.initUnknown();
     return result;
 }
 
-base::samples::RigidBodyState base::samples::RigidBodyState::invalid()
+RigidBodyState RigidBodyState::invalid()
 {
     RigidBodyState result(true);
     return result;
 }
 
-void base::samples::RigidBodyState::initSane()
+void RigidBodyState::initSane()
 {
     invalidate();
 }
 
-void base::samples::RigidBodyState::invalidate()
+void RigidBodyState::invalidate()
 {
     invalidateOrientation();
     invalidateOrientationCovariance();
@@ -77,7 +79,7 @@ void base::samples::RigidBodyState::invalidate()
     invalidateAngularVelocityCovariance();
 }
 
-void base::samples::RigidBodyState::initUnknown()
+void RigidBodyState::initUnknown()
 {
     position.setZero();
     velocity.setZero();
@@ -89,169 +91,169 @@ void base::samples::RigidBodyState::initUnknown()
     cov_angular_velocity = setValueUnknown();
 }
 
-bool base::samples::RigidBodyState::isValidValue(const base::Vector3d& vec)
+bool RigidBodyState::isValidValue(const Vector3d& vec)
 {
-    return !base::isNaN(vec(0)) &&
-        !base::isNaN(vec(1)) &&
-        !base::isNaN(vec(2));
+    return !isNaN(vec(0)) &&
+        !isNaN(vec(1)) &&
+        !isNaN(vec(2));
 }
 
-bool base::samples::RigidBodyState::isValidValue(const base::Orientation& ori)
+bool RigidBodyState::isValidValue(const Orientation& ori)
 {
-    return !base::isNaN(ori.w()) &&
-        !base::isNaN(ori.x()) &&
-        !base::isNaN(ori.y()) &&
-        !base::isNaN(ori.z()) &&
+    return !isNaN(ori.w()) &&
+        !isNaN(ori.x()) &&
+        !isNaN(ori.y()) &&
+        !isNaN(ori.z()) &&
         fabs(ori.squaredNorm()-1.0) < 1e-6;     //assuming at least single precision 
 }
 
-bool base::samples::RigidBodyState::isKnownValue(const base::Matrix3d& cov)
+bool RigidBodyState::isKnownValue(const Matrix3d& cov)
 {
-    return !base::isInfinity(cov(0,0)) &&
-        !base::isInfinity(cov(1,1)) &&
-        !base::isInfinity(cov(2,2));
+    return !isInfinity(cov(0,0)) &&
+        !isInfinity(cov(1,1)) &&
+        !isInfinity(cov(2,2));
 }
 
-bool base::samples::RigidBodyState::isValidCovariance(const base::Matrix3d& cov)
+bool RigidBodyState::isValidCovariance(const Matrix3d& cov)
 {
     for (int i = 0; i < 3; ++i)
         for (int j = 0; j < 3; ++j)
-            if (base::isNaN(cov(i, j)))
+            if (isNaN(cov(i, j)))
                 return false;
     return true;
 }
 
-bool base::samples::RigidBodyState::isValidValue(const base::Vector3d& vec, int dim)
+bool RigidBodyState::isValidValue(const Vector3d& vec, int dim)
 {
-    return !base::isNaN(vec(dim));
+    return !isNaN(vec(dim));
 }
 
-bool base::samples::RigidBodyState::isValidCovariance(const base::Matrix3d& cov, int dim)
+bool RigidBodyState::isValidCovariance(const Matrix3d& cov, int dim)
 {
-    return !base::isNaN(cov(dim,dim));
+    return !isNaN(cov(dim,dim));
 }
 
-bool base::samples::RigidBodyState::isKnownValue(const base::Matrix3d& cov, int dim)
+bool RigidBodyState::isKnownValue(const Matrix3d& cov, int dim)
 {
-    return !base::isInfinity(cov(dim,dim));
+    return !isInfinity(cov(dim,dim));
 }
 
-base::Vector3d base::samples::RigidBodyState::invalidValue()
+Vector3d RigidBodyState::invalidValue()
 {
-    return base::Vector3d::Ones() * base::NaN<double>();
+    return Vector3d::Ones() * NaN<double>();
 }
 
-base::Orientation base::samples::RigidBodyState::invalidOrientation()
+Orientation RigidBodyState::invalidOrientation()
 {
-    return base::Orientation(Eigen::Vector4d::Ones() * base::NaN<double>());
+    return Orientation(Eigen::Vector4d::Ones() * NaN<double>());
 }
 
-base::Matrix3d base::samples::RigidBodyState::setValueUnknown()
+Matrix3d RigidBodyState::setValueUnknown()
 {
-    return base::Matrix3d::Ones() * base::infinity<double>();
+    return Matrix3d::Ones() * infinity<double>();
 }
 
-base::Matrix3d base::samples::RigidBodyState::invalidCovariance()
+Matrix3d RigidBodyState::invalidCovariance()
 {
-    return base::Matrix3d::Ones() * base::NaN<double>();
+    return Matrix3d::Ones() * NaN<double>();
 }
 
-bool base::samples::RigidBodyState::hasValidPosition() const
+bool RigidBodyState::hasValidPosition() const
 {
     return isValidValue(position);
 }
 
-bool base::samples::RigidBodyState::hasValidPosition(int idx) const
+bool RigidBodyState::hasValidPosition(int idx) const
 {
     return isValidValue(position, idx);
 }
 
-bool base::samples::RigidBodyState::hasValidPositionCovariance() const
+bool RigidBodyState::hasValidPositionCovariance() const
 {
     return isValidCovariance(cov_position);
 }
 
-void base::samples::RigidBodyState::invalidatePosition()
+void RigidBodyState::invalidatePosition()
 {
     position = invalidValue();
 }
 
-void base::samples::RigidBodyState::invalidatePositionCovariance()
+void RigidBodyState::invalidatePositionCovariance()
 {
     cov_position = invalidCovariance();
 }
 
-bool base::samples::RigidBodyState::hasValidOrientation() const
+bool RigidBodyState::hasValidOrientation() const
 {
     return isValidValue(orientation);
 }
 
-bool base::samples::RigidBodyState::hasValidOrientationCovariance() const
+bool RigidBodyState::hasValidOrientationCovariance() const
 {
     return isValidCovariance(cov_orientation);
 }
 
-void base::samples::RigidBodyState::invalidateOrientation()
+void RigidBodyState::invalidateOrientation()
 {
     orientation = invalidOrientation(); 
 }
 
-void base::samples::RigidBodyState::invalidateOrientationCovariance()
+void RigidBodyState::invalidateOrientationCovariance()
 {
      cov_orientation = invalidCovariance();
 }
 
-bool base::samples::RigidBodyState::hasValidVelocity() const
+bool RigidBodyState::hasValidVelocity() const
 {
     return isValidValue(velocity);
 }
 
-bool base::samples::RigidBodyState::hasValidVelocity(int idx) const
+bool RigidBodyState::hasValidVelocity(int idx) const
 {
     return isValidValue(velocity, idx);
 }
 
-bool base::samples::RigidBodyState::hasValidVelocityCovariance() const
+bool RigidBodyState::hasValidVelocityCovariance() const
 {
     return isValidCovariance(cov_velocity);
 }
 
-void base::samples::RigidBodyState::invalidateVelocity()
+void RigidBodyState::invalidateVelocity()
 {
     velocity = invalidValue();
 }
 
-void base::samples::RigidBodyState::invalidateVelocityCovariance()
+void RigidBodyState::invalidateVelocityCovariance()
 {
     cov_velocity = invalidCovariance();
 }
 
-bool base::samples::RigidBodyState::hasValidAngularVelocity() const
+bool RigidBodyState::hasValidAngularVelocity() const
 {
     return isValidValue(angular_velocity);
 }
 
-bool base::samples::RigidBodyState::hasValidAngularVelocity(int idx) const
+bool RigidBodyState::hasValidAngularVelocity(int idx) const
 {
      return isValidValue(angular_velocity, idx);
 }
 
-bool base::samples::RigidBodyState::hasValidAngularVelocityCovariance() const
+bool RigidBodyState::hasValidAngularVelocityCovariance() const
 {
     return isValidCovariance(cov_angular_velocity);
 }
 
-void base::samples::RigidBodyState::invalidateAngularVelocity()
+void RigidBodyState::invalidateAngularVelocity()
 {
     angular_velocity = invalidValue();
 }
 
-void base::samples::RigidBodyState::invalidateAngularVelocityCovariance()
+void RigidBodyState::invalidateAngularVelocityCovariance()
 {
     cov_angular_velocity = invalidCovariance(); 
 }
 
-void base::samples::RigidBodyState::invalidateValues(bool invPos, bool invOri, bool invVel, bool invAngVel)
+void RigidBodyState::invalidateValues(bool invPos, bool invOri, bool invVel, bool invAngVel)
 {
     if (invPos) invalidatePosition();
     if (invOri) invalidateOrientation();
@@ -259,7 +261,7 @@ void base::samples::RigidBodyState::invalidateValues(bool invPos, bool invOri, b
     if (invAngVel) invalidateAngularVelocity();
 }
 
-void base::samples::RigidBodyState::invalidateCovariances(bool invPos, bool invOri, bool invVel, bool invAngVel)
+void RigidBodyState::invalidateCovariances(bool invPos, bool invOri, bool invVel, bool invAngVel)
 {
     if (invPos) invalidatePositionCovariance();
     if (invOri) invalidateOrientationCovariance();
@@ -267,7 +269,7 @@ void base::samples::RigidBodyState::invalidateCovariances(bool invPos, bool invO
     if (invAngVel) invalidateAngularVelocityCovariance();
 }
 
-
+}} //end namespace base::samples
 
 
 

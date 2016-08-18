@@ -3,12 +3,14 @@
 #include <vector>
 #include <limits>
 
-base::samples::SonarBeam::SonarBeam(const base::samples::SonarBeam& other)
+namespace base { namespace samples {
+
+SonarBeam::SonarBeam(const SonarBeam& other)
 {
     init(other);
 }
 
-double base::samples::SonarBeam::getSpatialResolution() const
+double SonarBeam::getSpatialResolution() const
 {
     //the sampling interval includes the time for 
     //the sound traveling from the transiter to the target an back
@@ -16,13 +18,13 @@ double base::samples::SonarBeam::getSpatialResolution() const
     return sampling_interval*0.5*speed_of_sound;
 }
 
-base::samples::SonarBeam& base::samples::SonarBeam::operator=(const base::samples::SonarBeam& other)
+SonarBeam& SonarBeam::operator=(const SonarBeam& other)
 {
     init(other);
     return *this;
 }
 
-void base::samples::SonarBeam::init(const base::samples::SonarBeam& other)
+void SonarBeam::init(const SonarBeam& other)
 {
     time = other.time;
     bearing = other.bearing;
@@ -33,7 +35,7 @@ void base::samples::SonarBeam::init(const base::samples::SonarBeam& other)
     beam = other.beam;
 }
 
-void base::samples::SonarBeam::swap(base::samples::SonarBeam& other)
+void SonarBeam::swap(SonarBeam& other)
 {
     Time temp_time = time;
     Angle temp_bearing = bearing;
@@ -59,5 +61,5 @@ void base::samples::SonarBeam::swap(base::samples::SonarBeam& other)
 }
 
 
-
+}} //end namespace base::samples
 

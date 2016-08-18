@@ -2,14 +2,16 @@
 
 #include <stdexcept>
 
-bool base::samples::LaserScan::isValidBeam(const unsigned int i) const
+namespace base { namespace samples {
+
+bool LaserScan::isValidBeam(const unsigned int i) const
 {
     if(i > ranges.size())
         throw std::out_of_range("Invalid beam index given");
     return isRangeValid(ranges[i]);
 }
 
-void base::samples::LaserScan::reset()
+void LaserScan::reset()
 {
     speed = 0.0;
     start_angle = 0.0;
@@ -19,14 +21,14 @@ void base::samples::LaserScan::reset()
     remission.clear();
 }
 
-bool base::samples::LaserScan::isRangeValid(base::samples::LaserScan::uint32_t range) const
+bool LaserScan::isRangeValid(LaserScan::uint32_t range) const
 {
     if(range >= minRange && range <= maxRange && range >= END_LASER_RANGE_ERRORS)
         return true;
     return false;
 }
 
-bool base::samples::LaserScan::getPointFromScanBeamXForward(const unsigned int i, Eigen::Vector3d& point) const
+bool LaserScan::getPointFromScanBeamXForward(const unsigned int i, Eigen::Vector3d& point) const
 {
     if(!isValidBeam(i))
         return false;
@@ -39,7 +41,7 @@ bool base::samples::LaserScan::getPointFromScanBeamXForward(const unsigned int i
     return true;
 }
 
-bool base::samples::LaserScan::getPointFromScanBeam(const unsigned int i, Eigen::Vector3d& point) const
+bool LaserScan::getPointFromScanBeam(const unsigned int i, Eigen::Vector3d& point) const
 {
     if(!isValidBeam(i))
         return false;
@@ -52,7 +54,7 @@ bool base::samples::LaserScan::getPointFromScanBeam(const unsigned int i, Eigen:
     return true;
 }
 
-std::vector< Eigen::Vector3d > base::samples::LaserScan::convertScanToPointCloud(const Eigen::Affine3d& transform) const
+std::vector< Eigen::Vector3d > LaserScan::convertScanToPointCloud(const Eigen::Affine3d& transform) const
 {
     std::vector<Eigen::Vector3d> pointCloud;
     pointCloud.reserve(ranges.size());
@@ -67,3 +69,5 @@ std::vector< Eigen::Vector3d > base::samples::LaserScan::convertScanToPointCloud
     
     return pointCloud;
 }
+
+}} //end namespace base::samples

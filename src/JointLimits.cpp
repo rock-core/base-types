@@ -1,6 +1,8 @@
 #include "JointLimits.hpp"
 
-bool base::JointLimits::isValid(const base::samples::Joints& joints) const
+namespace base {
+
+bool JointLimits::isValid(const samples::Joints& joints) const
 {
     if (joints.hasNames())
     {
@@ -17,7 +19,7 @@ bool base::JointLimits::isValid(const base::samples::Joints& joints) const
     return true;
 }
 
-void base::JointLimits::validate(const base::samples::Joints& joints) const
+void JointLimits::validate(const samples::Joints& joints) const
 {
     if (joints.hasNames())
     {
@@ -31,3 +33,4 @@ void base::JointLimits::validate(const base::samples::Joints& joints) const
     }
 }
 
+} //end namespace base

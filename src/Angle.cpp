@@ -2,14 +2,16 @@
 #include <boost/format.hpp>
 #include <base/Eigen.hpp>
 
-base::Angle base::Angle::vectorToVector(const base::Vector3d& a, const base::Vector3d& b)
+namespace base {
+
+Angle Angle::vectorToVector(const Vector3d& a, const Vector3d& b)
 {
     double dot = a.dot(b);
     double norm = a.norm() * b.norm();
     return fromRad(acos(dot / norm));
 }
 
-base::Angle base::Angle::vectorToVector(const base::Vector3d& a, const base::Vector3d& b, const base::Vector3d& positive)
+Angle Angle::vectorToVector(const Vector3d& a, const Vector3d& b, const Vector3d& positive)
 {
     double cos = a.dot(b) / (a.norm() * b.norm());
 
@@ -20,23 +22,23 @@ base::Angle base::Angle::vectorToVector(const base::Vector3d& a, const base::Vec
         return fromRad(-acos(cos));
 }
 
-std::ostream& operator << (std::ostream& os, base::Angle angle)
+std::ostream& operator << (std::ostream& os, Angle angle)
 {
     os << angle.getRad() << boost::format("[%3.1fdeg]") % angle.getDeg();
     return os;
 }
 
-base::AngleSegment::AngleSegment(): width(0), startRad(0), endRad(0)
+AngleSegment::AngleSegment(): width(0), startRad(0), endRad(0)
 {
 }
 
-base::AngleSegment::AngleSegment(const Angle &start, double _width): width(_width), startRad(start.getRad()), endRad(startRad + width)
+AngleSegment::AngleSegment(const Angle &start, double _width): width(_width), startRad(start.getRad()), endRad(startRad + width)
 {
     if(width < 0)
         throw std::runtime_error("Error got segment with negative width");
 }
 
-bool base::AngleSegment::isInside(const base::Angle& angle) const
+bool AngleSegment::isInside(const Angle& angle) const
 {
     double angleRad = angle.getRad();
     if(angleRad < startRad)
@@ -48,7 +50,7 @@ bool base::AngleSegment::isInside(const base::Angle& angle) const
     return false;
 }
 
-bool base::AngleSegment::isInside(const base::AngleSegment& segment) const
+bool AngleSegment::isInside(const AngleSegment& segment) const
 {
     double otherStart = segment.startRad;
     if(otherStart < startRad)
@@ -62,7 +64,7 @@ bool base::AngleSegment::isInside(const base::AngleSegment& segment) const
     return false;
 }
 
-std::vector< base::AngleSegment > base::AngleSegment::getIntersections(const base::AngleSegment& b) const
+std::vector< AngleSegment > AngleSegment::getIntersections(const AngleSegment& b) const
 {
     std::vector<AngleSegment> ret;
     //special case, this segment is a whole circle
@@ -154,18 +156,20 @@ std::vector< base::AngleSegment > base::AngleSegment::getIntersections(const bas
     return ret;
 }
 
-base::Angle base::AngleSegment::getStart() const
+Angle AngleSegment::getStart() const
 {
-    return base::Angle::fromRad(startRad);
+    return Angle::fromRad(startRad);
 }
 
-base::Angle base::AngleSegment::getEnd() const
+Angle AngleSegment::getEnd() const
 {
-    return base::Angle::fromRad(endRad);
+    return Angle::fromRad(endRad);
 }
 
-std::ostream& operator << (std::ostream& os, base::AngleSegment seg)
+std::ostream& operator << (std::ostream& os, AngleSegment seg)
 {
     os << " Segmend start " << seg.startRad/M_PI *180.0 << " end  " << seg.endRad/M_PI * 180.0 << " width " << seg.width /M_PI * 180.0;
     return os;
 }
+
+} //end namespace base

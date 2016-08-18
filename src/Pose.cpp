@@ -3,11 +3,11 @@
 namespace base 
 {
 
-base::Vector3d getEuler(const base::Orientation& orientation)
+Vector3d getEuler(const Orientation& orientation)
 {
     const Eigen::Matrix3d m = orientation.toRotationMatrix();
-    double x = base::Vector2d(m.coeff(2,2) , m.coeff(2,1)).norm();
-    base::Vector3d res(0,::atan2(-m.coeff(2,0), x),0);
+    double x = Vector2d(m.coeff(2,2) , m.coeff(2,1)).norm();
+    Vector3d res(0,::atan2(-m.coeff(2,0), x),0);
     if (x > Eigen::NumTraits<double>::dummy_precision()){
         res[0] = ::atan2(m.coeff(1,0), m.coeff(0,0));
         res[2] = ::atan2(m.coeff(2,1), m.coeff(2,2));
@@ -18,11 +18,11 @@ base::Vector3d getEuler(const base::Orientation& orientation)
     return res;
 }
 
-base::Vector3d getEuler(const base::AngleAxisd& orientation)
+Vector3d getEuler(const AngleAxisd& orientation)
 {
     const Eigen::Matrix3d m = orientation.toRotationMatrix();
-    double x = base::Vector2d(m.coeff(2,2) , m.coeff(2,1)).norm();
-    base::Vector3d res(0,::atan2(-m.coeff(2,0), x),0);
+    double x = Vector2d(m.coeff(2,2) , m.coeff(2,1)).norm();
+    Vector3d res(0,::atan2(-m.coeff(2,0), x),0);
     if (x > Eigen::NumTraits<double>::dummy_precision()){
         res[0] = ::atan2(m.coeff(1,0), m.coeff(0,0));
         res[2] = ::atan2(m.coeff(2,1), m.coeff(2,2));
@@ -33,62 +33,62 @@ base::Vector3d getEuler(const base::AngleAxisd& orientation)
     return res;
 }
 
-double getYaw(const base::Orientation& orientation)
+double getYaw(const Orientation& orientation)
 {
-    return base::getEuler(orientation)[0];
+    return getEuler(orientation)[0];
 }
 
-double getYaw(const base::AngleAxisd& orientation)
+double getYaw(const AngleAxisd& orientation)
 {
-    return base::getEuler(orientation)[0];
+    return getEuler(orientation)[0];
 }
 
-double getPitch(const base::Orientation& orientation)
+double getPitch(const Orientation& orientation)
 {
-    return base::getEuler(orientation)[1];
+    return getEuler(orientation)[1];
 }
 
-double getPitch(const base::AngleAxisd& orientation)
+double getPitch(const AngleAxisd& orientation)
 {
-    return base::getEuler(orientation)[1];
+    return getEuler(orientation)[1];
 }
 
-double getRoll(const base::Orientation& orientation)
+double getRoll(const Orientation& orientation)
 {
-    return base::getEuler(orientation)[2];
+    return getEuler(orientation)[2];
 }
 
-double getRoll(const base::AngleAxisd& orientation)
+double getRoll(const AngleAxisd& orientation)
 {
-    return base::getEuler(orientation)[2];
+    return getEuler(orientation)[2];
 }
 
-base::Orientation removeYaw(const base::Orientation& orientation)
-{
-    return Eigen::AngleAxisd( -getYaw(orientation), Eigen::Vector3d::UnitZ()) * orientation;
-}
-
-base::Orientation removeYaw(const base::AngleAxisd& orientation)
+Orientation removeYaw(const Orientation& orientation)
 {
     return Eigen::AngleAxisd( -getYaw(orientation), Eigen::Vector3d::UnitZ()) * orientation;
 }
 
-base::Orientation removePitch(const base::Orientation& orientation)
+Orientation removeYaw(const AngleAxisd& orientation)
+{
+    return Eigen::AngleAxisd( -getYaw(orientation), Eigen::Vector3d::UnitZ()) * orientation;
+}
+
+Orientation removePitch(const Orientation& orientation)
 {
     return Eigen::AngleAxisd( -getPitch(orientation), Eigen::Vector3d::UnitY()) * orientation;
 }
 
-base::Orientation removePitch(const base::AngleAxisd& orientation)
+Orientation removePitch(const AngleAxisd& orientation)
 {
     return Eigen::AngleAxisd( -getPitch(orientation), Eigen::Vector3d::UnitY()) * orientation;
 }
 
-base::Orientation removeRoll(const base::Orientation& orientation)
+Orientation removeRoll(const Orientation& orientation)
 {
     return Eigen::AngleAxisd( -getRoll(orientation), Eigen::Vector3d::UnitX()) * orientation;
 }
 
-base::Orientation removeRoll(const base::AngleAxisd& orientation)
+Orientation removeRoll(const AngleAxisd& orientation)
 {
     return Eigen::AngleAxisd( -getRoll(orientation), Eigen::Vector3d::UnitX()) * orientation;
 }
@@ -139,7 +139,7 @@ Vector6d Pose::toVector6d() const
     return res;
 }
 
-std::ostream& operator << (std::ostream& io, base::Pose const& pose)
+std::ostream& operator << (std::ostream& io, Pose const& pose)
 {
     io << "Position "
         << pose.position.transpose()
@@ -150,7 +150,7 @@ std::ostream& operator << (std::ostream& io, base::Pose const& pose)
     return io;
 }
 
-std::ostream& operator << (std::ostream& io, base::Pose2D const& pose)
+std::ostream& operator << (std::ostream& io, Pose2D const& pose)
 {
 
     io << "Position "
@@ -162,4 +162,4 @@ std::ostream& operator << (std::ostream& io, base::Pose2D const& pose)
 
 
 
-}
+} //end namespace base

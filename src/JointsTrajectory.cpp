@@ -1,6 +1,8 @@
 #include "JointsTrajectory.hpp"
 
-bool base::JointsTrajectory::isValid() const
+namespace base {
+
+bool JointsTrajectory::isValid() const
 {
     size_t samples = getTimeSteps();
 
@@ -16,7 +18,7 @@ bool base::JointsTrajectory::isValid() const
     return true;
 }
 
-void base::JointsTrajectory::resize(int num_joints, int num_samples)
+void JointsTrajectory::resize(int num_joints, int num_samples)
 {
     this->resize(num_joints);
     for(size_t i=0; i<elements.size(); i++){
@@ -24,13 +26,13 @@ void base::JointsTrajectory::resize(int num_joints, int num_samples)
     }
 }
 
-void base::JointsTrajectory::resize(int num_joints)
+void JointsTrajectory::resize(int num_joints)
 {
     elements.resize(num_joints);
     names.resize(num_joints);
 }
 
-void base::JointsTrajectory::getJointsAtTimeStep(size_t time_step, base::samples::Joints& joints)
+void JointsTrajectory::getJointsAtTimeStep(size_t time_step, samples::Joints& joints)
 {
     if(time_step > getTimeSteps())
         throw(InvalidTimeStep(time_step));
@@ -42,12 +44,12 @@ void base::JointsTrajectory::getJointsAtTimeStep(size_t time_step, base::samples
     }
 }
 
-bool base::JointsTrajectory::isTimed() const
+bool JointsTrajectory::isTimed() const
 {
     return !times.empty();
 }
 
-size_t base::JointsTrajectory::getTimeSteps() const
+size_t JointsTrajectory::getTimeSteps() const
 {
     size_t steps = 0;
     if( !elements.empty() )
@@ -55,14 +57,14 @@ size_t base::JointsTrajectory::getTimeSteps() const
     return steps;
 }
 
-size_t base::JointsTrajectory::getNumberOfJoints() const
+size_t JointsTrajectory::getNumberOfJoints() const
 {
     return elements.size();
 }
 
-base::Time base::JointsTrajectory::getDuration() const
+Time JointsTrajectory::getDuration() const
 {
-    base::Time summed;
+    Time summed;
     for(size_t i=0; i<times.size(); i++)
     {
         summed = summed+times[i];
@@ -70,7 +72,7 @@ base::Time base::JointsTrajectory::getDuration() const
     return summed;
 }
 
-
+} //end namespace base
 
 
 

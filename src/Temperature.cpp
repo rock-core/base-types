@@ -3,98 +3,100 @@
 #include <boost/format.hpp>
 #include <base/Float.hpp>
 
-base::Temperature::Temperature() : kelvin(base::unknown<double>())
+namespace base {
+
+Temperature::Temperature() : kelvin(unknown<double>())
 {
     
 }
 
-base::Temperature::Temperature(double kelvin) : kelvin(kelvin) 
+Temperature::Temperature(double kelvin) : kelvin(kelvin) 
 {
 
 }
 
-double base::Temperature::kelvin2Celsius(double kelvin)
+double Temperature::kelvin2Celsius(double kelvin)
 {
     return kelvin - 273.15;
 }
 
-double base::Temperature::celsius2Kelvin(double celsius)
+double Temperature::celsius2Kelvin(double celsius)
 {
     return celsius + 273.15;
 }
 
-base::Temperature base::Temperature::fromKelvin(double kelvin)
+Temperature Temperature::fromKelvin(double kelvin)
 {
     return Temperature( kelvin );
 }
 
-base::Temperature base::Temperature::fromCelsius(double celsius)
+Temperature Temperature::fromCelsius(double celsius)
 {
     return Temperature( celsius + 273.15);
 }
 
-double base::Temperature::getKelvin() const
+double Temperature::getKelvin() const
 {
     return kelvin;
 }
 
-double base::Temperature::getCelsius() const
+double Temperature::getCelsius() const
 {
     return kelvin - 273.15;
 }
 
-bool base::Temperature::isApprox(base::Temperature other, double prec) const
+bool Temperature::isApprox(Temperature other, double prec) const
 {
     return std::abs( other.kelvin - kelvin ) < prec;
 }
 
-void base::Temperature::operator=(const base::Temperature& other)
+void Temperature::operator=(const Temperature& other)
 {
     kelvin = other.kelvin;
 }
 
-bool base::Temperature::operator==(const base::Temperature& other) const
+bool Temperature::operator==(const Temperature& other) const
 {
     return this->kelvin == other.kelvin;
 }
 
-bool base::Temperature::operator<(const base::Temperature& other) const
+bool Temperature::operator<(const Temperature& other) const
 {
     return this->kelvin < other.kelvin;
 }
 
-bool base::Temperature::operator>(const base::Temperature& other) const
+bool Temperature::operator>(const Temperature& other) const
 {
     return this->kelvin > other.kelvin;
 }
 
-base::Temperature base::operator+(base::Temperature a, base::Temperature b)
+Temperature operator+(Temperature a, Temperature b)
 {
     return Temperature::fromKelvin( a.getKelvin() + b.getKelvin() );
 }
 
-base::Temperature base::operator-(base::Temperature a, base::Temperature b)
+Temperature operator-(Temperature a, Temperature b)
 {
     return Temperature::fromKelvin( a.getKelvin() - b.getKelvin() );
 }
 
-base::Temperature base::operator*(base::Temperature a, double b)
+Temperature operator*(Temperature a, double b)
 {
     return Temperature::fromKelvin( a.getKelvin() * b );
 }
 
-base::Temperature base::operator*(double a, base::Temperature b)
+Temperature operator*(double a, Temperature b)
 {
     return Temperature::fromKelvin( a * b.getKelvin() );
 }
 
-std::ostream& base::operator<<(std::ostream& os, base::Temperature temperature)
+std::ostream& operator<<(std::ostream& os, Temperature temperature)
 {
     os << temperature.getCelsius() << boost::format("[%3.1f celsius]");
     return os;
 }
 
-bool base::Temperature::isInRange(const base::Temperature &left_limit, const base::Temperature &right_limit) const
+bool Temperature::isInRange(const Temperature &left_limit, const Temperature &right_limit) const
 {
     if((right_limit-left_limit).kelvin < 0)
         return !isInRange(right_limit,left_limit);
@@ -104,17 +106,6 @@ bool base::Temperature::isInRange(const base::Temperature &left_limit, const bas
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+} //end namespace base
 
 

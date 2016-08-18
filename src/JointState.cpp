@@ -1,91 +1,93 @@
 #include "JointState.hpp"
 
-base::JointState base::JointState::Position(double value)
+namespace base {
+
+JointState JointState::Position(double value)
 {
     JointState ret;
     ret.position = value;
     return ret;
 }
 
-base::JointState base::JointState::Speed(float value)
+JointState JointState::Speed(float value)
 {
     JointState ret;
     ret.speed = value;
     return ret;
 }
 
-base::JointState base::JointState::Effort(float value)
+JointState JointState::Effort(float value)
 {
     JointState ret;
     ret.effort = value;
     return ret;
 }
 
-base::JointState base::JointState::Raw(float value)
+JointState JointState::Raw(float value)
 {
     JointState ret;
     ret.raw = value;
     return ret;
 }
 
-base::JointState base::JointState::Acceleration(float value)
+JointState JointState::Acceleration(float value)
 {
     JointState ret;
     ret.acceleration = value;
     return ret;
 }
 
-bool base::JointState::hasPosition() const
+bool JointState::hasPosition() const
 {
-    return !base::isUnset(position);
+    return !isUnset(position);
 }
 
-bool base::JointState::hasSpeed() const
+bool JointState::hasSpeed() const
 {
-    return !base::isUnset(speed);
+    return !isUnset(speed);
 }
 
-bool base::JointState::hasEffort() const
+bool JointState::hasEffort() const
 {
-    return !base::isUnset(effort);
+    return !isUnset(effort);
 }
 
-bool base::JointState::hasRaw() const
+bool JointState::hasRaw() const
 {
-    return !base::isUnset(raw);
+    return !isUnset(raw);
 }
 
-bool base::JointState::hasAcceleration() const
+bool JointState::hasAcceleration() const
 {
-    return !base::isUnset(acceleration);
+    return !isUnset(acceleration);
 }
 
-bool base::JointState::isPosition() const
+bool JointState::isPosition() const
 {
     return hasPosition() && !hasSpeed() && !hasEffort() && !hasRaw() && !hasAcceleration();
 }
 
-bool base::JointState::isSpeed() const
+bool JointState::isSpeed() const
 {
     return !hasPosition() && hasSpeed() && !hasEffort() && !hasRaw() && !hasAcceleration();
 }
 
-bool base::JointState::isEffort() const
+bool JointState::isEffort() const
 {
     return !hasPosition() && !hasSpeed() && hasEffort() && !hasRaw() && !hasAcceleration();
 }
 
-bool base::JointState::isRaw() const
+bool JointState::isRaw() const
 {
     return !hasPosition() && !hasSpeed() && !hasEffort() && hasRaw() && !hasAcceleration(); 
 }
 
-bool base::JointState::isAcceleration() const
+bool JointState::isAcceleration() const
 {
     return !hasPosition() && !hasSpeed() && !hasEffort() && !hasRaw() && hasAcceleration();
 }
 
-double base::JointState::getField(int mode) const
+double JointState::getField(int mode) const
 {
     switch(mode)
     {
@@ -98,7 +100,7 @@ double base::JointState::getField(int mode) const
     }
 }
 
-void base::JointState::setField(int mode, double value)
+void JointState::setField(int mode, double value)
 {
     switch(mode)
     {
@@ -121,7 +123,7 @@ void base::JointState::setField(int mode, double value)
     }
 }
 
-base::JointState::MODE base::JointState::getMode() const
+JointState::MODE JointState::getMode() const
 {
     if (isPosition())    return POSITION;
     else if (isSpeed())  return SPEED;
@@ -135,15 +137,5 @@ base::JointState::MODE base::JointState::getMode() const
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
+} //end namespace base
 

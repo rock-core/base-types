@@ -9,51 +9,53 @@
 
 #include <base/Float.hpp>
 
-base::TransformWithCovariance::TransformWithCovariance() 
-    : translation(base::Position::Zero()) , orientation(base::Quaterniond::Identity())
+namespace base {
+
+TransformWithCovariance::TransformWithCovariance() 
+    : translation(Position::Zero()) , orientation(Quaterniond::Identity())
 {
     this->invalidateCovariance();
 }
 
-base::TransformWithCovariance::TransformWithCovariance(const base::Affine3d& trans)
+TransformWithCovariance::TransformWithCovariance(const Affine3d& trans)
 {
     this->setTransform(trans);
     this->invalidateCovariance();
 }
 
-base::TransformWithCovariance::TransformWithCovariance(const base::Affine3d& trans, const base::TransformWithCovariance::Covariance& cov)
+TransformWithCovariance::TransformWithCovariance(const Affine3d& trans, const TransformWithCovariance::Covariance& cov)
 {
     this->setTransform(trans);
     this->cov = cov;
 }
 
-base::TransformWithCovariance::TransformWithCovariance(const base::Position& translation, const base::Quaterniond& orientation)
+TransformWithCovariance::TransformWithCovariance(const Position& translation, const Quaterniond& orientation)
     : translation(translation), orientation(orientation)
 {
     this->invalidateCovariance();
 }
 
-base::TransformWithCovariance::TransformWithCovariance(const base::Position& translation, const base::Quaterniond& orientation, const base::TransformWithCovariance::Covariance& cov)
+TransformWithCovariance::TransformWithCovariance(const Position& translation, const Quaterniond& orientation, const TransformWithCovariance::Covariance& cov)
     : translation(translation), orientation(orientation), cov(cov)
 {
 
 }
 
-base::TransformWithCovariance base::TransformWithCovariance::Identity()
+TransformWithCovariance TransformWithCovariance::Identity()
 {
     return TransformWithCovariance();
 }
 
-base::TransformWithCovariance base::TransformWithCovariance::composition(const base::TransformWithCovariance& trans) const
+TransformWithCovariance TransformWithCovariance::composition(const TransformWithCovariance& trans) const
 {
     return this->operator*( trans );
 }
 
-base::TransformWithCovariance base::TransformWithCovariance::compositionInv(const base::TransformWithCovariance& trans) const
+TransformWithCovariance TransformWithCovariance::compositionInv(const TransformWithCovariance& trans) const
 {
     const TransformWithCovariance &tf(*this);
     const TransformWithCovariance &t1(trans);
-    base::Position p2(tf.translation + (tf.orientation * t1.inverse().translation));
+    Position p2(tf.translation + (tf.orientation * t1.inverse().translation));
     Eigen::Quaterniond q2( tf.orientation * t1.orientation.inverse());
 
     // short path if there is no uncertainty
@@ -83,11 +85,11 @@ base::TransformWithCovariance base::TransformWithCovariance::compositionInv(cons
     return TransformWithCovariance( p2, q2, cov );
 }
 
-base::TransformWithCovariance base::TransformWithCovariance::preCompositionInv(const base::TransformWithCovariance& trans) const
+TransformWithCovariance TransformWithCovariance::preCompositionInv(const TransformWithCovariance& trans) const
 {
     const TransformWithCovariance &tf(*this);
     const TransformWithCovariance &t2(trans);
-    base::Position p1(t2.inverse().translation + (t2.orientation.inverse() * tf.translation));
+    Position p1(t2.inverse().translation + (t2.orientation.inverse() * tf.translation));
     Eigen::Quaterniond q1(t2.orientation.inverse() * tf.orientation);
 
     // short path if there is no uncertainty 
@@ -118,13 +120,13 @@ base::TransformWithCovariance base::TransformWithCovariance::preCompositionInv(c
 }
 
 
-base::TransformWithCovariance base::TransformWithCovariance::operator*(const base::TransformWithCovariance& trans) const
+TransformWithCovariance TransformWithCovariance::operator*(const TransformWithCovariance& trans) const
 {
     const TransformWithCovariance &t2(*this);
     const TransformWithCovariance &t1(trans);
 
-    const base::Quaterniond t(t2.orientation * t1.orientation);
-    const base::Position p(t2.translation + (t2.orientation * t1.translation));
+    const Quaterniond t(t2.orientation * t1.orientation);
+    const Position p(t2.translation + (t2.orientation * t1.translation));
 
     // short path if there is no uncertainty 
     if( !t1.hasValidCovariance() && !t2.hasValidCovariance() )
@@ -163,11 +165,11 @@ base::TransformWithCovariance base::TransformWithCovariance::operator*(const bas
     return TransformWithCovariance(p, t, cov);
 }
 
-base::TransformWithCovariance base::TransformWithCovariance::inverse() const
+TransformWithCovariance TransformWithCovariance::inverse() const
 {
     // short path if there is no uncertainty
     if( !hasValidCovariance() )
-        return TransformWithCovariance(static_cast<base::Position>(-(this->orientation.inverse() * this->translation)), this->orientation.inverse());
+        return TransformWithCovariance(static_cast<Position>(-(this->orientation.inverse() * this->translation)), this->orientation.inverse());
 
     Eigen::Quaterniond q(this->orientation);
     Eigen::Vector3d t(this->translation);
@@ -175,106 +177,106 @@ base::TransformWithCovariance base::TransformWithCovariance::inverse() const
     J << q.toRotationMatrix().transpose(), drx_by_dr( q.inverse(), t ),
     Eigen::Matrix3d::Zero(), Eigen::Matrix3d::Identity();
 
-    return TransformWithCovariance(static_cast<base::Position>(-(this->orientation.inverse() * this->translation)),
+    return TransformWithCovariance(static_cast<Position>(-(this->orientation.inverse() * this->translation)),
                                 this->orientation.inverse(),
                                 J*this->getCovariance()*J.transpose());
 }
 
-const base::TransformWithCovariance::Covariance& base::TransformWithCovariance::getCovariance() const
+const TransformWithCovariance::Covariance& TransformWithCovariance::getCovariance() const
 {
     return this->cov;
 }
 
-void base::TransformWithCovariance::setCovariance(const base::TransformWithCovariance::Covariance& cov)
+void TransformWithCovariance::setCovariance(const TransformWithCovariance::Covariance& cov)
 {
     this->cov = cov;
 }
 
-const base::Matrix3d base::TransformWithCovariance::getTranslationCov() const
+const Matrix3d TransformWithCovariance::getTranslationCov() const
 {
     return this->cov.topLeftCorner<3,3>();
 }
 
-void base::TransformWithCovariance::setTranslationCov(const base::Matrix3d& cov)
+void TransformWithCovariance::setTranslationCov(const Matrix3d& cov)
 {
     this->cov.topLeftCorner<3,3>() = cov;
 }
 
-const base::Matrix3d base::TransformWithCovariance::getOrientationCov() const
+const Matrix3d TransformWithCovariance::getOrientationCov() const
 {
     return this->cov.bottomRightCorner<3,3>();
 }
 
-void base::TransformWithCovariance::setOrientationCov(const base::Matrix3d& cov)
+void TransformWithCovariance::setOrientationCov(const Matrix3d& cov)
 {
     this->cov.bottomRightCorner<3,3>() = cov;
 }
 
-const base::Affine3d base::TransformWithCovariance::getTransform() const
+const Affine3d TransformWithCovariance::getTransform() const
 {
-    base::Affine3d trans (this->orientation);
+    Affine3d trans (this->orientation);
     trans.translation() = this->translation;
     return trans;
 }
 
-void base::TransformWithCovariance::setTransform(const base::Affine3d& trans)
+void TransformWithCovariance::setTransform(const Affine3d& trans)
 {
     this->translation = trans.translation();
-    this->orientation = base::Quaterniond(trans.rotation());
+    this->orientation = Quaterniond(trans.rotation());
 }
 
-const base::Orientation base::TransformWithCovariance::getOrientation() const
+const Orientation TransformWithCovariance::getOrientation() const
 {
-    return base::Orientation(this->orientation);
+    return Orientation(this->orientation);
 }
 
-void base::TransformWithCovariance::setOrientation(const base::Orientation& q)
+void TransformWithCovariance::setOrientation(const Orientation& q)
 {
-    this->orientation = base::Quaterniond(q);
+    this->orientation = Quaterniond(q);
 }
 
-bool base::TransformWithCovariance::hasValidTransform() const
+bool TransformWithCovariance::hasValidTransform() const
 {
     return !translation.hasNaN() && !orientation.coeffs().hasNaN();
 }
 
-void base::TransformWithCovariance::invalidateTransform()
+void TransformWithCovariance::invalidateTransform()
 {
-    translation = base::Position::Ones() * base::NaN<double>();
-    orientation.coeffs() = base::Vector4d::Ones() * base::NaN<double>();
+    translation = Position::Ones() * NaN<double>();
+    orientation.coeffs() = Vector4d::Ones() * NaN<double>();
 }
 
-bool base::TransformWithCovariance::hasValidCovariance() const
+bool TransformWithCovariance::hasValidCovariance() const
 {
     return !cov.hasNaN();
 }
 
-void base::TransformWithCovariance::invalidateCovariance()
+void TransformWithCovariance::invalidateCovariance()
 {
-    cov = Covariance::Ones() * base::NaN<double>();
+    cov = Covariance::Ones() * NaN<double>();
 }
 
-Eigen::Quaterniond base::TransformWithCovariance::r_to_q(const Eigen::Vector3d& r)
+Eigen::Quaterniond TransformWithCovariance::r_to_q(const Eigen::Vector3d& r)
 {
     double theta = r.norm();
     if( fabs(theta) > 1e-5 )
-        return Eigen::Quaterniond( base::AngleAxisd( theta, r/theta ) );
+        return Eigen::Quaterniond( AngleAxisd( theta, r/theta ) );
     else
         return Eigen::Quaterniond::Identity();
 }
 
-Eigen::Vector3d base::TransformWithCovariance::q_to_r(const Eigen::Quaterniond& q)
+Eigen::Vector3d TransformWithCovariance::q_to_r(const Eigen::Quaterniond& q)
 {
-    base::AngleAxisd aa( q );
+    AngleAxisd aa( q );
     return aa.axis() * aa.angle();
 }
 
-double base::TransformWithCovariance::sign(double v)
+double TransformWithCovariance::sign(double v)
 {
     return v > 0.0 ? 1.0 : -1.0;
 }
 
-Eigen::Matrix< double, int(3), int(3) > base::TransformWithCovariance::skew_symmetric(const Eigen::Vector3d& r)
+Eigen::Matrix< double, int(3), int(3) > TransformWithCovariance::skew_symmetric(const Eigen::Vector3d& r)
 {
     Eigen::Matrix3d res;
     res << 0, -r.z(), r.y(),
@@ -283,7 +285,7 @@ Eigen::Matrix< double, int(3), int(3) > base::TransformWithCovariance::skew_symm
     return res;
 }
 
-Eigen::Matrix< double, int(4), int(3) > base::TransformWithCovariance::dq_by_dr(const Eigen::Quaterniond& q)
+Eigen::Matrix< double, int(4), int(3) > TransformWithCovariance::dq_by_dr(const Eigen::Quaterniond& q)
 {
     const Eigen::Vector3d r( q_to_r( q ) );
 
@@ -297,7 +299,7 @@ Eigen::Matrix< double, int(4), int(3) > base::TransformWithCovariance::dq_by_dr(
     return res;
 }
 
-Eigen::Matrix< double, int(3), int(4) > base::TransformWithCovariance::dr_by_dq(const Eigen::Quaterniond& q)
+Eigen::Matrix< double, int(3), int(4) > TransformWithCovariance::dr_by_dq(const Eigen::Quaterniond& q)
 {
     const Eigen::Vector3d r( q_to_r( q ) );
     const double mu = q.vec().norm();
@@ -310,7 +312,7 @@ Eigen::Matrix< double, int(3), int(4) > base::TransformWithCovariance::dr_by_dq(
     return res;
 }
 
-Eigen::Matrix< double, int(4), int(4) > base::TransformWithCovariance::dq2q1_by_dq1(const Eigen::Quaterniond& q2)
+Eigen::Matrix< double, int(4), int(4) > TransformWithCovariance::dq2q1_by_dq1(const Eigen::Quaterniond& q2)
 {
     Eigen::Matrix<double,4,4> res;
     res << 0, -q2.vec().transpose(),
@@ -318,7 +320,7 @@ Eigen::Matrix< double, int(4), int(4) > base::TransformWithCovariance::dq2q1_by_
     return Eigen::Matrix<double,4,4>::Identity() * q2.w() + res;
 }
 
-Eigen::Matrix< double, int(4), int(4) > base::TransformWithCovariance::dq2q1_by_dq2(const Eigen::Quaterniond& q1)
+Eigen::Matrix< double, int(4), int(4) > TransformWithCovariance::dq2q1_by_dq2(const Eigen::Quaterniond& q1)
 {
     Eigen::Matrix<double,4,4> res;
     res << 0, -q1.vec().transpose(),
@@ -326,7 +328,7 @@ Eigen::Matrix< double, int(4), int(4) > base::TransformWithCovariance::dq2q1_by_
     return Eigen::Matrix<double,4,4>::Identity() * q1.w() + res;
 }
 
-Eigen::Matrix< double, int(3), int(3) > base::TransformWithCovariance::dr2r1_by_r1(const Eigen::Quaterniond& q, const Eigen::Quaterniond& q1, const Eigen::Quaterniond& q2)
+Eigen::Matrix< double, int(3), int(3) > TransformWithCovariance::dr2r1_by_r1(const Eigen::Quaterniond& q, const Eigen::Quaterniond& q1, const Eigen::Quaterniond& q2)
 {
     return Eigen::Matrix3d(
     dr_by_dq( q )
@@ -334,7 +336,7 @@ Eigen::Matrix< double, int(3), int(3) > base::TransformWithCovariance::dr2r1_by_
     * dq_by_dr( q1 ) );
 }
 
-Eigen::Matrix< double, int(3), int(3) > base::TransformWithCovariance::dr2r1_by_r2(const Eigen::Quaterniond& q, const Eigen::Quaterniond& q1, const Eigen::Quaterniond& q2)
+Eigen::Matrix< double, int(3), int(3) > TransformWithCovariance::dr2r1_by_r2(const Eigen::Quaterniond& q, const Eigen::Quaterniond& q1, const Eigen::Quaterniond& q2)
 {
     return Eigen::Matrix3d(
     dr_by_dq( q )
@@ -342,7 +344,7 @@ Eigen::Matrix< double, int(3), int(3) > base::TransformWithCovariance::dr2r1_by_
     * dq_by_dr( q2 ) );
 }
 
-Eigen::Matrix< double, int(3), int(3) > base::TransformWithCovariance::drx_by_dr(const Eigen::Quaterniond& q, const Eigen::Vector3d& x)
+Eigen::Matrix< double, int(3), int(3) > TransformWithCovariance::drx_by_dr(const Eigen::Quaterniond& q, const Eigen::Vector3d& x)
 {
     const Eigen::Vector3d r( q_to_r( q ) );
     const double theta = r.norm();
@@ -358,11 +360,11 @@ Eigen::Matrix< double, int(3), int(3) > base::TransformWithCovariance::drx_by_dr
         + 2.0*beta*Eigen::Matrix3d::Identity()) );
 }
 
-std::ostream& base::operator<<(std::ostream& out, const base::TransformWithCovariance& trans)
+std::ostream& operator<<(std::ostream& out, const TransformWithCovariance& trans)
 {
     /** cout the 6D pose vector (translation and scaled axis orientation) with its associated covariance matrix **/
-    base::Vector3d scaled_axis;
-    base::AngleAxisd angle_axis (trans.orientation);
+    Vector3d scaled_axis;
+    AngleAxisd angle_axis (trans.orientation);
     scaled_axis = angle_axis.axis() * angle_axis.angle();
     for (register unsigned short i=0; i<trans.getCovariance().rows(); ++i)
     {
@@ -380,10 +382,11 @@ std::ostream& base::operator<<(std::ostream& out, const base::TransformWithCovar
         }
         out<<"\n";
     }
-    out.unsetf(std::ios_base::floatfield);
+    out.unsetf(std::ios_floatfield);
     return out;
 }
 
+} //end namespace base
 
 
 

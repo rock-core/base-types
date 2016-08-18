@@ -7,85 +7,87 @@
 #include <stdio.h>
 #include <time.h>
 
-base::Time::Time(int64_t _microseconds) : microseconds(_microseconds)
+namespace base {
+
+Time::Time(int64_t _microseconds) : microseconds(_microseconds)
 {
 
 }
 
-base::Time::Time() : microseconds(0)
+Time::Time() : microseconds(0)
 {
 
 }
 
-base::Time base::Time::now()
+Time Time::now()
 {
     timeval t;
     gettimeofday(&t, 0);
     return Time(static_cast<int64_t>(t.tv_sec) * UsecPerSec + t.tv_usec);
 }
 
-bool base::Time::operator<(const base::Time& ts) const
+bool Time::operator<(const Time& ts) const
 {
     return microseconds < ts.microseconds;
 }
 
-bool base::Time::operator>(const base::Time& ts) const
+bool Time::operator>(const Time& ts) const
 {
     return microseconds > ts.microseconds;
 }
 
-bool base::Time::operator==(const base::Time& ts) const
+bool Time::operator==(const Time& ts) const
 {
     return microseconds == ts.microseconds;
 }
 
-bool base::Time::operator!=(const base::Time& ts) const
+bool Time::operator!=(const Time& ts) const
 {
     return !(*this == ts);
 }
 
-bool base::Time::operator>=(const base::Time& ts) const
+bool Time::operator>=(const Time& ts) const
 {
     return !(*this < ts);
 }
 
-bool base::Time::operator<=(const base::Time& ts) const
+bool Time::operator<=(const Time& ts) const
 {
     return !(*this > ts); 
 }
 
-base::Time base::Time::operator-(const base::Time& ts) const
+Time Time::operator-(const Time& ts) const
 {
     return Time(microseconds - ts.microseconds);
 }
 
-base::Time base::Time::operator+(const base::Time& ts) const
+Time Time::operator+(const Time& ts) const
 {
     return Time(microseconds + ts.microseconds);
 }
 
-base::Time base::Time::operator/(int divider) const
+Time Time::operator/(int divider) const
 {
     return Time(microseconds / divider);
 }
 
-base::Time base::Time::operator*(double factor) const
+Time Time::operator*(double factor) const
 {
     return Time(microseconds * factor);
 }
 
-bool base::Time::isNull() const
+bool Time::isNull() const
 {
     return microseconds == 0;
 }
 
-timeval base::Time::toTimeval() const
+timeval Time::toTimeval() const
 {
     timeval tv = { static_cast<time_t>(microseconds / UsecPerSec), static_cast<suseconds_t>(microseconds % UsecPerSec) };
     return tv;
 }
 
-std::string base::Time::toString(base::Time::Resolution resolution, const std::string& mainFormat) const
+std::string Time::toString(Time::Resolution resolution, const std::string& mainFormat) const
 {
     struct timeval tv = toTimeval();
     int uSecs = tv.tv_usec;
@@ -109,60 +111,60 @@ std::string base::Time::toString(base::Time::Resolution resolution, const std::s
             break;
         default:
             throw std::invalid_argument(
-                "base::Time::toString(): invalid "
+                "Time::toString(): invalid "
                 "value in switch-statement");
     }
 
     return std::string(buffer);
 }
 
-double base::Time::toSeconds() const
+double Time::toSeconds() const
 {
     return static_cast<double>(microseconds) / UsecPerSec;
 }
 
-int64_t base::Time::toMilliseconds() const
+int64_t Time::toMilliseconds() const
 {
     return microseconds / 1000;
 }
 
-int64_t base::Time::toMicroseconds() const
+int64_t Time::toMicroseconds() const
 {
     return microseconds;
 }
 
-base::Time base::Time::fromMicroseconds(uint64_t value)
+Time Time::fromMicroseconds(uint64_t value)
 {
     return Time(value);
 }
 
-base::Time base::Time::fromMilliseconds(uint64_t value)
+Time Time::fromMilliseconds(uint64_t value)
 {
     return Time(value * 1000);
 }
 
-base::Time base::Time::fromSeconds(int64_t value)
+Time Time::fromSeconds(int64_t value)
 {
     return Time(value * UsecPerSec); 
 }
 
-base::Time base::Time::fromSeconds(int value)
+Time Time::fromSeconds(int value)
 {
     return Time(static_cast<int64_t>(value) * UsecPerSec);
 }
 
-base::Time base::Time::fromSeconds(int64_t value, int microseconds)
+Time Time::fromSeconds(int64_t value, int microseconds)
 {
     return Time(value * UsecPerSec + static_cast<int64_t>(microseconds));
 }
 
-base::Time base::Time::fromSeconds(double value)
+Time Time::fromSeconds(double value)
 {
     int64_t seconds = value;
     return Time(seconds * UsecPerSec + static_cast<int64_t>(round((value - seconds) * UsecPerSec)));
 }
 
-base::Time base::Time::fromTimeValues(int year, int month, int day, int hour, int minute, int seconds, int millis, int micros)
+Time Time::fromTimeValues(int year, int month, int day, int hour, int minute, int seconds, int millis, int micros)
 {
     struct tm timeobj;
     timeobj.tm_year = year - 1900;
@@ -185,7 +187,7 @@ base::Time base::Time::fromTimeValues(int year, int month, int day, int hour, in
     return Time(timeVal); 
 }
 
-base::Time base::Time::fromString(const std::string& stringTime, base::Time::Resolution resolution, const std::string& mainFormat)
+Time Time::fromString(const std::string& stringTime, Time::Resolution resolution, const std::string& mainFormat)
 {
     std::string mainTime = stringTime;
     int32_t usecs = 0;
@@ -199,7 +201,7 @@ base::Time base::Time::fromString(const std::string& stringTime, base::Time::Res
             // string matches resolutions
         } else
         { 
-            throw std::runtime_error("base::Time::fromString failed - resolution does not match provided Time-String");
+            throw std::runtime_error("Time::fromString failed - resolution does not match provided Time-String");
         }
 
         switch(resolution)
@@ -213,11 +215,11 @@ base::Time base::Time::fromString(const std::string& stringTime, base::Time::Res
                 break;
             case Seconds:
                 throw std::invalid_argument(
-                    "base::Time::fromString(); "
+                    "Time::fromString(); "
                     "'Seconds' is an invalid case "
                     "here");
             default:
-                throw std::invalid_argument("base::Time::fromString(): "
+                throw std::invalid_argument("Time::fromString(): "
                                             "invalid value in "
                                             "switch-statement");
         }
@@ -226,7 +228,7 @@ base::Time base::Time::fromString(const std::string& stringTime, base::Time::Res
     struct tm tm;
     if(NULL == strptime(mainTime.c_str(), mainFormat.c_str(), &tm))
     {
-        throw std::runtime_error("base::Time::fromString failed- Time-String '" + mainTime + "' did not match the given format '" + mainFormat +"'");
+        throw std::runtime_error("Time::fromString failed- Time-String '" + mainTime + "' did not match the given format '" + mainFormat +"'");
     }
     // " ... not set by strptime(); tells mktime() to determine 
     // whether daylight saving time is in effect ..."
@@ -239,7 +241,7 @@ base::Time base::Time::fromString(const std::string& stringTime, base::Time::Res
 }
 
 
-std::ostream& base::operator<<(std::ostream& io, const base::Time& time)
+std::ostream& operator<<(std::ostream& io, const Time& time)
 {
     const int64_t microsecs = time.toMicroseconds();
 
@@ -253,18 +255,4 @@ std::ostream& base::operator<<(std::ostream& io, const base::Time& time)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+} //end namespace base

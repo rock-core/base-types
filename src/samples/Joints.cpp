@@ -1,6 +1,8 @@
 #include "Joints.hpp"
 
-base::samples::Joints base::samples::Joints::Positions(const std::vector< double >& positions)
+namespace base { namespace samples {
+
+Joints Joints::Positions(const std::vector< double >& positions)
 {
     Joints result;
     result.elements.resize(positions.size());
@@ -9,7 +11,7 @@ base::samples::Joints base::samples::Joints::Positions(const std::vector< double
     return result;
 }
 
-base::samples::Joints base::samples::Joints::Positions(const std::vector< double >& positions, const std::vector< std::string >& names)
+Joints Joints::Positions(const std::vector< double >& positions, const std::vector< std::string >& names)
 {
     Joints result = Positions(positions);
     if (result.elements.size() != names.size())
@@ -18,7 +20,7 @@ base::samples::Joints base::samples::Joints::Positions(const std::vector< double
     return result;
 }
 
-base::samples::Joints base::samples::Joints::Speeds(const std::vector< float >& speeds)
+Joints Joints::Speeds(const std::vector< float >& speeds)
 {
     Joints result;
     result.elements.resize(speeds.size());
@@ -27,7 +29,7 @@ base::samples::Joints base::samples::Joints::Speeds(const std::vector< float >& 
     return result;
 }
 
-base::samples::Joints base::samples::Joints::Speeds(const std::vector< float >& speeds, const std::vector< std::string >& names)
+Joints Joints::Speeds(const std::vector< float >& speeds, const std::vector< std::string >& names)
 {
     Joints result = Speeds(speeds);
     if (result.elements.size() != names.size())
@@ -36,7 +38,7 @@ base::samples::Joints base::samples::Joints::Speeds(const std::vector< float >& 
     return result;
 }
 
-base::samples::Joints base::samples::Joints::Efforts(const std::vector< float >& efforts)
+Joints Joints::Efforts(const std::vector< float >& efforts)
 {
     Joints result;
     result.elements.resize(efforts.size());
@@ -45,7 +47,7 @@ base::samples::Joints base::samples::Joints::Efforts(const std::vector< float >&
     return result;
 }
 
-base::samples::Joints base::samples::Joints::Efforts(const std::vector< float >& efforts, const std::vector< std::string >& names)
+Joints Joints::Efforts(const std::vector< float >& efforts, const std::vector< std::string >& names)
 {
     Joints result = Efforts(efforts);
     if (result.elements.size() != names.size())
@@ -54,7 +56,7 @@ base::samples::Joints base::samples::Joints::Efforts(const std::vector< float >&
     return result;
 }
 
-base::samples::Joints base::samples::Joints::Raw(const std::vector< float >& raw)
+Joints Joints::Raw(const std::vector< float >& raw)
 {
     Joints result;
     result.elements.resize(raw.size());
@@ -63,7 +65,7 @@ base::samples::Joints base::samples::Joints::Raw(const std::vector< float >& raw
     return result;
 }
 
-base::samples::Joints base::samples::Joints::Raw(const std::vector< float >& raw, const std::vector< std::string >& names)
+Joints Joints::Raw(const std::vector< float >& raw, const std::vector< std::string >& names)
 {
     Joints result = Raw(raw);
     if (result.elements.size() != names.size())
@@ -72,7 +74,7 @@ base::samples::Joints base::samples::Joints::Raw(const std::vector< float >& raw
     return result;
 }
 
-base::samples::Joints base::samples::Joints::Accelerations(const std::vector< float >& acceleration)
+Joints Joints::Accelerations(const std::vector< float >& acceleration)
 {
     Joints result;
     result.elements.resize(acceleration.size());
@@ -81,7 +83,7 @@ base::samples::Joints base::samples::Joints::Accelerations(const std::vector< fl
     return result;
 }
 
-base::samples::Joints base::samples::Joints::Accelerations(const std::vector< float >& acceleration, const std::vector< std::string >& names)
+Joints Joints::Accelerations(const std::vector< float >& acceleration, const std::vector< std::string >& names)
 {
     Joints result = Accelerations(acceleration);
     if (result.elements.size() != names.size())
@@ -90,5 +92,6 @@ base::samples::Joints base::samples::Joints::Accelerations(const std::vector< fl
     return result;
 }
 
+}} //end namespace base::samples
 
 

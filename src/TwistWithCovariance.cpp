@@ -9,6 +9,8 @@
 
 #include <base/Float.hpp>
 
+namespace base {
+
 /**
  * Guarantee Symmetric (semi-) Positive Definite (SPD) matrix.
  * The input matrix must be symmetric already (only the lower triangular part will be considered)
@@ -34,162 +36,154 @@ static typename _MatrixType::PlainObject guaranteeSPD (const _MatrixType &A, con
 };
 
 
-typedef base::TwistWithCovariance::Covariance Covariance;
+typedef TwistWithCovariance::Covariance Covariance;
 
-base::TwistWithCovariance::TwistWithCovariance(const base::Vector3d& vel, const base::Vector3d& rot)
+TwistWithCovariance::TwistWithCovariance(const Vector3d& vel, const Vector3d& rot)
     : vel(vel), rot(rot)
 {
     this->invalidateCovariance();
 }
 
-base::TwistWithCovariance::TwistWithCovariance(const base::Vector3d& vel, const base::Vector3d& rot, const base::TwistWithCovariance::Covariance& cov)
+TwistWithCovariance::TwistWithCovariance(const Vector3d& vel, const Vector3d& rot, const TwistWithCovariance::Covariance& cov)
     : vel(vel), rot(rot), cov(cov)
 {
 
 }
 
-base::TwistWithCovariance::TwistWithCovariance(const base::Vector6d& velocity, const base::TwistWithCovariance::Covariance& cov)
+TwistWithCovariance::TwistWithCovariance(const Vector6d& velocity, const TwistWithCovariance::Covariance& cov)
 {
     this->setVelocity(velocity);
     this->cov = cov;
 }
 
-const base::Vector3d& base::TwistWithCovariance::getTranslation() const
+const Vector3d& TwistWithCovariance::getTranslation() const
 {
     return this->vel;
 }
 
-void base::TwistWithCovariance::setTranslation(const base::Vector3d& vel)
+void TwistWithCovariance::setTranslation(const Vector3d& vel)
 {
     this->vel = vel;
 }
 
-const base::Vector3d& base::TwistWithCovariance::getRotation() const
+const Vector3d& TwistWithCovariance::getRotation() const
 {
     return this->rot;
 }
 
-void base::TwistWithCovariance::setRotation(const base::Vector3d& rot)
+void TwistWithCovariance::setRotation(const Vector3d& rot)
 {
     this->rot = rot;
 }
 
-const base::TwistWithCovariance::Covariance& base::TwistWithCovariance::getCovariance() const
+const TwistWithCovariance::Covariance& TwistWithCovariance::getCovariance() const
 {
     return this->cov;
 }
 
-void base::TwistWithCovariance::setCovariance(const base::TwistWithCovariance::Covariance& cov)
+void TwistWithCovariance::setCovariance(const TwistWithCovariance::Covariance& cov)
 {
     this->cov = cov;
 }
 
-const base::Matrix3d base::TwistWithCovariance::getLinearVelocityCov() const
+const Matrix3d TwistWithCovariance::getLinearVelocityCov() const
 {
     return this->cov.block<3,3>(0,0);
 }
 
-void base::TwistWithCovariance::setLinearVelocityCov(const base::Matrix3d& cov)
+void TwistWithCovariance::setLinearVelocityCov(const Matrix3d& cov)
 {
     this->cov.block<3,3>(0,0) = cov;
 }
 
-const base::Matrix3d base::TwistWithCovariance::getAngularVelocityCov() const
+const Matrix3d TwistWithCovariance::getAngularVelocityCov() const
 {
     return this->cov.block<3,3>(3,3);
 }
 
-void base::TwistWithCovariance::setAngularVelocityCov(const base::Matrix3d& cov)
+void TwistWithCovariance::setAngularVelocityCov(const Matrix3d& cov)
 {
     this->cov.block<3,3>(3,3) = cov;
 }
 
-const base::Vector3d& base::TwistWithCovariance::getLinearVelocity() const
+const Vector3d& TwistWithCovariance::getLinearVelocity() const
 {
     return this->getTranslation(); 
 }
 
-void base::TwistWithCovariance::setLinearVelocity(const base::Vector3d& vel)
+void TwistWithCovariance::setLinearVelocity(const Vector3d& vel)
 {
     return this->setTranslation(vel);
 }
 
-const base::Vector3d& base::TwistWithCovariance::getAngularVelocity() const
+const Vector3d& TwistWithCovariance::getAngularVelocity() const
 {
     return this->getRotation();
 }
 
-void base::TwistWithCovariance::setAngularVelocity(const base::Vector3d& rot)
+void TwistWithCovariance::setAngularVelocity(const Vector3d& rot)
 {
     return this->setRotation(rot);
 }
 
-const base::Vector3d& base::TwistWithCovariance::translation() const
+const Vector3d& TwistWithCovariance::translation() const
 {
     return this->getTranslation();
 }
 
-const base::Vector3d& base::TwistWithCovariance::rotation() const
+const Vector3d& TwistWithCovariance::rotation() const
 {
     return this->getRotation();
 }
 
-const base::Vector6d base::TwistWithCovariance::getVelocity() const
+const Vector6d TwistWithCovariance::getVelocity() const
 {
-    base::Vector6d all_velocities;
+    Vector6d all_velocities;
     all_velocities.block<3,1>(0,0) = this->vel;
     all_velocities.block<3,1>(3,0) = this->rot;
     return all_velocities;
 }
 
-void base::TwistWithCovariance::setVelocity(const base::Vector6d& velocity)
+void TwistWithCovariance::setVelocity(const Vector6d& velocity)
 {
     /** Linear velocity at first place, Angular velocity at second place **/
     this->vel = velocity.block<3,1>(0,0);
     this->rot = velocity.block<3,1>(3,0);
 }
 
-bool base::TwistWithCovariance::hasValidVelocity() const
+bool TwistWithCovariance::hasValidVelocity() const
 {
     return this->vel.allFinite() && this->rot.allFinite();
 }
 
-void base::TwistWithCovariance::invalidateVelocity()
+void TwistWithCovariance::invalidateVelocity()
 {
-    this->vel = base::Vector3d::Ones() * base::unknown<double>();
-    this->rot = base::Vector3d::Ones() * base::unknown<double>();
+    this->vel = Vector3d::Ones() * unknown<double>();
+    this->rot = Vector3d::Ones() * unknown<double>();
 }
 
-bool base::TwistWithCovariance::hasValidCovariance() const
+bool TwistWithCovariance::hasValidCovariance() const
 {
     return this->cov.allFinite();
 }
 
-void base::TwistWithCovariance::invalidateCovariance()
+void TwistWithCovariance::invalidateCovariance()
 {
-    this->cov = Covariance::Ones() * base::unknown<double>();
+    this->cov = Covariance::Ones() * unknown<double>();
 }
 
-void base::TwistWithCovariance::invalidate()
+void TwistWithCovariance::invalidate()
 {
     this->invalidateVelocity();
     this->invalidateCovariance();
 }
 
-base::TwistWithCovariance base::TwistWithCovariance::Zero()
+TwistWithCovariance TwistWithCovariance::Zero()
 {
-    return TwistWithCovariance(static_cast<const base::Vector3d>(base::Vector3d::Zero()), static_cast<const base::Vector3d>(base::Vector3d::Zero()));
+    return TwistWithCovariance(static_cast<const Vector3d>(Vector3d::Zero()), static_cast<const Vector3d>(Vector3d::Zero()));
 }
 
-double& base::TwistWithCovariance::operator[](int i)
-{
-    if (i<3)
-        return this->vel(i);
-    else
-        return this->rot(i-3);
-}
-
-double base::TwistWithCovariance::operator[](int i) const
+double& TwistWithCovariance::operator[](int i)
 {
     if (i<3)
         return this->vel(i);
@@ -197,7 +191,15 @@ double base::TwistWithCovariance::operator[](int i) const
         return this->rot(i-3);
 }
 
-base::TwistWithCovariance& base::TwistWithCovariance::operator+=(const base::TwistWithCovariance& arg)
+double TwistWithCovariance::operator[](int i) const
+{
+    if (i<3)
+        return this->vel(i);
+    else
+        return this->rot(i-3);
+}
+
+TwistWithCovariance& TwistWithCovariance::operator+=(const TwistWithCovariance& arg)
 {
     this->vel += arg.vel;
     this->rot += arg.rot;
@@ -209,12 +211,12 @@ base::TwistWithCovariance& base::TwistWithCovariance::operator+=(const base::Twi
     return *this;
 }
 
-base::TwistWithCovariance operator+(base::TwistWithCovariance lhs, const base::TwistWithCovariance& rhs)
+TwistWithCovariance operator+(TwistWithCovariance lhs, const TwistWithCovariance& rhs)
 {
      return lhs += rhs;
 }
 
-base::TwistWithCovariance& base::TwistWithCovariance::operator-=(const base::TwistWithCovariance& arg)
+TwistWithCovariance& TwistWithCovariance::operator-=(const TwistWithCovariance& arg)
 {
     this->vel -= arg.vel;
     this->rot -= arg.rot;
@@ -227,38 +229,38 @@ base::TwistWithCovariance& base::TwistWithCovariance::operator-=(const base::Twi
     return *this;
 }
 
-base::TwistWithCovariance operator-(base::TwistWithCovariance lhs, const base::TwistWithCovariance& rhs)
+TwistWithCovariance operator-(TwistWithCovariance lhs, const TwistWithCovariance& rhs)
 {
      return lhs -= rhs;
 }
 
-base::TwistWithCovariance operator*(const base::TwistWithCovariance& lhs, double rhs)
+TwistWithCovariance operator*(const TwistWithCovariance& lhs, double rhs)
 {
     if (!lhs.hasValidCovariance())
     {
-        return base::TwistWithCovariance(static_cast<base::Vector3d>(lhs.vel*rhs), static_cast<base::Vector3d>(lhs.rot*rhs));
+        return TwistWithCovariance(static_cast<Vector3d>(lhs.vel*rhs), static_cast<Vector3d>(lhs.rot*rhs));
     }
     else
     {
-        return base::TwistWithCovariance(static_cast<base::Vector3d>(lhs.vel*rhs), static_cast<base::Vector3d>(lhs.rot*rhs), static_cast<Covariance>((rhs*rhs)*lhs.cov));
+        return TwistWithCovariance(static_cast<Vector3d>(lhs.vel*rhs), static_cast<Vector3d>(lhs.rot*rhs), static_cast<Covariance>((rhs*rhs)*lhs.cov));
     }
 }
 
-base::TwistWithCovariance operator*(double lhs, const base::TwistWithCovariance& rhs)
+TwistWithCovariance operator*(double lhs, const TwistWithCovariance& rhs)
 {
     if (!rhs.hasValidCovariance())
     {
-        return base::TwistWithCovariance(static_cast<base::Vector3d>(lhs*rhs.vel), static_cast<base::Vector3d>(lhs*rhs.rot));
+        return TwistWithCovariance(static_cast<Vector3d>(lhs*rhs.vel), static_cast<Vector3d>(lhs*rhs.rot));
     }
     else
     {
-        return base::TwistWithCovariance(static_cast<base::Vector3d>(lhs*rhs.vel), static_cast<base::Vector3d>(lhs*rhs.rot), static_cast<Covariance>((lhs*lhs)*rhs.cov));
+        return TwistWithCovariance(static_cast<Vector3d>(lhs*rhs.vel), static_cast<Vector3d>(lhs*rhs.rot), static_cast<Covariance>((lhs*lhs)*rhs.cov));
     }
 }
 
-base::TwistWithCovariance operator*(const base::TwistWithCovariance& lhs, const base::TwistWithCovariance& rhs)
+TwistWithCovariance operator*(const TwistWithCovariance& lhs, const TwistWithCovariance& rhs)
 {
-    base::TwistWithCovariance tmp;
+    TwistWithCovariance tmp;
     tmp.vel = lhs.rot.cross(rhs.vel)+lhs.vel.cross(rhs.rot);
     tmp.rot = lhs.rot.cross(rhs.rot);
 
@@ -271,23 +273,23 @@ base::TwistWithCovariance operator*(const base::TwistWithCovariance& lhs, const 
         /** Initialize covariance **/
         tmp.cov.setZero();
 
-        cross_jacob = base::TwistWithCovariance::crossJacobian(lhs.rot, rhs.vel);
-        cross_cov << lhs.cov.block<3,3>(3,3), base::Matrix3d::Zero(),
-                    base::Matrix3d::Zero(), rhs.cov.block<3,3>(0,0);
+        cross_jacob = TwistWithCovariance::crossJacobian(lhs.rot, rhs.vel);
+        cross_cov << lhs.cov.block<3,3>(3,3), Matrix3d::Zero(),
+                    Matrix3d::Zero(), rhs.cov.block<3,3>(0,0);
 
         /** Linear velocity is at the first covariance block **/
         tmp.cov.block<3,3>(0,0) = cross_jacob * cross_cov * cross_jacob.transpose();
 
-        cross_jacob = base::TwistWithCovariance::crossJacobian(lhs.vel, rhs.rot);
-        cross_cov << lhs.cov.block<3,3>(0,0), base::Matrix3d::Zero(),
-                    base::Matrix3d::Zero(),rhs.cov.block<3,3>(3,3);
+        cross_jacob = TwistWithCovariance::crossJacobian(lhs.vel, rhs.rot);
+        cross_cov << lhs.cov.block<3,3>(0,0), Matrix3d::Zero(),
+                    Matrix3d::Zero(),rhs.cov.block<3,3>(3,3);
 
         /** Linear velocity is at the first covariance block **/
         tmp.cov.block<3,3>(0,0) += cross_jacob * cross_cov * cross_jacob.transpose();
 
-        cross_jacob = base::TwistWithCovariance::crossJacobian(lhs.rot, rhs.rot);
-        cross_cov << lhs.cov.block<3,3>(3,3), base::Matrix3d::Zero(),
-                    base::Matrix3d::Zero(),rhs.cov.block<3,3>(3,3);
+        cross_jacob = TwistWithCovariance::crossJacobian(lhs.rot, rhs.rot);
+        cross_cov << lhs.cov.block<3,3>(3,3), Matrix3d::Zero(),
+                    Matrix3d::Zero(),rhs.cov.block<3,3>(3,3);
 
         /** Angular velocity is at the first covariance block **/
         tmp.cov.block<3,3>(3,3) = cross_jacob * cross_cov * cross_jacob.transpose();
@@ -298,27 +300,27 @@ base::TwistWithCovariance operator*(const base::TwistWithCovariance& lhs, const 
     return tmp;
 }
 
-base::TwistWithCovariance operator/(const base::TwistWithCovariance& lhs, double rhs)
+TwistWithCovariance operator/(const TwistWithCovariance& lhs, double rhs)
 {
-     return base::TwistWithCovariance(static_cast<base::Vector3d>(lhs.vel/rhs), static_cast<base::Vector3d>(lhs.rot/rhs), static_cast<Covariance>((1.0/(rhs *rhs))*lhs.cov));
+     return TwistWithCovariance(static_cast<Vector3d>(lhs.vel/rhs), static_cast<Vector3d>(lhs.rot/rhs), static_cast<Covariance>((1.0/(rhs *rhs))*lhs.cov));
 }
 
-base::TwistWithCovariance operator-(const base::TwistWithCovariance& arg)
+TwistWithCovariance operator-(const TwistWithCovariance& arg)
 {
-    return base::TwistWithCovariance(static_cast<base::Vector3d>(-arg.vel), static_cast<base::Vector3d>(-arg.rot), arg.cov);
+    return TwistWithCovariance(static_cast<Vector3d>(-arg.vel), static_cast<Vector3d>(-arg.rot), arg.cov);
 }
 
-Eigen::Matrix< double, int(3), int(6) > base::TwistWithCovariance::crossJacobian(const base::Vector3d& u, const base::Vector3d& v)
+Eigen::Matrix< double, int(3), int(6) > TwistWithCovariance::crossJacobian(const Vector3d& u, const Vector3d& v)
 {
     Eigen::Matrix<double, 3, 6> cross_jacob;
-    base::Matrix3d cross_u, cross_v;
+    Matrix3d cross_u, cross_v;
     cross_u << 0.0, -u[2], u[1], u[2], 0.0, -u[0], -u[1], u[0], 0.0;
     cross_v << 0.0, -v[2], v[1], v[2], 0.0, -v[0], -v[1], v[0], 0.0;
     cross_jacob << cross_u, cross_v;
     return cross_jacob;
 }
 
-std::ostream& base::operator<<(std::ostream& out, const base::TwistWithCovariance& twist)
+std::ostream& operator<<(std::ostream& out, const TwistWithCovariance& twist)
 {
     /** cout the 6D twist vector (rotational first and linear second) with its associated covariance matrix **/
     for (register unsigned short i=0; i<twist.getCovariance().rows(); ++i)
@@ -337,31 +339,10 @@ std::ostream& base::operator<<(std::ostream& out, const base::TwistWithCovarianc
         }
         out<<"\n";
     }
-    out.unsetf(std::ios_base::floatfield);
+    out.unsetf(std::ios_floatfield);
     return out;
 }
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+} //end namespace base

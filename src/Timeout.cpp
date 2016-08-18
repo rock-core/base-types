@@ -1,25 +1,27 @@
 #include "Timeout.hpp"
 
-base::Timeout::Timeout(base::Time timeout) : timeout(timeout) 
+namespace base {
+
+Timeout::Timeout(Time timeout) : timeout(timeout) 
 {
-    start_time = base::Time::now();
+    start_time = Time::now();
 }
 
-void base::Timeout::restart()
+void Timeout::restart()
 {
-    start_time = base::Time::now();
+    start_time = Time::now();
 }
 
-bool base::Timeout::elapsed() const
+bool Timeout::elapsed() const
 {
     return elapsed(timeout);
 }
 
-bool base::Timeout::elapsed(const base::Time& timeout) const
+bool Timeout::elapsed(const Time& timeout) const
 {
     if(!timeout.isNull())
     {
-        return start_time + timeout < base::Time::now();
+        return start_time + timeout < Time::now();
     }
     else
     {
@@ -27,24 +29,24 @@ bool base::Timeout::elapsed(const base::Time& timeout) const
     }
 }
 
-base::Time base::Timeout::timeLeft() const
+Time Timeout::timeLeft() const
 {
     return timeLeft(timeout);
 }
 
-base::Time base::Timeout::timeLeft(const base::Time& timeout) const
+Time Timeout::timeLeft(const Time& timeout) const
 {
     if(!timeout.isNull())
     {
-        return start_time + timeout - base::Time::now();
+        return start_time + timeout - Time::now();
     }
     else
     {
-        return base::Time::fromSeconds(0);
+        return Time::fromSeconds(0);
     }
 }
 
 
-
+} //end namespace base
 
 

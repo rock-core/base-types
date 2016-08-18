@@ -1,9 +1,11 @@
 #include "JointTransform.hpp"
 
-void base::JointTransformVector::setRigidBodyStates(const base::samples::Joints& joints, std::vector< base::samples::RigidBodyState >& rbs) const
+namespace base {
+
+void JointTransformVector::setRigidBodyStates(const samples::Joints& joints, std::vector< samples::RigidBodyState >& rbs) const
 {
     if (joints.names.empty()) {
-        throw std::runtime_error("base::JointTransformVector::"
+        throw std::runtime_error("JointTransformVector::"
                                     "setRigidBodyStates(): the vector "
                                     "'joints.names()' is empty");
     }
@@ -13,7 +15,7 @@ void base::JointTransformVector::setRigidBodyStates(const base::samples::Joints&
     {
         if (!joints[i].hasPosition()) {
             std::stringstream ss;
-            ss << "base::JointTransformVector::setRigidBodyStates(): "
+            ss << "JointTransformVector::setRigidBodyStates(): "
                     "the joint 'joints[" << i << "]' has no position";
             throw std::runtime_error(ss.str());
         }
@@ -26,3 +28,5 @@ void base::JointTransformVector::setRigidBodyStates(const base::samples::Joints&
         rbs[i].setTransform( Eigen::Isometry3d( Eigen::AngleAxisd( joints[i].position, jt.rotationAxis ) ) );
     }
 }
+
+} //end namespace base

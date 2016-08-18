@@ -115,4 +115,4 @@ std::pair< bool, JointLimitRange::OutOfBounds > JointLimitRange::verifyValidity(
 
     
     
-}
+} //end namespace base
