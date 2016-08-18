@@ -339,7 +339,7 @@ std::ostream& operator<<(std::ostream& out, const TwistWithCovariance& twist)
         }
         out<<"\n";
     }
-    out.unsetf(std::ios_floatfield);
+    out.unsetf(std::ios::floatfield);
     return out;
 }
 

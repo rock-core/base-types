@@ -382,7 +382,7 @@ std::ostream& operator<<(std::ostream& out, const TransformWithCovariance& trans
         }
         out<<"\n";
     }
-    out.unsetf(std::ios_floatfield);
+    out.unsetf(std::ios::floatfield);
     return out;
 }
 
