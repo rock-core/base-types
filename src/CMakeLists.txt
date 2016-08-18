@@ -19,7 +19,6 @@ rock_library(
         Waypoint.cpp
         commands/Motion2D.cpp
         samples/BodyState.cpp
-        samples/CompressedFrame.cpp
         samples/DepthMap.cpp
         samples/DistanceImage.cpp
         samples/Frame.cpp
@@ -65,7 +64,6 @@ rock_library(
         logging/logging_printf_style.h
         samples/BodyState.hpp
         samples/CommandSamples.hpp
-        samples/CompressedFrame.hpp
         samples/DepthMap.hpp
         samples/DistanceImage.hpp
         samples/Frame.hpp
