@@ -36,7 +36,7 @@ rock_library(
         Deprecated.hpp
         Eigen.hpp
         Float.hpp
-        JointLimitRange.cpp
+        JointLimitRange.hpp
         JointLimits.hpp
         JointState.hpp
         JointsTrajectory.hpp
