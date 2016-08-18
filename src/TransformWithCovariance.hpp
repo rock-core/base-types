@@ -38,18 +38,40 @@ namespace base {
         Covariance cov;
 
     public:
+        TransformWithCovariance()
+            : translation(Position::Zero()) , orientation(Quaterniond::Identity())
+        {
+            this->invalidateCovariance();
+        }
       
-        TransformWithCovariance();
-      
-        explicit TransformWithCovariance( const base::Affine3d& trans);
+        explicit TransformWithCovariance( const base::Affine3d& trans)
+        {
+            this->setTransform(trans);
+            this->invalidateCovariance();
+        }
 
-        TransformWithCovariance( const base::Affine3d& trans, const Covariance& cov );
+        TransformWithCovariance( const base::Affine3d& trans, const Covariance& cov )
+        {
+            this->setTransform(trans);
+            this->cov = cov;
+        }
 
-        TransformWithCovariance(const base::Position& translation, const base::Quaterniond& orientation);
+        TransformWithCovariance(const base::Position& translation, const base::Quaterniond& orientation)
+            : translation(translation), orientation(orientation)
+        {
+            this->invalidateCovariance();
+        }
 
-        TransformWithCovariance(const base::Position& translation, const base::Quaterniond& orientation, const Covariance& cov );
+        TransformWithCovariance(const base::Position& translation, const base::Quaterniond& orientation, const Covariance& cov )
+            : translation(translation), orientation(orientation), cov(cov)
+        {
 
-        static TransformWithCovariance Identity();
+        }
+
+        static TransformWithCovariance Identity()
+        {
+            return TransformWithCovariance();
+        }
 	
 	
         /** Default std::cout function
@@ -79,30 +101,80 @@ namespace base {
 	
         TransformWithCovariance inverse() const;
 
-        const Covariance& getCovariance() const;
-        void setCovariance( const Covariance& cov );
+        const Covariance& getCovariance() const
+        {
+            return this->cov;
+        }
 
-        const base::Matrix3d getTranslationCov() const;
-        void setTranslationCov(const base::Matrix3d& cov);
+        void setCovariance( const Covariance& cov )
+        {
+            this->cov = cov;
+        }
 
-        const base::Matrix3d getOrientationCov() const;
-        void setOrientationCov(const base::Matrix3d& cov);
-
-        const base::Affine3d getTransform() const;
+        const base::Matrix3d getTranslationCov() const
+        {
+            return this->cov.topLeftCorner<3,3>();
+        }
         
-        void setTransform( const base::Affine3d& trans );
+        void setTranslationCov(const base::Matrix3d& cov)
+        {
+            this->cov.topLeftCorner<3,3>() = cov;
+        }
 
-        const base::Orientation getOrientation() const;
+        const base::Matrix3d getOrientationCov() const
+        {
+            return this->cov.bottomRightCorner<3,3>();
+        }
+        
+        void setOrientationCov(const base::Matrix3d& cov)
+        {
+            this->cov.bottomRightCorner<3,3>() = cov;
+        }
 
-        void setOrientation(const base::Orientation & q);
+        const base::Affine3d getTransform() const
+        {
+            Affine3d trans (this->orientation);
+            trans.translation() = this->translation;
+            return trans;
+        }
 
-        bool hasValidTransform() const;
+        void setTransform( const base::Affine3d& trans )
+        {
+            this->translation = trans.translation();
+            this->orientation = Quaterniond(trans.rotation());
+        }
 
-        void invalidateTransform();
+        const base::Orientation &getOrientation() const
+        {
+            return this->orientation;
+        }
+
+        void setOrientation(const base::Orientation & q)
+        {
+            this->orientation = q;
+        }
+
+        bool hasValidTransform() const
+        {
+            return !translation.hasNaN() && !orientation.coeffs().hasNaN();
+        }
+
+        void invalidateTransform()
+        {
+            translation = Position::Ones() * NaN<double>();
+            orientation.coeffs() = Vector4d::Ones() * NaN<double>();
+        }
 
         /** @warning This method is computationally expensive. Use with care! */
-        bool hasValidCovariance() const;
-        void invalidateCovariance();
+        bool hasValidCovariance() const
+        {
+            return !cov.hasNaN();
+        }
+        
+        void invalidateCovariance()
+        {
+            cov = Covariance::Ones() * NaN<double>();
+        }
 
     protected:
         // The uncertainty transformations are implemented according to: 

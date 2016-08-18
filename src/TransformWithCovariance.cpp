@@ -11,40 +11,6 @@
 
 namespace base {
 
-TransformWithCovariance::TransformWithCovariance() 
-    : translation(Position::Zero()) , orientation(Quaterniond::Identity())
-{
-    this->invalidateCovariance();
-}
-
-TransformWithCovariance::TransformWithCovariance(const Affine3d& trans)
-{
-    this->setTransform(trans);
-    this->invalidateCovariance();
-}
-
-TransformWithCovariance::TransformWithCovariance(const Affine3d& trans, const TransformWithCovariance::Covariance& cov)
-{
-    this->setTransform(trans);
-    this->cov = cov;
-}
-
-TransformWithCovariance::TransformWithCovariance(const Position& translation, const Quaterniond& orientation)
-    : translation(translation), orientation(orientation)
-{
-    this->invalidateCovariance();
-}
-
-TransformWithCovariance::TransformWithCovariance(const Position& translation, const Quaterniond& orientation, const TransformWithCovariance::Covariance& cov)
-    : translation(translation), orientation(orientation), cov(cov)
-{
-
-}
-
-TransformWithCovariance TransformWithCovariance::Identity()
-{
-    return TransformWithCovariance();
-}
 
 TransformWithCovariance TransformWithCovariance::composition(const TransformWithCovariance& trans) const
 {
@@ -180,80 +146,6 @@ TransformWithCovariance TransformWithCovariance::inverse() const
     return TransformWithCovariance(static_cast<Position>(-(this->orientation.inverse() * this->translation)),
                                 this->orientation.inverse(),
                                 J*this->getCovariance()*J.transpose());
-}
-
-const TransformWithCovariance::Covariance& TransformWithCovariance::getCovariance() const
-{
-    return this->cov;
-}
-
-void TransformWithCovariance::setCovariance(const TransformWithCovariance::Covariance& cov)
-{
-    this->cov = cov;
-}
-
-const Matrix3d TransformWithCovariance::getTranslationCov() const
-{
-    return this->cov.topLeftCorner<3,3>();
-}
-
-void TransformWithCovariance::setTranslationCov(const Matrix3d& cov)
-{
-    this->cov.topLeftCorner<3,3>() = cov;
-}
-
-const Matrix3d TransformWithCovariance::getOrientationCov() const
-{
-    return this->cov.bottomRightCorner<3,3>();
-}
-
-void TransformWithCovariance::setOrientationCov(const Matrix3d& cov)
-{
-    this->cov.bottomRightCorner<3,3>() = cov;
-}
-
-const Affine3d TransformWithCovariance::getTransform() const
-{
-    Affine3d trans (this->orientation);
-    trans.translation() = this->translation;
-    return trans;
-}
-
-void TransformWithCovariance::setTransform(const Affine3d& trans)
-{
-    this->translation = trans.translation();
-    this->orientation = Quaterniond(trans.rotation());
-}
-
-const Orientation TransformWithCovariance::getOrientation() const
-{
-    return Orientation(this->orientation);
-}
-
-void TransformWithCovariance::setOrientation(const Orientation& q)
-{
-    this->orientation = Quaterniond(q);
-}
-
-bool TransformWithCovariance::hasValidTransform() const
-{
-    return !translation.hasNaN() && !orientation.coeffs().hasNaN();
-}
-
-void TransformWithCovariance::invalidateTransform()
-{
-    translation = Position::Ones() * NaN<double>();
-    orientation.coeffs() = Vector4d::Ones() * NaN<double>();
-}
-
-bool TransformWithCovariance::hasValidCovariance() const
-{
-    return !cov.hasNaN();
-}
-
-void TransformWithCovariance::invalidateCovariance()
-{
-    cov = Covariance::Ones() * NaN<double>();
 }
 
 Eigen::Quaterniond TransformWithCovariance::r_to_q(const Eigen::Vector3d& r)
