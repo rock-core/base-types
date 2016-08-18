@@ -1,4 +1,5 @@
 #include "Sonar.hpp"
+#include <stdexcept>
 
 namespace base { namespace samples {
 

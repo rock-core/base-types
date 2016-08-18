@@ -8,6 +8,8 @@
 #include <base/Time.hpp>
 #include <base-logging/Singleton.hpp>
 
+#include <stdexcept>
+
 #include <boost/cstdint.hpp>
 
 namespace base { namespace samples {
