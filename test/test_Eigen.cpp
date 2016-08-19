@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include <base/Eigen.hpp>
 #include <iostream>
+#include "../src/TwistWithCovariance.cpp"
 
 BOOST_AUTO_TEST_SUITE(Eigen)
 
