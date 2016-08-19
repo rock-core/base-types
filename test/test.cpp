@@ -2,8 +2,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include <base/Angle.hpp>
-#include <base/commands/AUVMotion.hpp>
-#include <base/commands/AUVPosition.hpp>
 #include <base/commands/Joints.hpp>
 #include <base/commands/Motion2D.hpp>
 #include <base/commands/Speed6D.hpp>
