@@ -42,6 +42,7 @@ rock_library(
         JointsTrajectory.hpp
         JointTransform.hpp
         Logging.hpp
+        Matrix.hpp
         NamedVector.hpp
         Point.hpp
         Pose.hpp
