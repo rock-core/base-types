@@ -97,13 +97,13 @@ public:
 
 };
 
-static Temperature operator+( Temperature a, Temperature b );
+Temperature operator+( Temperature a, Temperature b );
 
-static Temperature operator-( Temperature a, Temperature b );
+Temperature operator-( Temperature a, Temperature b );
 
-static Temperature operator*( Temperature a, double b );
+Temperature operator*( Temperature a, double b );
 
-static Temperature operator*( double a, Temperature b );
+Temperature operator*( double a, Temperature b );
 
 static std::ostream& operator << (std::ostream& os, Temperature temperature);
 
