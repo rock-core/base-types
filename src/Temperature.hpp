@@ -105,7 +105,7 @@ Temperature operator*( Temperature a, double b );
 
 Temperature operator*( double a, Temperature b );
 
-static std::ostream& operator << (std::ostream& os, Temperature temperature);
+std::ostream& operator << (std::ostream& os, Temperature temperature);
 
 
 }
