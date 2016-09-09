@@ -61,6 +61,7 @@ rock_library(
         commands/Joints.hpp
         commands/Motion2D.hpp
         commands/Speed6D.hpp
+	commands/LinearAngular6DCommand.hpp
         logging/logging_iostream_style.h 
         logging/logging_printf_style.h
         samples/BodyState.hpp
