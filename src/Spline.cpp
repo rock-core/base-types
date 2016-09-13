@@ -8,9 +8,10 @@
 #include <iostream>
 
 using namespace std;
-using namespace base::geometry;
 using boost::lexical_cast;
 using namespace Eigen;
+
+
 
 static double angleLimit(double angle)
 {
@@ -21,6 +22,8 @@ static double angleLimit(double angle)
     else
      	return angle;
 }
+
+namespace base { namespace geometry {
 
 SplineBase::SplineBase (int dim, double _geometric_resolution, int _curve_order)
     : dimension(dim), curve(0), geometric_resolution(_geometric_resolution)
@@ -99,7 +102,7 @@ void SplineBase::getPoint(double* result, double _param) const
 void SplineBase::getPointAndTangent(double* result, double _param) const
 { return getPointAndTangentHelper(result, _param, true); }
 
-bool base::geometry::SplineBase::checkAndNormalizeParam(double& _param, double equalDistance) const
+bool SplineBase::checkAndNormalizeParam(double& _param, double equalDistance) const
 {
     if(_param < start_param && start_param - _param < equalDistance)
 	_param = start_param;
@@ -184,7 +187,7 @@ double SplineBase::getVariationOfCurvature(double _param)  // Variation of Curva
     return VoC;
 }
 
-double base::geometry::SplineBase::getCurveLength(double relative_resolution) const
+double SplineBase::getCurveLength(double relative_resolution) const
 {
     if (isSingleton())
         return 0;
@@ -288,7 +291,7 @@ void SplineBase::interpolate(const vector< double >& points,
     else
     {
         if (coord_types.size() * dimension != points.size()) {
-            throw std::runtime_error("base::types::Spline::interpolate(): "
+            throw std::runtime_error("types::Spline::interpolate(): "
                                      "'points.size()' does not match "
                                      "expectation");
         }
@@ -852,7 +855,7 @@ double SplineBase::join(SplineBase const& other, double tolerance, bool with_tan
     
     //be sure joining_Types has the right size
     if (joining_points.size() / dim > 4) {
-        throw std::runtime_error("base::SplineBase::join(): the size of "
+        throw std::runtime_error("SplineBase::join(): the size of "
                                  "'joining_points' is unexpectedly big");
     }
 
@@ -969,7 +972,7 @@ SISLCurve* SplineBase::getSISLCurve()
     return curve;
 }
 
-base::Matrix3d SplineBase::getFrenetFrame(double _param)
+Matrix3d SplineBase::getFrenetFrame(double _param)
 {
     if (!curve)
         throw std::runtime_error("getFrenetFrame() called on an empty or degenerate curve");
@@ -1006,7 +1009,7 @@ double SplineBase::headingError(double _actHeading, double _param)
     return angleLimit( _actHeading - getHeading(_param));
 }
 
-double SplineBase::distanceError(base::Vector3d _pt, double _param)
+double SplineBase::distanceError(Vector3d _pt, double _param)
 {
     // Error vector
     Vector3d curve_point;
@@ -1024,7 +1027,7 @@ double SplineBase::distanceError(base::Vector3d _pt, double _param)
     return (angle >= 0.0)?(error.norm()):(-error.norm());
 }
 
-base::Vector3d SplineBase::poseError(base::Vector3d _position, double _heading, double _guess, double minParam)
+Vector3d SplineBase::poseError(Vector3d _position, double _heading, double _guess, double minParam)
 {
     double param = findOneClosestPoint(_position.data(), _guess, getGeometricResolution());
     
@@ -1032,15 +1035,15 @@ base::Vector3d SplineBase::poseError(base::Vector3d _position, double _heading, 
         param = minParam;
 
     // Returns the error [distance error, orientation error, parameter] 
-    return base::Vector3d(distanceError(_position, param), headingError(_heading, param), param);
+    return Vector3d(distanceError(_position, param), headingError(_heading, param), param);
 }
 
-base::Vector3d SplineBase::poseError(base::Vector3d _position, double _heading, double _guess)
+Vector3d SplineBase::poseError(Vector3d _position, double _heading, double _guess)
 {
     double param = findOneClosestPoint(_position.data(), _guess, getGeometricResolution());
 
     // Returns the error [distance error, orientation error, parameter] 
-    return base::Vector3d(distanceError(_position, param), headingError(_heading, param), param);
+    return Vector3d(distanceError(_position, param), headingError(_heading, param), param);
 }
 
 void SplineBase::crop(double start_t, double end_t)
@@ -1143,3 +1146,5 @@ SplineBase *SplineBase::getSubSpline(double start_t, double end_t) const
     
     return new SplineBase(getGeometricResolution(), newCurve);
 }
+
+}} //end namespace base::geometry

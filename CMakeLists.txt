@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 find_package(Rock)
 rock_init(base 1.0)
 
-#rock_export_includedir(${PROJECT_SOURCE_DIR}/base ${PROJECT_NAME})
+# rock_export_includedir(${PROJECT_SOURCE_DIR}/base ${PROJECT_NAME})
 rock_export_includedir(${PROJECT_SOURCE_DIR}/src base/geometry)
 include_directories(BEFORE ${PROJECT_SOURCE_DIR})
 
@@ -33,8 +33,4 @@ if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/test)
 endif()
 
 rock_standard_layout()
-
-configure_file(base-types.pc.in base-types.pc @ONLY)
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/base DESTINATION include)
-install(FILES ${CMAKE_BINARY_DIR}/base-types.pc DESTINATION lib/pkgconfig)
 

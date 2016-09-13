@@ -26,7 +26,7 @@ rock_vizkit_plugin(base-viz
         SonarBeamVisualization.hpp
         PointcloudVisualization.hpp
         DepthMapVisualization.hpp
-    DEPS base
+    DEPS base-types
     LIBS ${Boost_SYSTEM_LIBRARY}
     DEPS_PKGCONFIG base-logging
 )

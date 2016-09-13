@@ -1,0 +1,9 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+includedir=${prefix}/include
+
+Name: baseLib
+Version: 0.1
+Description: Common types for robotics modules, part that require a library
+Requires: base-types
+

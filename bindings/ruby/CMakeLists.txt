@@ -17,7 +17,7 @@ if (base_AVAILABLE)
     endif(SISL_FOUND)
     install(FILES lib/eigen.rb
         DESTINATION ${RUBY_LIBRARY_INSTALL_DIR})
-        target_link_libraries(base_types_ruby base)
+        target_link_libraries(base_types_ruby base-types)
         rock_typelib_ruby_plugin(lib/base/typelib_plugin.rb RENAME base_types.rb)
 endif()
 
