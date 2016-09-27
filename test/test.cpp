@@ -765,6 +765,84 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     BOOST_CHECK_THROW(scan.getMeasurementState(0,1), std::out_of_range);
     scan.convertDepthMapToPointCloud(scan_points, transform);
     BOOST_CHECK(scan_points.size() == 1);
+
+    // check horizontal angular interpolation
+    scan.reset();
+    scan.horizontal_size = 3;
+    scan.vertical_size = 1;
+    scan.vertical_projection = base::samples::DepthMap::POLAR;
+    scan.horizontal_projection = base::samples::DepthMap::POLAR;
+    scan.distances.push_back(sqrt(2.0));
+    scan.distances.push_back(1.0);
+    scan.distances.push_back(sqrt(2.0));
+    scan.vertical_interval.push_back(0.0);
+    scan.horizontal_interval.push_back(M_PI - M_PI_4);
+    scan.horizontal_interval.push_back(-M_PI + M_PI_4);
+    scan_points.clear();
+    scan.convertDepthMapToPointCloud(scan_points);
+    BOOST_CHECK(scan_points.size() == scan.vertical_size * scan.horizontal_size);
+    BOOST_CHECK(scan_points[0].isApprox(Eigen::Vector3d(-1.0,1.0,0.0), 1e-6));
+    BOOST_CHECK(scan_points[1].isApprox(Eigen::Vector3d(1.0,0.0,0.0), 1e-6));
+    BOOST_CHECK(scan_points[2].isApprox(Eigen::Vector3d(-1.0,-1.0,0.0), 1e-6));
+
+    scan.horizontal_interval.clear();
+    scan.horizontal_interval.push_back(-M_PI_4);
+    scan.horizontal_interval.push_back(-2.0*M_PI+M_PI_4);
+    scan_points.clear();
+    scan.convertDepthMapToPointCloud(scan_points);
+    BOOST_CHECK(scan_points.size() == scan.vertical_size * scan.horizontal_size);
+    BOOST_CHECK(scan_points[0].isApprox(Eigen::Vector3d(1.0,-1.0,0.0), 1e-6));
+    BOOST_CHECK(scan_points[1].isApprox(Eigen::Vector3d(-1.0,0.0,0.0), 1e-6));
+    BOOST_CHECK(scan_points[2].isApprox(Eigen::Vector3d(1.0,1.0,0.0), 1e-6));
+
+    scan.horizontal_interval.clear();
+    scan.horizontal_interval.push_back(M_PI_4);
+    scan.horizontal_interval.push_back(-M_PI_4);
+    scan_points.clear();
+    scan.convertDepthMapToPointCloud(scan_points);
+    BOOST_CHECK(scan_points.size() == scan.vertical_size * scan.horizontal_size);
+    BOOST_CHECK(scan_points[0].isApprox(Eigen::Vector3d(1.0,1.0,0.0), 1e-6));
+    BOOST_CHECK(scan_points[1].isApprox(Eigen::Vector3d(1.0,0.0,0.0), 1e-6));
+    BOOST_CHECK(scan_points[2].isApprox(Eigen::Vector3d(1.0,-1.0,0.0), 1e-6));
+
+    // check vertical angular interpolation
+    scan.reset();
+    scan.horizontal_size = 1;
+    scan.vertical_size = 3;
+    scan.vertical_projection = base::samples::DepthMap::POLAR;
+    scan.horizontal_projection = base::samples::DepthMap::POLAR;
+    scan.distances.push_back(sqrt(2.0));
+    scan.distances.push_back(1.0);
+    scan.distances.push_back(sqrt(2.0));
+    scan.horizontal_interval.push_back(0.0);
+    scan.vertical_interval.push_back(-M_PI + M_PI_4);
+    scan.vertical_interval.push_back(M_PI - M_PI_4);
+    scan_points.clear();
+    scan.convertDepthMapToPointCloud(scan_points);
+    BOOST_CHECK(scan_points.size() == scan.vertical_size * scan.horizontal_size);
+    BOOST_CHECK(scan_points[0].isApprox(Eigen::Vector3d(-1.0,0.0,1.0), 1e-6));
+    BOOST_CHECK(scan_points[1].isApprox(Eigen::Vector3d(1.0,0.0,0.0), 1e-6));
+    BOOST_CHECK(scan_points[2].isApprox(Eigen::Vector3d(-1.0,0.0,-1.0), 1e-6));
+
+    scan.vertical_interval.clear();
+    scan.vertical_interval.push_back(M_PI_4);
+    scan.vertical_interval.push_back(2.0*M_PI-M_PI_4);
+    scan_points.clear();
+    scan.convertDepthMapToPointCloud(scan_points);
+    BOOST_CHECK(scan_points.size() == scan.vertical_size * scan.horizontal_size);
+    BOOST_CHECK(scan_points[0].isApprox(Eigen::Vector3d(1.0,0.0,-1.0), 1e-6));
+    BOOST_CHECK(scan_points[1].isApprox(Eigen::Vector3d(-1.0,0.0,0.0), 1e-6));
+    BOOST_CHECK(scan_points[2].isApprox(Eigen::Vector3d(1.0,0.0,1.0), 1e-6));
+
+    scan.vertical_interval.clear();
+    scan.vertical_interval.push_back(-M_PI_4);
+    scan.vertical_interval.push_back(M_PI_4);
+    scan_points.clear();
+    scan.convertDepthMapToPointCloud(scan_points);
+    BOOST_CHECK(scan_points.size() == scan.vertical_size * scan.horizontal_size);
+    BOOST_CHECK(scan_points[0].isApprox(Eigen::Vector3d(1.0,0.0,1.0), 1e-6));
+    BOOST_CHECK(scan_points[1].isApprox(Eigen::Vector3d(1.0,0.0,0.0), 1e-6));
+    BOOST_CHECK(scan_points[2].isApprox(Eigen::Vector3d(1.0,0.0,-1.0), 1e-6));
 }
 
 BOOST_AUTO_TEST_CASE( pose_test )

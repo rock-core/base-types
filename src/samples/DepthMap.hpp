@@ -71,13 +71,13 @@ public:
     std::vector<base::Time> timestamps;
     
     /** Defines the vertical projection type of the depth map.
-     * If polar, the vertical intervals are angles in the range of (-PI, PI].
+     * If polar, the vertical intervals are angular rotations around the Y-unit axis.
      * If planar, the vertical intervals are positions on an image plane coordinate frame.
      */
     PROJECTION_TYPE vertical_projection;
     
     /** Defines the horizontal projection type of the depth map.
-     * If polar, the horizontal intervals are angles in the range of (-PI, PI].
+     * If polar, the horizontal intervals are angular rotations around the Z-unit axis.
      * If planar, the horizontal intervals are positions on an image plane coordinate frame.
      */
     PROJECTION_TYPE horizontal_projection;
@@ -87,7 +87,9 @@ public:
      * In planar projection mode the vertical intervals are y coordinates on an 
      * depth-image plane, with zero in the middle of the plane.
      * In polar projection mode the vertical intervals are angular rotations
-     * around the Y-unit axis.
+     * around the Y-unit axis. Vertical angles must always be ordered from a smaller
+     * to a higher value, since the rows of the data matrices are interpreted from the upper
+     * to the lower row.
      * The field has either two or |vertical_size| entries. In the case of two 
      * entries the intervals are interpreted as upper and under boundaries. The 
      * transformation for each measurement will be interpolated.
@@ -99,7 +101,9 @@ public:
      * In planar projection mode the horizontal intervals are x coordinates on an 
      * depth-image plane, with zero in the middle of the plane.
      * In polar projection mode the horizontal intervals are angular rotations
-     * around the Z-unit axis.
+     * around the Z-unit axis. Horizontal angles must always be ordered from a higher
+     * to a smaller value, since the columns of the data matrices are interpreted
+     * from the left to the right.
      * The field has either two or |horizontal_size| entries. In the case of two 
      * entries the intervals are interpreted as left and right boundaries. The 
      * transformation for each measurement will be interpolated.
@@ -518,7 +522,7 @@ protected:
 	    else if(horizontal_projection == POLAR)
 	    {
 		for(unsigned h = 0; h < horizontal_size; h++)
-		    horizontal_angles[h] = base::Angle::fromRad(horizontal_interval.front() - ((double)h * step_resolution));
+		    horizontal_angles[h] = base::Angle::fromRad(horizontal_interval.front() + ((double)h * step_resolution));
 	    }
 	    else
 		throw std::invalid_argument("Invalid argument for horizontal projection type.");
@@ -597,10 +601,7 @@ protected:
 	    if(interval.back() == interval.front())
 		step_resolution = (2.0 * M_PI) / (double)(elements-1);
 	    else
-	    {
-		double diff = std::abs(base::Angle::normalizeRad(interval.back() - interval.front()));
-		step_resolution = diff / (double)(elements-1);
-	    }
+                step_resolution = (interval.back() - interval.front()) / (double)(elements-1);
 	}
 	else
 	    throw std::invalid_argument("Invalid argument for projection type.");
