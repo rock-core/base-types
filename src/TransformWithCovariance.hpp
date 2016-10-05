@@ -98,6 +98,11 @@ namespace base {
         /** alias for the composition of two transforms
          */
         TransformWithCovariance operator*( const TransformWithCovariance& trans ) const;
+
+        /** performs a composition of this transform with a given point with covariance.
+         */
+        std::pair<Eigen::Vector3d, Eigen::Matrix3d>
+        composePointWithCovariance( const Eigen::Vector3d& point, const Eigen::Matrix3d& cov ) const;
 	
         TransformWithCovariance inverse() const;
 
