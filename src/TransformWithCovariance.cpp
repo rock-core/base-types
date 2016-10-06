@@ -131,6 +131,19 @@ TransformWithCovariance TransformWithCovariance::operator*(const TransformWithCo
     return TransformWithCovariance(p, t, cov);
 }
 
+std::pair<Eigen::Vector3d, Eigen::Matrix3d> TransformWithCovariance::composePointWithCovariance(const Eigen::Vector3d& point, const Eigen::Matrix3d& cov) const
+{
+    Eigen::Matrix3d R( getTransform().linear() );
+    Eigen::Quaterniond q( R );
+    Eigen::Matrix<double,3,6> J;
+    J << Eigen::Matrix3d::Identity(), drx_by_dr( q, point );
+
+    Eigen::Matrix3d tr_point_cov = J*getCovariance()*J.transpose();
+    tr_point_cov += R*cov*R.transpose();
+
+    return std::make_pair(getTransform() * point, tr_point_cov);
+}
+
 TransformWithCovariance TransformWithCovariance::inverse() const
 {
     // short path if there is no uncertainty
