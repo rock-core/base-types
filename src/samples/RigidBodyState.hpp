@@ -61,7 +61,7 @@ namespace base { namespace samples {
 	 */
         base::Matrix3d cov_velocity;
 
-        /** Angular Velocity as an axis-angle representation in body fixed frame
+        /** Angular Velocity as an axis-angle representation in sourceFrame (body fixed frame)
          *
          * The direction of the vector is the axis, its length the speed */
         base::Vector3d angular_velocity;
