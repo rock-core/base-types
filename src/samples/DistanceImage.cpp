@@ -14,11 +14,14 @@ Pointcloud DistanceImage::getPointCloud() const
 {
     Pointcloud pointCloud;
     Eigen::Vector3d point;
-    for(size_t y = 0; y < height ; y++)
+    for(size_t y = 0; y < this->height ; ++y)
     {
-        for(size_t x = 0; x < width ; x++)
+        for(size_t x = 0; x < this->width ; ++x)
         {
-            pointCloud.points.push_back(point);
+            if (this->getScenePoint(x, y, point))
+            {
+                pointCloud.points.push_back(point);
+            }
         }
     }
     return pointCloud;

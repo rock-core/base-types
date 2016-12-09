@@ -522,6 +522,26 @@ BOOST_AUTO_TEST_CASE( laser_scan_test )
     BOOST_CHECK(!std::isnan(points[3].z()));
 }
 
+BOOST_AUTO_TEST_CASE(distance_image_test)
+{
+    /** Distance image **/
+    base::samples::DistanceImage dimage(2,2);
+    dimage.setIntrinsic(1, 1, 1, 1);
+    dimage.data.push_back(1.0); // 1st value
+    dimage.data.push_back(2.0); // 2nd value
+    dimage.data.push_back(2.0); // 3rd value
+    dimage.data.push_back(1.0); //4th value
+
+    /** Point cloud **/
+    base::samples::Pointcloud point_cloud = dimage.getPointCloud();
+    BOOST_CHECK(point_cloud.points.size() == dimage.data.size());
+
+    BOOST_CHECK(point_cloud.points[0] == Eigen::Vector3d(-1.0, -1.00, 1.00));
+    BOOST_CHECK(point_cloud.points[1] == Eigen::Vector3d(0.0, -2.00, 2.00));
+    BOOST_CHECK(point_cloud.points[2] == Eigen::Vector3d(-2.0, 0.00, 2.00));
+    BOOST_CHECK(point_cloud.points[3] == Eigen::Vector3d(0.0, 0.00, 1.00));
+}
+
 BOOST_AUTO_TEST_CASE(depth_map_test)
 {
     // setup scan
