@@ -24,6 +24,8 @@ namespace vizkit3d
     Q_PROPERTY(QColor defaultFeatureColor READ getDefaultFeatureColor WRITE setDefaultFeatureColor)
     
     public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+        
         DepthMapVisualization();
         ~DepthMapVisualization();
         
