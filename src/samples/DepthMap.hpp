@@ -239,8 +239,8 @@ public:
 	point_cloud.reserve(distances.size());
 	
 	// precompute local transformations
-	std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > rows2column;
-	std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > columns2pointcloud;
+	std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine>, Eigen::aligned_allocator< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > > rows2column;
+	std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine>, Eigen::aligned_allocator< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > > columns2pointcloud;
 	computeLocalTransformations(rows2column, columns2pointcloud, use_lut);
 	
 	// convert rows
@@ -282,8 +282,8 @@ public:
 	point_cloud.reserve(distances.size());
 	
 	// precompute local transformations
-	std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > rows2column;
-	std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > columns2pointcloud;
+	std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine>, Eigen::aligned_allocator< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > > rows2column;
+	std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine>, Eigen::aligned_allocator< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > > columns2pointcloud;
 	computeLocalTransformations(rows2column, columns2pointcloud, use_lut);
 	
 	Eigen::Matrix<typename T::Scalar,3,1> translation_delta = last_transformation.translation() - first_transformation.translation();
@@ -309,7 +309,7 @@ public:
 	}
 	else
 	{
-	    std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > pointcloud2world;
+	    std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine>, Eigen::aligned_allocator< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > > pointcloud2world;
 	    for(unsigned v = 0; v < vertical_size; v++)
 	    {
 		Eigen::Transform<typename T::Scalar,3,Eigen::Affine> transformation = 
@@ -339,7 +339,7 @@ public:
      */
     template<typename T>
     void convertDepthMapToPointCloud(std::vector<T> &point_cloud,
-				const std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> >& transformations,
+				const std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine>, Eigen::aligned_allocator< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > >& transformations,
 				bool use_lut = false,
 				bool skip_invalid_measurements = true,
 				bool apply_transforms_vertically = true) const
@@ -358,8 +358,8 @@ public:
 	point_cloud.reserve(distances.size());
 	
 	// precompute local transformations
-	std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > rows2column;
-	std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > columns2pointcloud;
+	std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine>, Eigen::aligned_allocator< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > > rows2column;
+	std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine>, Eigen::aligned_allocator< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > > columns2pointcloud;
 	computeLocalTransformations(rows2column, columns2pointcloud);
 	
 	// apply global transformations
@@ -398,7 +398,7 @@ protected:
     void convertSingleRow(std::vector<T> &point_cloud, 
 			    unsigned int row,
 			    const Eigen::Transform<typename T::Scalar,3,Eigen::Affine>& row2column,
-			    const std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> >& columns2pointcloud,
+			    const std::vector< Eigen::Transform<typename T::Scalar,3,Eigen::Affine>, Eigen::aligned_allocator< Eigen::Transform<typename T::Scalar,3,Eigen::Affine> > >& columns2pointcloud,
 			    const Eigen::Transform<typename T::Scalar,3,Eigen::Affine>& pointcloud2world,
 			    bool skip_invalid_measurements) const
     {
@@ -423,8 +423,8 @@ protected:
 
     /** Helper method to compute the local rows2column and columns2pointcloud transformations. */
     template<typename T>
-    void computeLocalTransformations(std::vector< Eigen::Transform<T,3,Eigen::Affine> >& rows2column, 
-				     std::vector< Eigen::Transform<T,3,Eigen::Affine> >& columns2pointcloud,
+    void computeLocalTransformations(std::vector< Eigen::Transform<T,3,Eigen::Affine>, Eigen::aligned_allocator< Eigen::Transform<T,3,Eigen::Affine> > >& rows2column, 
+				     std::vector< Eigen::Transform<T,3,Eigen::Affine>, Eigen::aligned_allocator< Eigen::Transform<T,3,Eigen::Affine> > >& columns2pointcloud,
 				     bool use_lut = false) const
     {
 	// check interval sizes
@@ -548,7 +548,7 @@ protected:
     
     /** Helper method to compute the rotations around an unit axis. */
     template<typename T>
-    void computeRotations(std::vector< Eigen::Transform<T,3,Eigen::Affine> >& rotations, 
+    void computeRotations(std::vector< Eigen::Transform<T,3,Eigen::Affine>, Eigen::aligned_allocator< Eigen::Transform<T,3,Eigen::Affine> > >& rotations, 
 			const std::vector<base::Angle>& angles, 
 			UNIT_AXIS axis,
 			bool use_lut = false) const
@@ -638,7 +638,7 @@ private:
     private:
 	double rad2deg;
 	double deg2rad;
-	std::vector< Eigen::Transform<T,3,Eigen::Affine> > transformations;
+	std::vector< Eigen::Transform<T,3,Eigen::Affine>, Eigen::aligned_allocator< Eigen::Transform<T,3,Eigen::Affine> > > transformations;
     };
 };
 
