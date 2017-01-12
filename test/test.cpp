@@ -613,7 +613,7 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     
     
     // use multiple transformations
-    std::vector<Eigen::Affine3d> transformations;
+    std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d> > transformations;
     transformations.push_back(transform);
     transformations.push_back(transform * transform);
     scan_points.clear();
@@ -643,7 +643,7 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
         BOOST_CHECK(scan_points_f[i].isApprox(ref_points[i].cast<float>(), 1e-6));
 
     scan_points_f.clear();
-    std::vector<Eigen::Affine3f> transformations_f;
+    std::vector<Eigen::Affine3f, Eigen::aligned_allocator<Eigen::Affine3f> > transformations_f;
     transformations_f.push_back(transform_f);
     transformations_f.push_back(transform_f);
     scan.convertDepthMapToPointCloud(scan_points_f, transformations_f, true, true, false);
