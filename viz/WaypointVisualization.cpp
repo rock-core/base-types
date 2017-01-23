@@ -104,9 +104,7 @@ void WaypointVisualization::addWaypoints(osg::Group* group) {
         osg::Vec3 position = eigenVectorToOsgVec3(it->position);
         position[2] += 0.01; // Moves the waypoints a little bit above the z=0 plane.
         waypoint_transform->setPosition(position);
-        // osg::Quat(0,0,1,heading) != osg::Quat(heading, Vec(0,0,1)).. why?
-        // -M_PI/2.0 because rock defines x to be the front axis.
-        waypoint_transform->setAttitude(osg::Quat(it->heading-M_PI/2.0, osg::Vec3f(0,0,1)));
+        waypoint_transform->setAttitude(osg::Quat(it->heading, osg::Vec3f(0,0,1)));
         waypoint_transform->addChild(waypoint_geode);
         
         // Adds the waypoints to the main node.
