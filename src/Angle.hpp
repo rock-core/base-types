@@ -169,6 +169,16 @@ public:
         return this->rad > other.rad;
     }
 
+    inline bool operator<=(const Angle &other ) const
+    {
+        return this->rad <= other.rad;
+    }
+
+    inline bool operator>=(const Angle &other ) const
+    {
+        return this->rad >= other.rad;
+    }
+
     inline Angle &operator+=(const Angle &other )
     {
         this->rad += other.rad;
