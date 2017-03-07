@@ -7,11 +7,9 @@ namespace vizkit3d
 {
 
 TrajectoryVisualization::TrajectoryVisualization()
-    : max_number_of_points(1800), line_width( 1.0 )
+    : doClear(false), max_number_of_points(1800), line_width( 1.0 ), color(1., 0., 0., 1.), backwardColor(1., 0., 1., 1.)
 {
     VizPluginRubyMethod(TrajectoryVisualization, base::Vector3d, setColor);
-
-    // initialize here so that setColor can be called event
 }
 
 TrajectoryVisualization::~TrajectoryVisualization()
@@ -24,8 +22,6 @@ osg::ref_ptr<osg::Node> TrajectoryVisualization::createMainNode()
     colorArray = new osg::Vec4Array;
     geom = new osg::Geometry;
     pointsOSG = new osg::Vec3Array;
-    color = osg::Vec4(1, 0, 0, 1);
-    backwardColor = osg::Vec4(1, 1, 1, 1);
     geom->setVertexArray(pointsOSG.get());
     drawArrays = new osg::DrawArrays( osg::PrimitiveSet::LINE_STRIP, 0, pointsOSG->size() );
     geom->addPrimitiveSet(drawArrays.get());
@@ -63,11 +59,10 @@ void TrajectoryVisualization::updateMainNode( osg::Node* node )
     
     pointsOSG->clear();
     colorArray->clear();
-    std::cout << points.size() << std::endl;
-    for(const Point& p : points)
+    for(std::deque<Point>::iterator it = points.begin(); it != points.end(); it++)
     {
-        pointsOSG->push_back(p.point);
-        colorArray->push_back(p.color);
+        pointsOSG->push_back(it->point);
+        colorArray->push_back(it->color);
     }
     
     geom->setVertexArray(pointsOSG);
@@ -94,10 +89,10 @@ void TrajectoryVisualization::addSpline(const base::geometry::Spline3& data,
         p.point = osg::Vec3(splinePoint.x(), splinePoint.y(), splinePoint.z());
         p.color = color;
         points.push_back(p);
-        
-//         while(points.size() > max_number_of_points)
-//             points.pop_front();
     }
+
+    while(points.size() > max_number_of_points)
+        points.pop_front();
 }
 
 void TrajectoryVisualization::updateDataIntern(const base::geometry::Spline3& data)
@@ -152,14 +147,14 @@ QColor TrajectoryVisualization::getColor() const
 void TrajectoryVisualization::setBackwardColor(QColor c)
 {
     backwardColor = osg::Vec4(c.redF(), c.greenF(), c.blueF(), c.alphaF() );
-    emit propertyChanged("backwardColor");
+    emit propertyChanged("BackwardColor");
     setDirty();
 }
 
 QColor TrajectoryVisualization::getBackwardColor() const
 {
     QColor c;
-    c.setRgbF(color.x(), color.y(), color.z(), color.w());
+    c.setRgbF(backwardColor.x(), backwardColor.y(), backwardColor.z(), backwardColor.w());
     return c;
 }
 
