@@ -16,7 +16,7 @@ std::string JointLimitRange::OutOfBounds::errorString(std::string name, double m
 void JointLimitRange::validate(const JointState& state) const
 {
     std::pair<bool, OutOfBounds> check = verifyValidity(state);
-    if (check.first)
+    if (!check.first)
         throw check.second;
 }
 
