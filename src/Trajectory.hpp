@@ -2,6 +2,7 @@
 #define __TRAJECTORY_HH__
 
 #include <base/geometry/Spline.hpp>
+#include <base/NamedVector.hpp>
 
 namespace base
 {
@@ -28,6 +29,11 @@ struct Trajectory
      * be driven. 
      * */
     base::geometry::Spline<3> spline;
+    
+    /**
+     * A mapping for additional information.
+     */
+    NamedVector<std::string> attributes;
 };
 
 }
