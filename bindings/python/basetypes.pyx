@@ -81,6 +81,8 @@ cdef class PyVector2d:
     def squared_norm(self):
         return self.thisptr.squaredNorm()
 
+    # TODO add toarray / fromarray
+
 
 cdef class PyVector3d:
     cdef _basetypes.Vector3d* thisptr
@@ -143,6 +145,8 @@ cdef class PyVector3d:
     def squared_norm(self):
         return self.thisptr.squaredNorm()
 
+    # TODO add toarray / fromarray
+
 
 cdef class PyVector4d:
     cdef _basetypes.Vector4d* thisptr
@@ -182,8 +186,10 @@ cdef class PyVector4d:
     def squared_norm(self):
         return self.thisptr.squaredNorm()
 
+    # TODO add toarray / fromarray
 
-# TODO Vector6d, VectorXd
+
+# TODO Vector6d, VectorXd, Point, Pose
 
 
 cdef class PyQuaterniond:
@@ -206,6 +212,8 @@ cdef class PyQuaterniond:
         return "[im=%.2f, real=(%.2f, %.2f, %.2f)]" % (
             self.thisptr.w(), self.thisptr.x(), self.thisptr.y(),
             self.thisptr.z())
+
+    # TODO add toarray / fromarray
 
 
 cdef class PyTransformWithCovariance:
@@ -340,6 +348,9 @@ cdef class PyJointState:
         return self
 
 
+# TODO Joints
+
+
 cdef class PyRigidBodyState:
     cdef _basetypes.RigidBodyState* thisptr
     cdef bool delete_thisptr
@@ -383,3 +394,6 @@ cdef class PyRigidBodyState:
         self.thisptr.targetFrame = value
 
     target_frame = property(_get_target_frame, _set_target_frame)
+
+
+# TODO DistanceImage, Frame, LaserScan, IMUSensors, PointCloud
