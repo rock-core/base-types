@@ -72,3 +72,46 @@ def test_transform_set_get_orientation():
     o = basetypes.PyQuaterniond(1.0, 0.0, 0.0, 0.0)
     p.orientation = o
     assert_equal(str(p.orientation), "[im=1.00, real=(0.00, 0.00, 0.00)]")
+
+
+def test_joint_state_get_set_position():
+    js = basetypes.PyJointState()
+    js.position = 5.0
+    assert_equal(js.position, 5.0)
+
+
+def test_joint_state_get_set_speed():
+    js = basetypes.PyJointState()
+    js.speed = 5.0
+    assert_equal(js.speed, 5.0)
+
+
+def test_joint_state_get_set_effort():
+    js = basetypes.PyJointState()
+    js.effort = 5.0
+    assert_equal(js.effort, 5.0)
+
+
+def test_joint_state_get_set_raw():
+    js = basetypes.PyJointState()
+    js.raw = 5.0
+    assert_equal(js.raw, 5.0)
+
+
+def test_joint_state_get_set_acceleration():
+    js = basetypes.PyJointState()
+    js.acceleration = 5.0
+    assert_equal(js.acceleration, 5.0)
+
+
+def test_joint_state_factories():
+    js = basetypes.PyJointState.Position(5.0)
+    assert_equal(js.position, 5.0)
+    js = basetypes.PyJointState.Speed(5.0)
+    assert_equal(js.speed, 5.0)
+    js = basetypes.PyJointState.Effort(5.0)
+    assert_equal(js.effort, 5.0)
+    js = basetypes.PyJointState.Raw(5.0)
+    assert_equal(js.raw, 5.0)
+    js = basetypes.PyJointState.Acceleration(5.0)
+    assert_equal(js.acceleration, 5.0)

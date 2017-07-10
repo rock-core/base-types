@@ -252,3 +252,89 @@ cdef class PyTransformWithCovariance:
         return "(translation=%s, orientation=%s)" % (self.translation,
                                                      self.orientation)
 
+
+cdef class PyJointState:
+    cdef _basetypes.JointState* thisptr
+    cdef bool delete_thisptr
+
+    def __cinit__(self):
+        self.thisptr = NULL
+        self.delete_thisptr = False
+
+    def __dealloc__(self):
+        if self.thisptr != NULL and self.delete_thisptr:
+            del self.thisptr
+
+    def __init__(self):
+        self.thisptr = new _basetypes.JointState()
+        self.delete_thisptr = True
+
+    def _get_position(self):
+        return self.thisptr.position
+
+    def _set_position(self, double value):
+        self.thisptr.position = value
+
+    position = property(_get_position, _set_position)
+
+    def _get_speed(self):
+        return self.thisptr.speed
+
+    def _set_speed(self, double value):
+        self.thisptr.speed = value
+
+    speed = property(_get_speed, _set_speed)
+
+    def _get_effort(self):
+        return self.thisptr.effort
+
+    def _set_effort(self, double value):
+        self.thisptr.effort = value
+
+    effort = property(_get_effort, _set_effort)
+
+    def _get_raw(self):
+        return self.thisptr.raw
+
+    def _set_raw(self, double value):
+        self.thisptr.raw = value
+
+    raw = property(_get_raw, _set_raw)
+
+    def _get_acceleration(self):
+        return self.thisptr.acceleration
+
+    def _set_acceleration(self, double value):
+        self.thisptr.acceleration = value
+
+    acceleration = property(_get_acceleration, _set_acceleration)
+
+    @staticmethod
+    def Position(double value):
+        cdef PyJointState self = PyJointState()
+        self.thisptr[0] = _basetypes.Position(value)
+        return self
+
+    @staticmethod
+    def Speed(double value):
+        cdef PyJointState self = PyJointState()
+        self.thisptr[0] = _basetypes.Speed(value)
+        return self
+
+    @staticmethod
+    def Effort(double value):
+        cdef PyJointState self = PyJointState()
+        self.thisptr[0] = _basetypes.Effort(value)
+        return self
+
+    @staticmethod
+    def Raw(double value):
+        cdef PyJointState self = PyJointState()
+        self.thisptr[0] = _basetypes.Raw(value)
+        return self
+
+    @staticmethod
+    def Acceleration(double value):
+        cdef PyJointState self = PyJointState()
+        self.thisptr[0] = _basetypes.Acceleration(value)
+        return self

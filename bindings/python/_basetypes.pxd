@@ -61,3 +61,20 @@ cdef extern from "base/TransformWithCovariance.hpp" namespace "base":
         Vector3d translation
         Quaterniond orientation
 
+
+cdef extern from "base/JointState.hpp" namespace "base":
+    cdef cppclass JointState:
+        JointState()
+        double position
+        double speed
+        double effort
+        double raw
+        double acceleration
+
+
+cdef extern from "base/JointState.hpp" namespace "base::JointState":
+    JointState Position(double)
+    JointState Speed(double)
+    JointState Effort(double)
+    JointState Raw(double)
+    JointState Acceleration(double)
