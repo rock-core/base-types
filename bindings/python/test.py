@@ -115,3 +115,28 @@ def test_joint_state_factories():
     assert_equal(js.raw, 5.0)
     js = basetypes.PyJointState.Acceleration(5.0)
     assert_equal(js.acceleration, 5.0)
+
+
+def test_rigid_body_state_get_set_time():
+    rbs = basetypes.PyRigidBodyState()
+    assert_equal(rbs.time.microseconds, 0)
+    rbs.time.microseconds = 500
+    assert_equal(rbs.time.microseconds, 500)
+    time = basetypes.PyTime()
+    time.microseconds = 1000
+    rbs.time = time
+    assert_equal(rbs.time.microseconds, 1000)
+
+
+def test_rigid_body_state_get_set_source_frame():
+    rbs = basetypes.PyRigidBodyState()
+    assert_equal(rbs.source_frame, "")
+    rbs.source_frame = "source_frame"
+    assert_equal(rbs.source_frame, "source_frame")
+
+
+def test_rigid_body_state_get_set_target_frame():
+    rbs = basetypes.PyRigidBodyState()
+    assert_equal(rbs.target_frame, "")
+    rbs.target_frame = "target_frame"
+    assert_equal(rbs.target_frame, "target_frame")

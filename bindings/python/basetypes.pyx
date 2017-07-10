@@ -338,3 +338,48 @@ cdef class PyJointState:
         cdef PyJointState self = PyJointState()
         self.thisptr[0] = _basetypes.Acceleration(value)
         return self
+
+
+cdef class PyRigidBodyState:
+    cdef _basetypes.RigidBodyState* thisptr
+    cdef bool delete_thisptr
+
+    def __cinit__(self):
+        self.thisptr = NULL
+        self.delete_thisptr = False
+
+    def __dealloc__(self):
+        if self.thisptr != NULL and self.delete_thisptr:
+            del self.thisptr
+
+    def __init__(self, bool do_invalidation=True):
+        self.thisptr = new _basetypes.RigidBodyState(do_invalidation)
+        self.delete_thisptr = True
+
+    def _get_time(self):
+        cdef PyTime time = PyTime()
+        del time.thisptr
+        time.thisptr = &self.thisptr.time
+        time.delete_thisptr = False
+        return time
+
+    def _set_time(self, PyTime time):
+        self.thisptr.time = deref(time.thisptr)
+
+    time = property(_get_time, _set_time)
+
+    def _get_source_frame(self):
+        return self.thisptr.sourceFrame
+
+    def _set_source_frame(self, string value):
+        self.thisptr.sourceFrame = value
+
+    source_frame = property(_get_source_frame, _set_source_frame)
+
+    def _get_target_frame(self):
+        return self.thisptr.targetFrame
+
+    def _set_target_frame(self, string value):
+        self.thisptr.targetFrame = value
+
+    target_frame = property(_get_target_frame, _set_target_frame)

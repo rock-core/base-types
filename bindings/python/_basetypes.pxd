@@ -78,3 +78,18 @@ cdef extern from "base/JointState.hpp" namespace "base::JointState":
     JointState Effort(double)
     JointState Raw(double)
     JointState Acceleration(double)
+
+
+cdef extern from "base/samples/RigidBodyState.hpp" namespace "base::samples":
+    cdef cppclass RigidBodyState:
+        RigidBodyState(bool)
+        Time time
+        string sourceFrame
+        string targetFrame
+        Vector3d position
+        #Matrix3d cov_position TODO
+        #Matrix3d cov_orientatio TODO
+        Vector3d velocity
+        #Matrix3d cov_velocity TODO
+        Vector3d angular_velocity
+        #Matrix3d cov_angular_velocity TODO
