@@ -8,6 +8,18 @@ cdef extern from "base/Time.hpp" namespace "base":
 
 
 cdef extern from "base/Eigen.hpp" namespace "base":
+    cdef cppclass Vector2d:
+        Vector2d()
+        Vector2d(double, double)
+        Vector2d(Vector2d&)
+        double* data()
+        int rows()
+        double& get "operator()"(int rows)
+        double x()
+        double y()
+        double norm()
+        double squaredNorm()
+
     cdef cppclass Vector3d:
         Vector3d()
         Vector3d(double, double, double)
@@ -18,6 +30,22 @@ cdef extern from "base/Eigen.hpp" namespace "base":
         double x()
         double y()
         double z()
+        double norm()
+        double squaredNorm()
+
+    cdef cppclass Vector4d:
+        Vector4d()
+        Vector4d(double, double, double, double)
+        Vector4d(Vector4d&)
+        double* data()
+        int rows()
+        double& get "operator()"(int rows)
+        double x()
+        double y()
+        double z()
+        double norm()
+        double squaredNorm()
+
     cdef cppclass Quaterniond:
         Quaterniond()
         Quaterniond(double, double, double, double)

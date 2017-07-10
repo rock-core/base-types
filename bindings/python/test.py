@@ -1,5 +1,5 @@
 import basetypes
-from nose.tools import assert_equal, assert_raises_regexp
+from nose.tools import assert_equal, assert_raises_regexp, assert_almost_equal
 
 
 def test_get_set_microseconds():
@@ -9,9 +9,46 @@ def test_get_set_microseconds():
     assert_equal(t.microseconds, m)
 
 
+def test_vector2d_ctor():
+    v = basetypes.PyVector2d(1.0, 2.0)
+    assert_equal(str(v), "[1.00, 2.00]")
+
+
 def test_vector3d_ctor():
     v = basetypes.PyVector3d(1.0, 2.0, 3.0)
     assert_equal(str(v), "[1.00, 2.00, 3.00]")
+
+
+def test_vector4d_ctor():
+    v = basetypes.PyVector4d(1.0, 2.0, 3.0, 4.0)
+    assert_equal(str(v), "[1.00, 2.00, 3.00, 4.00]")
+
+
+def test_vector3d_get_set_data():
+    v = basetypes.PyVector3d(1.0, 2.0, 3.0)
+    v.x = 5.0
+    v.y = 6.0
+    v.z = 7.0
+    assert_equal(v.x, 5.0)
+    assert_equal(v.y, 6.0)
+    assert_equal(v.z, 7.0)
+
+
+def test_vector3d_array_access():
+    v = basetypes.PyVector3d(1.0, 2.0, 3.0)
+    assert_equal(v[0], 1.0)
+    v[1] = 4.0
+    assert_equal(v[1], 4.0)
+    assert_raises_regexp(KeyError, "index must be", lambda i: v[i], -1)
+    def assign(i):
+        v[i] = 5.0
+    assert_raises_regexp(KeyError, "index must be", assign, 3)
+
+
+def test_norms():
+    v = basetypes.PyVector3d(1.0, 2.0, 3.0)
+    assert_almost_equal(v.norm(), 3.741657387)
+    assert_equal(v.squared_norm(), 14.0)
 
 
 def test_quaterniond_ctor():
