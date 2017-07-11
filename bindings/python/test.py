@@ -179,3 +179,47 @@ def test_rigid_body_state_get_set_orientation():
     rbs.orientation.fromarray(np.array([1.0, 2.0, 3.0, 4.0]))
     assert_array_almost_equal(
         rbs.orientation.toarray(), np.array([1.0, 2.0, 3.0, 4.0]))
+
+
+def test_rigid_body_state_get_set_cov_orientation():
+    rbs = basetypes.RigidBodyState()
+    assert_array_almost_equal(
+        rbs.cov_orientation.toarray(), np.ones((3, 3)) * np.nan)
+    rbs.cov_orientation.fromarray(np.eye(3))
+    assert_array_almost_equal(rbs.cov_orientation.toarray(), np.eye(3))
+
+
+def test_rigid_body_state_get_set_velocity():
+    rbs = basetypes.RigidBodyState()
+    assert_array_almost_equal(
+        rbs.velocity.toarray(), np.array([np.nan, np.nan, np.nan]))
+    rbs.velocity.x = 1.0
+    rbs.velocity.y = 2.0
+    rbs.velocity.z = 3.0
+    assert_array_almost_equal(rbs.velocity.toarray(), np.array([1, 2, 3]))
+
+
+def test_rigid_body_state_get_set_cov_velocity():
+    rbs = basetypes.RigidBodyState()
+    assert_array_almost_equal(
+        rbs.cov_velocity.toarray(), np.ones((3, 3)) * np.nan)
+    rbs.cov_velocity.fromarray(np.eye(3))
+    assert_array_almost_equal(rbs.cov_velocity.toarray(), np.eye(3))
+
+
+def test_rigid_body_state_get_set_angular_velocity():
+    rbs = basetypes.RigidBodyState()
+    assert_array_almost_equal(
+        rbs.angular_velocity.toarray(), np.array([np.nan, np.nan, np.nan]))
+    rbs.angular_velocity.x = 1.0
+    rbs.angular_velocity.y = 2.0
+    rbs.angular_velocity.z = 3.0
+    assert_array_almost_equal(rbs.angular_velocity.toarray(), np.array([1, 2, 3]))
+
+
+def test_rigid_body_state_get_set_cov_angular_velocity():
+    rbs = basetypes.RigidBodyState()
+    assert_array_almost_equal(
+        rbs.cov_angular_velocity.toarray(), np.ones((3, 3)) * np.nan)
+    rbs.cov_angular_velocity.fromarray(np.eye(3))
+    assert_array_almost_equal(rbs.cov_angular_velocity.toarray(), np.eye(3))

@@ -514,6 +514,65 @@ cdef class RigidBodyState:
 
     orientation = property(_get_orientation, _set_orientation)
 
-    # TODO other properties
+    def _get_cov_orientation(self):
+        cdef Matrix3d cov_orientation = Matrix3d()
+        del cov_orientation.thisptr
+        cov_orientation.delete_thisptr = False
+        cov_orientation.thisptr = &self.thisptr.cov_orientation
+        return cov_orientation
+
+    def _set_cov_orientation(self, Matrix3d value):
+        self.thisptr.cov_orientation = deref(value.thisptr)
+
+    cov_orientation = property(_get_cov_orientation, _set_cov_orientation)
+
+    def _get_velocity(self):
+        cdef Vector3d velocity = Vector3d()
+        del velocity.thisptr
+        velocity.delete_thisptr = False
+        velocity.thisptr = &self.thisptr.velocity
+        return velocity
+
+    def _set_velocity(self, Vector3d value):
+        self.thisptr.velocity = deref(value.thisptr)
+
+    velocity = property(_get_velocity, _set_velocity)
+
+    def _get_cov_velocity(self):
+        cdef Matrix3d cov_velocity = Matrix3d()
+        del cov_velocity.thisptr
+        cov_velocity.delete_thisptr = False
+        cov_velocity.thisptr = &self.thisptr.cov_velocity
+        return cov_velocity
+
+    def _set_cov_velocity(self, Matrix3d value):
+        self.thisptr.cov_velocity = deref(value.thisptr)
+
+    cov_velocity = property(_get_cov_velocity, _set_cov_velocity)
+
+    def _get_angular_velocity(self):
+        cdef Vector3d angular_velocity = Vector3d()
+        del angular_velocity.thisptr
+        angular_velocity.delete_thisptr = False
+        angular_velocity.thisptr = &self.thisptr.angular_velocity
+        return angular_velocity
+
+    def _set_angular_velocity(self, Vector3d value):
+        self.thisptr.angular_velocity = deref(value.thisptr)
+
+    angular_velocity = property(_get_angular_velocity, _set_angular_velocity)
+
+    def _get_cov_angular_velocity(self):
+        cdef Matrix3d cov_angular_velocity = Matrix3d()
+        del cov_angular_velocity.thisptr
+        cov_angular_velocity.delete_thisptr = False
+        cov_angular_velocity.thisptr = &self.thisptr.cov_angular_velocity
+        return cov_angular_velocity
+
+    def _set_cov_angular_velocity(self, Matrix3d value):
+        self.thisptr.cov_angular_velocity = deref(value.thisptr)
+
+    cov_angular_velocity = property(
+        _get_cov_angular_velocity, _set_cov_angular_velocity)
 
 # TODO DistanceImage, Frame, LaserScan, IMUSensors, PointCloud
