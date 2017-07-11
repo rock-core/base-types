@@ -3,9 +3,11 @@ cimport _basetypes
 from cython.operator cimport dereference as deref
 from libcpp.string cimport string
 from libcpp cimport bool
+cimport numpy as np
+import numpy as np
 
 
-cdef class PyTime:
+cdef class Time:
     cdef _basetypes.Time* thisptr
     cdef bool delete_thisptr
 
@@ -30,7 +32,7 @@ cdef class PyTime:
     microseconds = property(_get_microseconds, _set_microseconds)
 
 
-cdef class PyVector2d:
+cdef class Vector2d:
     cdef _basetypes.Vector2d* thisptr
     cdef bool delete_thisptr
 
@@ -84,7 +86,7 @@ cdef class PyVector2d:
     # TODO add toarray / fromarray
 
 
-cdef class PyVector3d:
+cdef class Vector3d:
     cdef _basetypes.Vector3d* thisptr
     cdef bool delete_thisptr
 
@@ -148,7 +150,7 @@ cdef class PyVector3d:
     # TODO add toarray / fromarray
 
 
-cdef class PyVector4d:
+cdef class Vector4d:
     cdef _basetypes.Vector4d* thisptr
     cdef bool delete_thisptr
 
@@ -165,10 +167,10 @@ cdef class PyVector4d:
         self.delete_thisptr = True
 
     def __str__(self):
-        return "[%.2f, %.2f, %.2f, %.2f]" % (self.thisptr.get(0),
-                                             self.thisptr.get(1),
-                                             self.thisptr.get(2),
-                                             self.thisptr.get(3))
+        return "[%.2f, %.2f, %.2f, %.2f]" % (
+            self.thisptr.get(0), self.thisptr.get(1),
+            self.thisptr.get(2), self.thisptr.get(3)
+        )
 
     def __getitem__(self, int i):
         if i < 0 or i > 3:
@@ -189,10 +191,72 @@ cdef class PyVector4d:
     # TODO add toarray / fromarray
 
 
+cdef class Matrix3d:
+    cdef _basetypes.Matrix3d* thisptr
+    cdef bool delete_thisptr
+
+    def __cinit__(self):
+        self.thisptr = NULL
+        self.delete_thisptr = False
+
+    def __dealloc__(self):
+        if self.thisptr != NULL and self.delete_thisptr:
+            del self.thisptr
+
+    def __init__(self, np.ndarray[double, ndim=2] array=None):
+        self.thisptr = new _basetypes.Matrix3d()
+        self.delete_thisptr = True
+        cdef int i
+        cdef int j
+        if array is not None:
+            for i in range(3):
+                for j in range(3):
+                    self.thisptr.data()[3 * j + i] = array[i, j]
+
+    def __str__(self):
+        return ("[%.2f, %.2f, %.2f],"
+                "[%.2f, %.2f, %.2f],"
+                "[%.2f, %.2f, %.2f]") % (
+            self.thisptr.get(0, 0), self.thisptr.get(0, 1), self.thisptr.get(0, 2),
+            self.thisptr.get(1, 0), self.thisptr.get(1, 1), self.thisptr.get(1, 2),
+            self.thisptr.get(2, 0), self.thisptr.get(2, 1), self.thisptr.get(2, 2),
+        )
+
+    def __getitem__(self, tuple indices):
+        cdef int i
+        cdef int j
+        i, j = indices
+        if i < 0 or i > 3 or j < 0 or j > 3:
+            raise KeyError("indices must be in [0, 3] but were (%d, %d)"
+                           % (i, j))
+        return self.thisptr.get(i, j)
+
+    def __setitem__(self, tuple indices, double v):
+        cdef int i
+        cdef int j
+        i, j = indices
+        if i < 0 or i > 3 or j < 0 or j > 3:
+            raise KeyError("indices must be in [0, 3] but were (%d, %d)"
+                           % (i, j))
+        # Assumes column-major order!
+        self.thisptr.data()[3 * j + i] = v
+
+    def toarray(self):
+        cdef np.ndarray[double, ndim=2] array = np.empty((3, 3))
+        cdef int i
+        cdef int j
+        for i in range(3):
+            for j in range(3):
+                array[i, j] = self.thisptr.data()[3 * j + i]
+        return array
+
+    # TODO add fromarray
+
+
 # TODO Vector6d, VectorXd, Point, Pose
 
 
-cdef class PyQuaterniond:
+cdef class Quaterniond:
     cdef _basetypes.Quaterniond* thisptr
     cdef bool delete_thisptr
 
@@ -216,7 +280,7 @@ cdef class PyQuaterniond:
     # TODO add toarray / fromarray
 
 
-cdef class PyTransformWithCovariance:
+cdef class TransformWithCovariance:
     cdef _basetypes.TransformWithCovariance* thisptr
     cdef bool delete_thisptr
 
@@ -233,25 +297,25 @@ cdef class PyTransformWithCovariance:
         self.delete_thisptr = True
 
     def _get_translation(self):
-        cdef PyVector3d translation = PyVector3d()
+        cdef Vector3d translation = Vector3d()
         del translation.thisptr
         translation.delete_thisptr = False
         translation.thisptr = &self.thisptr.translation
         return translation
 
-    def _set_translation(self, PyVector3d translation):
+    def _set_translation(self, Vector3d translation):
         self.thisptr.translation = deref(translation.thisptr)
 
     translation = property(_get_translation, _set_translation)
 
     def _get_orientation(self):
-        cdef PyQuaterniond orientation = PyQuaterniond()
+        cdef Quaterniond orientation = Quaterniond()
         del orientation.thisptr
         orientation.delete_thisptr = False
         orientation.thisptr = &self.thisptr.orientation
         return orientation
 
-    def _set_orientation(self, PyQuaterniond orientation):
+    def _set_orientation(self, Quaterniond orientation):
         self.thisptr.orientation = deref(orientation.thisptr)
 
     orientation = property(_get_orientation, _set_orientation)
@@ -261,7 +325,7 @@ cdef class PyTransformWithCovariance:
                                                      self.orientation)
 
 
-cdef class PyJointState:
+cdef class JointState:
     cdef _basetypes.JointState* thisptr
     cdef bool delete_thisptr
 
@@ -319,31 +383,31 @@ cdef class PyJointState:
 
     @staticmethod
     def Position(double value):
-        cdef PyJointState self = PyJointState()
+        cdef JointState self = JointState()
         self.thisptr[0] = _basetypes.Position(value)
         return self
 
     @staticmethod
     def Speed(double value):
-        cdef PyJointState self = PyJointState()
+        cdef JointState self = JointState()
         self.thisptr[0] = _basetypes.Speed(value)
         return self
 
     @staticmethod
     def Effort(double value):
-        cdef PyJointState self = PyJointState()
+        cdef JointState self = JointState()
         self.thisptr[0] = _basetypes.Effort(value)
         return self
 
     @staticmethod
     def Raw(double value):
-        cdef PyJointState self = PyJointState()
+        cdef JointState self = JointState()
         self.thisptr[0] = _basetypes.Raw(value)
         return self
 
     @staticmethod
     def Acceleration(double value):
-        cdef PyJointState self = PyJointState()
+        cdef JointState self = JointState()
         self.thisptr[0] = _basetypes.Acceleration(value)
         return self
 
@@ -351,7 +415,7 @@ cdef class PyJointState:
 # TODO Joints
 
 
-cdef class PyRigidBodyState:
+cdef class RigidBodyState:
     cdef _basetypes.RigidBodyState* thisptr
     cdef bool delete_thisptr
 
@@ -368,13 +432,13 @@ cdef class PyRigidBodyState:
         self.delete_thisptr = True
 
     def _get_time(self):
-        cdef PyTime time = PyTime()
+        cdef Time time = Time()
         del time.thisptr
         time.thisptr = &self.thisptr.time
         time.delete_thisptr = False
         return time
 
-    def _set_time(self, PyTime time):
+    def _set_time(self, Time time):
         self.thisptr.time = deref(time.thisptr)
 
     time = property(_get_time, _set_time)

@@ -14,7 +14,7 @@ cdef extern from "base/Eigen.hpp" namespace "base":
         Vector2d(Vector2d&)
         double* data()
         int rows()
-        double& get "operator()"(int rows)
+        double& get "operator()"(int row)
         double x()
         double y()
         double norm()
@@ -26,7 +26,7 @@ cdef extern from "base/Eigen.hpp" namespace "base":
         Vector3d(Vector3d&)
         double* data()
         int rows()
-        double& get "operator()"(int rows)
+        double& get "operator()"(int row)
         double x()
         double y()
         double z()
@@ -39,12 +39,19 @@ cdef extern from "base/Eigen.hpp" namespace "base":
         Vector4d(Vector4d&)
         double* data()
         int rows()
-        double& get "operator()"(int rows)
+        double& get "operator()"(int row)
         double x()
         double y()
         double z()
         double norm()
         double squaredNorm()
+
+    cdef cppclass Matrix3d:
+        Matrix3d()
+        double* data()
+        double& get "operator()"(int row, int col)
+        int rows()
+        int cols()
 
     cdef cppclass Quaterniond:
         Quaterniond()
