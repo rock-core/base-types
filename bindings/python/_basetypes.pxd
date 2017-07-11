@@ -94,8 +94,9 @@ cdef extern from "base/samples/RigidBodyState.hpp" namespace "base::samples":
         string sourceFrame
         string targetFrame
         Vector3d position
-        #Matrix3d cov_position TODO
-        #Matrix3d cov_orientatio TODO
+        Matrix3d cov_position
+        Quaterniond orientation
+        #Matrix3d cov_orientation TODO
         Vector3d velocity
         #Matrix3d cov_velocity TODO
         Vector3d angular_velocity

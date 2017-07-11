@@ -147,7 +147,14 @@ cdef class Vector3d:
     def squared_norm(self):
         return self.thisptr.squaredNorm()
 
-    # TODO add toarray / fromarray
+    def toarray(self):
+        cdef np.ndarray[double, ndim=1] array = np.empty(3)
+        cdef int i
+        for i in range(3):
+            array[i] = self.thisptr.data()[i]
+        return array
+
+    # TODO add fromarray
 
 
 cdef class Vector4d:
@@ -250,7 +257,12 @@ cdef class Matrix3d:
                 array[i, j] = self.thisptr.data()[3 * j + i]
         return array
 
-    # TODO add fromarray
+    def fromarray(self, np.ndarray[double, ndim=2] array):
+        cdef int i
+        cdef int j
+        for i in range(3):
+            for j in range(3):
+                self.thisptr.data()[3 * j + i] = array[i, j]
 
 
 # TODO Vector6d, VectorXd, Point, Pose
@@ -277,7 +289,14 @@ cdef class Quaterniond:
             self.thisptr.w(), self.thisptr.x(), self.thisptr.y(),
             self.thisptr.z())
 
-    # TODO add toarray / fromarray
+    def toarray(self):
+        cdef np.ndarray[double, ndim=1] array = np.array([
+            self.thisptr.w(), self.thisptr.x(), self.thisptr.y(),
+            self.thisptr.z()])
+        return array
+
+    def fromarray(self, np.ndarray[double, ndim=1] array):
+        self.thisptr[0] = _basetypes.Quaterniond(array[0], array[1], array[2], array[3])
 
 
 cdef class TransformWithCovariance:
@@ -459,5 +478,42 @@ cdef class RigidBodyState:
 
     target_frame = property(_get_target_frame, _set_target_frame)
 
+    def _get_position(self):
+        cdef Vector3d position = Vector3d()
+        del position.thisptr
+        position.delete_thisptr = False
+        position.thisptr = &self.thisptr.position
+        return position
+
+    def _set_position(self, Vector3d value):
+        self.thisptr.position = deref(value.thisptr)
+
+    position = property(_get_position, _set_position)
+
+    def _get_cov_position(self):
+        cdef Matrix3d cov_position = Matrix3d()
+        del cov_position.thisptr
+        cov_position.delete_thisptr = False
+        cov_position.thisptr = &self.thisptr.cov_position
+        return cov_position
+
+    def _set_cov_position(self, Matrix3d value):
+        self.thisptr.cov_position = deref(value.thisptr)
+
+    cov_position = property(_get_cov_position, _set_cov_position)
+
+    def _get_orientation(self):
+        cdef Quaterniond orientation = Quaterniond()
+        del orientation.thisptr
+        orientation.delete_thisptr = False
+        orientation.thisptr = &self.thisptr.orientation
+        return orientation
+
+    def _set_orientation(self, Quaterniond value):
+        self.thisptr.orientation = deref(value.thisptr)
+
+    orientation = property(_get_orientation, _set_orientation)
+
+    # TODO other properties
 
 # TODO DistanceImage, Frame, LaserScan, IMUSensors, PointCloud

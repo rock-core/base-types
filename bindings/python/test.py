@@ -152,3 +152,30 @@ def test_rigid_body_state_get_set_target_frame():
     assert_equal(rbs.target_frame, "")
     rbs.target_frame = "target_frame"
     assert_equal(rbs.target_frame, "target_frame")
+
+
+def test_rigid_body_state_get_set_position():
+    rbs = basetypes.RigidBodyState()
+    assert_array_almost_equal(
+        rbs.position.toarray(), np.array([np.nan, np.nan, np.nan]))
+    rbs.position.x = 1.0
+    rbs.position.y = 2.0
+    rbs.position.z = 3.0
+    assert_array_almost_equal(rbs.position.toarray(), np.array([1, 2, 3]))
+
+
+def test_rigid_body_state_get_set_cov_position():
+    rbs = basetypes.RigidBodyState()
+    assert_array_almost_equal(
+        rbs.cov_position.toarray(), np.ones((3, 3)) * np.nan)
+    rbs.cov_position.fromarray(np.eye(3))
+    assert_array_almost_equal(rbs.cov_position.toarray(), np.eye(3))
+
+
+def test_rigid_body_state_get_set_orientation():
+    rbs = basetypes.RigidBodyState()
+    assert_array_almost_equal(
+        rbs.orientation.toarray(), np.array([np.nan, np.nan, np.nan, np.nan]))
+    rbs.orientation.fromarray(np.array([1.0, 2.0, 3.0, 4.0]))
+    assert_array_almost_equal(
+        rbs.orientation.toarray(), np.array([1.0, 2.0, 3.0, 4.0]))
