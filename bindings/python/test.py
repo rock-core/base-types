@@ -1,6 +1,6 @@
 import basetypes
 import numpy as np
-from nose.tools import assert_equal, assert_raises_regexp, assert_almost_equal
+from nose.tools import assert_equal, assert_raises_regexp, assert_almost_equal, assert_false, assert_true
 from numpy.testing import assert_array_almost_equal
 
 
@@ -127,6 +127,15 @@ def test_joint_state_factories():
     assert_equal(js.raw, 5.0)
     js = basetypes.JointState.Acceleration(5.0)
     assert_equal(js.acceleration, 5.0)
+
+
+def test_joints_resize():
+    j = basetypes.Joints()
+    assert_equal(j.size(), 0)
+    assert_false(j.has_names())
+    j.resize(5)
+    assert_equal(j.size(), 5)
+    assert_false(j.has_names())
 
 
 def test_rigid_body_state_get_set_time():

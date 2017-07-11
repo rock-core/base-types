@@ -431,7 +431,32 @@ cdef class JointState:
         return self
 
 
-# TODO Joints
+cdef class Joints:
+    cdef _basetypes.Joints* thisptr
+    cdef bool delete_thisptr
+
+    def __cinit__(self):
+        self.thisptr = NULL
+        self.delete_thisptr = False
+
+    def __dealloc__(self):
+        if self.thisptr != NULL and self.delete_thisptr:
+            del self.thisptr
+
+    def __init__(self):
+        self.thisptr = new _basetypes.Joints()
+        self.delete_thisptr = True
+
+    def size(self):
+        return self.thisptr.size()
+
+    def resize(self, int size):
+        self.thisptr.resize(size)
+
+    def has_names(self):
+        return self.thisptr.hasNames()
+
+    # TODO expose some useful functions
 
 
 cdef class RigidBodyState:

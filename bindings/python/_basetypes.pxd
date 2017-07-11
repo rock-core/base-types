@@ -1,4 +1,6 @@
 from libcpp.string cimport string
+from libcpp.vector cimport vector
+from libcpp cimport bool
 
 
 cdef extern from "base/Time.hpp" namespace "base":
@@ -85,6 +87,26 @@ cdef extern from "base/JointState.hpp" namespace "base::JointState":
     JointState Effort(double)
     JointState Raw(double)
     JointState Acceleration(double)
+
+
+cdef extern from "base/NamedVector.hpp" namespace "base":
+    cdef cppclass NamedVector[T]:
+        vector[string] names
+        vector[T] elements
+
+        bool hasNames()
+        T getElementByName(string)
+        void resize(int)
+        int size()
+        bool empty()
+        void clear()
+        int mapNameToIndex(string name)
+
+
+cdef extern from "base/samples/Joints.hpp" namespace "base::samples":
+    cdef cppclass Joints(NamedVector[JointState]):
+        Joints()
+        Time time
 
 
 cdef extern from "base/samples/RigidBodyState.hpp" namespace "base::samples":
