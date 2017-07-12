@@ -10,7 +10,26 @@ cdef extern from "base/Time.hpp" namespace "base":
 
         int microseconds
 
+        bool operator<(Time)
+        bool operator>(Time)
+        bool operator==(Time)
+        bool operator!=(Time)
+        bool operator>=(Time)
+        bool operator<=(Time)
+        Time operator-(Time)
+        Time operator+(Time)
+        Time operator/(int)
+        Time operator*(double)
+
         bool isNull()
+        string toString(Resolution, string)
+
+
+cdef extern from "base/Time.hpp" namespace "base::Time":
+    cdef enum Resolution:
+        Seconds
+        Milliseconds
+        Microseconds
 
 
 cdef extern from "base/Time.hpp" namespace "base::Time":

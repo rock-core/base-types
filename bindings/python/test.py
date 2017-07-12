@@ -11,9 +11,56 @@ def test_get_set_microseconds():
     assert_equal(t.microseconds, m)
 
 
+def test_time_operators():
+    t1 = basetypes.Time()
+    t1.microseconds = 0
+    t2 = basetypes.Time()
+    t2.microseconds = 1
+    t3 = basetypes.Time()
+    t3.microseconds = 1
+    t4 = basetypes.Time()
+    t4.microseconds = 2
+
+    assert_true(t1 < t2 < t4)
+    assert_true(t4 > t2 > t1)
+    assert_true(t1 != t2)
+    assert_false(t2 != t3)
+    assert_true(t2 == t3)
+    assert_false(t1 == t2)
+    assert_true(t2 >= t3)
+    assert_false(t2 > t3)
+    assert_true(t2 <= t3)
+    assert_false(t2 < t3)
+
+    assert_true(t2 + t2 == t4)
+    assert_true(t4 - t2 == t2)
+    assert_true(t4 / 2 == t2)
+    assert_true(t2 * 2 == t4)
+
+    t5 = basetypes.Time()
+    t5.microseconds = 10
+    t5 /= 2
+    assert_equal(t5.microseconds, 5)
+    t5 -= t2 * 4
+    assert_equal(t5, t2)
+    t5 *= 2
+    assert_equal(t5, t4)
+    t5 += t1
+    assert_equal(t5, t4)
+
+
 def test_vector2d_ctor():
     v = basetypes.Vector2d(1.0, 2.0)
     assert_equal(str(v), "[1.00, 2.00]")
+
+
+def test_vector2d_as_ndarray():
+    random_state = np.random.RandomState(843)
+    r = random_state.randn(2, 2)
+    v = basetypes.Vector2d(3.23, 2.24)
+    rv = r.dot(np.asarray(v))
+    rv2 = r.dot(v.toarray())
+    assert_array_almost_equal(rv, rv2)
 
 
 def test_vector3d_ctor():
@@ -21,9 +68,13 @@ def test_vector3d_ctor():
     assert_equal(str(v), "[1.00, 2.00, 3.00]")
 
 
-def test_vector4d_ctor():
-    v = basetypes.Vector4d(1.0, 2.0, 3.0, 4.0)
-    assert_equal(str(v), "[1.00, 2.00, 3.00, 4.00]")
+def test_vector3d_as_ndarray():
+    random_state = np.random.RandomState(843)
+    r = random_state.randn(3, 3)
+    v = basetypes.Vector3d(3.23, 2.24, 3.63)
+    rv = r.dot(np.asarray(v))
+    rv2 = r.dot(v.toarray())
+    assert_array_almost_equal(rv, rv2)
 
 
 def test_vector3d_get_set_data():
@@ -47,6 +98,26 @@ def test_vector3d_array_access():
     assert_raises_regexp(KeyError, "index must be", assign, 3)
 
 
+def test_norms():
+    v = basetypes.Vector3d(1.0, 2.0, 3.0)
+    assert_almost_equal(v.norm(), 3.741657387)
+    assert_equal(v.squared_norm(), 14.0)
+
+
+def test_vector4d_ctor():
+    v = basetypes.Vector4d(1.0, 2.0, 3.0, 4.0)
+    assert_equal(str(v), "[1.00, 2.00, 3.00, 4.00]")
+
+
+def test_vector4d_as_ndarray():
+    random_state = np.random.RandomState(843)
+    r = random_state.randn(4, 4)
+    v = basetypes.Vector4d(3.23, 2.24, 3.63, 2.05)
+    rv = r.dot(np.asarray(v))
+    rv2 = r.dot(v.toarray())
+    assert_array_almost_equal(rv, rv2)
+
+
 def test_matrix3d_get_set_data():
     m = basetypes.Matrix3d()
     m[0, 1] = 1.0
@@ -57,10 +128,12 @@ def test_matrix3d_get_set_data():
     assert_array_almost_equal(m.toarray(), r)
 
 
-def test_norms():
-    v = basetypes.Vector3d(1.0, 2.0, 3.0)
-    assert_almost_equal(v.norm(), 3.741657387)
-    assert_equal(v.squared_norm(), 14.0)
+def test_matrix3d_array_access():
+    random_state = np.random.RandomState(843)
+    m = basetypes.Matrix3d()
+    r = random_state.randn(3, 3)
+    m.fromarray(r)
+    assert_array_equal(np.asarray(m), r)
 
 
 def test_quaterniond_ctor():

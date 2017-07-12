@@ -9,6 +9,9 @@ import numpy as np
 cimport _basetypes
 
 
+np.import_array()  # must be here because we use the NumPy C API
+
+
 cdef class Time:
     cdef _basetypes.Time* thisptr
     cdef bool delete_thisptr
@@ -24,6 +27,9 @@ cdef class Time:
     def __init__(self):
         self.thisptr = new _basetypes.Time()
         self.delete_thisptr = True
+
+    def __str__(self):
+        return self.thisptr.toString(_basetypes.Resolution.Microseconds, "%Y%m%d-%H:%M:%S")
 
     def _get_microseconds(self):
         return self.thisptr.microseconds
@@ -41,6 +47,58 @@ cdef class Time:
         cdef Time time = Time()
         time.thisptr[0] = _basetypes.now()
         return time
+
+    def __richcmp__(Time self, Time other, int op):
+        if op == 0:
+            return deref(self.thisptr) < deref(other.thisptr)
+        elif op == 1:
+            return deref(self.thisptr) <= deref(other.thisptr)
+        elif op == 2:
+            return deref(self.thisptr) == deref(other.thisptr)
+        elif op == 3:
+            return deref(self.thisptr) != deref(other.thisptr)
+        elif op == 4:
+            return deref(self.thisptr) > deref(other.thisptr)
+        elif op == 5:
+            return deref(self.thisptr) >= deref(other.thisptr)
+        else:
+            raise ValueError("Unknown comparison operation %d" % op)
+
+    def __add__(Time self, Time other):
+        cdef Time time = Time()
+        time.thisptr[0] = deref(self.thisptr) + deref(other.thisptr)
+        return time
+
+    def __iadd__(Time self, Time other):
+        self.thisptr[0] = deref(self.thisptr) + deref(other.thisptr)
+        return self
+
+    def __sub__(Time self, Time other):
+        cdef Time time = Time()
+        time.thisptr[0] = deref(self.thisptr) - deref(other.thisptr)
+        return time
+
+    def __isub__(Time self, Time other):
+        self.thisptr[0] = deref(self.thisptr) - deref(other.thisptr)
+        return self
+
+    def __div__(Time self, int divider):
+        cdef Time time = Time()
+        time.thisptr[0] = deref(self.thisptr) / divider
+        return time
+
+    def __idiv__(Time self, int divider):
+        self.thisptr[0] = deref(self.thisptr) / divider
+        return self
+
+    def __mul__(Time self, double factor):
+        cdef Time time = Time()
+        time.thisptr[0] = deref(self.thisptr) * factor
+        return time
+
+    def __imul__(Time self, double factor):
+        self.thisptr[0] = deref(self.thisptr) * factor
+        return self
 
 
 cdef class Vector2d:
@@ -61,6 +119,12 @@ cdef class Vector2d:
 
     def __str__(self):
         return "[%.2f, %.2f]" % (self.thisptr.get(0), self.thisptr.get(1))
+
+    def __array__(self, dtype=None):
+        cdef np.npy_intp shape[1]
+        shape[0] = <np.npy_intp> 2
+        return np.PyArray_SimpleNewFromData(
+            1, shape, np.NPY_DOUBLE, <void*> self.thisptr.data())
 
     def __getitem__(self, int i):
         if i < 0 or i > 1:
@@ -94,7 +158,14 @@ cdef class Vector2d:
     def squared_norm(self):
         return self.thisptr.squaredNorm()
 
-    # TODO add toarray / fromarray
+    def toarray(self):
+        cdef np.ndarray[double, ndim=1] array = np.empty(2)
+        cdef int i
+        for i in range(2):
+            array[i] = self.thisptr.data()[i]
+        return array
+
+    # TODO add fromarray
 
 
 cdef class Vector3d:
@@ -117,6 +188,12 @@ cdef class Vector3d:
         return "[%.2f, %.2f, %.2f]" % (self.thisptr.get(0),
                                        self.thisptr.get(1),
                                        self.thisptr.get(2))
+
+    def __array__(self, dtype=None):
+        cdef np.npy_intp shape[1]
+        shape[0] = <np.npy_intp> 3
+        return np.PyArray_SimpleNewFromData(
+            1, shape, np.NPY_DOUBLE, <void*> self.thisptr.data())
 
     def __getitem__(self, int i):
         if i < 0 or i > 2:
@@ -190,6 +267,12 @@ cdef class Vector4d:
             self.thisptr.get(2), self.thisptr.get(3)
         )
 
+    def __array__(self, dtype=None):
+        cdef np.npy_intp shape[1]
+        shape[0] = <np.npy_intp> 4
+        return np.PyArray_SimpleNewFromData(
+            1, shape, np.NPY_DOUBLE, <void*> self.thisptr.data())
+
     def __getitem__(self, int i):
         if i < 0 or i > 3:
             raise KeyError("index must be in [0, 3] but was %d" % i)
@@ -247,6 +330,13 @@ cdef class Matrix3d:
             self.thisptr.get(2, 0), self.thisptr.get(2, 1), self.thisptr.get(2, 2),
         )
 
+    def __array__(self, dtype=None):
+        cdef np.npy_intp shape[2]
+        shape[0] = <np.npy_intp> 3
+        shape[1] = <np.npy_intp> 3
+        return np.PyArray_SimpleNewFromData(
+            2, shape, np.NPY_DOUBLE, <void*> self.thisptr.data()).T
+
     def __getitem__(self, tuple indices):
         cdef int i
         cdef int j
@@ -283,7 +373,7 @@ cdef class Matrix3d:
                 self.thisptr.data()[3 * j + i] = array[i, j]
 
 
-# TODO Vector6d, VectorXd, Point, Pose
+# TODO Vector6d, VectorXd, Pose
 
 
 cdef class Quaterniond:
