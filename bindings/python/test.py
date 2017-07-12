@@ -268,3 +268,77 @@ def test_create_frame_rgb():
     assert_equal(image.dtype, np.uint8)
     frame.image = np.ones(image.shape, dtype=np.uint8)
     assert_true(np.all(frame.image == 1))
+
+
+def test_create_frame_gray():
+    GRAYSCALE = 1
+    VALID = 1
+    frame = basetypes.Frame(800, 600, 1, GRAYSCALE, VALID, 800 * 600 * 1)
+    assert_equal(frame.get_width(), 800)
+    assert_equal(frame.get_height(), 600)
+    assert_equal(frame.get_channel_count(), 1)
+    assert_equal(frame.get_data_depth(), 1)
+    image = frame.image
+    assert_array_equal(image.shape, (800, 600))
+    assert_equal(image.dtype, np.uint8)
+    frame.image = np.ones(image.shape, dtype=np.uint8)
+    assert_true(np.all(frame.image == 1))
+
+
+def test_create_pointcloud():
+    pcl = basetypes.Pointcloud()
+
+    pcl.points.resize(100)
+    point = pcl.points[0]
+    point.x = 1.0
+    point.y = 2.0
+    point.z = 3.0
+    assert_equal(pcl.points.size(), 100)
+    assert_array_equal(pcl.points[0].toarray(), (1.0, 2.0, 3.0))
+
+    pcl.colors.resize(100)
+    color = pcl.colors[0]
+    color[0] = 255.0
+    color[1] = 255.0
+    color[2] = 255.0
+    color[3] = 255.0
+    assert_equal(pcl.colors.size(), 100)
+    assert_array_equal(pcl.colors[0].toarray(), (255.0, 255.0, 255.0, 255.0))
+
+
+def test_laser_scan():
+    ls = basetypes.LaserScan()
+
+    time = basetypes.Time.now()
+    ls.time = time
+    assert_equal(ls.time.microseconds, time.microseconds)
+
+    ls.min_range = 20
+    ls.max_range = 30
+
+    ls.ranges.resize(10)
+    ls.remission.resize(10)
+    for i in range(10):
+        ls.ranges[i] = 25
+        ls.remission[i] = 0.0
+    ls.ranges[5] = 10
+    assert_false(ls.is_valid_beam(5))
+    assert_true(ls.is_valid_beam(0))
+    assert_false(ls.is_range_valid(500))
+    assert_true(ls.is_range_valid(25))
+
+
+def test_imu_sensors():
+    imu = basetypes.IMUSensors()
+
+    imu.time = basetypes.Time.now()
+    assert_false(imu.time.is_null())
+
+    imu.acc.x = 1.0
+    assert_equal(imu.acc.x, 1.0)
+
+    imu.gyro.x = 2.0
+    assert_equal(imu.gyro.x, 2.0)
+
+    imu.mag.x = 3.0
+    assert_equal(imu.mag.x, 3.0)

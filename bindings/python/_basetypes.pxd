@@ -7,7 +7,14 @@ from libc.stdint cimport uint8_t, uint16_t, uint32_t
 cdef extern from "base/Time.hpp" namespace "base":
     cdef cppclass Time:
         Time()
+
         int microseconds
+
+        bool isNull()
+
+
+cdef extern from "base/Time.hpp" namespace "base::Time":
+    Time now()
 
 
 cdef extern from "base/Eigen.hpp" namespace "base":
@@ -183,3 +190,50 @@ cdef extern from "base/samples/Frame.hpp" namespace "base::samples::frame":
         uint32_t getDataDepth()
         uint16_t getWidth()
         uint16_t getHeight()
+
+
+cdef extern from "base/samples/Pointcloud.hpp" namespace "base::samples":
+    cdef cppclass Pointcloud:
+        Pointcloud()
+
+        Time time
+        vector[Vector3d] points
+        vector[Vector4d] colors
+
+
+cdef extern from "base/samples/LaserScan.hpp" namespace "base::samples":
+    cdef enum LASER_RANGE_ERRORS:  # TODO pyx
+        TOO_FAR
+        TOO_NEAR
+        MEASUREMENT_ERROR
+        OTHER_RANGE_ERRORS
+        MAX_RANGE_ERROR
+
+    cdef cppclass LaserScan:
+        LaserScan()
+
+        Time time
+        double start_angle
+        double angular_resolution
+        double speed
+        vector[uint32_t] ranges
+        uint32_t minRange
+        uint32_t maxRange
+        vector[float] remission
+
+        bool isValidBeam(unsigned int)
+        void reset()
+        bool isRangeValid(uint32_t)
+        #convertScanToPointCloud(vector[T], Affine3d, bool) TODO wrap Affine3d
+        #bool getPointFromScanBeamXForward(unsigned int i, Vector3d point) TODO
+        #bool getPointFromScanBeam(unsigned int i, Vector3d point) TODO
+
+
+cdef extern from "base/samples/IMUSensors.hpp" namespace "base::samples":
+    cdef cppclass IMUSensors:
+        IMUSensors()
+
+        Time time
+        Vector3d acc
+        Vector3d gyro
+        Vector3d mag

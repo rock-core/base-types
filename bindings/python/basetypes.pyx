@@ -33,6 +33,15 @@ cdef class Time:
 
     microseconds = property(_get_microseconds, _set_microseconds)
 
+    def is_null(self):
+        return self.thisptr.isNull()
+
+    @staticmethod
+    def now():
+        cdef Time time = Time()
+        time.thisptr[0] = _basetypes.now()
+        return time
+
 
 cdef class Vector2d:
     cdef _basetypes.Vector2d* thisptr
@@ -171,7 +180,7 @@ cdef class Vector4d:
         if self.thisptr != NULL and self.delete_thisptr:
             del self.thisptr
 
-    def __init__(self, v0, v1, v2, v3):
+    def __init__(self, v0=0.0, v1=0.0, v2=0.0, v3=0.0):
         self.thisptr = new _basetypes.Vector4d(v0, v1, v2, v3)
         self.delete_thisptr = True
 
@@ -197,7 +206,14 @@ cdef class Vector4d:
     def squared_norm(self):
         return self.thisptr.squaredNorm()
 
-    # TODO add toarray / fromarray
+    def toarray(self):
+        cdef np.ndarray[double, ndim=1] array = np.empty(4)
+        cdef int i
+        for i in range(4):
+            array[i] = self.thisptr.data()[i]
+        return array
+
+    # TODO add fromarray
 
 
 cdef class Matrix3d:
@@ -528,6 +544,9 @@ cdef class StringVectorReference:
     def __setitem__(self, int i, string s):
         deref(self.thisptr)[i] = s
 
+    def size(self):
+        return self.thisptr.size()
+
 
 cdef class JointStateVectorReference:
     cdef vector[_basetypes.JointState]* thisptr
@@ -544,6 +563,9 @@ cdef class JointStateVectorReference:
         joint_state.delete_thisptr = False
         joint_state.thisptr = &deref(self.thisptr)[i]
         return joint_state
+
+    def size(self):
+        return self.thisptr.size()
 
 
 cdef class RigidBodyState:
@@ -807,4 +829,272 @@ cdef class Frame:
 # TODO FramePair
 
 
-# TODO Frame, LaserScan, IMUSensors, PointCloud
+cdef class Pointcloud:
+    cdef _basetypes.Pointcloud* thisptr
+    cdef bool delete_thisptr
+
+    def __cinit__(self):
+        self.thisptr = NULL
+        self.delete_thisptr = False
+
+    def __dealloc__(self):
+        if self.thisptr != NULL and self.delete_thisptr:
+            del self.thisptr
+
+    def __init__(self):
+        self.thisptr = new _basetypes.Pointcloud()
+        self.delete_thisptr = True
+
+    @property
+    def points(self):
+        cdef Vector3dVectorReference points = Vector3dVectorReference()
+        points.thisptr = &self.thisptr.points
+        return points
+
+    @property
+    def colors(self):
+        cdef Vector4dVectorReference colors = Vector4dVectorReference()
+        colors.thisptr = &self.thisptr.colors
+        return colors
+
+
+cdef class Vector3dVectorReference:
+    cdef vector[_basetypes.Vector3d]* thisptr
+
+    def __cinit__(self):
+        self.thisptr = NULL
+
+    def __dealloc__(self):
+        pass
+
+    def __getitem__(self, int i):
+        cdef Vector3d v = Vector3d()
+        del v.thisptr
+        v.delete_thisptr = False
+        v.thisptr = &deref(self.thisptr)[i]
+        return v
+
+    def resize(self, int i):
+        self.thisptr.resize(i)
+
+    def size(self):
+        return self.thisptr.size()
+
+
+cdef class Vector4dVectorReference:
+    cdef vector[_basetypes.Vector4d]* thisptr
+
+    def __cinit__(self):
+        self.thisptr = NULL
+
+    def __dealloc__(self):
+        pass
+
+    def __getitem__(self, int i):
+        cdef Vector4d v = Vector4d()
+        del v.thisptr
+        v.delete_thisptr = False
+        v.thisptr = &deref(self.thisptr)[i]
+        return v
+
+    def resize(self, int i):
+        self.thisptr.resize(i)
+
+    def size(self):
+        return self.thisptr.size()
+
+
+cdef class LaserScan:
+    cdef _basetypes.LaserScan* thisptr
+    cdef bool delete_thisptr
+
+    def __cinit__(self):
+        self.thisptr = NULL
+        self.delete_thisptr = False
+
+    def __dealloc__(self):
+        if self.thisptr != NULL and self.delete_thisptr:
+            del self.thisptr
+
+    def __init__(self):
+        self.thisptr = new _basetypes.LaserScan()
+        self.delete_thisptr = True
+
+    def _get_time(self):
+        cdef Time time = Time()
+        del time.thisptr
+        time.thisptr = &self.thisptr.time
+        time.delete_thisptr = False
+        return time
+
+    def _set_time(self, Time time):
+        self.thisptr.time = deref(time.thisptr)
+
+    time = property(_get_time, _set_time)
+
+    def _get_start_angle(self):
+        return self.thisptr.start_angle
+
+    def _set_start_angle(self, double start_angle):
+        self.thisptr.start_angle = start_angle
+
+    start_angle = property(_get_start_angle, _set_start_angle)
+
+    def _get_angular_resolution(self):
+        return self.thisptr.angular_resolution
+
+    def _set_angular_resolution(self, double angular_resolution):
+        self.thisptr.angular_resolution = angular_resolution
+
+    angular_resolution = property(_get_angular_resolution, _set_angular_resolution)
+
+    def _get_speed(self):
+        return self.thisptr.speed
+
+    def _set_speed(self, double speed):
+        self.thisptr.speed = speed
+
+    speed = property(_get_speed, _set_speed)
+
+    @property
+    def ranges(self):
+        cdef UInt32VectorReference ranges = UInt32VectorReference()
+        ranges.thisptr = &self.thisptr.ranges
+        return ranges
+
+    def _get_min_range(self):
+        return self.thisptr.minRange
+
+    def _set_min_range(self, uint32_t min_range):
+        self.thisptr.minRange = min_range
+
+    min_range = property(_get_min_range, _set_min_range)
+
+    def _get_max_range(self):
+        return self.thisptr.maxRange
+
+    def _set_max_range(self, uint32_t max_range):
+        self.thisptr.maxRange = max_range
+
+    max_range = property(_get_max_range, _set_max_range)
+
+    @property
+    def remission(self):
+        cdef FloatVectorReference remission = FloatVectorReference()
+        remission.thisptr = &self.thisptr.remission
+        return remission
+
+    def is_valid_beam(self, unsigned int i):
+        return self.thisptr.isValidBeam(i)
+
+    def is_range_valid(self, uint32_t r):
+        return self.thisptr.isRangeValid(r)
+
+
+cdef class UInt32VectorReference:
+    cdef vector[uint32_t]* thisptr
+
+    def __cinit__(self):
+        self.thisptr = NULL
+
+    def __dealloc__(self):
+        pass
+
+    def __getitem__(self, int i):
+        return deref(self.thisptr)[i]
+
+    def __setitem__(self, int i, uint32_t v):
+        deref(self.thisptr)[i] = v
+
+    def resize(self, int i):
+        self.thisptr.resize(i)
+
+    def size(self):
+        return self.thisptr.size()
+
+
+cdef class FloatVectorReference:
+    cdef vector[float]* thisptr
+
+    def __cinit__(self):
+        self.thisptr = NULL
+
+    def __dealloc__(self):
+        pass
+
+    def __getitem__(self, int i):
+        return deref(self.thisptr)[i]
+
+    def __setitem__(self, int i, float v):
+        deref(self.thisptr)[i] = v
+
+    def resize(self, int i):
+        self.thisptr.resize(i)
+
+    def size(self):
+        return self.thisptr.size()
+
+
+cdef class IMUSensors:
+    cdef _basetypes.IMUSensors* thisptr
+    cdef bool delete_thisptr
+
+    def __cinit__(self):
+        self.thisptr = NULL
+        self.delete_thisptr = False
+
+    def __dealloc__(self):
+        if self.thisptr != NULL and self.delete_thisptr:
+            del self.thisptr
+
+    def __init__(self):
+        self.thisptr = new _basetypes.IMUSensors()
+        self.delete_thisptr = True
+
+    def _get_time(self):
+        cdef Time time = Time()
+        del time.thisptr
+        time.thisptr = &self.thisptr.time
+        time.delete_thisptr = False
+        return time
+
+    def _set_time(self, Time time):
+        self.thisptr.time = deref(time.thisptr)
+
+    time = property(_get_time, _set_time)
+
+    def _get_acc(self):
+        cdef Vector3d acc = Vector3d()
+        del acc.thisptr
+        acc.delete_thisptr = False
+        acc.thisptr = &self.thisptr.acc
+        return acc
+
+    def _set_acc(self, Vector3d value):
+        self.thisptr.acc = deref(value.thisptr)
+
+    acc = property(_get_acc, _set_acc)
+
+    def _get_gyro(self):
+        cdef Vector3d gyro = Vector3d()
+        del gyro.thisptr
+        gyro.delete_thisptr = False
+        gyro.thisptr = &self.thisptr.gyro
+        return gyro
+
+    def _set_gyro(self, Vector3d value):
+        self.thisptr.gyro = deref(value.thisptr)
+
+    gyro = property(_get_gyro, _set_gyro)
+
+    def _get_mag(self):
+        cdef Vector3d mag = Vector3d()
+        del mag.thisptr
+        mag.delete_thisptr = False
+        mag.thisptr = &self.thisptr.mag
+        return mag
+
+    def _set_mag(self, Vector3d value):
+        self.thisptr.mag = deref(value.thisptr)
+
+    mag = property(_get_mag, _set_mag)
