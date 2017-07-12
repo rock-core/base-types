@@ -48,6 +48,8 @@ cdef class Time:
         time.thisptr[0] = _basetypes.now()
         return time
 
+    # TODO more factory methods
+
     def __richcmp__(Time self, Time other, int op):
         if op == 0:
             return deref(self.thisptr) < deref(other.thisptr)
@@ -165,7 +167,7 @@ cdef class Vector2d:
             array[i] = self.thisptr.data()[i]
         return array
 
-    # TODO add fromarray
+    # TODO add operators, fromarray
 
 
 cdef class Vector3d:
@@ -242,7 +244,7 @@ cdef class Vector3d:
             array[i] = self.thisptr.data()[i]
         return array
 
-    # TODO add fromarray
+    # TODO add operators, fromarray
 
 
 cdef class Vector4d:
@@ -296,7 +298,7 @@ cdef class Vector4d:
             array[i] = self.thisptr.data()[i]
         return array
 
-    # TODO add fromarray
+    # TODO add operators, fromarray
 
 
 cdef class Matrix3d:
@@ -372,6 +374,8 @@ cdef class Matrix3d:
             for j in range(3):
                 self.thisptr.data()[3 * j + i] = array[i, j]
 
+    # TODO operators
+
 
 # TODO Vector6d, VectorXd, Pose
 
@@ -406,6 +410,8 @@ cdef class Quaterniond:
     def fromarray(self, np.ndarray[double, ndim=1] array):
         self.thisptr[0] = _basetypes.Quaterniond(array[0], array[1], array[2], array[3])
 
+    # TODO how can we modify a quaternion?
+
 
 cdef class TransformWithCovariance:
     cdef _basetypes.TransformWithCovariance* thisptr
@@ -422,6 +428,10 @@ cdef class TransformWithCovariance:
     def __init__(self):
         self.thisptr = new _basetypes.TransformWithCovariance()
         self.delete_thisptr = True
+
+    def __str__(self):
+        return "(translation=%s, orientation=%s)" % (self.translation,
+                                                     self.orientation)
 
     def _get_translation(self):
         cdef Vector3d translation = Vector3d()
@@ -447,9 +457,7 @@ cdef class TransformWithCovariance:
 
     orientation = property(_get_orientation, _set_orientation)
 
-    def __str__(self):
-        return "(translation=%s, orientation=%s)" % (self.translation,
-                                                     self.orientation)
+    # TODO covariance
 
 
 cdef class JointState:
@@ -617,6 +625,8 @@ cdef class Joints:
     def __setitem__(self, string name, JointState joint_state):
         cdef int i = self.thisptr.mapNameToIndex(name)
         self.thisptr.elements[i] = deref(joint_state.thisptr)
+
+    # TODO factory methods
 
 
 cdef class StringVectorReference:
@@ -800,34 +810,33 @@ cdef class RigidBodyState:
         _get_cov_angular_velocity, _set_cov_angular_velocity)
 
 
-""" TODO
 cdef class frame_mode_t:
-    MODE_UNDEFINED = _basetypes.MODE_UNDEFINED
-    MODE_GRAYSCALE = _basetypes.MODE_GRAYSCALE
-    MODE_RGB = _basetypes.MODE_RGB
-    MODE_UYVY = _basetypes.MODE_UYVY
-    MODE_BGR = _basetypes.MODE_BGR
-    MODE_RGB32 = _basetypes.MODE_RGB32
-    RAW_MODES = _basetypes.RAW_MODES
-    MODE_BAYER = _basetypes.MODE_BAYER
-    MODE_BAYER_RGGB = _basetypes.MODE_BAYER_RGGB
-    MODE_BAYER_GRBG = _basetypes.MODE_BAYER_GRBG
-    MODE_BAYER_BGGR = _basetypes.MODE_BAYER_BGGR
-    MODE_BAYER_GBRG = _basetypes.MODE_BAYER_GBRG
-    COMPRESSED_MODES = _basetypes.COMPRESSED_MODES
-    MODE_PJPG = _basetypes.MODE_PJPG
-    MODE_JPEG = _basetypes.MODE_JPEG
-    MODE_PNG = _basetypes.MODE_PNG
+    MODE_UNDEFINED = _basetypes.frame_mode_t.MODE_UNDEFINED
+    MODE_GRAYSCALE = _basetypes.frame_mode_t.MODE_GRAYSCALE
+    MODE_RGB = _basetypes.frame_mode_t.MODE_RGB
+    MODE_UYVY = _basetypes.frame_mode_t.MODE_UYVY
+    MODE_BGR = _basetypes.frame_mode_t.MODE_BGR
+    #MODE_RGB32 = _basetypes.frame_mode_t.MODE_RGB32 # TODO I don't know why but this value is "not known"
+    RAW_MODES = _basetypes.frame_mode_t.RAW_MODES
+    MODE_BAYER = _basetypes.frame_mode_t.MODE_BAYER
+    MODE_BAYER_RGGB = _basetypes.frame_mode_t.MODE_BAYER_RGGB
+    MODE_BAYER_GRBG = _basetypes.frame_mode_t.MODE_BAYER_GRBG
+    MODE_BAYER_BGGR = _basetypes.frame_mode_t.MODE_BAYER_BGGR
+    MODE_BAYER_GBRG = _basetypes.frame_mode_t.MODE_BAYER_GBRG
+    COMPRESSED_MODES = _basetypes.frame_mode_t.COMPRESSED_MODES
+    MODE_PJPG = _basetypes.frame_mode_t.MODE_PJPG
+    MODE_JPEG = _basetypes.frame_mode_t.MODE_JPEG
+    MODE_PNG = _basetypes.frame_mode_t.MODE_PNG
 
 
 cdef class frame_status_t:
-    STATUS_EMPTY = _basetypes.STATUS_EMPTY
-    STATUS_VALID = _basetypes.STATUS_VALID
-    STATUS_INVALID = _basetypes.STATUS_INVALID
-"""
+    STATUS_EMPTY = _basetypes.frame_status_t.STATUS_EMPTY
+    STATUS_VALID = _basetypes.frame_status_t.STATUS_VALID
+    STATUS_INVALID = _basetypes.frame_status_t.STATUS_INVALID
 
 
 cdef class Frame:
+    # TODO frame attributes
     cdef _basetypes.Frame* thisptr
     cdef bool delete_thisptr
 
@@ -871,7 +880,9 @@ cdef class Frame:
 
     received_time = property(_get_received_time, _set_received_time)
 
-    def _get_image(self):  # TODO can we return a reference?
+    def _get_image(self):
+        # TODO can we return a reference?
+        # TODO what if it is compressed?
         cdef int n_channels = self.thisptr.getChannelCount()
         dimensions = (self.thisptr.size.width, self.thisptr.size.height)
         if n_channels > 1:
@@ -1188,3 +1199,39 @@ cdef class IMUSensors:
         self.thisptr.mag = deref(value.thisptr)
 
     mag = property(_get_mag, _set_mag)
+
+
+# TODO missing types:
+# typedefs: Position, Point, Orientation
+# Angle !!!
+# (CircularBuffer)
+# Eigen::Matrix3/4/6/Xd
+# Eigen::Affine3d
+# Eigen::Isometry3d
+# JointLimitRange
+# JointLimits
+# JointsTrajectory
+# JointTransform
+# Pose / Pose2D
+# (Spline)
+# Temperature
+# TimeMark
+# Timeout
+# Trajectory
+# TwistWithCovariance
+# Waypoint
+# Wrench
+# ~~commands/Joints~~
+# commands/LinearAngular6DCommand
+# commands/Motion2D
+# (commands/Speed6D)
+# samples/BodyState - what is the difference to RigidBodyState???
+# samples/CommandSamples
+# samples/DepthMap !!!
+# samples/DistanceImage
+# samples/Pressure
+# (samples/RigidBodyAcceleration)
+# (samples/Sonar)
+# (samples/SonarBeam)
+# samples/Wrench
+# samples/Wrenches

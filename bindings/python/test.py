@@ -329,9 +329,9 @@ def test_rigid_body_state_get_set_cov_angular_velocity():
 
 
 def test_create_frame_rgb():
-    RGB = 2
-    VALID = 1
-    frame = basetypes.Frame(800, 600, 1, RGB, VALID, 800 * 600 * 3)
+    frame = basetypes.Frame(
+        800, 600, 1, basetypes.frame_mode_t.MODE_RGB,
+        basetypes.frame_status_t.STATUS_VALID, 800 * 600 * 3)
     assert_equal(frame.get_width(), 800)
     assert_equal(frame.get_height(), 600)
     assert_equal(frame.get_channel_count(), 3)
@@ -344,9 +344,9 @@ def test_create_frame_rgb():
 
 
 def test_create_frame_gray():
-    GRAYSCALE = 1
-    VALID = 1
-    frame = basetypes.Frame(800, 600, 1, GRAYSCALE, VALID, 800 * 600 * 1)
+    frame = basetypes.Frame(
+        800, 600, 1, basetypes.frame_mode_t.MODE_GRAYSCALE,
+        basetypes.frame_status_t.STATUS_VALID, 800 * 600 * 1)
     assert_equal(frame.get_width(), 800)
     assert_equal(frame.get_height(), 600)
     assert_equal(frame.get_channel_count(), 1)
