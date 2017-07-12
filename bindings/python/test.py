@@ -136,6 +136,27 @@ def test_joints_resize():
     j.resize(5)
     assert_equal(j.size(), 5)
     assert_false(j.has_names())
+    j.clear()
+    assert_equal(j.size(), 0)
+
+
+def test_joints_access():
+    j = basetypes.Joints()
+    j.resize(1)
+
+    assert_equal(j.names[0], "")
+    assert_false(j.elements[0].has_position())
+    assert_false(j.elements[0].has_speed())
+    assert_false(j.elements[0].has_effort())
+    assert_false(j.elements[0].has_raw())
+    assert_false(j.elements[0].has_acceleration())
+
+    j.names[0] = "test_name"
+    j.elements[0].position = 1.0
+    assert_equal(j.names[0], "test_name")
+    assert_true(j.elements[0].has_position())
+
+    assert_equal(j["test_name"].position, 1.0)
 
 
 def test_rigid_body_state_get_set_time():

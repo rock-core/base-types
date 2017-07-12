@@ -79,6 +79,16 @@ cdef extern from "base/JointState.hpp" namespace "base":
         double effort
         double raw
         double acceleration
+        bool hasPosition()
+        bool hasSpeed()
+        bool hasEffort()
+        bool hasRaw()
+        bool hasAcceleration()
+        bool isPosition()
+        bool isSpeed()
+        bool isEffort()
+        bool isRaw()
+        bool isAcceleration()
 
 
 cdef extern from "base/JointState.hpp" namespace "base::JointState":
@@ -94,12 +104,12 @@ cdef extern from "base/NamedVector.hpp" namespace "base":
         vector[string] names
         vector[T] elements
 
-        bool hasNames()
-        T getElementByName(string)
         void resize(int)
         int size()
         bool empty()
         void clear()
+        bool hasNames()
+        T getElementByName(string)
         int mapNameToIndex(string name)
 
 

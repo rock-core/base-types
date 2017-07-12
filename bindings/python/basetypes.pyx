@@ -2,6 +2,7 @@
 cimport _basetypes
 from cython.operator cimport dereference as deref
 from libcpp.string cimport string
+from libcpp.vector cimport vector
 from libcpp cimport bool
 cimport numpy as np
 import numpy as np
@@ -400,6 +401,36 @@ cdef class JointState:
 
     acceleration = property(_get_acceleration, _set_acceleration)
 
+    def has_position(self):
+        return self.thisptr.hasPosition()
+
+    def has_speed(self):
+        return self.thisptr.hasSpeed()
+
+    def has_effort(self):
+        return self.thisptr.hasEffort()
+
+    def has_raw(self):
+        return self.thisptr.hasRaw()
+
+    def has_acceleration(self):
+        return self.thisptr.hasAcceleration()
+
+    def has_position(self):
+        return self.thisptr.hasPosition()
+
+    def is_speed(self):
+        return self.thisptr.isSpeed()
+
+    def is_effort(self):
+        return self.thisptr.isEffort()
+
+    def is_raw(self):
+        return self.thisptr.isRaw()
+
+    def is_acceleration(self):
+        return self.thisptr.isAcceleration()
+
     @staticmethod
     def Position(double value):
         cdef JointState self = JointState()
@@ -456,7 +487,64 @@ cdef class Joints:
     def has_names(self):
         return self.thisptr.hasNames()
 
+    def clear(self):
+        self.thisptr.clear()
+
+    @property
+    def names(self):
+        cdef StringVectorReference names = StringVectorReference()
+        names.thisptr = &self.thisptr.names
+        return names
+
+    @property
+    def elements(self):
+        cdef JointStateVectorReference elements = JointStateVectorReference()
+        elements.thisptr = &self.thisptr.elements
+        return elements
+
+    def __getitem__(self, string name):
+        cdef JointState joint_state = JointState()
+        joint_state.thisptr[0] = self.thisptr.getElementByName(name)
+        return joint_state
+
+    def __setitem__(self, string name, JointState joint_state):
+        cdef int i = self.thisptr.mapNameToIndex(name)
+        self.thisptr.elements[i] = deref(joint_state.thisptr)
+
     # TODO expose some useful functions
+
+
+cdef class StringVectorReference:
+    cdef vector[string]* thisptr
+
+    def __cinit__(self):
+        self.thisptr = NULL
+
+    def __dealloc__(self):
+        pass
+
+    def __getitem__(self, int i):
+        return deref(self.thisptr)[i]
+
+    def __setitem__(self, int i, string s):
+        deref(self.thisptr)[i] = s
+
+
+cdef class JointStateVectorReference:
+    cdef vector[_basetypes.JointState]* thisptr
+
+    def __cinit__(self):
+        self.thisptr = NULL
+
+    def __dealloc__(self):
+        pass
+
+    def __getitem__(self, int i):
+        cdef JointState joint_state = JointState()
+        del joint_state.thisptr
+        joint_state.delete_thisptr = False
+        joint_state.thisptr = &deref(self.thisptr)[i]
+        return joint_state
 
 
 cdef class RigidBodyState:
