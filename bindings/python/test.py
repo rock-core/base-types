@@ -1,7 +1,7 @@
 import basetypes
 import numpy as np
 from nose.tools import assert_equal, assert_raises_regexp, assert_almost_equal, assert_false, assert_true
-from numpy.testing import assert_array_almost_equal
+from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 
 def test_get_set_microseconds():
@@ -253,3 +253,18 @@ def test_rigid_body_state_get_set_cov_angular_velocity():
         rbs.cov_angular_velocity.toarray(), np.ones((3, 3)) * np.nan)
     rbs.cov_angular_velocity.fromarray(np.eye(3))
     assert_array_almost_equal(rbs.cov_angular_velocity.toarray(), np.eye(3))
+
+
+def test_create_frame_rgb():
+    RGB = 2
+    VALID = 1
+    frame = basetypes.Frame(800, 600, 1, RGB, VALID, 800 * 600 * 3)
+    assert_equal(frame.get_width(), 800)
+    assert_equal(frame.get_height(), 600)
+    assert_equal(frame.get_channel_count(), 3)
+    assert_equal(frame.get_data_depth(), 1)
+    image = frame.image
+    assert_array_equal(image.shape, (800, 600, 3))
+    assert_equal(image.dtype, np.uint8)
+    frame.image = np.ones(image.shape, dtype=np.uint8)
+    assert_true(np.all(frame.image == 1))

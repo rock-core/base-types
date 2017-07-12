@@ -1,6 +1,7 @@
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp cimport bool
+from libc.stdint cimport uint8_t, uint16_t, uint32_t
 
 
 cdef extern from "base/Time.hpp" namespace "base":
@@ -133,3 +134,52 @@ cdef extern from "base/samples/RigidBodyState.hpp" namespace "base::samples":
         Matrix3d cov_velocity
         Vector3d angular_velocity
         Matrix3d cov_angular_velocity
+
+
+cdef extern from "base/samples/Frame.hpp" namespace "base::samples::frame":
+    cdef enum frame_mode_t:
+        MODE_UNDEFINED,
+        MODE_GRAYSCALE,
+        MODE_RGB,
+        MODE_UYVY,
+        MODE_BGR,
+        MODE_BGR32,
+        RAW_MODES,
+        MODE_BAYER,
+        MODE_BAYER_RGGB,
+        MODE_BAYER_GRBG,
+        MODE_BAYER_BGGR,
+        MODE_BAYER_GBRG,
+        COMPRESSED_MODES,
+        MODE_PJPG,
+        MODE_JPEG,
+        MODE_PNG
+
+    cdef enum frame_status_t:
+        STATUS_EMPTY,
+        STATUS_VALID,
+        STATUS_INVALID
+
+    cdef cppclass frame_size_t:
+        int width
+        int height
+
+    cdef cppclass Frame:
+        Frame()
+        Frame(int width, int height, int depth, frame_mode_t mode, int val, int sizeInBytes)
+        Frame(Frame other, bool bcopy)
+
+        Time time
+        Time received_time
+        vector[uint8_t] image
+
+        frame_size_t size
+
+        uint32_t getChannelCount()
+        uint32_t getPixelSize()
+        uint32_t getRowSize()
+        uint32_t getNumberOfBytes()
+        uint32_t getPixelCount()
+        uint32_t getDataDepth()
+        uint16_t getWidth()
+        uint16_t getHeight()

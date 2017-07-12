@@ -1,11 +1,12 @@
 # distutils: language = c++
-cimport _basetypes
 from cython.operator cimport dereference as deref
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp cimport bool
+from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t
 cimport numpy as np
 import numpy as np
+cimport _basetypes
 
 
 cdef class Time:
@@ -511,8 +512,6 @@ cdef class Joints:
         cdef int i = self.thisptr.mapNameToIndex(name)
         self.thisptr.elements[i] = deref(joint_state.thisptr)
 
-    # TODO expose some useful functions
-
 
 cdef class StringVectorReference:
     cdef vector[string]* thisptr
@@ -688,4 +687,124 @@ cdef class RigidBodyState:
     cov_angular_velocity = property(
         _get_cov_angular_velocity, _set_cov_angular_velocity)
 
-# TODO DistanceImage, Frame, LaserScan, IMUSensors, PointCloud
+
+""" TODO
+cdef class frame_mode_t:
+    MODE_UNDEFINED = _basetypes.MODE_UNDEFINED
+    MODE_GRAYSCALE = _basetypes.MODE_GRAYSCALE
+    MODE_RGB = _basetypes.MODE_RGB
+    MODE_UYVY = _basetypes.MODE_UYVY
+    MODE_BGR = _basetypes.MODE_BGR
+    MODE_RGB32 = _basetypes.MODE_RGB32
+    RAW_MODES = _basetypes.RAW_MODES
+    MODE_BAYER = _basetypes.MODE_BAYER
+    MODE_BAYER_RGGB = _basetypes.MODE_BAYER_RGGB
+    MODE_BAYER_GRBG = _basetypes.MODE_BAYER_GRBG
+    MODE_BAYER_BGGR = _basetypes.MODE_BAYER_BGGR
+    MODE_BAYER_GBRG = _basetypes.MODE_BAYER_GBRG
+    COMPRESSED_MODES = _basetypes.COMPRESSED_MODES
+    MODE_PJPG = _basetypes.MODE_PJPG
+    MODE_JPEG = _basetypes.MODE_JPEG
+    MODE_PNG = _basetypes.MODE_PNG
+
+
+cdef class frame_status_t:
+    STATUS_EMPTY = _basetypes.STATUS_EMPTY
+    STATUS_VALID = _basetypes.STATUS_VALID
+    STATUS_INVALID = _basetypes.STATUS_INVALID
+"""
+
+
+cdef class Frame:
+    cdef _basetypes.Frame* thisptr
+    cdef bool delete_thisptr
+
+    def __cinit__(self):
+        self.thisptr = NULL
+        self.delete_thisptr = False
+
+    def __dealloc__(self):
+        if self.thisptr != NULL and self.delete_thisptr:
+            del self.thisptr
+
+    def __init__(self, width=None, height=None, depth=None, mode=None, val=None,
+                 size_in_bytes=None):
+        if width is None:
+            self.thisptr = new _basetypes.Frame()
+        else:
+            self.thisptr = new _basetypes.Frame(width, height, depth, mode, val, size_in_bytes)
+        self.delete_thisptr = True
+
+    def _get_time(self):
+        cdef Time time = Time()
+        del time.thisptr
+        time.thisptr = &self.thisptr.time
+        time.delete_thisptr = False
+        return time
+
+    def _set_time(self, Time time):
+        self.thisptr.time = deref(time.thisptr)
+
+    time = property(_get_time, _set_time)
+
+    def _get_received_time(self):
+        cdef Time received_time = Time()
+        del received_time.thisptr
+        received_time.thisptr = &self.thisptr.received_time
+        received_time.delete_thisptr = False
+        return received_time
+
+    def _set_received_time(self, Time received_time):
+        self.thisptr.received_time = deref(received_time.thisptr)
+
+    received_time = property(_get_received_time, _set_received_time)
+
+    def _get_image(self):  # TODO can we return a reference?
+        cdef int n_channels = self.thisptr.getChannelCount()
+        dimensions = (self.thisptr.size.width, self.thisptr.size.height)
+        if n_channels > 1:
+            dimensions += (n_channels,)
+
+        cdef uint32_t depth = self.thisptr.getDataDepth()
+        if depth == 1:
+            dtype = np.uint8
+        elif depth == 2:
+            dtype = np.uint16
+        elif depth == 4:
+            dtype = np.uint32
+        elif depth == 8:
+            dtype = np.uint64
+        else:
+            raise ValueError("Cannot handle depth of %d" % depth)
+
+        cdef np.ndarray image
+        image = np.empty(dimensions, dtype=dtype)
+        cdef uint32_t i
+        for i in range(self.thisptr.getNumberOfBytes()):
+            image.data[i] = self.thisptr.image[i]
+        return image
+
+    def _set_image(self, np.ndarray image):
+        cdef uint32_t i
+        for i in range(self.thisptr.getNumberOfBytes()):
+            self.thisptr.image[i] = image.data[i]
+
+    image = property(_get_image, _set_image)
+
+    def get_width(self):
+        return self.thisptr.getWidth()
+
+    def get_height(self):
+        return self.thisptr.getHeight()
+
+    def get_channel_count(self):
+        return self.thisptr.getChannelCount()
+
+    def get_data_depth(self):
+        return self.thisptr.getDataDepth()
+
+
+# TODO FramePair
+
+
+# TODO Frame, LaserScan, IMUSensors, PointCloud
