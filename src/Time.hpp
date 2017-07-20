@@ -59,9 +59,9 @@ namespace base
         /** Returns this time as an integer number of microseconds */
         int64_t toMicroseconds() const;
         
-        static Time fromMicroseconds(uint64_t value);
+        static Time fromMicroseconds(int64_t value);
         
-	static Time fromMilliseconds(uint64_t value);
+	static Time fromMilliseconds(int64_t value);
         
         static Time fromSeconds(int64_t value);
         
@@ -70,7 +70,9 @@ namespace base
         static Time fromSeconds(int64_t value, int microseconds);
         
         static Time fromSeconds(double value);
-
+        
+        /** Returns the maximum time value possible */
+        static Time max();
 
         /**
           * \brief Create time from int Time Values.

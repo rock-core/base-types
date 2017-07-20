@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <stdio.h>
 #include <time.h>
+#include <limits>
 
 namespace base {
 
@@ -133,12 +134,12 @@ int64_t Time::toMicroseconds() const
     return microseconds;
 }
 
-Time Time::fromMicroseconds(uint64_t value)
+Time Time::fromMicroseconds(int64_t value)
 {
     return Time(value);
 }
 
-Time Time::fromMilliseconds(uint64_t value)
+Time Time::fromMilliseconds(int64_t value)
 {
     return Time(value * 1000);
 }
@@ -163,6 +164,11 @@ Time Time::fromSeconds(double value)
     int64_t seconds = value;
     return Time(seconds * UsecPerSec + static_cast<int64_t>(round((value - seconds) * UsecPerSec)));
 }
+
+Time Time::max()
+{
+    return Time(std::numeric_limits<int64_t>::max());
+} 
 
 Time Time::fromTimeValues(int year, int month, int day, int hour, int minute, int seconds, int millis, int micros)
 {
