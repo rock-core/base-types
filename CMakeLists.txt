@@ -34,3 +34,4 @@ endif()
 
 rock_standard_layout()
 
+install(DIRECTORY base DESTINATION include)
