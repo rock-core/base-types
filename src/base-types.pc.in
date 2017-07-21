@@ -8,6 +8,6 @@ Description: @PROJECT_DESCRIPTION@
 Version: @PROJECT_VERSION@
 Requires: @DEPS_PKGCONFIG@
 Libs: -L${libdir} -l@TARGET_NAME@
-Cflags: -I${includedir}
+Cflags: -I${includedir} -I${includedir}/base/backward
 
 
