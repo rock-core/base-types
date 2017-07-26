@@ -380,6 +380,18 @@ BOOST_AUTO_TEST_CASE( time_test )
 {
     std::cout << base::Time::fromSeconds( 35.553 ) << std::endl;
     std::cout << base::Time::fromSeconds( -5.553 ) << std::endl;
+
+    base::Time null_time;
+    null_time.fromMicroseconds(0);
+    BOOST_CHECK(null_time.isNull());
+    null_time.fromMilliseconds(0);
+    BOOST_CHECK(null_time.isNull());
+
+
+    base::Time max_time;
+    max_time = base::Time::fromMicroseconds(std::numeric_limits<int64_t>::max());
+    BOOST_REQUIRE_EQUAL(max_time.toMicroseconds(), std::numeric_limits<int64_t>::max());
+    BOOST_REQUIRE_EQUAL(max_time, base::Time::max());
 }
 
 BOOST_AUTO_TEST_CASE( time_fromSeconds )
@@ -392,6 +404,51 @@ BOOST_AUTO_TEST_CASE( time_fromSeconds )
     BOOST_REQUIRE_EQUAL( -5553000, seconds.toMicroseconds() );
     seconds = base::Time::fromSeconds( 0.01 );
     BOOST_REQUIRE_EQUAL( 10000, seconds.toMicroseconds() );
+}
+
+BOOST_AUTO_TEST_CASE( time_fromMicroseconds )
+{
+    base::Time microseconds;
+
+    microseconds = base::Time::fromMicroseconds( -1 );
+    BOOST_REQUIRE_EQUAL( -1, microseconds.toMicroseconds() );
+    microseconds = base::Time::fromMicroseconds( 1 );
+    BOOST_REQUIRE_EQUAL( 1, microseconds.toMicroseconds() );
+}
+
+BOOST_AUTO_TEST_CASE( time_fromMilliseconds )
+{
+    base::Time milliseconds;
+
+    milliseconds = base::Time::fromMilliseconds( -1 );
+    BOOST_REQUIRE_EQUAL( -1000, milliseconds.toMicroseconds() );
+    milliseconds = base::Time::fromMilliseconds( 1 );
+    BOOST_REQUIRE_EQUAL( 1000, milliseconds.toMicroseconds() );
+}
+
+BOOST_AUTO_TEST_CASE(time_operators)
+{
+    base::Time time_10 = base::Time::fromMicroseconds(10);
+    base::Time time_1= base::Time::fromMicroseconds(1);
+    base::Time time_1_neg= base::Time::fromMicroseconds(-1);
+    base::Time time_10_neg= base::Time::fromMicroseconds(-10);
+    
+    BOOST_CHECK(time_1!=time_10);
+
+    BOOST_CHECK(time_10>time_1);
+    BOOST_CHECK(time_1<time_10);
+    BOOST_CHECK(time_1>time_1_neg);
+    BOOST_CHECK(time_1_neg>time_10_neg);
+
+    //test multiplication and equality
+    BOOST_CHECK(time_1*10==time_10);
+    BOOST_REQUIRE_EQUAL(time_1*10,time_10);
+    
+    BOOST_CHECK(time_10/10==time_1);
+    BOOST_REQUIRE_EQUAL(time_10/10,time_1);
+    
+    BOOST_CHECK(time_1_neg*(-1)==time_1);
+    BOOST_REQUIRE_EQUAL(time_1_neg*(-1),time_1);
 }
 
 BOOST_AUTO_TEST_CASE( time_multiply )

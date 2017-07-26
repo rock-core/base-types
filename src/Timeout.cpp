@@ -42,7 +42,7 @@ Time Timeout::timeLeft(const Time& timeout) const
     }
     else
     {
-        return Time::fromSeconds(0);
+        return Time::max();
     }
 }
 
