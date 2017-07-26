@@ -1,8 +1,21 @@
 # Python bindings for base-types
 
+## Install
+
 You can build this prototype with
 
     python setup.py build_ext -i
+
+For now, you have to add this folder to your PYTHONPATH environment variable:
+
+    export PYTHONPATH=$PYTHONPATH:<this folder>
+
+You could also install the bindings to some location that is already in the
+Python path:
+
+    python setup.py install --prefix <path>
+
+## Note
 
 There are still some open issues, e.g.
 * How can we handle compressed Frame objects (e.g. JPG, PNG)?
