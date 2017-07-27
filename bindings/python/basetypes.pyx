@@ -244,7 +244,12 @@ cdef class Vector3d:
             array[i] = self.thisptr.data()[i]
         return array
 
-    # TODO add operators, fromarray
+    def fromarray(self, np.ndarray[double, ndim=1] array):
+        cdef int i
+        for i in range(3):
+            self.thisptr.data()[3 * i] = array[i]
+
+    # TODO add operators
 
 
 cdef class Vector4d:
