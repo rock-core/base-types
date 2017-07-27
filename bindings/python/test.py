@@ -1,6 +1,6 @@
 import basetypes
 import numpy as np
-from nose.tools import assert_equal, assert_raises_regexp, assert_almost_equal, assert_false, assert_true
+from nose.tools import assert_equal, assert_raises_regexp, assert_almost_equal, assert_false, assert_true, assert_greater
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 
@@ -9,6 +9,13 @@ def test_get_set_microseconds():
     m = 1000023
     t.microseconds = m
     assert_equal(t.microseconds, m)
+
+
+def test_no_overflow():
+    t = basetypes.Time.now()
+    mus = t.microseconds
+    assert_greater(mus, 0)
+    t.microseconds = mus
 
 
 def test_time_operators():

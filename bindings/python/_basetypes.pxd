@@ -1,14 +1,14 @@
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp cimport bool
-from libc.stdint cimport uint8_t, uint16_t, uint32_t
+from libc.stdint cimport uint8_t, uint16_t, uint32_t, int64_t
 
 
 cdef extern from "base/Time.hpp" namespace "base":
     cdef cppclass Time:
         Time()
 
-        int microseconds
+        int64_t microseconds
 
         bool operator<(Time)
         bool operator>(Time)

@@ -3,7 +3,7 @@ from cython.operator cimport dereference as deref
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp cimport bool
-from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t
+from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t, int64_t
 cimport numpy as np
 import numpy as np
 cimport _basetypes
@@ -34,7 +34,7 @@ cdef class Time:
     def _get_microseconds(self):
         return self.thisptr.microseconds
 
-    def _set_microseconds(self, int microseconds):
+    def _set_microseconds(self, int64_t microseconds):
         self.thisptr.microseconds = microseconds
 
     microseconds = property(_get_microseconds, _set_microseconds)
