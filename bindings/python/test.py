@@ -68,6 +68,15 @@ def test_vector3d_ctor():
     assert_equal(str(v), "[1.00, 2.00, 3.00]")
 
 
+def test_vector3d_fromarray():
+    v = basetypes.Vector3d()
+    a = np.array([-2.32, 2.42, 54.23])
+    v.fromarray(a)
+    assert_equal(v[0], a[0])
+    assert_equal(v[1], a[1])
+    assert_equal(v[2], a[2])
+
+
 def test_vector3d_as_ndarray():
     random_state = np.random.RandomState(843)
     r = random_state.randn(3, 3)
