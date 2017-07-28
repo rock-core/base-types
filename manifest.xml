@@ -19,5 +19,10 @@
     <depend package="rice" optional="1" />
     <depend package="external/sisl" optional="1" />
     <depend package="gui/vizkit3d" optional="1" />
+
+    <depend package="python-dev" />
+    <depend package="python-numpy" />
+    <depend package="python-nose" optiona="1" />
+    <depend package="cython" />
     <tags>stable</tags>
 </package>
