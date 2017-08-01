@@ -47,4 +47,16 @@ if __name__ == '__main__':
             language="c++"
         )
     ]
-    setup(ext_modules=cythonize(extensions))
+    setup(
+        name="basetypes",
+        ext_modules=cythonize(extensions),
+        description="Python bindings for Rock base-types",
+        version="0.0.1",
+        maintainer="Alexander Fabisch",
+        maintainer_email="Alexander.Fabisch@dfki.de",
+        packages=[""],
+        package_dir={"": "."},
+        package_data={
+            "": ["_basetypes.pxd", "basetypes.pxd", "basetypes.pyx"]
+        }
+    )
