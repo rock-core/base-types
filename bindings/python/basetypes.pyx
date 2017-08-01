@@ -1,21 +1,15 @@
 # distutils: language = c++
+cimport basetypes
 from cython.operator cimport dereference as deref
-from libcpp.string cimport string
-from libcpp.vector cimport vector
-from libcpp cimport bool
 from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t, int64_t
 cimport numpy as np
 import numpy as np
-cimport _basetypes
 
 
 np.import_array()  # must be here because we use the NumPy C API
 
 
 cdef class Time:
-    cdef _basetypes.Time* thisptr
-    cdef bool delete_thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
         self.delete_thisptr = False
@@ -104,9 +98,6 @@ cdef class Time:
 
 
 cdef class Vector2d:
-    cdef _basetypes.Vector2d* thisptr
-    cdef bool delete_thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
         self.delete_thisptr = False
@@ -171,9 +162,6 @@ cdef class Vector2d:
 
 
 cdef class Vector3d:
-    cdef _basetypes.Vector3d* thisptr
-    cdef bool delete_thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
         self.delete_thisptr = False
@@ -253,9 +241,6 @@ cdef class Vector3d:
 
 
 cdef class Vector4d:
-    cdef _basetypes.Vector4d* thisptr
-    cdef bool delete_thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
         self.delete_thisptr = False
@@ -307,9 +292,6 @@ cdef class Vector4d:
 
 
 cdef class Matrix3d:
-    cdef _basetypes.Matrix3d* thisptr
-    cdef bool delete_thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
         self.delete_thisptr = False
@@ -386,9 +368,6 @@ cdef class Matrix3d:
 
 
 cdef class Quaterniond:
-    cdef _basetypes.Quaterniond* thisptr
-    cdef bool delete_thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
         self.delete_thisptr = False
@@ -419,9 +398,6 @@ cdef class Quaterniond:
 
 
 cdef class TransformWithCovariance:
-    cdef _basetypes.TransformWithCovariance* thisptr
-    cdef bool delete_thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
         self.delete_thisptr = False
@@ -466,9 +442,6 @@ cdef class TransformWithCovariance:
 
 
 cdef class JointState:
-    cdef _basetypes.JointState* thisptr
-    cdef bool delete_thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
         self.delete_thisptr = False
@@ -583,9 +556,6 @@ cdef class JointState:
 
 
 cdef class Joints:
-    cdef _basetypes.Joints* thisptr
-    cdef bool delete_thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
         self.delete_thisptr = False
@@ -635,8 +605,6 @@ cdef class Joints:
 
 
 cdef class StringVectorReference:
-    cdef vector[string]* thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
 
@@ -654,8 +622,6 @@ cdef class StringVectorReference:
 
 
 cdef class JointStateVectorReference:
-    cdef vector[_basetypes.JointState]* thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
 
@@ -674,9 +640,6 @@ cdef class JointStateVectorReference:
 
 
 cdef class RigidBodyState:
-    cdef _basetypes.RigidBodyState* thisptr
-    cdef bool delete_thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
         self.delete_thisptr = False
@@ -842,9 +805,6 @@ cdef class frame_status_t:
 
 cdef class Frame:
     # TODO frame attributes
-    cdef _basetypes.Frame* thisptr
-    cdef bool delete_thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
         self.delete_thisptr = False
@@ -936,9 +896,6 @@ cdef class Frame:
 
 
 cdef class Pointcloud:
-    cdef _basetypes.Pointcloud* thisptr
-    cdef bool delete_thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
         self.delete_thisptr = False
@@ -965,8 +922,6 @@ cdef class Pointcloud:
 
 
 cdef class Vector3dVectorReference:
-    cdef vector[_basetypes.Vector3d]* thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
 
@@ -988,8 +943,6 @@ cdef class Vector3dVectorReference:
 
 
 cdef class Vector4dVectorReference:
-    cdef vector[_basetypes.Vector4d]* thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
 
@@ -1011,9 +964,6 @@ cdef class Vector4dVectorReference:
 
 
 cdef class LaserScan:
-    cdef _basetypes.LaserScan* thisptr
-    cdef bool delete_thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
         self.delete_thisptr = False
@@ -1098,8 +1048,6 @@ cdef class LaserScan:
 
 
 cdef class UInt32VectorReference:
-    cdef vector[uint32_t]* thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
 
@@ -1120,8 +1068,6 @@ cdef class UInt32VectorReference:
 
 
 cdef class FloatVectorReference:
-    cdef vector[float]* thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
 
@@ -1142,9 +1088,6 @@ cdef class FloatVectorReference:
 
 
 cdef class IMUSensors:
-    cdef _basetypes.IMUSensors* thisptr
-    cdef bool delete_thisptr
-
     def __cinit__(self):
         self.thisptr = NULL
         self.delete_thisptr = False
