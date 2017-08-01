@@ -15,6 +15,19 @@ Python path:
 
     python setup.py install --prefix <path>
 
+The more convenient way is to use autoproj. You must add three lines to
+your manifest:
+
+    package_sets:
+       ...
+       - type: git
+         url: git@git.hb.dfki.de:InFuse/infuse-package_set.git
+
+    layout:
+       ...
+       - tools/infuselog2cpp
+       ...
+
 ## Note
 
 There are still some open issues, e.g.
