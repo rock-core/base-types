@@ -218,6 +218,11 @@ def test_joint_state_factories():
     assert_equal(js.acceleration, 5.0)
 
 
+def test_joints_has_time():
+    j = basetypes.Joints()
+    assert_true(hasattr(j, "time"))
+
+
 def test_joints_resize():
     j = basetypes.Joints()
     assert_equal(j.size(), 0)

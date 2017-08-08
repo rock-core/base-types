@@ -580,6 +580,18 @@ cdef class Joints:
     def clear(self):
         self.thisptr.clear()
 
+    def _get_time(self):
+        cdef Time time = Time()
+        del time.thisptr
+        time.thisptr = &self.thisptr.time
+        time.delete_thisptr = False
+        return time
+
+    def _set_time(self, Time time):
+        self.thisptr.time = deref(time.thisptr)
+
+    time = property(_get_time, _set_time)
+
     @property
     def names(self):
         cdef StringVectorReference names = StringVectorReference()
