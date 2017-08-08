@@ -617,6 +617,9 @@ cdef class StringVectorReference:
     def __setitem__(self, int i, string s):
         deref(self.thisptr)[i] = s
 
+    def resize(self, int i):
+        self.thisptr.resize(i)
+
     def size(self):
         return self.thisptr.size()
 
@@ -634,6 +637,9 @@ cdef class JointStateVectorReference:
         joint_state.delete_thisptr = False
         joint_state.thisptr = &deref(self.thisptr)[i]
         return joint_state
+
+    def resize(self, int i):
+        self.thisptr.resize(i)
 
     def size(self):
         return self.thisptr.size()
