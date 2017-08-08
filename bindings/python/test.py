@@ -457,16 +457,16 @@ def test_laser_scan_str():
     ls = basetypes.LaserScan()
     ls.min_range = 20
     ls.max_range = 30
-    ls.ranges.resize(3)
-    ls.remission.resize(3)
-    for i in range(3):
+    ls.ranges.resize(6)
+    ls.remission.resize(6)
+    for i in range(6):
         ls.ranges[i] = 25
         ls.remission[i] = 0.0
     ls.ranges[1] = 10
     assert_equal(
         str(ls),
-        "LaserScan {<time=19700101-01:00:00:000000>, min_range=20, max_range=30, ranges=[25, 10, 25], "
-        "remission=[0.0, 0.0, 0.0]}"
+        "LaserScan {<time=19700101-01:00:00:000000>, min_range=20, max_range=30, ranges=[25, 10, 25, 25, 25, ...], "
+        "remission=[0.0, 0.0, 0.0, 0.0, 0.0, ...]}"
     )
 
 

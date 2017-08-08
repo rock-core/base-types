@@ -1034,9 +1034,13 @@ cdef class LaserScan:
         cdef unsigned int i
         for i in range(self.ranges.size()):
             ranges.append(self.ranges[i])
+        if len(ranges) > 5:
+            ranges = str(ranges[:5])[:-1] + ", ...]"
         remission = []
         for i in range(self.remission.size()):
             remission.append(self.remission[i])
+        if len(remission) > 5:
+            remission = str(remission[:5])[:-1] + ", ...]"
         return "LaserScan {%s, min_range=%s, max_range=%s, ranges=%s, remission=%s}" % (self.time, self.thisptr.minRange, self.thisptr.maxRange, ranges, remission)
 
     def _get_time(self):
