@@ -650,6 +650,9 @@ cdef class JointStateVectorReference:
         joint_state.thisptr = &deref(self.thisptr)[i]
         return joint_state
 
+    def __setitem__(self, int i, JointState v):
+        deref(self.thisptr)[i] = deref(v.thisptr)
+
     def resize(self, int i):
         self.thisptr.resize(i)
 
