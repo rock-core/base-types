@@ -453,6 +453,23 @@ def test_laser_scan():
     assert_true(ls.is_range_valid(25))
 
 
+def test_laser_scan_str():
+    ls = basetypes.LaserScan()
+    ls.min_range = 20
+    ls.max_range = 30
+    ls.ranges.resize(3)
+    ls.remission.resize(3)
+    for i in range(3):
+        ls.ranges[i] = 25
+        ls.remission[i] = 0.0
+    ls.ranges[1] = 10
+    assert_equal(
+        str(ls),
+        "LaserScan {<time=19700101-01:00:00:000000>, min_range=20, max_range=30, ranges=[25, 10, 25], "
+        "remission=[0.0, 0.0, 0.0]}"
+    )
+
+
 def test_imu_sensors():
     imu = basetypes.IMUSensors()
 

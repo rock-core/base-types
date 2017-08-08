@@ -1029,7 +1029,15 @@ cdef class LaserScan:
         self.thisptr = new _basetypes.LaserScan()
         self.delete_thisptr = True
 
-    # TODO __str__
+    def __str__(self):
+        ranges = []
+        cdef unsigned int i
+        for i in range(self.ranges.size()):
+            ranges.append(self.ranges[i])
+        remission = []
+        for i in range(self.remission.size()):
+            remission.append(self.remission[i])
+        return "LaserScan {%s, min_range=%s, max_range=%s, ranges=%s, remission=%s}" % (self.time, self.thisptr.minRange, self.thisptr.maxRange, ranges, remission)
 
     def _get_time(self):
         cdef Time time = Time()
