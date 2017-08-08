@@ -1,6 +1,6 @@
 import basetypes
 import numpy as np
-from nose.tools import assert_equal, assert_raises_regexp, assert_almost_equal, assert_false, assert_true, assert_greater
+from nose.tools import assert_equal, assert_raises_regexp, assert_almost_equal, assert_false, assert_true, assert_greater, assert_regexp_matches
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 
@@ -9,6 +9,11 @@ def test_get_set_microseconds():
     m = 1000023
     t.microseconds = m
     assert_equal(t.microseconds, m)
+
+
+def test_time_str():
+    t = basetypes.Time.now()
+    assert_regexp_matches(str(t), "<time=\d{8}-\d{2}:\d{2}:\d{2}:\d{6}>")
 
 
 def test_no_overflow():
@@ -185,24 +190,28 @@ def test_joint_state_get_set_speed():
     js = basetypes.JointState()
     js.speed = 5.0
     assert_equal(js.speed, 5.0)
+    assert_equal(str(js), "JointState [speed=5]")
 
 
 def test_joint_state_get_set_effort():
     js = basetypes.JointState()
     js.effort = 5.0
     assert_equal(js.effort, 5.0)
+    assert_equal(str(js), "JointState [effort=5]")
 
 
 def test_joint_state_get_set_raw():
     js = basetypes.JointState()
     js.raw = 5.0
     assert_equal(js.raw, 5.0)
+    assert_equal(str(js), "JointState [raw=5]")
 
 
 def test_joint_state_get_set_acceleration():
     js = basetypes.JointState()
     js.acceleration = 5.0
     assert_equal(js.acceleration, 5.0)
+    assert_equal(str(js), "JointState [acceleration=5]")
 
 
 def test_joint_state_factories():
@@ -253,6 +262,19 @@ def test_joints_access():
     assert_equal(j["test_name"].position, 1.0)
 
 
+def test_joints_str():
+    j = basetypes.Joints()
+    j.names.resize(2)
+    j.names[0] = "j1"
+    j.names[1] = "j2"
+    j.elements.resize(2)
+    j.elements[0].position = 1.0
+    j.elements[1].position = 2.0
+    assert_equal(
+        str(j), "Joints <time=19700101-01:00:00:000000> "
+        "{j1: JointState [position=1], j2: JointState [position=2]}")
+
+
 def test_rigid_body_state_get_set_time():
     rbs = basetypes.RigidBodyState()
     assert_equal(rbs.time.microseconds, 0)
@@ -276,6 +298,15 @@ def test_rigid_body_state_get_set_target_frame():
     assert_equal(rbs.target_frame, "")
     rbs.target_frame = "target_frame"
     assert_equal(rbs.target_frame, "target_frame")
+
+
+def test_rigid_body_state_str():
+    rbs = basetypes.RigidBodyState()
+    rbs.source_frame = "source"
+    rbs.target_frame = "target"
+    assert_equal(
+        str(rbs), "RigidBodyState {<time=19700101-01:00:00:000000>, "
+        "source_frame=source, target_frame=target, ...}")
 
 
 def test_rigid_body_state_get_set_position():

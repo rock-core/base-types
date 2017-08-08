@@ -23,7 +23,9 @@ cdef class Time:
         self.delete_thisptr = True
 
     def __str__(self):
-        return self.thisptr.toString(_basetypes.Resolution.Microseconds, "%Y%m%d-%H:%M:%S")
+        return ("<time=%s>"
+                % self.thisptr.toString(_basetypes.Resolution.Microseconds,
+                                        "%Y%m%d-%H:%M:%S"))
 
     def _get_microseconds(self):
         return self.thisptr.microseconds
@@ -454,6 +456,20 @@ cdef class JointState:
         self.thisptr = new _basetypes.JointState()
         self.delete_thisptr = True
 
+    def __str__(self):
+        parts = []
+        if self.thisptr.hasPosition():
+            parts.append("position=%g" % self.thisptr.position)
+        if self.thisptr.hasSpeed():
+            parts.append("speed=%g" % self.thisptr.speed)
+        if self.thisptr.hasEffort():
+            parts.append("effort=%g" % self.thisptr.effort)
+        if self.thisptr.hasRaw():
+            parts.append("raw=%g" % self.thisptr.raw)
+        if self.thisptr.hasAcceleration():
+            parts.append("acceleration=%g" % self.thisptr.acceleration)
+        return "JointState [%s]" % ", ".join(parts)
+
     def _get_position(self):
         return self.thisptr.position
 
@@ -568,6 +584,16 @@ cdef class Joints:
         self.thisptr = new _basetypes.Joints()
         self.delete_thisptr = True
 
+    def __str__(self):
+        parts = []
+        # TODO Is this really a requirement? Can we ensure this?
+        assert self.thisptr.elements.size() == self.thisptr.names.size()
+        cdef unsigned int i
+        for i in range(self.thisptr.elements.size()):
+            parts.append("%s: %s" % (self.thisptr.names[i],
+                                     self.elements[i]))
+        return "Joints %s {%s}" % (self.time, ", ".join(parts))
+
     def size(self):
         return self.thisptr.size()
 
@@ -672,6 +698,10 @@ cdef class RigidBodyState:
     def __init__(self, bool do_invalidation=True):
         self.thisptr = new _basetypes.RigidBodyState(do_invalidation)
         self.delete_thisptr = True
+
+    def __str__(self):
+        # TODO extend string representation?
+        return "RigidBodyState {%s, source_frame=%s, target_frame=%s, ...}" % (self.time, self.thisptr.sourceFrame, self.thisptr.targetFrame)
 
     def _get_time(self):
         cdef Time time = Time()
@@ -842,6 +872,8 @@ cdef class Frame:
             self.thisptr = new _basetypes.Frame(width, height, depth, mode, val, size_in_bytes)
         self.delete_thisptr = True
 
+    # TODO __str__
+
     def _get_time(self):
         cdef Time time = Time()
         del time.thisptr
@@ -997,6 +1029,8 @@ cdef class LaserScan:
         self.thisptr = new _basetypes.LaserScan()
         self.delete_thisptr = True
 
+    # TODO __str__
+
     def _get_time(self):
         cdef Time time = Time()
         del time.thisptr
@@ -1120,6 +1154,8 @@ cdef class IMUSensors:
     def __init__(self):
         self.thisptr = new _basetypes.IMUSensors()
         self.delete_thisptr = True
+
+    # TODO __str__
 
     def _get_time(self):
         cdef Time time = Time()
