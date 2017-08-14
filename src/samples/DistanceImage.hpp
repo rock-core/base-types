@@ -170,7 +170,7 @@ namespace samples
 	 * @param width width of the image
 	 * @param height height of the image
 	 */
-	void setSize( double width, double height );
+	void setSize( uint16_t width, uint16_t height );
     };
 }
 }

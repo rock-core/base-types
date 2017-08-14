@@ -35,11 +35,11 @@ void DistanceImage::setIntrinsic(double f_x, double f_y, double c_x, double c_y)
     center_y = -c_y / f_y;
 }
 
-void DistanceImage::setSize(double width, double height)
+void DistanceImage::setSize(uint16_t width, uint16_t height)
 {
     this->width = width;
     this->height = height;
-    data.resize( width * height );
+    data.resize( (size_t)width * (size_t)height );
 }
 
 }} //end namespace base::samples
