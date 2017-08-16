@@ -1015,6 +1015,11 @@ namespace geometry {
     
     inline std::ostream& operator << (std::ostream& io, base::geometry::Spline<3> const& s)
     {
+        if(s.isEmpty())
+        {
+            io << "{ empty spline }";
+            return io;
+        }
 	io << "Length " << s.getCurveLength() 
 	    << " start " << s.getStartPoint().transpose() << " end " << s.getEndPoint().transpose()
 	    << " startParam " << s.getStartParam() << " endParam " << s.getEndParam();
