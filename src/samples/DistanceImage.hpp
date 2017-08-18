@@ -79,16 +79,15 @@ namespace samples
 	template <class Scalar_>
 	bool getScenePoint( size_t x, size_t y, Eigen::Matrix<Scalar_,3,1>& point ) const
 	{
-	    point = Eigen::Matrix<Scalar_,3,1>( (x*scale_x)+center_x, (y*scale_y)+center_y, 1.0 );
-
 	    // check bounds. x and y are always positive
-	    if( (x >= width) || (y >= height) ) 
-            return false;
+	    if( (x >= width) || (y >= height) )
+		return false;
 
 	    // only process vector if distance value is not NaN or inf
-	    const float d = data[width*y+x];
+	    const scalar d = data[width*y+x];
 	    if( boost::math::isnormal( d ) ) 
 	    {
+		point = Eigen::Matrix<Scalar_,3,1>( (x*scale_x)+center_x, (y*scale_y)+center_y, 1.0 );
 		point *= d;
 		return true;
 	    }
@@ -107,12 +106,15 @@ namespace samples
 	    if( point.z() <= 0 )
 		return false;
 
-	    x = ((point.x() / point.z()) - center_x) / scale_x;
-	    y = ((point.y() / point.z()) - center_y) / scale_y;
+	    size_t u = ((point.x() / point.z()) - center_x) / scale_x;
+	    size_t v = ((point.y() / point.z()) - center_y) / scale_y;
 
-	    // check bounds. x and y are always positive
-	    if( (x >= width) || (y >= height) ) 
-            return false;
+	    // check bounds. u and v are always positive
+	    if( (u >= width) || (v >= height) )
+		return false;
+
+	    x = u;
+	    y = v;
 
 	    return true;
 	}

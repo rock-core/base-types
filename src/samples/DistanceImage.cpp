@@ -7,12 +7,13 @@ namespace base { namespace samples {
 
 void DistanceImage::clear()
 {
-    std::fill( data.begin(), data.end(), std::numeric_limits<float>::quiet_NaN() );
+    std::fill( data.begin(), data.end(), std::numeric_limits<scalar>::quiet_NaN() );
 }
 
 Pointcloud DistanceImage::getPointCloud() const
 {
     Pointcloud pointCloud;
+    pointCloud.time = time;
     Eigen::Vector3d point;
     for(size_t y = 0; y < this->height ; ++y)
     {

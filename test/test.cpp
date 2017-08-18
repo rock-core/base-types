@@ -597,6 +597,57 @@ BOOST_AUTO_TEST_CASE(distance_image_test)
     BOOST_CHECK(point_cloud.points[1] == Eigen::Vector3d(0.0, -2.00, 2.00));
     BOOST_CHECK(point_cloud.points[2] == Eigen::Vector3d(-2.0, 0.00, 2.00));
     BOOST_CHECK(point_cloud.points[3] == Eigen::Vector3d(0.0, 0.00, 1.00));
+
+    /** Scene and image point projections **/
+    dimage.setSize(3,2);
+    dimage.clear();
+    dimage.data[0] = 1.0;
+    dimage.data[1] = 2.0;
+    dimage.data[2] = 0.0;
+    dimage.data[3] = std::numeric_limits<base::samples::DistanceImage::scalar>::denorm_min();
+    dimage.data[4] = std::numeric_limits<base::samples::DistanceImage::scalar>::infinity();
+    dimage.data[5] = std::numeric_limits<base::samples::DistanceImage::scalar>::quiet_NaN();
+
+    Eigen::Vector3d scene_point = Eigen::Vector3d::Zero();
+    size_t x = std::numeric_limits<size_t>::max(), y = std::numeric_limits<size_t>::max();
+    // test valid projections
+    BOOST_CHECK(dimage.getScenePoint(0,0,scene_point));
+    BOOST_CHECK(dimage.getImagePoint(scene_point,x,y));
+    BOOST_CHECK(x == 0);
+    BOOST_CHECK(y == 0);
+
+    BOOST_CHECK(dimage.getScenePoint(1,0,scene_point));
+    BOOST_CHECK(dimage.getImagePoint(scene_point,x,y));
+    BOOST_CHECK(x == 1);
+    BOOST_CHECK(y == 0);
+
+    // test invalid distacnes
+    scene_point.setZero();
+    x = std::numeric_limits<size_t>::max();
+    y = std::numeric_limits<size_t>::max();
+    BOOST_CHECK(dimage.getScenePoint(2,0,scene_point) == false);
+    BOOST_CHECK(scene_point == Eigen::Vector3d::Zero());
+    BOOST_CHECK(dimage.getScenePoint(0,1,scene_point) == false);
+    BOOST_CHECK(scene_point == Eigen::Vector3d::Zero());
+    BOOST_CHECK(dimage.getScenePoint(1,1,scene_point) == false);
+    BOOST_CHECK(scene_point == Eigen::Vector3d::Zero());
+    BOOST_CHECK(dimage.getScenePoint(2,1,scene_point) == false);
+    BOOST_CHECK(scene_point == Eigen::Vector3d::Zero());
+    BOOST_CHECK(dimage.getImagePoint(scene_point,x,y) == false);
+    BOOST_CHECK(x == std::numeric_limits<size_t>::max());
+    BOOST_CHECK(y == std::numeric_limits<size_t>::max());
+
+    // test bounds
+    BOOST_CHECK(dimage.getScenePoint(3,2,scene_point) == false);
+    BOOST_CHECK(scene_point == Eigen::Vector3d::Zero());
+    BOOST_CHECK(dimage.getScenePoint(0,2,scene_point) == false);
+    BOOST_CHECK(scene_point == Eigen::Vector3d::Zero());
+    BOOST_CHECK(dimage.getScenePoint(3,0,scene_point) == false);
+    BOOST_CHECK(scene_point == Eigen::Vector3d::Zero());
+    scene_point = Eigen::Vector3d(1.0, 1.0, 1.0);
+    BOOST_CHECK(dimage.getImagePoint(scene_point,x,y) == false);
+    BOOST_CHECK(x == std::numeric_limits<size_t>::max());
+    BOOST_CHECK(y == std::numeric_limits<size_t>::max());
 }
 
 BOOST_AUTO_TEST_CASE(depth_map_test)
