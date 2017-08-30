@@ -9,6 +9,127 @@ import numpy as np
 np.import_array()  # must be here because we use the NumPy C API
 
 
+
+cdef class Angle:
+    cdef _basetypes.Angle* thisptr
+    cdef bool delete_thisptr
+
+    def __cinit__(self, Angle other=None):
+        self.thisptr = NULL
+        self.delete_thisptr = False
+
+    def __dealloc__(self):
+        if self.thisptr != NULL and self.delete_thisptr:
+            del self.thisptr
+
+    def __init__(self, Angle other=None):
+        self.thisptr = new _basetypes.Angle()
+        self.delete_thisptr = True
+        if other and type(other) is Angle:
+            self.thisptr[0] = other.thisptr[0]
+
+    def getDeg(self):
+        return self.thisptr.getDeg()
+
+    def isApprox(self, Angle other, prec=None):
+        if prec is None:
+            return self.thisptr.isApprox(other.thisptr[0])
+        else:
+            return self.thisptr.isApprox(other.thisptr[0], prec)
+
+    def __richcmp__(Angle self, Angle other, int op):
+        if op == 0:
+            return deref(self.thisptr) < deref(other.thisptr)
+        elif op == 1:
+            return deref(self.thisptr) <= deref(other.thisptr)
+        elif op == 2:
+            return deref(self.thisptr) == deref(other.thisptr)
+        elif op == 3:
+            return not deref(self.thisptr) == deref(other.thisptr)
+        elif op == 4:
+            return deref(self.thisptr) > deref(other.thisptr)
+        elif op == 5:
+            return deref(self.thisptr) >= deref(other.thisptr)
+        else:
+            raise ValueError("Unknown comparison operation %d" % op)
+
+    def __add__(Angle self, Angle other):
+        cdef Angle ret = Angle()
+        ret.thisptr[0] = self.thisptr[0] + other.thisptr[0]
+        return ret
+
+    def __sub__(Angle self, Angle other):
+        cdef Angle ret = Angle()
+        ret.thisptr[0] = self.thisptr[0] - other.thisptr[0]
+        return ret
+
+    def __iadd__(Angle self, Angle other):
+        self.thisptr[0] = self.thisptr[0] + other.thisptr[0]
+        return self
+
+    def __isub__(Angle self, Angle other):
+        self.thisptr[0] = self.thisptr[0] - other.thisptr[0]
+        return self
+
+    def __mul__(Angle self, Angle other):
+        cdef Angle ret = Angle()
+
+        return ret
+
+    def __mul__(Angle self, factor):
+        cdef Angle ret = Angle()
+        if isinstance(factor, Angle):
+            ret.thisptr[0] = self.thisptr[0] * (<Angle>factor).thisptr[0]
+        elif isinstance(factor, float):
+            ret.thisptr[0] = deref(self.thisptr) * <float>factor
+        else:
+            raise TypeError("Angle multiplication only accept types Angle and float")
+        return ret
+
+    #__lshift__ 	x, y 	object 	<< operato
+    @staticmethod
+    def rad2Deg(rad):
+        return _basetypes.rad2Deg(rad)
+
+    @staticmethod
+    def deg2Rad(deg):
+        return _basetypes.deg2Rad(deg)
+
+    @staticmethod
+    def normalizeRad(rad):
+        return _basetypes.normalizeRad(rad)
+
+    @staticmethod
+    def fromRad(rad):
+        cdef Angle angle = Angle()
+        angle.thisptr[0] = _basetypes.fromRad(rad)
+        return angle
+
+    @staticmethod
+    def fromDeg(deg):
+        cdef Angle angle = Angle()
+        angle.thisptr[0] = _basetypes.fromDeg(deg)
+        return angle
+
+    @staticmethod
+    def unknown():
+        cdef Angle angle = Angle()
+        angle.thisptr[0] = _basetypes.unknown()
+        return angle
+
+    @staticmethod
+    def Min():
+        cdef Angle angle = Angle()
+        angle.thisptr[0] = _basetypes.Min()
+        return angle
+
+    @staticmethod
+    def Max():
+        cdef Angle angle = Angle()
+        angle.thisptr[0] = _basetypes.Max()
+        return angle
+
+
 cdef class Time:
     def __cinit__(self):
         self.thisptr = NULL

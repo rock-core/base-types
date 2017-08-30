@@ -529,3 +529,68 @@ def test_imu_sensors():
 
     imu.mag.x = 3.0
     assert_equal(imu.mag.x, 3.0)
+
+
+def test_angle():
+    assert_equal(basetypes.Angle.rad2Deg(1),57.29577951308232)
+    assert_equal(basetypes.Angle.deg2Rad(57.29577951308232), 1)
+    assert_equal(basetypes.Angle.normalizeRad(7),0.7168146928204138)
+
+    angle = basetypes.Angle.fromRad(1)
+    assert_equal(angle.getDeg(), 57.29577951308232)
+
+    angle = basetypes.Angle.fromDeg(1)
+    assert_equal(angle.getDeg(), 1)
+
+    angle = basetypes.Angle.Min()
+    assert_true(angle.getDeg()< -179)
+
+    angle = basetypes.Angle.Max()
+    assert_true(angle.getDeg()> 179)
+
+    angle1 = basetypes.Angle.fromRad(1)
+    angle2 = basetypes.Angle.fromRad(0.9)
+
+    assert_true(angle1.isApprox(angle2,0.2))
+    assert_false(angle1.isApprox(angle2))
+    assert_true(angle1.isApprox(angle1))
+
+    assert_true(angle1>angle2)
+    assert_false(angle2>angle1)
+    assert_false(angle1 > angle1)
+    assert_true(angle1 >= angle2)
+    assert_true(angle1 >= angle1)
+
+    assert_false(angle1 < angle2)
+    assert_true(angle2 < angle1)
+    assert_false(angle1 < angle1)
+    assert_false(angle1 <= angle2)
+    assert_true(angle1 <= angle1)
+
+    assert_true(angle1 == angle1)
+    assert_false(angle1 == angle2)
+    assert_false(angle1 != angle1)
+    assert_true(angle1 != angle2)
+    assert_true(basetypes.Angle.fromRad(1) == basetypes.Angle.fromRad(1))
+
+    angle = basetypes.Angle.fromDeg(1)
+    sum = angle + angle
+    assert_equal(sum.getDeg(), 2)
+    sum = angle - angle
+    assert_equal(sum.getDeg(), 0)
+    angle += angle
+    assert_equal(angle.getDeg(), 2)
+    angle -= angle
+    assert_equal(angle.getDeg(), 0)
+    angle = basetypes.Angle.fromDeg(1)
+    mul = angle * angle
+    assert_equal(mul.getDeg(), 0.017453292519943295)
+    mul = angle * 2.0
+    assert_equal(mul.getDeg(), 2.0)
+
+    angle1 = basetypes.Angle.fromDeg(1)
+    angle2 = angle1
+    angle2+= basetypes.Angle.fromDeg(1)
+    assert_true(angle1 != angle2)
+
+    angle = basetypes.Angle()
