@@ -27,6 +27,9 @@ cdef class Time:
                 % self.thisptr.toString(_basetypes.Resolution.Microseconds,
                                         "%Y%m%d-%H:%M:%S"))
 
+    def assign(self, Time other):
+        self.thisptr.assign(deref(other.thisptr))
+
     def _get_microseconds(self):
         return self.thisptr.microseconds
 
@@ -115,6 +118,9 @@ cdef class Vector2d:
     def __str__(self):
         return "[%.2f, %.2f]" % (self.thisptr.get(0), self.thisptr.get(1))
 
+    def assign(self, Vector2d other):
+        self.thisptr.assign(deref(other.thisptr))
+
     def __array__(self, dtype=None):
         cdef np.npy_intp shape[1]
         shape[0] = <np.npy_intp> 2
@@ -160,6 +166,22 @@ cdef class Vector2d:
             array[i] = self.thisptr.data()[i]
         return array
 
+    def __richcmp__(Vector2d self, Vector2d other, int op):
+        if op == 0:
+            raise NotImplementedError("<")
+        elif op == 1:
+            raise NotImplementedError("<=")
+        elif op == 2:
+            return deref(self.thisptr) == deref(other.thisptr)
+        elif op == 3:
+            return deref(self.thisptr) != deref(other.thisptr)
+        elif op == 4:
+            raise NotImplementedError(">")
+        elif op == 5:
+            raise NotImplementedError(">=")
+        else:
+            raise ValueError("Unknown comparison operation %d" % op)
+
     # TODO add operators, fromarray
 
 
@@ -180,6 +202,9 @@ cdef class Vector3d:
         return "[%.2f, %.2f, %.2f]" % (self.thisptr.get(0),
                                        self.thisptr.get(1),
                                        self.thisptr.get(2))
+
+    def assign(self, Vector3d other):
+        self.thisptr.assign(deref(other.thisptr))
 
     def __array__(self, dtype=None):
         cdef np.npy_intp shape[1]
@@ -239,6 +264,22 @@ cdef class Vector3d:
         for i in range(3):
             self.thisptr.data()[i] = array[i]
 
+    def __richcmp__(Vector3d self, Vector3d other, int op):
+        if op == 0:
+            raise NotImplementedError("<")
+        elif op == 1:
+            raise NotImplementedError("<=")
+        elif op == 2:
+            return deref(self.thisptr) == deref(other.thisptr)
+        elif op == 3:
+            return deref(self.thisptr) != deref(other.thisptr)
+        elif op == 4:
+            raise NotImplementedError(">")
+        elif op == 5:
+            raise NotImplementedError(">=")
+        else:
+            raise ValueError("Unknown comparison operation %d" % op)
+
     # TODO add operators
 
 
@@ -260,6 +301,9 @@ cdef class Vector4d:
             self.thisptr.get(0), self.thisptr.get(1),
             self.thisptr.get(2), self.thisptr.get(3)
         )
+
+    def assign(self, Vector4d other):
+        self.thisptr.assign(deref(other.thisptr))
 
     def __array__(self, dtype=None):
         cdef np.npy_intp shape[1]
@@ -289,6 +333,22 @@ cdef class Vector4d:
         for i in range(4):
             array[i] = self.thisptr.data()[i]
         return array
+
+    def __richcmp__(Vector4d self, Vector4d other, int op):
+        if op == 0:
+            raise NotImplementedError("<")
+        elif op == 1:
+            raise NotImplementedError("<=")
+        elif op == 2:
+            return deref(self.thisptr) == deref(other.thisptr)
+        elif op == 3:
+            return deref(self.thisptr) != deref(other.thisptr)
+        elif op == 4:
+            raise NotImplementedError(">")
+        elif op == 5:
+            raise NotImplementedError(">=")
+        else:
+            raise ValueError("Unknown comparison operation %d" % op)
 
     # TODO add operators, fromarray
 
@@ -320,6 +380,9 @@ cdef class Matrix3d:
             self.thisptr.get(1, 0), self.thisptr.get(1, 1), self.thisptr.get(1, 2),
             self.thisptr.get(2, 0), self.thisptr.get(2, 1), self.thisptr.get(2, 2),
         )
+
+    def assign(self, Matrix3d other):
+        self.thisptr.assign(deref(other.thisptr))
 
     def __array__(self, dtype=None):
         cdef np.npy_intp shape[2]
@@ -363,6 +426,22 @@ cdef class Matrix3d:
             for j in range(3):
                 self.thisptr.data()[3 * j + i] = array[i, j]
 
+    def __richcmp__(Matrix3d self, Matrix3d other, int op):
+        if op == 0:
+            raise NotImplementedError("<")
+        elif op == 1:
+            raise NotImplementedError("<=")
+        elif op == 2:
+            return deref(self.thisptr) == deref(other.thisptr)
+        elif op == 3:
+            return deref(self.thisptr) != deref(other.thisptr)
+        elif op == 4:
+            raise NotImplementedError(">")
+        elif op == 5:
+            raise NotImplementedError(">=")
+        else:
+            raise ValueError("Unknown comparison operation %d" % op)
+
     # TODO operators
 
 
@@ -386,6 +465,9 @@ cdef class Quaterniond:
         return "[im=%.2f, real=(%.2f, %.2f, %.2f)]" % (
             self.thisptr.w(), self.thisptr.x(), self.thisptr.y(),
             self.thisptr.z())
+
+    def assign(self, Quaterniond other):
+        self.thisptr.assign(deref(other.thisptr))
 
     def toarray(self):
         cdef np.ndarray[double, ndim=1] array = np.array([
@@ -415,6 +497,9 @@ cdef class TransformWithCovariance:
     def __str__(self):
         return "(translation=%s, orientation=%s)" % (self.translation,
                                                      self.orientation)
+
+    def assign(self, TransformWithCovariance other):
+        self.thisptr.assign(deref(other.thisptr))
 
     def _get_translation(self):
         cdef Vector3d translation = Vector3d()
@@ -469,6 +554,9 @@ cdef class JointState:
         if self.thisptr.hasAcceleration():
             parts.append("acceleration=%g" % self.thisptr.acceleration)
         return "JointState [%s]" % ", ".join(parts)
+
+    def assign(self, JointState other):
+        self.thisptr.assign(deref(other.thisptr))
 
     def _get_position(self):
         return self.thisptr.position
@@ -594,6 +682,9 @@ cdef class Joints:
                                      self.elements[i]))
         return "Joints %s {%s}" % (self.time, ", ".join(parts))
 
+    def assign(self, Joints other):
+        self.thisptr.assign(deref(other.thisptr))
+
     def size(self):
         return self.thisptr.size()
 
@@ -702,6 +793,9 @@ cdef class RigidBodyState:
     def __str__(self):
         # TODO extend string representation?
         return "RigidBodyState {%s, source_frame=%s, target_frame=%s, ...}" % (self.time, self.thisptr.sourceFrame, self.thisptr.targetFrame)
+
+    def assign(self, RigidBodyState other):
+        self.thisptr.assign(deref(other.thisptr))
 
     def _get_time(self):
         cdef Time time = Time()
@@ -874,6 +968,9 @@ cdef class Frame:
 
     # TODO __str__
 
+    def assign(self, Frame other):
+        self.thisptr.assign(deref(other.thisptr))
+
     def _get_time(self):
         cdef Time time = Time()
         del time.thisptr
@@ -961,6 +1058,9 @@ cdef class Pointcloud:
         self.thisptr = new _basetypes.Pointcloud()
         self.delete_thisptr = True
 
+    def assign(self, Pointcloud other):
+        self.thisptr.assign(deref(other.thisptr))
+
     @property
     def points(self):
         cdef Vector3dVectorReference points = Vector3dVectorReference()
@@ -1042,6 +1142,9 @@ cdef class LaserScan:
         if len(remission) > 5:
             remission = str(remission[:5])[:-1] + ", ...]"
         return "LaserScan {%s, min_range=%s, max_range=%s, ranges=%s, remission=%s}" % (self.time, self.thisptr.minRange, self.thisptr.maxRange, ranges, remission)
+
+    def assign(self, LaserScan other):
+        self.thisptr.assign(deref(other.thisptr))
 
     def _get_time(self):
         cdef Time time = Time()
@@ -1168,6 +1271,9 @@ cdef class IMUSensors:
         self.delete_thisptr = True
 
     # TODO __str__
+
+    def assign(self, IMUSensors other):
+        self.thisptr.assign(deref(other.thisptr))
 
     def _get_time(self):
         cdef Time time = Time()

@@ -1,6 +1,8 @@
 import basetypes
 import numpy as np
-from nose.tools import assert_equal, assert_raises_regexp, assert_almost_equal, assert_false, assert_true, assert_greater, assert_regexp_matches
+from nose.tools import assert_equal, assert_not_equal, assert_raises_regexp, \
+    assert_almost_equal, assert_false, assert_true, assert_greater, \
+    assert_regexp_matches
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 
@@ -61,9 +63,25 @@ def test_time_operators():
     assert_equal(t5, t4)
 
 
+def test_time_assign():
+    t1 = basetypes.Time()
+    t2 = basetypes.Time.now()
+    assert_not_equal(t1, t2)
+    t1.assign(t2)
+    assert_equal(t1, t2)
+
+
 def test_vector2d_ctor():
     v = basetypes.Vector2d(1.0, 2.0)
     assert_equal(str(v), "[1.00, 2.00]")
+
+
+def test_vector2d_assign():
+    obj1 = basetypes.Vector2d()
+    obj2 = basetypes.Vector2d(1.0, 2.0)
+    assert_not_equal(obj1, obj2)
+    obj1.assign(obj2)
+    assert_equal(obj1, obj2)
 
 
 def test_vector2d_as_ndarray():
@@ -119,6 +137,14 @@ def test_vector3d_array_access():
     assert_raises_regexp(KeyError, "index must be", assign, 3)
 
 
+def test_vector3d_assign():
+    obj1 = basetypes.Vector3d()
+    obj2 = basetypes.Vector3d(1.0, 2.0, 3.0)
+    assert_not_equal(obj1, obj2)
+    obj1.assign(obj2)
+    assert_equal(obj1, obj2)
+
+
 def test_norms():
     v = basetypes.Vector3d(1.0, 2.0, 3.0)
     assert_almost_equal(v.norm(), 3.741657387)
@@ -139,6 +165,14 @@ def test_vector4d_as_ndarray():
     assert_array_almost_equal(rv, rv2)
 
 
+def test_vector4d_assign():
+    obj1 = basetypes.Vector4d()
+    obj2 = basetypes.Vector4d(1.0, 2.0, 3.0)
+    assert_not_equal(obj1, obj2)
+    obj1.assign(obj2)
+    assert_equal(obj1, obj2)
+
+
 def test_matrix3d_get_set_data():
     m = basetypes.Matrix3d()
     m[0, 1] = 1.0
@@ -155,6 +189,15 @@ def test_matrix3d_array_access():
     r = random_state.randn(3, 3)
     m.fromarray(r)
     assert_array_equal(np.asarray(m), r)
+
+
+def test_matrix3d_assign():
+    obj1 = basetypes.Matrix3d()
+    obj2 = basetypes.Matrix3d()
+    obj2.fromarray(np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]]))
+    assert_not_equal(obj1, obj2)
+    obj1.assign(obj2)
+    assert_equal(obj1, obj2)
 
 
 def test_quaterniond_ctor():

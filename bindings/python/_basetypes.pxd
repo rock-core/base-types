@@ -10,6 +10,8 @@ cdef extern from "base/Time.hpp" namespace "base":
 
         int64_t microseconds
 
+        Time& assign "operator="(Time&)
+
         bool operator<(Time)
         bool operator>(Time)
         bool operator==(Time)
@@ -43,6 +45,9 @@ cdef extern from "base/Eigen.hpp" namespace "base":
         Vector2d(Vector2d&)
         double* data()
         int rows()
+        Vector2d& assign "operator="(Vector2d&)
+        bool operator==(Vector2d&)
+        bool operator!=(Vector2d&)
         double& get "operator()"(int row)
         double x()
         double y()
@@ -55,6 +60,9 @@ cdef extern from "base/Eigen.hpp" namespace "base":
         Vector3d(Vector3d&)
         double* data()
         int rows()
+        Vector3d& assign "operator="(Vector3d&)
+        bool operator==(Vector3d&)
+        bool operator!=(Vector3d&)
         double& get "operator()"(int row)
         double x()
         double y()
@@ -68,6 +76,9 @@ cdef extern from "base/Eigen.hpp" namespace "base":
         Vector4d(Vector4d&)
         double* data()
         int rows()
+        Vector4d& assign "operator="(Vector4d&)
+        bool operator==(Vector4d&)
+        bool operator!=(Vector4d&)
         double& get "operator()"(int row)
         double x()
         double y()
@@ -78,6 +89,9 @@ cdef extern from "base/Eigen.hpp" namespace "base":
     cdef cppclass Matrix3d:
         Matrix3d()
         double* data()
+        Matrix3d& assign "operator="(Matrix3d&)
+        bool operator==(Matrix3d&)
+        bool operator!=(Matrix3d&)
         double& get "operator()"(int row, int col)
         int rows()
         int cols()
@@ -85,6 +99,7 @@ cdef extern from "base/Eigen.hpp" namespace "base":
     cdef cppclass Quaterniond:
         Quaterniond()
         Quaterniond(double, double, double, double)
+        Quaterniond& assign "operator="(Quaterniond&)
         double w()
         double x()
         double y()
@@ -94,6 +109,7 @@ cdef extern from "base/Eigen.hpp" namespace "base":
 cdef extern from "base/TransformWithCovariance.hpp" namespace "base":
     cdef cppclass TransformWithCovariance:
         TransformWithCovariance()
+        TransformWithCovariance& assign "operator="(TransformWithCovariance&)
         Vector3d translation
         Quaterniond orientation
 
@@ -101,6 +117,9 @@ cdef extern from "base/TransformWithCovariance.hpp" namespace "base":
 cdef extern from "base/JointState.hpp" namespace "base":
     cdef cppclass JointState:
         JointState()
+        JointState& assign "operator="(JointState&)
+        bool operator==(JointState&)
+        bool operator!=(JointState&)
         double position
         double speed
         double effort
@@ -131,6 +150,7 @@ cdef extern from "base/NamedVector.hpp" namespace "base":
         vector[string] names
         vector[T] elements
 
+        NamedVector& assign "operator="(NamedVector&)
         void resize(int)
         int size()
         bool empty()
@@ -149,6 +169,7 @@ cdef extern from "base/samples/Joints.hpp" namespace "base::samples":
 cdef extern from "base/samples/RigidBodyState.hpp" namespace "base::samples":
     cdef cppclass RigidBodyState:
         RigidBodyState(bool)
+        RigidBodyState& assign "operator="(RigidBodyState&)
         Time time
         string sourceFrame
         string targetFrame
@@ -195,6 +216,8 @@ cdef extern from "base/samples/Frame.hpp" namespace "base::samples::frame":
         Frame(int width, int height, int depth, frame_mode_t mode, int val, int sizeInBytes)
         Frame(Frame other, bool bcopy)
 
+        Frame& assign "operator="(Frame&)
+
         Time time
         Time received_time
         vector[uint8_t] image
@@ -215,6 +238,8 @@ cdef extern from "base/samples/Pointcloud.hpp" namespace "base::samples":
     cdef cppclass Pointcloud:
         Pointcloud()
 
+        Pointcloud& assign "operator="(Pointcloud&)
+
         Time time
         vector[Vector3d] points
         vector[Vector4d] colors
@@ -230,6 +255,7 @@ cdef extern from "base/samples/LaserScan.hpp" namespace "base::samples":
 
     cdef cppclass LaserScan:
         LaserScan()
+        LaserScan& assign "operator="(LaserScan&)
 
         Time time
         double start_angle
@@ -251,6 +277,7 @@ cdef extern from "base/samples/LaserScan.hpp" namespace "base::samples":
 cdef extern from "base/samples/IMUSensors.hpp" namespace "base::samples":
     cdef cppclass IMUSensors:
         IMUSensors()
+        IMUSensors& assign "operator="(IMUSensors&)
 
         Time time
         Vector3d acc
