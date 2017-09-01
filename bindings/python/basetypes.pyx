@@ -1061,6 +1061,18 @@ cdef class Pointcloud:
     def assign(self, Pointcloud other):
         self.thisptr.assign(deref(other.thisptr))
 
+    def _get_time(self):
+        cdef Time time = Time()
+        del time.thisptr
+        time.thisptr = &self.thisptr.time
+        time.delete_thisptr = False
+        return time
+
+    def _set_time(self, Time time):
+        self.thisptr.time = deref(time.thisptr)
+
+    time = property(_get_time, _set_time)
+
     @property
     def points(self):
         cdef Vector3dVectorReference points = Vector3dVectorReference()

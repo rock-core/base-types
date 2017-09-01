@@ -456,6 +456,8 @@ def test_create_frame_gray():
 def test_create_pointcloud():
     pcl = basetypes.Pointcloud()
 
+    assert_equal(pcl.time.microseconds, 0)
+
     pcl.points.resize(100)
     point = pcl.points[0]
     point.x = 1.0
