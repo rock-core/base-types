@@ -531,66 +531,74 @@ def test_imu_sensors():
     assert_equal(imu.mag.x, 3.0)
 
 
-def test_angle():
-    assert_equal(basetypes.Angle.rad2Deg(1),57.29577951308232)
-    assert_equal(basetypes.Angle.deg2Rad(57.29577951308232), 1)
-    assert_equal(basetypes.Angle.normalizeRad(7),0.7168146928204138)
+def test_angle_conversions():
+    assert_equal(basetypes.Angle.rad_to_deg(1), 57.29577951308232)
+    assert_equal(basetypes.Angle.deg_to_rad(57.29577951308232), 1)
+    assert_equal(basetypes.Angle.normalize_rad(7), 0.7168146928204138)
 
-    angle = basetypes.Angle.fromRad(1)
-    assert_equal(angle.getDeg(), 57.29577951308232)
+def test_angle_constructors():
+    angle = basetypes.Angle.from_rad(1)
+    assert_equal(angle.get_deg(), 57.29577951308232)
 
-    angle = basetypes.Angle.fromDeg(1)
-    assert_equal(angle.getDeg(), 1)
+    angle = basetypes.Angle.from_deg(1)
+    assert_equal(angle.get_deg(), 1)
 
-    angle = basetypes.Angle.Min()
-    assert_true(angle.getDeg()< -179)
+    angle = basetypes.Angle.min()
+    assert_true(angle.get_deg()< -179)
 
-    angle = basetypes.Angle.Max()
-    assert_true(angle.getDeg()> 179)
+    angle = basetypes.Angle.max()
+    assert_true(angle.get_deg()> 179)
 
-    angle1 = basetypes.Angle.fromRad(1)
-    angle2 = basetypes.Angle.fromRad(0.9)
+def test_angle_comparisons():
+    angle1 = basetypes.Angle.from_rad(1)
+    angle2 = basetypes.Angle.from_rad(0.9)
 
-    assert_true(angle1.isApprox(angle2,0.2))
-    assert_false(angle1.isApprox(angle2))
-    assert_true(angle1.isApprox(angle1))
+    assert_true(angle1.is_approx(angle2, 0.2))
+    assert_false(angle1.is_approx(angle2))
+    assert_true(angle1.is_approx(angle1))
 
-    assert_true(angle1>angle2)
-    assert_false(angle2>angle1)
-    assert_false(angle1 > angle1)
-    assert_true(angle1 >= angle2)
-    assert_true(angle1 >= angle1)
+    assert_true( angle1 >  angle2)
+    assert_false(angle2 >  angle1)
+    assert_false(angle1 >  angle1)
+    assert_true( angle1 >= angle2)
+    assert_true( angle1 >= angle1)
 
     assert_false(angle1 < angle2)
-    assert_true(angle2 < angle1)
+    assert_true( angle2 < angle1)
     assert_false(angle1 < angle1)
     assert_false(angle1 <= angle2)
-    assert_true(angle1 <= angle1)
+    assert_true( angle1 <= angle1)
 
-    assert_true(angle1 == angle1)
+    assert_true( angle1 == angle1)
     assert_false(angle1 == angle2)
     assert_false(angle1 != angle1)
-    assert_true(angle1 != angle2)
-    assert_true(basetypes.Angle.fromRad(1) == basetypes.Angle.fromRad(1))
+    assert_true( angle1 != angle2)
+    assert_true(basetypes.Angle.from_rad(1) == basetypes.Angle.from_rad(1))
 
-    angle = basetypes.Angle.fromDeg(1)
+def test_angle_operators():
+    angle = basetypes.Angle.from_deg(1)
+
     sum = angle + angle
-    assert_equal(sum.getDeg(), 2)
+    assert_equal(sum.get_deg(), 2)
+
     sum = angle - angle
-    assert_equal(sum.getDeg(), 0)
+    assert_equal(sum.get_deg(), 0)
+
     angle += angle
-    assert_equal(angle.getDeg(), 2)
+    assert_equal(angle.get_deg(), 2)
+
     angle -= angle
-    assert_equal(angle.getDeg(), 0)
-    angle = basetypes.Angle.fromDeg(1)
+    assert_equal(angle.get_deg(), 0)
+
+    angle = basetypes.Angle.from_deg(1)
     mul = angle * angle
-    assert_equal(mul.getDeg(), 0.017453292519943295)
+    assert_equal(mul.get_deg(), 0.017453292519943295)
+
     mul = angle * 2.0
-    assert_equal(mul.getDeg(), 2.0)
+    assert_equal(mul.get_deg(), 2.0)
 
-    angle1 = basetypes.Angle.fromDeg(1)
+def test_angle_allocation():
+    angle1 = basetypes.Angle.from_deg(1)
     angle2 = angle1
-    angle2+= basetypes.Angle.fromDeg(1)
+    angle2+= basetypes.Angle.from_deg(1)
     assert_true(angle1 != angle2)
-
-    angle = basetypes.Angle()

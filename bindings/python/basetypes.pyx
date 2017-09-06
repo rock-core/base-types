@@ -28,10 +28,10 @@ cdef class Angle:
         if other and type(other) is Angle:
             self.thisptr[0] = other.thisptr[0]
 
-    def getDeg(self):
+    def get_deg(self):
         return self.thisptr.getDeg()
 
-    def isApprox(self, Angle other, prec=None):
+    def is_approx(self, Angle other, prec=None):
         if prec is None:
             return self.thisptr.isApprox(other.thisptr[0])
         else:
@@ -71,11 +71,6 @@ cdef class Angle:
         self.thisptr[0] = self.thisptr[0] - other.thisptr[0]
         return self
 
-    def __mul__(Angle self, Angle other):
-        cdef Angle ret = Angle()
-
-        return ret
-
     def __mul__(Angle self, factor):
         cdef Angle ret = Angle()
         if isinstance(factor, Angle):
@@ -88,25 +83,25 @@ cdef class Angle:
 
     #__lshift__ 	x, y 	object 	<< operato
     @staticmethod
-    def rad2Deg(rad):
+    def rad_to_deg(rad):
         return _basetypes.rad2Deg(rad)
 
     @staticmethod
-    def deg2Rad(deg):
+    def deg_to_rad(deg):
         return _basetypes.deg2Rad(deg)
 
     @staticmethod
-    def normalizeRad(rad):
+    def normalize_rad(rad):
         return _basetypes.normalizeRad(rad)
 
     @staticmethod
-    def fromRad(rad):
+    def from_rad(rad):
         cdef Angle angle = Angle()
         angle.thisptr[0] = _basetypes.fromRad(rad)
         return angle
 
     @staticmethod
-    def fromDeg(deg):
+    def from_deg(deg):
         cdef Angle angle = Angle()
         angle.thisptr[0] = _basetypes.fromDeg(deg)
         return angle
@@ -118,13 +113,13 @@ cdef class Angle:
         return angle
 
     @staticmethod
-    def Min():
+    def min():
         cdef Angle angle = Angle()
         angle.thisptr[0] = _basetypes.Min()
         return angle
 
     @staticmethod
-    def Max():
+    def max():
         cdef Angle angle = Angle()
         angle.thisptr[0] = _basetypes.Max()
         return angle
