@@ -8,8 +8,6 @@ import numpy as np
 
 np.import_array()  # must be here because we use the NumPy C API
 
-
-
 cdef class Angle:
     cdef _basetypes.Angle* thisptr
     cdef bool delete_thisptr
@@ -30,6 +28,9 @@ cdef class Angle:
 
     def get_deg(self):
         return self.thisptr.getDeg()
+
+    def get_rad(self):
+        return self.thisptr.getRad()
 
     def is_approx(self, Angle other, prec=None):
         if prec is None:
@@ -53,6 +54,9 @@ cdef class Angle:
         else:
             raise ValueError("Unknown comparison operation %d" % op)
 
+    def assign(self,Angle other):
+        self.thisptr.assign(other.thisptr[0])
+
     def __add__(Angle self, Angle other):
         cdef Angle ret = Angle()
         ret.thisptr[0] = self.thisptr[0] + other.thisptr[0]
@@ -71,17 +75,30 @@ cdef class Angle:
         self.thisptr[0] = self.thisptr[0] - other.thisptr[0]
         return self
 
-    def __mul__(Angle self, factor):
+    def __mul__(a, b):
         cdef Angle ret = Angle()
-        if isinstance(factor, Angle):
-            ret.thisptr[0] = self.thisptr[0] * (<Angle>factor).thisptr[0]
-        elif isinstance(factor, float):
-            ret.thisptr[0] = deref(self.thisptr) * <float>factor
+        if isinstance(a, Angle) and isinstance(b, Angle):
+            ret.thisptr[0] = (<Angle>b).thisptr[0] * (<Angle>b).thisptr[0]
+        elif isinstance(a, float) and isinstance(b, Angle):
+            ret.thisptr[0] = (<Angle>b).thisptr[0] * <float>a
+        elif isinstance(a, Angle) and isinstance(b, float):
+            ret.thisptr[0] = (<Angle>a).thisptr[0] * <float>b
         else:
             raise TypeError("Angle multiplication only accept types Angle and float")
         return ret
 
-    #__lshift__ 	x, y 	object 	<< operato
+    def __str__(self):
+        return "%f [%3.1fdeg]" % (self.get_rad(), self.get_deg())
+
+    def flipped(self):
+        cdef Angle ret = Angle()
+        ret.thisptr[0] = self.thisptr[0].flipped()
+        return ret
+
+    def flip(self):
+        self.thisptr.flip()
+        return self
+
     @staticmethod
     def rad_to_deg(rad):
         return _basetypes.rad2Deg(rad)
@@ -124,6 +141,14 @@ cdef class Angle:
         angle.thisptr[0] = _basetypes.Max()
         return angle
 
+    @staticmethod
+    def vector_to_vector(Vector3d a, Vector3d b, Vector3d positive=None):
+        cdef Angle ret = Angle()
+        if positive:
+            ret.thisptr[0] = _basetypes.vectorToVector(a.thisptr[0], b.thisptr[0], positive.thisptr[0])
+        else:
+            ret.thisptr[0] = _basetypes.vectorToVector(a.thisptr[0], b.thisptr[0])
+        return ret
 
 cdef class Time:
     def __cinit__(self):

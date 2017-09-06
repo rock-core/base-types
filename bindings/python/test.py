@@ -538,7 +538,7 @@ def test_angle_conversions():
 
 def test_angle_constructors():
     angle = basetypes.Angle.from_rad(1)
-    assert_equal(angle.get_deg(), 57.29577951308232)
+    assert_equal(angle.get_rad(), 1)
 
     angle = basetypes.Angle.from_deg(1)
     assert_equal(angle.get_deg(), 1)
@@ -597,8 +597,40 @@ def test_angle_operators():
     mul = angle * 2.0
     assert_equal(mul.get_deg(), 2.0)
 
-def test_angle_allocation():
-    angle1 = basetypes.Angle.from_deg(1)
-    angle2 = angle1
+    mul = 2.0 * angle
+    assert_equal(mul.get_deg(), 2.0)
+
+def test_angle_assign():
+    angle1 = basetypes.Angle.from_deg(2)
+    angle2 = basetypes.Angle()
+    angle2.assign(angle1)
+    assert_true(angle1 == angle2)
     angle2+= basetypes.Angle.from_deg(1)
     assert_true(angle1 != angle2)
+
+def test_angle_flipping():
+    angle1 = basetypes.Angle.from_deg(1)
+    angle2 = angle1.flip()
+    assert_true(angle1 == angle2)
+    assert_equal(angle1.get_deg(), -179)
+
+    angle1 = basetypes.Angle.from_deg(1)
+    angle2 = angle1.flipped()
+    assert_false(angle1 == angle2)
+    assert_equal(angle1.get_deg(), 1)
+    assert_equal(angle2.get_deg(), -179)
+
+def test_angle_vector_to_vector():
+    v1 = basetypes.Vector3d(0,0,1)
+    v2 = basetypes.Vector3d(0, -1, 0)
+    pos_dir = basetypes.Vector3d(-1, -1, -1)
+
+    angle1 = basetypes.Angle.vector_to_vector(v1, v2)
+    assert_equal(angle1.get_deg(), 90)
+
+    angle1 = basetypes.Angle.vector_to_vector(v1, v2, pos_dir)
+    assert_equal(angle1.get_deg(), -90)
+
+def test_angle_to_str():
+    angle1 = basetypes.Angle.from_deg(123.456)
+    assert_equal(str(angle1), '2.154714 [123.5deg]')

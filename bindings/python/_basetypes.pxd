@@ -8,41 +8,43 @@ cdef extern from "base/Angle.hpp" namespace "base":
         Angle()
 
         double getDeg()
-        bool isApprox(Angle, double)
-        bool isApprox(Angle)
+        double getRad()
+        bool isApprox(Angle&, double)
+        bool isApprox(Angle&)
 
+        bool operator==(Angle&)
+        bool operator<(Angle&)
+        bool operator>(Angle&)
+        bool operator<=(Angle&)
+        bool operator>=(Angle&)
 
-        bool operator==(Angle)
-        bool operator<(Angle)
-        bool operator>(Angle)
-        bool operator<=(Angle)
-        bool operator>=(Angle)
-
-        Angle operator+(Angle)
-        Angle operator-(Angle)
-        Angle operator*(Angle)
+        Angle operator+(Angle&)
+        Angle operator-(Angle&)
+        Angle operator*(Angle&)
         Angle operator*(double)
+        Angle operator*(double, Angle)
 
-        #void operator=(Angle)
+        Angle assign "operator="(Angle&)
 
-        #Angle flipped()
-        #Angle &flip()
+        Angle flipped()
+        Angle &flip()
 
-        #static Angle vectorToVector(const base::Vector3d& a, const base::Vector3d& b);
-        #static Angle vectorToVector(const base::Vector3d& a, const base::Vector3d& b, const base::Vector3d& positive);
-        #static inline Angle operator*( double a, Angle b )
-        #std::ostream& operator << (std::ostream& os, Angle angle);
-        # and more
+        #std::ostream& operator << (std::ostream& os, Angle angle);  reimplemented
+        #Angle operator*(double, Angle) used Angle operator*(double, Angle) instead
+        #AngleSegment
 
 cdef extern from "base/Angle.hpp" namespace "base::Angle":
     double rad2Deg(double)
-    double deg2Rad( double)
-    double normalizeRad( double)
-    Angle fromRad( double )
-    Angle fromDeg( double )
+    double deg2Rad(double)
+    double normalizeRad(double)
+    Angle fromRad(double)
+    Angle fromDeg(double)
     Angle unknown()
     Angle Min()
     Angle Max()
+    Angle vectorToVector(Vector3d&, Vector3d&)
+    Angle vectorToVector(Vector3d&, Vector3d&, Vector3d&)
+
 
 cdef extern from "base/Time.hpp" namespace "base":
     cdef cppclass Time:
