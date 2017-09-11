@@ -4,6 +4,12 @@ from libcpp.string cimport string
 from libc.stdint cimport uint32_t
 cimport _basetypes
 
+
+cdef class Angle:
+    cdef _basetypes.Angle* thisptr
+    cdef bool delete_thisptr
+
+
 cdef class Time:
     cdef _basetypes.Time* thisptr
     cdef bool delete_thisptr

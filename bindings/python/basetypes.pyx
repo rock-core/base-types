@@ -8,10 +8,8 @@ import numpy as np
 
 np.import_array()  # must be here because we use the NumPy C API
 
-cdef class Angle:
-    cdef _basetypes.Angle* thisptr
-    cdef bool delete_thisptr
 
+cdef class Angle:
     def __cinit__(self, Angle other=None):
         self.thisptr = NULL
         self.delete_thisptr = False
