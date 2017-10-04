@@ -1147,4 +1147,18 @@ SplineBase *SplineBase::getSubSpline(double start_t, double end_t) const
     return new SplineBase(getGeometricResolution(), newCurve);
 }
 
+void SplineBase::derive(unsigned int order, SplineBase& result) const
+{
+    if (!SplineBase::getSISLCurve())
+        throw std::invalid_argument("cannot derive a singleton");
+
+    SISLCurve* newCurve;
+    int stat;
+    s1720(const_cast<SISLCurve*>(getSISLCurve()), order, &newCurve, &stat);
+    if (stat < 0)
+        throw std::runtime_error("failed to derive the curve");
+
+    result.reset(newCurve);
+}
+
 }} //end namespace base::geometry
