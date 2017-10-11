@@ -1449,11 +1449,15 @@ BOOST_AUTO_TEST_CASE( rbs_validity )
     // check if values are unknown
     BOOST_CHECK(!rbs.isKnownValue(rbs.cov_position));
     BOOST_CHECK(!rbs.isKnownValue(rbs.cov_velocity));
+    BOOST_CHECK(!rbs.isKnownValue(rbs.cov_acceleration));
     BOOST_CHECK(!rbs.isKnownValue(rbs.cov_orientation));
     BOOST_CHECK(!rbs.isKnownValue(rbs.cov_angular_velocity));
+    BOOST_CHECK(!rbs.isKnownValue(rbs.cov_angular_acceleration));
     BOOST_CHECK(rbs.position == Eigen::Vector3d::Zero());
     BOOST_CHECK(rbs.velocity == Eigen::Vector3d::Zero());
+    BOOST_CHECK(rbs.acceleration == Eigen::Vector3d::Zero());
     BOOST_CHECK(rbs.angular_velocity == Eigen::Vector3d::Zero());
+    BOOST_CHECK(rbs.angular_acceleration == Eigen::Vector3d::Zero());
     BOOST_CHECK(rbs.orientation.x() == 0 && rbs.orientation.y() == 0 && 
                 rbs.orientation.z() == 0 && rbs.orientation.w() == 1);
     
@@ -1466,6 +1470,10 @@ BOOST_AUTO_TEST_CASE( rbs_validity )
     BOOST_CHECK(rbs.hasValidVelocityCovariance());
     BOOST_CHECK(rbs.hasValidAngularVelocity());
     BOOST_CHECK(rbs.hasValidAngularVelocityCovariance());
+    BOOST_CHECK(rbs.hasValidAcceleration());
+    BOOST_CHECK(rbs.hasValidAccelerationCovariance());
+    BOOST_CHECK(rbs.hasValidAngularAcceleration());
+    BOOST_CHECK(rbs.hasValidAngularAccelerationCovariance());
     
     rbs.invalidate();
     // check if values are invalid
@@ -1477,6 +1485,10 @@ BOOST_AUTO_TEST_CASE( rbs_validity )
     BOOST_CHECK(!rbs.hasValidVelocityCovariance());
     BOOST_CHECK(!rbs.hasValidAngularVelocity());
     BOOST_CHECK(!rbs.hasValidAngularVelocityCovariance());
+    BOOST_CHECK(!rbs.hasValidAcceleration());
+    BOOST_CHECK(!rbs.hasValidAccelerationCovariance());
+    BOOST_CHECK(!rbs.hasValidAngularAcceleration());
+    BOOST_CHECK(!rbs.hasValidAngularAccelerationCovariance());
 }
 
 BOOST_AUTO_TEST_CASE( transform_with_covariance )

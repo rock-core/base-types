@@ -69,6 +69,19 @@ namespace base { namespace samples {
 	 */
         base::Matrix3d cov_angular_velocity;
 
+        /** Linear acceleration in m/ss expressed in targetFrame*/
+        base::Vector3d acceleration;
+
+        /** Covariance of the acceleration */
+        base::Matrix3d cov_acceleration;
+
+        /** Angular acceleration as an axis-angle representation in body fixed frame
+         * The direction of the vector is the axis, its length the acceleration */
+        base::Vector3d angular_acceleration;
+
+        /** Covariance of the angular acceleration */
+        base::Matrix3d cov_angular_acceleration;
+
 	void setTransform(const Eigen::Affine3d& transform);
 
 	 Eigen::Affine3d getTransform() const;
@@ -169,11 +182,25 @@ namespace base { namespace samples {
         void invalidateAngularVelocity();
         void invalidateAngularVelocityCovariance();
 
-        void invalidateValues(bool invPos, bool invOri, bool invVel = true,
-                              bool invAngVel = true);
+        bool hasValidAcceleration() const;
+        bool hasValidAcceleration(int idx) const;
+        bool hasValidAccelerationCovariance() const;
+        void invalidateAcceleration();
+        void invalidateAccelerationCovariance();
+
+        bool hasValidAngularAcceleration() const;
+        bool hasValidAngularAcceleration(int idx) const;
+        bool hasValidAngularAccelerationCovariance() const;
+        void invalidateAngularAcceleration();
+        void invalidateAngularAccelerationCovariance();
+
+        void invalidateValues(bool invPos, bool invOri,
+                              bool invVel = true, bool invAngVel = true,
+                              bool invAcc = true, bool invAngAcc = true);
 
         void invalidateCovariances(bool invPos = true, bool invOri = true,
-                                   bool invVel = true, bool invAngVel = true);
+                                   bool invVel = true, bool invAngVel = true,
+                                   bool invAcc = true, bool invAngAcc = true);
     };
 }}
 

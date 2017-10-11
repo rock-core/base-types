@@ -77,6 +77,10 @@ void RigidBodyState::invalidate()
     invalidateVelocityCovariance();
     invalidateAngularVelocity();
     invalidateAngularVelocityCovariance();
+    invalidateAcceleration();
+    invalidateAccelerationCovariance();
+    invalidateAngularAcceleration();
+    invalidateAngularAccelerationCovariance();
 }
 
 void RigidBodyState::initUnknown()
@@ -89,6 +93,10 @@ void RigidBodyState::initUnknown()
     cov_orientation = setValueUnknown();
     cov_velocity = setValueUnknown();
     cov_angular_velocity = setValueUnknown();
+    acceleration.setZero();
+    angular_acceleration.setZero();
+    cov_acceleration = setValueUnknown();
+    cov_angular_acceleration = setValueUnknown();
 }
 
 bool RigidBodyState::isValidValue(const Vector3d& vec)
@@ -253,20 +261,74 @@ void RigidBodyState::invalidateAngularVelocityCovariance()
     cov_angular_velocity = invalidCovariance(); 
 }
 
-void RigidBodyState::invalidateValues(bool invPos, bool invOri, bool invVel, bool invAngVel)
+bool RigidBodyState::hasValidAcceleration() const
+{
+    return isValidValue(acceleration);
+}
+
+bool RigidBodyState::hasValidAcceleration(int idx) const
+{
+    return isValidValue(acceleration, idx);
+}
+
+bool RigidBodyState::hasValidAccelerationCovariance() const
+{
+    return isValidCovariance(cov_acceleration);
+}
+
+void RigidBodyState::invalidateAcceleration()
+{
+    acceleration = invalidValue();
+}
+
+void RigidBodyState::invalidateAccelerationCovariance()
+{
+    cov_acceleration = invalidCovariance();
+}
+
+bool RigidBodyState::hasValidAngularAcceleration() const
+{
+     return isValidValue(angular_acceleration);
+}
+
+bool RigidBodyState::RigidBodyState::hasValidAngularAcceleration(int idx) const
+{
+    return isValidValue(angular_acceleration, idx);
+}
+
+bool RigidBodyState::hasValidAngularAccelerationCovariance() const
+{
+    return isValidCovariance(cov_angular_acceleration);
+}
+
+void RigidBodyState::invalidateAngularAcceleration()
+{
+    angular_acceleration = invalidValue();
+}
+
+void RigidBodyState::invalidateAngularAccelerationCovariance()
+{
+    cov_angular_acceleration = invalidCovariance();
+}
+
+void RigidBodyState::invalidateValues(bool invPos, bool invOri, bool invVel, bool invAngVel, bool invAcc, bool invAngAcc)
 {
     if (invPos) invalidatePosition();
     if (invOri) invalidateOrientation();
     if (invVel) invalidateVelocity();
     if (invAngVel) invalidateAngularVelocity();
+    if (invAcc) invalidateAcceleration();
+    if (invAngAcc) invalidateAngularAcceleration();
 }
 
-void RigidBodyState::invalidateCovariances(bool invPos, bool invOri, bool invVel, bool invAngVel)
+void RigidBodyState::invalidateCovariances(bool invPos, bool invOri, bool invVel, bool invAngVel, bool invAcc, bool invAngAcc)
 {
     if (invPos) invalidatePositionCovariance();
     if (invOri) invalidateOrientationCovariance();
     if (invVel) invalidateVelocityCovariance();
     if (invAngVel) invalidateAngularVelocityCovariance();
+    if (invAcc) invalidateAccelerationCovariance();
+    if (invAngAcc) invalidateAngularAccelerationCovariance();
 }
 
 }} //end namespace base::samples

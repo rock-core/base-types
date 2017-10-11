@@ -11,7 +11,11 @@ Typelib.specialize_model '/base/samples/RigidBodyState_m' do
             :velocity => v3,
             :cov_velocity => m3,
             :angular_velocity => v3,
-            :cov_angular_velocity => m3)
+            :cov_angular_velocity => m3,
+            :acceleration => v3,
+            :cov_acceleration => m3,
+            :angular_acceleration => v3,
+            :cov_angular_acceleration => m3)
     end
 
     def Invalid; invalid end
