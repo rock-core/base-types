@@ -48,12 +48,12 @@ def test_time_operators():
 
     assert_true(t2 + t2 == t4)
     assert_true(t4 - t2 == t2)
-    assert_true(t4 / 2 == t2)
+    assert_true(t4 // 2 == t2)
     assert_true(t2 * 2 == t4)
 
     t5 = basetypes.Time()
     t5.microseconds = 10
-    t5 /= 2
+    t5 //= 2
     assert_equal(t5.microseconds, 5)
     t5 -= t2 * 4
     assert_equal(t5, t2)

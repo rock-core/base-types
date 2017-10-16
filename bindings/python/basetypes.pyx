@@ -162,9 +162,9 @@ cdef class Time:
         self.delete_thisptr = True
 
     def __str__(self):
-        return ("<time=%s>"
-                % self.thisptr.toString(_basetypes.Resolution.Microseconds,
-                                        "%Y%m%d-%H:%M:%S"))
+        cdef bytes text = self.thisptr.toString(
+            _basetypes.Resolution.Microseconds, "%Y%m%d-%H:%M:%S")
+        return str("<time=%s>" % text.decode())
 
     def assign(self, Time other):
         self.thisptr.assign(deref(other.thisptr))
@@ -222,12 +222,12 @@ cdef class Time:
         self.thisptr[0] = deref(self.thisptr) - deref(other.thisptr)
         return self
 
-    def __div__(Time self, int divider):
+    def __floordiv__(Time self, int divider):
         cdef Time time = Time()
         time.thisptr[0] = deref(self.thisptr) / divider
         return time
 
-    def __idiv__(Time self, int divider):
+    def __ifloordiv__(Time self, int divider):
         self.thisptr[0] = deref(self.thisptr) / divider
         return self
 
@@ -255,7 +255,7 @@ cdef class Vector2d:
         self.delete_thisptr = True
 
     def __str__(self):
-        return "[%.2f, %.2f]" % (self.thisptr.get(0), self.thisptr.get(1))
+        return str("[%.2f, %.2f]" % (self.thisptr.get(0), self.thisptr.get(1)))
 
     def assign(self, Vector2d other):
         self.thisptr.assign(deref(other.thisptr))
@@ -338,9 +338,9 @@ cdef class Vector3d:
         self.delete_thisptr = True
 
     def __str__(self):
-        return "[%.2f, %.2f, %.2f]" % (self.thisptr.get(0),
-                                       self.thisptr.get(1),
-                                       self.thisptr.get(2))
+        return str("[%.2f, %.2f, %.2f]" % (
+                   self.thisptr.get(0), self.thisptr.get(1),
+                   self.thisptr.get(2)))
 
     def assign(self, Vector3d other):
         self.thisptr.assign(deref(other.thisptr))
@@ -436,10 +436,10 @@ cdef class Vector4d:
         self.delete_thisptr = True
 
     def __str__(self):
-        return "[%.2f, %.2f, %.2f, %.2f]" % (
+        return str("[%.2f, %.2f, %.2f, %.2f]" % (
             self.thisptr.get(0), self.thisptr.get(1),
             self.thisptr.get(2), self.thisptr.get(3)
-        )
+        ))
 
     def assign(self, Vector4d other):
         self.thisptr.assign(deref(other.thisptr))
@@ -512,13 +512,13 @@ cdef class Matrix3d:
                     self.thisptr.data()[3 * j + i] = array[i, j]
 
     def __str__(self):
-        return ("[%.2f, %.2f, %.2f],"
-                "[%.2f, %.2f, %.2f],"
-                "[%.2f, %.2f, %.2f]") % (
+        return str("[%.2f, %.2f, %.2f],\n"
+                   "[%.2f, %.2f, %.2f],\n"
+                   "[%.2f, %.2f, %.2f]" % (
             self.thisptr.get(0, 0), self.thisptr.get(0, 1), self.thisptr.get(0, 2),
             self.thisptr.get(1, 0), self.thisptr.get(1, 1), self.thisptr.get(1, 2),
             self.thisptr.get(2, 0), self.thisptr.get(2, 1), self.thisptr.get(2, 2),
-        )
+        ))
 
     def assign(self, Matrix3d other):
         self.thisptr.assign(deref(other.thisptr))
@@ -601,9 +601,9 @@ cdef class Quaterniond:
         self.delete_thisptr = True
 
     def __str__(self):
-        return "[im=%.2f, real=(%.2f, %.2f, %.2f)]" % (
+        return str("[im=%.2f, real=(%.2f, %.2f, %.2f)]" % (
             self.thisptr.w(), self.thisptr.x(), self.thisptr.y(),
-            self.thisptr.z())
+            self.thisptr.z()))
 
     def assign(self, Quaterniond other):
         self.thisptr.assign(deref(other.thisptr))
@@ -634,8 +634,8 @@ cdef class TransformWithCovariance:
         self.delete_thisptr = True
 
     def __str__(self):
-        return "(translation=%s, orientation=%s)" % (self.translation,
-                                                     self.orientation)
+        return str("(translation=%s, orientation=%s)" % (self.translation,
+                                                         self.orientation))
 
     def assign(self, TransformWithCovariance other):
         self.thisptr.assign(deref(other.thisptr))
@@ -692,7 +692,7 @@ cdef class JointState:
             parts.append("raw=%g" % self.thisptr.raw)
         if self.thisptr.hasAcceleration():
             parts.append("acceleration=%g" % self.thisptr.acceleration)
-        return "JointState [%s]" % ", ".join(parts)
+        return str("JointState [%s]" % ", ".join(parts))
 
     def assign(self, JointState other):
         self.thisptr.assign(deref(other.thisptr))
@@ -817,9 +817,8 @@ cdef class Joints:
         assert self.thisptr.elements.size() == self.thisptr.names.size()
         cdef unsigned int i
         for i in range(self.thisptr.elements.size()):
-            parts.append("%s: %s" % (self.thisptr.names[i],
-                                     self.elements[i]))
-        return "Joints %s {%s}" % (self.time, ", ".join(parts))
+            parts.append("%s: %s" % (self.names[i], self.elements[i]))
+        return str("Joints %s {%s}" % (self.time, ", ".join(parts)))
 
     def assign(self, Joints other):
         self.thisptr.assign(deref(other.thisptr))
@@ -860,13 +859,15 @@ cdef class Joints:
         elements.thisptr = &self.thisptr.elements
         return elements
 
-    def __getitem__(self, string name):
+    def __getitem__(self, str name):
+        cdef string key = name.encode()
         cdef JointState joint_state = JointState()
-        joint_state.thisptr[0] = self.thisptr.getElementByName(name)
+        joint_state.thisptr[0] = self.thisptr.getElementByName(key)
         return joint_state
 
-    def __setitem__(self, string name, JointState joint_state):
-        cdef int i = self.thisptr.mapNameToIndex(name)
+    def __setitem__(self, str name, JointState joint_state):
+        cdef string key = name.encode()
+        cdef int i = self.thisptr.mapNameToIndex(key)
         self.thisptr.elements[i] = deref(joint_state.thisptr)
 
     # TODO factory methods
@@ -880,10 +881,11 @@ cdef class StringVectorReference:
         pass
 
     def __getitem__(self, int i):
-        return deref(self.thisptr)[i]
+        return deref(self.thisptr)[i].decode()
 
-    def __setitem__(self, int i, string s):
-        deref(self.thisptr)[i] = s
+    def __setitem__(self, int i, str s):
+        cdef string value = s.encode()
+        deref(self.thisptr)[i] = value
 
     def resize(self, int i):
         self.thisptr.resize(i)
@@ -931,7 +933,8 @@ cdef class RigidBodyState:
 
     def __str__(self):
         # TODO extend string representation?
-        return "RigidBodyState {%s, source_frame=%s, target_frame=%s, ...}" % (self.time, self.thisptr.sourceFrame, self.thisptr.targetFrame)
+        return str("RigidBodyState {%s, source_frame=%s, target_frame=%s, ...}"
+                   % (self.time, self.source_frame, self.target_frame))
 
     def assign(self, RigidBodyState other):
         self.thisptr.assign(deref(other.thisptr))
@@ -949,17 +952,19 @@ cdef class RigidBodyState:
     time = property(_get_time, _set_time)
 
     def _get_source_frame(self):
-        return self.thisptr.sourceFrame
+        return self.thisptr.sourceFrame.decode()
 
-    def _set_source_frame(self, string value):
+    def _set_source_frame(self, str source_frame):
+        cdef string value = source_frame.encode()
         self.thisptr.sourceFrame = value
 
     source_frame = property(_get_source_frame, _set_source_frame)
 
     def _get_target_frame(self):
-        return self.thisptr.targetFrame
+        return self.thisptr.targetFrame.decode()
 
-    def _set_target_frame(self, string value):
+    def _set_target_frame(self, str target_frame):
+        cdef string value = target_frame.encode()
         self.thisptr.targetFrame = value
 
     target_frame = property(_get_target_frame, _set_target_frame)
@@ -1281,18 +1286,28 @@ cdef class LaserScan:
         self.delete_thisptr = True
 
     def __str__(self):
-        ranges = []
         cdef unsigned int i
+
+        ranges = []
         for i in range(self.ranges.size()):
             ranges.append(self.ranges[i])
         if len(ranges) > 5:
             ranges = str(ranges[:5])[:-1] + ", ...]"
+        else:
+            ranges = str(ranges)
+
         remission = []
         for i in range(self.remission.size()):
             remission.append(self.remission[i])
         if len(remission) > 5:
             remission = str(remission[:5])[:-1] + ", ...]"
-        return "LaserScan {%s, min_range=%s, max_range=%s, ranges=%s, remission=%s}" % (self.time, self.thisptr.minRange, self.thisptr.maxRange, ranges, remission)
+        else:
+            remission = str(remission)
+
+        return str(
+            "LaserScan {%s, min_range=%s, max_range=%s, ranges=%s, remission=%s}"
+            % (self.time, str(self.thisptr.minRange),
+               str(self.thisptr.maxRange), ranges, remission))
 
     def assign(self, LaserScan other):
         self.thisptr.assign(deref(other.thisptr))
