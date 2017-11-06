@@ -15,6 +15,8 @@
 
 using namespace vizkit3d;
 
+const double DEFAULT_POINT_SIZE = 2.0;
+
 DepthMapVisualization::DepthMapVisualization() : 
     colorize_altitude(false), colorize_magnitude(false), colorize_interval(1.0), show_remission(false), show_slope(false)
 {
@@ -56,6 +58,9 @@ osg::ref_ptr<osg::Node> DepthMapVisualization::createMainNode()
     //setup slope geometry
     slope_geom = new osg::Geometry();
     slope_geom->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF); 
+    
+    setPointSize(DEFAULT_POINT_SIZE);
+    
     scan_node->addDrawable(slope_geom);
 
     return transformation_node;
@@ -149,6 +154,8 @@ void DepthMapVisualization::updateMainNode ( osg::Node* node )
 
     slope_geom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS,0,scan_vertices->size()));
 
+   
+    
     //draw slope geometry
     if(show_slope)
     {
@@ -267,6 +274,25 @@ QColor DepthMapVisualization::getDefaultFeatureColor()
     return color;
 }
 
+double DepthMapVisualization::getPointSize() const
+{
+    return pointSize;
+}
+
+void DepthMapVisualization::setPointSize(double value)
+{
+    if(value <= 0.0)
+        pointSize = 0.1;
+    else
+        pointSize = value;
+    
+    osg::ref_ptr<osg::Point> pt = new osg::Point(pointSize);
+    slope_geom->getOrCreateStateSet()->setAttribute(pt, osg::StateAttribute::ON);
+    
+    emit propertyChanged("pointSize");
+}
+
+
 void DepthMapVisualization::setDefaultFeatureColor(QColor color)
 {
     default_feature_color.x() = color.redF();
@@ -275,3 +301,6 @@ void DepthMapVisualization::setDefaultFeatureColor(QColor color)
     default_feature_color.w() = color.alphaF();
     emit propertyChanged("defaultFeatureColor");
 }
+
+
+

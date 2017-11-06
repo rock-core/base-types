@@ -19,6 +19,7 @@ namespace vizkit3d
     Q_PROPERTY(bool ColorizeAltitude READ isColorizeAltitudeEnabled WRITE setColorizeAltitude)
     Q_PROPERTY(bool ColorizeMagnitude READ isColorizeMagnitudeEnabled WRITE setColorizeMagnitude)
     Q_PROPERTY(double ColorizeInterval READ getColorizeInterval WRITE setColorizeInterval)
+    Q_PROPERTY(double pointSize READ getPointSize WRITE setPointSize)
     Q_PROPERTY(bool ShowRemission READ isShowRemissionEnabled WRITE setShowRemission)
     Q_PROPERTY(bool ShowSlope READ isShowSlopeEnabled WRITE setShowSlope)
     Q_PROPERTY(QColor defaultFeatureColor READ getDefaultFeatureColor WRITE setDefaultFeatureColor)
@@ -45,6 +46,8 @@ namespace vizkit3d
         bool isColorizeMagnitudeEnabled()const;
         void setColorizeInterval(double value);
         double getColorizeInterval()const;
+        double getPointSize() const;
+        void setPointSize(double value);
         void setShowRemission(bool value);
         bool isShowRemissionEnabled() const;
         void setShowSlope(bool value);
@@ -72,6 +75,7 @@ namespace vizkit3d
         bool show_remission;
         bool show_slope;
         osg::Vec4f default_feature_color;
+        double pointSize;
     };
 }
 #endif
