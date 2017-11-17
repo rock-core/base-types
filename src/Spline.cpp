@@ -1150,13 +1150,13 @@ SplineBase *SplineBase::getSubSpline(double start_t, double end_t) const
 void SplineBase::derive(unsigned int order, SplineBase& result) const
 {
     if (!SplineBase::getSISLCurve())
-        throw std::invalid_argument("cannot derive a singleton");
+        throw std::invalid_argument("base::geometry::SplineBase::derive(): cannot derive a singleton");
 
     SISLCurve* newCurve;
     int stat;
     s1720(const_cast<SISLCurve*>(getSISLCurve()), order, &newCurve, &stat);
     if (stat < 0)
-        throw std::runtime_error("failed to derive the curve");
+        throw std::runtime_error("base::geometry::SplineBase::derive(): failed to derive the curve");
 
     result.reset(newCurve);
 }
