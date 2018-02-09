@@ -221,6 +221,10 @@ namespace geometry {
 
         void setSingleton(double const* coordinates);
 
+        /** Returns the i-th derivative of this curve
+         */
+        void derive(unsigned int order, SplineBase& result) const;
+
     protected:
 	/**
 	 * This function checks weather param is smaler or bigger
@@ -372,7 +376,6 @@ namespace geometry {
          * */
         base::Vector3d poseError(base::Vector3d const& _position, double _heading, double _guess, double minParam)
         { return SplineBase::poseError(_position, _heading, _guess, minParam); }
-
     };
 
     template<int DIM> struct SplineBaseClass
@@ -429,6 +432,13 @@ namespace geometry {
             result.reserve(parameters.size());
             for (unsigned int i = 0; i < parameters.size(); ++i)
                 result.push_back(getPoint(parameters[i]));
+            return result;
+        }
+
+        Spline derive(int order) const
+        {
+            Spline result;
+            SplineBase::derive(order, result);
             return result;
         }
 
