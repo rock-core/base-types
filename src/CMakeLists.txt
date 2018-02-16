@@ -30,6 +30,7 @@ rock_library(
         samples/Sonar.cpp
         samples/SonarBeam.cpp
         samples/SonarScan.cpp
+        samples/PoseWithCovariance.cpp
     HEADERS
         Angle.hpp
         CircularBuffer.hpp
@@ -79,6 +80,7 @@ rock_library(
         samples/Sonar.hpp
         samples/SonarBeam.hpp
         samples/SonarScan.hpp
+        samples/PoseWithCovariance.hpp
         samples/Wrench.hpp
         samples/Wrenches.hpp
         templates/TimeStamped.hpp
