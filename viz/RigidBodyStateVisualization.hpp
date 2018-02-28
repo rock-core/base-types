@@ -16,7 +16,8 @@ namespace osgFX
 namespace vizkit3d 
 {
 
-class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBodyState>
+class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBodyState>,
+        public VizPluginAddType<std::vector <base::samples::RigidBodyState> >
 {
         Q_OBJECT
         Q_PROPERTY(double size READ getSize WRITE setSize)
@@ -27,22 +28,26 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         Q_PROPERTY(bool forcePositionDisplay READ isPositionDisplayForced WRITE setPositionDisplayForceFlag)
         Q_PROPERTY(bool forceOrientationDisplay READ isOrientationDisplayForced WRITE setOrientationDisplayForceFlag)
         Q_PROPERTY(QString modelPath READ getModelPath WRITE loadModel)
+        Q_PROPERTY(QString texturePath READ getTexture WRITE setTexture)
 
     public:
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-	RigidBodyStateVisualization(QObject* parent = NULL);
-	virtual ~RigidBodyStateVisualization();
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+        RigidBodyStateVisualization(QObject* parent = NULL);
+        virtual ~RigidBodyStateVisualization();
 
         Q_INVOKABLE void updateData( const base::samples::RigidBodyState& state )
         { return Vizkit3DPlugin<base::samples::RigidBodyState>::updateData(state); }
         Q_INVOKABLE void updateRigidBodyState( const base::samples::RigidBodyState& state )
         { return updateData(state); }
+        Q_INVOKABLE void updateData( const std::vector<base::samples::RigidBodyState>& states )
+        { return Vizkit3DPlugin<base::samples::RigidBodyState>::updateData(states); }
 
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
-	virtual void updateMainNode(osg::Node* node);
-	void updateDataIntern( const base::samples::RigidBodyState& state );
-        base::samples::RigidBodyState state;
+        virtual void updateMainNode(osg::Node* node);
+        void updateDataIntern( const base::samples::RigidBodyState& state );
+        void updateDataIntern( const std::vector<base::samples::RigidBodyState>& states );
+        std::vector<base::samples::RigidBodyState> states;
     
     public slots: 
         bool isPositionDisplayForced() const;
@@ -50,11 +55,8 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         bool isOrientationDisplayForced() const;
         void setOrientationDisplayForceFlag(bool flag);
 
-        double getSize() const;
-        void setSize(double size);
-
         void resetModel(double size);
-	void resetModelSphere(double size);
+        void resetModelSphere(double size);
 	
         QString getModelPath() const;
         void loadModel(std::string const& path);
@@ -73,6 +75,9 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
          * The default is 0.1
          */
         double getMainSphereSize() const;
+        
+        double getSize() const;
+        void setSize(double size);
 
         /** Sets the text size relative to the size of the complete object.
          * If text size is positive, the name of the source frame is rendered in the visualization.
@@ -94,12 +99,13 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
          * apply the new color
          */
         void setColor(base::Vector3d const& color);
-	
-	void setColor(const osg::Vec4d& color, osg::Geode* geode);
+        void setColor(const osg::Vec4d& color, osg::Geode* geode);
 	
         void setTexture(QString const& path);
         void setTexture(std::string const& path);
+        QString getTexture() const;     
         void clearTexture();
+        
         void addBumpMapping(
                 QString const& diffuse_color_map_path,
                 QString const& normal_map_path);
@@ -127,14 +133,11 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         { BODY_NONE, BODY_SIMPLE, BODY_SPHERE, BODY_CUSTOM_MODEL };
 
         BODY_TYPES body_type;
-	osg::ref_ptr<osg::Node>  body_model;
-        osg::ref_ptr<osg::Group> createSimpleBody(double size);
-	osg::ref_ptr<osg::Group> createSimpleSphere(double size);
+        osg::ref_ptr<osg::Node>  body_model;
 
         osg::ref_ptr<osg::Image> image;
         osg::ref_ptr<osg::Texture2D> texture;
         bool texture_dirty;
-        void updateTexture();
 
         osg::ref_ptr<osg::Image> diffuse_image;
         osg::ref_ptr<osg::Image> normal_image;
@@ -142,13 +145,18 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         osg::ref_ptr<osg::Texture2D> normal_texture;
         osg::ref_ptr<osgFX::BumpMapping> bump_mapping;
         bool bump_mapping_dirty;
-        void updateBumpMapping();
 
         bool forcePositionDisplay;
         bool forceOrientationDisplay;
         
         QString model_path;
-
+        std::string texture_path;
+        
+        osg::ref_ptr<osg::Group> createSimpleBody(double size);
+        osg::ref_ptr<osg::Group> createSimpleSphere(double size);
+        void updateTexture();
+        void updateBumpMapping();
+        QString createAbsolutePath(std::string const& path);
 };
 
 }
