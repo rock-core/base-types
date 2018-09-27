@@ -1,5 +1,18 @@
+
+find_package(SISL)
+
+set(sisl_hpp "")
+set(sisl_cpp "")
+
+if(SISL_FOUND)
+  set(sisl_hpp "Spline.hpp")
+  set(sisl_cpp "Spline.cpp")
+else()
+  message(WARNING "SISL not found. Compiling without spline support!")
+endif()
+
 rock_library(
-    base-types 
+    base-types
         Angle.cpp
         JointLimitRange.cpp
         JointLimits.cpp
@@ -8,7 +21,7 @@ rock_library(
         JointTransform.cpp
         Pose.cpp
         Pressure.cpp
-        Spline.cpp
+        ${sisl_cpp}
         Temperature.cpp
         Time.cpp
         TimeMark.cpp
@@ -48,10 +61,10 @@ rock_library(
         Point.hpp
         Pose.hpp
         Pressure.hpp
-        Singleton.hpp 
-        Spline.hpp
+        Singleton.hpp
         Temperature.hpp
         Time.hpp
+        ${sisl_hpp}
         TimeMark.hpp
         Timeout.hpp
         Trajectory.hpp
@@ -63,7 +76,7 @@ rock_library(
         commands/Motion2D.hpp
         commands/Speed6D.hpp
 	commands/LinearAngular6DCommand.hpp
-        logging/logging_iostream_style.h 
+        logging/logging_iostream_style.h
         logging/logging_printf_style.h
         samples/BodyState.hpp
         samples/CommandSamples.hpp
@@ -84,15 +97,15 @@ rock_library(
         samples/Wrench.hpp
         samples/Wrenches.hpp
         templates/TimeStamped.hpp
-    DEPS_CMAKE 
-        SISL
-    DEPS_PKGCONFIG 
+    DEPS_PKGCONFIG
         base-logging
         eigen3
 )
 
-install(FILES ${CMAKE_SOURCE_DIR}/src/Spline.hpp
-	DESTINATION include/base/geometry)
+if(SISL_FOUND)
+  install(FILES ${CMAKE_SOURCE_DIR}/src/Spline.hpp
+  	DESTINATION include/base/geometry)
+endif()
 
 configure_file(base-lib.pc.in ${CMAKE_BINARY_DIR}/base-lib.pc @ONLY)
 install(FILES ${CMAKE_BINARY_DIR}/base-lib.pc DESTINATION lib/pkgconfig)
