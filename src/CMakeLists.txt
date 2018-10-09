@@ -4,11 +4,14 @@ find_package(SISL)
 set(sisl_hpp "")
 set(sisl_cpp "")
 
+#compile without Spline and Trajectory if SISL is not found
 if(SISL_FOUND)
-  set(sisl_hpp "Spline.hpp")
-  set(sisl_cpp "Spline.cpp")
+  set(sisl_hpp Spline.hpp
+               Trajectory.hpp)
+  set(sisl_cpp Spline.cpp
+               Trajectory.cpp)
 else()
-  message(WARNING "SISL not found. Compiling without spline support!")
+  message(WARNING "SISL not found. Compiling without spline and trajectory support!")
 endif()
 
 rock_library(
@@ -26,7 +29,6 @@ rock_library(
         Time.cpp
         TimeMark.cpp
         Timeout.cpp
-        Trajectory.cpp
         TransformWithCovariance.cpp
         TwistWithCovariance.cpp
         Waypoint.cpp
@@ -67,7 +69,6 @@ rock_library(
         ${sisl_hpp}
         TimeMark.hpp
         Timeout.hpp
-        Trajectory.hpp
         TransformWithCovariance.hpp
         TwistWithCovariance.hpp
         Waypoint.hpp
