@@ -10,6 +10,7 @@ if(SISL_FOUND)
                Trajectory.hpp)
   set(sisl_cpp Spline.cpp
                Trajectory.cpp)
+  include_directories(${SISL_INCLUDE_DIRS})
 else()
   message(WARNING "SISL not found. Compiling without spline and trajectory support!")
 endif()
@@ -104,6 +105,8 @@ rock_library(
 )
 
 if(SISL_FOUND)
+  target_link_libraries(base-types ${SISL_LIBRARIES})
+  
   install(FILES ${CMAKE_SOURCE_DIR}/src/Spline.hpp
   	DESTINATION include/base/geometry)
 endif()
