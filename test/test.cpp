@@ -508,6 +508,17 @@ BOOST_AUTO_TEST_CASE(time_fromString)
 
 }
 
+BOOST_AUTO_TEST_CASE(time_toTimeValues)
+{
+    base::Time time = base::Time::fromMicroseconds(93784005006);
+    std::vector<int> timeValues = time.toTimeValues();
+
+    for (int i = 0; i < timeValues.size(); ++i)
+    {
+        BOOST_CHECK_EQUAL(timeValues.at(i), timeValues.size() - i);
+    }
+}
+
 BOOST_AUTO_TEST_CASE( laser_scan_test )
 {
     //configure laser scan
