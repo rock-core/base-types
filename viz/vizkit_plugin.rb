@@ -9,6 +9,7 @@ Vizkit::UiLoader.register_3d_plugin_for('TrajectoryVisualization', "/wrappers/ge
 Vizkit::UiLoader.register_3d_plugin_for('TrajectoryVisualization', "/std/vector</base/Trajectory>", :updateTr)
 Vizkit::UiLoader.register_3d_plugin('RigidBodyStateVisualization',"base", 'RigidBodyStateVisualization')
 Vizkit::UiLoader.register_3d_plugin_for('RigidBodyStateVisualization', "/base/samples/RigidBodyState", :updateRigidBodyState)
+Vizkit::UiLoader.register_3d_plugin_for('RigidBodyStateVisualization', "/base/TransformWithCovariance", :updateData)
 Vizkit::UiLoader.register_3d_plugin('BodyStateVisualization',"base", 'BodyStateVisualization')
 Vizkit::UiLoader.register_3d_plugin_for('BodyStateVisualization', "/base/samples/BodyState", :updateBodyState)
 Vizkit::UiLoader.register_3d_plugin('LaserScanVisualization',"base", 'LaserScanVisualization')
