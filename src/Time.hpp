@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <ostream>
 #include <stdint.h>
+#include <vector>
 
 namespace base
 {
@@ -42,6 +43,14 @@ namespace base
 
         /** Converts this time as a timeval object */
         timeval toTimeval() const;
+
+        /** Converts this time to a vector containing the number of
+         * microseconds, milliseconds, seconds, minutes, hours and days
+         * contained in that order.
+         * @example: for 86400000000 microseconds the vector contains:
+         * {0, 0, 0, 0, 0, 1}
+         */
+        std::vector<int> toTimeValues() const;
 
 	/** Convert time into a string
          * \param resolution Resolution which the string should present
