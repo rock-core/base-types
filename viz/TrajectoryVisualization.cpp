@@ -6,11 +6,11 @@ namespace vizkit3d
 {
 
 TrajectoryVisualization::TrajectoryVisualization()
-    : doClear(false), max_number_of_points(1800)
-    , line_width( 1.0 )
-    , color(1., 0., 0., 1.), backwardColor(1., 0., 1., 1.)
+    : doClear(false), max_number_of_points(1800), line_width( 1.0 ), 
+        color(1., 0., 0., 1.), backwardColor(1., 0., 1., 1.), max_velocity(0)
 {
     VizPluginRubyMethod(TrajectoryVisualization, base::Vector3d, setColor);
+    VizPluginRubyMethod(TrajectoryVisualization, double, setMaxVelocity);
 }
 
 TrajectoryVisualization::~TrajectoryVisualization()
@@ -45,6 +45,18 @@ void TrajectoryVisualization::setColor(const base::Vector3d& color)
     this->color = osg::Vec4(color.x(), color.y(), color.z(), 1.0);
     emit propertyChanged("Color");
     setDirty();
+}
+
+void TrajectoryVisualization::setMaxVelocity(double max_velocity)
+{
+    boost::mutex::scoped_lock lockit(this->updateMutex);
+    this->max_velocity = max_velocity;
+    setDirty();
+}
+
+double TrajectoryVisualization::getMaxVelocity()
+{
+    return max_velocity;
 }
 
 
@@ -87,16 +99,25 @@ void TrajectoryVisualization::addSpline(const base::geometry::Spline3& data,
     double stepSize = (spline.getEndParam() - spline.getStartParam()) / (spline.getCurveLength() / 0.05);
     for(double param = spline.getStartParam(); param <= spline.getEndParam(); param += stepSize )
     {
-        const Eigen::Vector3d splinePoint = spline.getPoint(param);
+        auto splinePoint = spline.getPointAndTangent(param);
         Point p;
-        p.point = osg::Vec3(splinePoint.x(), splinePoint.y(), splinePoint.z());
-        p.color = color;
+        p.point = osg::Vec3(splinePoint.first.x(), splinePoint.first.y(), 
+            splinePoint.first.z());
+        if(max_velocity > 0)
+        {
+            double color_multiplier = splinePoint.second.norm()/max_velocity;
+            osg::Vec4 gradient_color(color_multiplier, 1 - color_multiplier , 0 ,1);
+            p.color = gradient_color;
+        }
+        else
+            p.color = color;
         points.push_back(p);
     }
 
     while(points.size() > max_number_of_points)
         points.pop_front();
 }
+
 
 void TrajectoryVisualization::updateDataIntern(const base::geometry::Spline3& data)
 {

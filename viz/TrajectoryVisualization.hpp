@@ -19,13 +19,16 @@ class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>
     //unsigned int is not supported by the property browser so far
     Q_PROPERTY(int MaxPoints READ getMaxNumberOfPoints WRITE setMaxNumberOfPoints)
     Q_PROPERTY(double LineWidth READ getLineWidth WRITE setLineWidth)
+    Q_PROPERTY(double MaxVelocity READ getMaxVelocity WRITE setMaxVelocity)
     Q_PROPERTY(QColor Color READ getColor WRITE setColor)
     Q_PROPERTY(QColor BackwardColor READ getBackwardColor WRITE setBackwardColor)
 
     public:
         TrajectoryVisualization();
         ~TrajectoryVisualization();
-        void setColor(const base::Vector3d& color);
+        void setColor(const base::Vector3d& color); 
+        void setMaxVelocity(double max_velocity);
+        double getMaxVelocity();
         Q_INVOKABLE void clear();
 
         Q_INVOKABLE void updateTr(const std::vector<base::Trajectory>& data)
@@ -67,7 +70,8 @@ class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>
 
         osg::Vec4 color;
         osg::Vec4 backwardColor;
-
+        double max_velocity;
+        
         struct Point
         {
             osg::Vec3 point;
@@ -80,6 +84,8 @@ class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>
         osg::ref_ptr<osg::DrawArrays> drawArrays;
         osg::ref_ptr<osg::Geometry> geom;
         osg::ref_ptr<osg::LineWidth> lineWidth;
+        osg::ref_ptr<osg::Geode> geode;
+        
 };
 
 }
