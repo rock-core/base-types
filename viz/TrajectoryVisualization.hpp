@@ -2,12 +2,13 @@
 #define TRAJECTORYVISUALISATION_H
 #include <Eigen/Geometry>
 #include <osg/Geometry>
+#include <osg/LineWidth>
 #include <deque>
 #include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <base/geometry/Spline.hpp>
 #include <base/Trajectory.hpp>
 
-namespace vizkit3d 
+namespace vizkit3d
 {
 
 class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>
@@ -24,7 +25,7 @@ class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>
     public:
         TrajectoryVisualization();
         ~TrajectoryVisualization();
-        void setColor(const base::Vector3d& color); 
+        void setColor(const base::Vector3d& color);
         Q_INVOKABLE void clear();
 
         Q_INVOKABLE void updateTr(const std::vector<base::Trajectory>& data)
@@ -59,26 +60,26 @@ class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>
         virtual void updateDataIntern(const base::geometry::Spline3& data);
         virtual void updateDataIntern(const std::vector<base::Trajectory>& data);
 
-        private:
+    private:
         bool doClear;
-            size_t max_number_of_points;
+        size_t max_number_of_points;
         double line_width;
 
         osg::Vec4 color;
         osg::Vec4 backwardColor;
-        
+
         struct Point
         {
             osg::Vec3 point;
             osg::Vec4 color;
         };
-        
+
         std::deque<Point> points;
-        osg::ref_ptr<osg::Vec4Array> colorArray; 
+        osg::ref_ptr<osg::Vec4Array> colorArray;
         osg::ref_ptr<osg::Vec3Array> pointsOSG;
         osg::ref_ptr<osg::DrawArrays> drawArrays;
         osg::ref_ptr<osg::Geometry> geom;
-        osg::ref_ptr<osg::Geode> geode;
+        osg::ref_ptr<osg::LineWidth> lineWidth;
 };
 
 }
