@@ -57,7 +57,6 @@ void TrajectoryVisualization::updateMainNode( osg::Node* node )
 {
     osg::StateSet* stategeode = node->getOrCreateStateSet();
     stategeode->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
-
     lineWidth->setWidth(line_width);
     stategeode->setAttributeAndModes(lineWidth, osg::StateAttribute::ON);
 
