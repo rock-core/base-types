@@ -42,15 +42,17 @@ osg::ref_ptr<osg::Node> TrajectoryVisualization::createMainNode()
 
 void TrajectoryVisualization::setColor(const base::Vector3d& color)
 {
-    this->color = osg::Vec4(color.x(), color.y(), color.z(), 1.0);
+    { boost::mutex::scoped_lock lockit(this->updateMutex);
+        this->color = osg::Vec4(color.x(), color.y(), color.z(), 1.0); }
     emit propertyChanged("Color");
     setDirty();
 }
 
 void TrajectoryVisualization::setMaxVelocity(double max_velocity)
 {
-    boost::mutex::scoped_lock lockit(this->updateMutex);
-    this->max_velocity = max_velocity;
+    { boost::mutex::scoped_lock lockit(this->updateMutex);
+        this->max_velocity = max_velocity; }
+    emit propertyChanged("MaxVelocity");
     setDirty();
 }
 
@@ -69,6 +71,7 @@ void TrajectoryVisualization::updateMainNode( osg::Node* node )
 {
     osg::StateSet* stategeode = node->getOrCreateStateSet();
     stategeode->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
+
     lineWidth->setWidth(line_width);
     stategeode->setAttributeAndModes(lineWidth, osg::StateAttribute::ON);
 
@@ -93,7 +96,7 @@ void TrajectoryVisualization::addSpline(const base::geometry::Spline3& data,
     base::geometry::Spline3 spline = data;
 
     if(!data.getSISLCurve())
-	return;
+        return;
 
     //a point every 5 cm
     double stepSize = (spline.getEndParam() - spline.getStartParam()) / (spline.getCurveLength() / 0.05);
@@ -123,7 +126,6 @@ void TrajectoryVisualization::updateDataIntern(const base::geometry::Spline3& da
 {
     //delete old trajectory
     points.clear();
-
     addSpline(data, color);
 }
 
@@ -156,8 +158,8 @@ void TrajectoryVisualization::updateDataIntern( const base::Vector3d& data )
 
 void TrajectoryVisualization::setColor(QColor color)
 {
-    boost::mutex::scoped_lock lockit(this->updateMutex);
-    this->color = osg::Vec4(color.redF(), color.greenF(), color.blueF(), color.alphaF());
+    { boost::mutex::scoped_lock lockit(this->updateMutex);
+        this->color = osg::Vec4(color.redF(), color.greenF(), color.blueF(), color.alphaF()); }
     emit propertyChanged("Color");
     setDirty();
 }
@@ -171,8 +173,8 @@ QColor TrajectoryVisualization::getColor() const
 
 void TrajectoryVisualization::setBackwardColor(QColor c)
 {
-    boost::mutex::scoped_lock lockit(this->updateMutex);
-    backwardColor = osg::Vec4(c.redF(), c.greenF(), c.blueF(), c.alphaF() );
+    { boost::mutex::scoped_lock lockit(this->updateMutex);
+        backwardColor = osg::Vec4(c.redF(), c.greenF(), c.blueF(), c.alphaF() ); }
     emit propertyChanged("BackwardColor");
     setDirty();
 }
@@ -191,8 +193,8 @@ double TrajectoryVisualization::getLineWidth() const
 
 void TrajectoryVisualization::setLineWidth(double line_width)
 {
-    boost::mutex::scoped_lock lockit(this->updateMutex);
-    this->line_width = line_width;
+    { boost::mutex::scoped_lock lockit(this->updateMutex);
+        this->line_width = line_width; }
     emit propertyChanged("LineWidth");
     setDirty();
 }
