@@ -184,7 +184,7 @@ QColor TrajectoryVisualization::getBackwardColor() const
     return c;
 }
 
-double TrajectoryVisualization::getLineWidth()
+double TrajectoryVisualization::getLineWidth() const
 {
     return line_width;
 }
