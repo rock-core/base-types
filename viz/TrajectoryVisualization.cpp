@@ -1,15 +1,16 @@
 #include "TrajectoryVisualization.hpp"
 #include <osg/Geometry>
 #include <osg/Geode>
-#include <osg/LineWidth>
 
-namespace vizkit3d 
+namespace vizkit3d
 {
 
 TrajectoryVisualization::TrajectoryVisualization()
-    : doClear(false), max_number_of_points(1800), line_width( 1.0 ), color(1., 0., 0., 1.), backwardColor(1., 0., 1., 1.)
+    : doClear(false), max_number_of_points(1800), line_width( 1.0 ), 
+        color(1., 0., 0., 1.), backwardColor(1., 0., 1., 1.), max_velocity(0)
 {
     VizPluginRubyMethod(TrajectoryVisualization, base::Vector3d, setColor);
+    VizPluginRubyMethod(TrajectoryVisualization, double, setMaxVelocity);
 }
 
 TrajectoryVisualization::~TrajectoryVisualization()
@@ -25,24 +26,39 @@ osg::ref_ptr<osg::Node> TrajectoryVisualization::createMainNode()
     geom->setVertexArray(pointsOSG.get());
     drawArrays = new osg::DrawArrays( osg::PrimitiveSet::LINE_STRIP, 0, pointsOSG->size() );
     geom->addPrimitiveSet(drawArrays.get());
+    lineWidth = new osg::LineWidth;
 
     // Add the Geometry (Drawable) to a Geode and
-    //   return the Geode.
-    geode = new osg::Geode;
+    // return the Geode.
+    osg::Geode* geode = new osg::Geode;
     geode->addDrawable( geom.get() );
 
     osg::StateSet* stategeode = geode->getOrCreateStateSet();
     stategeode->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
-    
+
     return geode;
 }
 
 
 void TrajectoryVisualization::setColor(const base::Vector3d& color)
 {
-    this->color = osg::Vec4(color.x(), color.y(), color.z(), 1.0);
+    { boost::mutex::scoped_lock lockit(this->updateMutex);
+        this->color = osg::Vec4(color.x(), color.y(), color.z(), 1.0); }
     emit propertyChanged("Color");
     setDirty();
+}
+
+void TrajectoryVisualization::setMaxVelocity(double max_velocity)
+{
+    { boost::mutex::scoped_lock lockit(this->updateMutex);
+        this->max_velocity = max_velocity; }
+    emit propertyChanged("MaxVelocity");
+    setDirty();
+}
+
+double TrajectoryVisualization::getMaxVelocity()
+{
+    return max_velocity;
 }
 
 
@@ -52,11 +68,13 @@ void TrajectoryVisualization::clear()
 }
 
 void TrajectoryVisualization::updateMainNode( osg::Node* node )
-{   
-
-    osg::StateSet* stategeode = geode->getOrCreateStateSet();
+{
+    osg::StateSet* stategeode = node->getOrCreateStateSet();
     stategeode->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
-    
+
+    lineWidth->setWidth(line_width);
+    stategeode->setAttributeAndModes(lineWidth, osg::StateAttribute::ON);
+
     pointsOSG->clear();
     colorArray->clear();
     for(std::deque<Point>::iterator it = points.begin(); it != points.end(); it++)
@@ -64,7 +82,7 @@ void TrajectoryVisualization::updateMainNode( osg::Node* node )
         pointsOSG->push_back(it->point);
         colorArray->push_back(it->color);
     }
-    
+
     geom->setVertexArray(pointsOSG);
     drawArrays->setCount(pointsOSG->size());
     geom->setColorArray(colorArray);
@@ -75,19 +93,27 @@ void TrajectoryVisualization::addSpline(const base::geometry::Spline3& data,
                                         const osg::Vec4& color)
 {
     //needs a copy as getCurveLength is not const
-    base::geometry::Spline3 spline = data; 
-    
+    base::geometry::Spline3 spline = data;
+
     if(!data.getSISLCurve())
-	return;
-    
+        return;
+
     //a point every 5 cm
     double stepSize = (spline.getEndParam() - spline.getStartParam()) / (spline.getCurveLength() / 0.05);
     for(double param = spline.getStartParam(); param <= spline.getEndParam(); param += stepSize )
     {
-        const Eigen::Vector3d splinePoint = spline.getPoint(param);
+        auto splinePoint = spline.getPointAndTangent(param);
         Point p;
-        p.point = osg::Vec3(splinePoint.x(), splinePoint.y(), splinePoint.z());
-        p.color = color;
+        p.point = osg::Vec3(splinePoint.first.x(), splinePoint.first.y(), 
+            splinePoint.first.z());
+        if(max_velocity > 0)
+        {
+            double color_multiplier = splinePoint.second.norm()/max_velocity;
+            osg::Vec4 gradient_color(color_multiplier, 1 - color_multiplier , 0 ,1);
+            p.color = gradient_color;
+        }
+        else
+            p.color = color;
         points.push_back(p);
     }
 
@@ -95,11 +121,11 @@ void TrajectoryVisualization::addSpline(const base::geometry::Spline3& data,
         points.pop_front();
 }
 
+
 void TrajectoryVisualization::updateDataIntern(const base::geometry::Spline3& data)
 {
     //delete old trajectory
     points.clear();
-
     addSpline(data, color);
 }
 
@@ -132,7 +158,8 @@ void TrajectoryVisualization::updateDataIntern( const base::Vector3d& data )
 
 void TrajectoryVisualization::setColor(QColor color)
 {
-    this->color = osg::Vec4(color.redF(), color.greenF(), color.blueF(), color.alphaF());
+    { boost::mutex::scoped_lock lockit(this->updateMutex);
+        this->color = osg::Vec4(color.redF(), color.greenF(), color.blueF(), color.alphaF()); }
     emit propertyChanged("Color");
     setDirty();
 }
@@ -146,7 +173,8 @@ QColor TrajectoryVisualization::getColor() const
 
 void TrajectoryVisualization::setBackwardColor(QColor c)
 {
-    backwardColor = osg::Vec4(c.redF(), c.greenF(), c.blueF(), c.alphaF() );
+    { boost::mutex::scoped_lock lockit(this->updateMutex);
+        backwardColor = osg::Vec4(c.redF(), c.greenF(), c.blueF(), c.alphaF() ); }
     emit propertyChanged("BackwardColor");
     setDirty();
 }
@@ -158,22 +186,16 @@ QColor TrajectoryVisualization::getBackwardColor() const
     return c;
 }
 
-double TrajectoryVisualization::getLineWidth()
+double TrajectoryVisualization::getLineWidth() const
 {
     return line_width;
 }
 
 void TrajectoryVisualization::setLineWidth(double line_width)
 {
-    this->line_width = line_width;
-    if(geode)
-    {
-        osg::StateSet* stateset = geode->getOrCreateStateSet();
-        osg::LineWidth* linewidth = new osg::LineWidth();
-        linewidth->setWidth(line_width);
-        stateset->setAttributeAndModes(linewidth,osg::StateAttribute::ON);
-        stateset->setMode(GL_LIGHTING,osg::StateAttribute::OFF);
-    }
+    { boost::mutex::scoped_lock lockit(this->updateMutex);
+        this->line_width = line_width; }
     emit propertyChanged("LineWidth");
+    setDirty();
 }
 }
