@@ -10,6 +10,7 @@ rock_vizkit_plugin(base-viz
         WaypointVisualization.cpp 
         SonarGroundDistanceVisualization.cpp 
         SonarBeamVisualization.cpp
+        SonarVisualization.cpp
         PointcloudVisualization.cpp
         DepthMapVisualization.cpp
     HEADERS 
@@ -24,6 +25,7 @@ rock_vizkit_plugin(base-viz
         WaypointVisualization.hpp 
         SonarGroundDistanceVisualization.hpp 
         SonarBeamVisualization.hpp
+        SonarVisualization.hpp
         PointcloudVisualization.hpp
         DepthMapVisualization.hpp
     DEPS base-types
