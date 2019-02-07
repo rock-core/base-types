@@ -9,4 +9,9 @@ rock_executable(benchmark benchmark.cpp bench_func.cpp
     DEPS base-types
     DEPS_PKGCONFIG base-logging
     NOINSTALL)
+rock_executable(test_DepthMapVisualization test_DepthMapVisualization.cpp
+    DEPS base-types base-viz
+    DEPS_PKGCONFIG vizkit3d
+    LIBS ${Boost_SYSTEM_LIBRARY}
+    NOINSTALL)
 
