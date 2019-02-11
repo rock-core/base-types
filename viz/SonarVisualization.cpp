@@ -11,7 +11,6 @@ SonarVisualization::SonarVisualization():
     new_sonar_scan(false),
     full_scan(false)
 {
-    last_orientation.invalidate();
     data.resize(1);
 }
 
@@ -41,32 +40,44 @@ osg::ref_ptr< osg::Node > SonarVisualization::createMainNode()
  */
 void SonarVisualization::updateDataIntern(const base::samples::Sonar& data)
 {
-    if(motor_step == 0)
+    if(motor_step == 0 && data.beam_count == 1)
         return;
-    double current_pos = 0;
-    if(full_scan)
-        current_pos = ((data.bearings[0].rad+M_PI)/(2.0*M_PI))*num_steps;
-
-    SonarHelper bm;
-    bm.sonar_sample = data;
-    bm.orientation = last_orientation;
-    this->data[current_pos] = bm;
+    
     new_sonar_scan = true;
+    
+    int current_pos = 0;
+    if(data.beam_count > 1)
+    {
+        this->data[current_pos] = data;
+        return;
+    }
+    else
+    {
+        if(full_scan)
+        {
+            current_pos = std::round((data.bearings[0].rad + M_PI)/motor_step);
+        }
+
+        this->data[current_pos] = data;
+        new_sonar_scan = true;
+    }
 }
 
-void SonarVisualization::updateDataIntern(const base::samples::RigidBodyState& data)
+
+void SonarVisualization::clearVisualization()
 {
-    last_orientation = data;
+    data.clear();
 }
+
 
 void SonarVisualization::setMotorStep(double motor_step)
 {
+    if (motor_step == 0)
+        return; 
     { 
         boost::mutex::scoped_lock lockit(this->updateMutex);
-        if (motor_step == 0)
-            return; //Exception?
         this->motor_step = motor_step;
-        this->num_steps =  (2.0*M_PI)/motor_step;
+        this->num_steps =  std::round((2.0*M_PI)/motor_step);
         if(full_scan)
             this->data.resize(num_steps+1);
     }
@@ -79,26 +90,22 @@ double SonarVisualization::getMotorStep()
     return motor_step;
 }
 
-void SonarVisualization::setFullScan(bool full_scan)
+void SonarVisualization::showFullScan(bool full_scan)
 {
     { 
-        //boost::mutex::scoped_lock lockit(this->updateMutex);
+        boost::mutex::scoped_lock lockit(this->updateMutex);
         this->full_scan = full_scan; 
         data.clear();
         if(!full_scan)
         {
             data.resize(1);    
         }
-        else
+        else if(motor_step != 0)
         {
-            if(motor_step != 0)
-            {
-                this->data.resize(num_steps+1);
-            }
+            this->data.resize(num_steps+1);
         }
-        
     }
-    emit propertyChanged("Full Scan");
+    emit propertyChanged("FullScan");
     setDirty();
 }
 
@@ -109,38 +116,46 @@ bool SonarVisualization::isFullScan()
 
 void SonarVisualization::updateMainNode(osg::Node* node)
 {
-    if (new_sonar_scan)
+    if (!new_sonar_scan)
+        return;
+    new_sonar_scan = false;
+
+    //Cleaning up internal structures
+    pointsOSG->clear();
+    color->clear();
+
+    for(auto it = data.begin(); it != data.end(); it++)
     {
-        new_sonar_scan = false;
+        if(it->beam_count <= 0)
+            continue;
 
-        //Trivial check if we have data
-        if(data.size() == 0) return;
+        double fan_opening;
 
-        //Cleaning up internal structures
-        pointsOSG->clear();
-        color->clear();
+        if(it->beam_count > 1)
+            fan_opening = it->bearings[1].rad - it->bearings[0].rad;
+        else
+            fan_opening = motor_step;
 
-        for(auto it = data.begin(); it != data.end(); it++)
+        double bin_length = it->bin_duration.toSeconds() * it->speed_of_sound;
+        
+        for(int i = 0; i < it->beam_count; i++)
         {
-            if(it->sonar_sample.beam_count <= 0)
-                continue;
-            //Pre-initialize old heading to prevent artefacts
             osg::Quat lastBeamOrientation;
-            lastBeamOrientation.makeRotate(it->orientation.getYaw() + 
-                it->sonar_sample.bearings[0].rad - motor_step/2.0, osg::Vec3d(0,0,1));
+            lastBeamOrientation.makeRotate(it->bearings[i].rad - fan_opening/2.0, 
+                osg::Vec3d(0,0,1));
             
             osg::Quat currrentBeamOrientation;
-            currrentBeamOrientation.makeRotate(it->orientation.getYaw() + 
-                it->sonar_sample.bearings[0].rad + motor_step/2.0, osg::Vec3d(0,0,1));
+            currrentBeamOrientation.makeRotate(it->bearings[i].rad + fan_opening/2.0, 
+                osg::Vec3d(0,0,1));
             
-            for(size_t i =0; i < it->sonar_sample.bin_count; i++)
-            {
-                double bin_length = it->sonar_sample.bin_duration.toSeconds()*
-                    it->sonar_sample.getSpeedOfSoundInWater();
-                osg::Vec3d currentPoint(bin_length * i, 0,0);
-                osg::Vec3d nextPoint(bin_length * (i+1),0,0);
+            int fan_segment = it->bin_count/it->beam_count;
 
-                double v = it->sonar_sample.bins[i];
+            for(size_t j = i*fan_segment; j < (i+1)*fan_segment; j++)
+            {
+                osg::Vec3d currentPoint(bin_length * (j - i*fan_segment), 0,0);
+                osg::Vec3d nextPoint(bin_length * ((j+1) - i*fan_segment) ,0,0);
+
+                double v = it->bins[j];
                 if(v!= 0.0){
                     color->push_back(osg::Vec4f(v, 0, 0, 1.0));
                     color->push_back(osg::Vec4f(v, 0, 0, 1.0));
@@ -167,10 +182,11 @@ void SonarVisualization::updateMainNode(osg::Node* node)
                 pointsOSG->push_back(currrentBeamOrientation*nextPoint);
             }
         }
-        drawArrays->setCount(pointsOSG->size());
-        pointGeom->setVertexArray(pointsOSG);
-        pointGeom->setColorArray(color);
     }
+    drawArrays->setCount(pointsOSG->size());
+    pointGeom->setVertexArray(pointsOSG);
+    pointGeom->setColorArray(color);
+    
 }
 
 }
