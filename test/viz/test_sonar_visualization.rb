@@ -16,7 +16,7 @@ module Vizkit
         after do 
         end
 
-        def init_sonar_sample(beam_count, bin_count, step)
+        def init_sonar_sample(beam_count, bin_count, step, initial_bearing = 0)
             sonar = Types.base.samples.Sonar.new
             sonar.speed_of_sound = 1000
             sonar.beam_count = beam_count
@@ -26,7 +26,7 @@ module Vizkit
             beam_count.times do |i|
                 sonar.bins.concat(Array.new(bin_count, (i+1)*normalizer))
                 bearing =  Types.base.Angle.new
-                bearing.rad = i*step
+                bearing.rad = initial_bearing + i*step
                 sonar.bearings << bearing
             end
             sonar
@@ -101,10 +101,11 @@ module Vizkit
         end
         it "it shows a multibeam fan with zero bearing" do
             step = 0.03
-            sonar = init_sonar_sample(30, 100, step)
+            sonar = init_sonar_sample(30, 100, step, -30*step/2)
             @sonar_viz.setMotorStep(0.03)
             @sonar_viz.updateSonar(sonar)
-            confirm 'A multibeam sonar reading should appear, point in x (red) direction'
+            confirm "A multibeam sonar reading should appear, centered in x (red) direction." \
+            "The beam should have a gradient from black to red in the anticlockwise direction"
         end
     end
 end
