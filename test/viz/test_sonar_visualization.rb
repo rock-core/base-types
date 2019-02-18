@@ -21,6 +21,8 @@ module Vizkit
             sonar.speed_of_sound = 1000
             sonar.beam_count = beam_count
             sonar.bin_count = beam_count*bin_count
+            sonar.beam_width = Types.base.Angle.new
+            sonar.beam_width.rad = 0.05
             sonar.bin_duration = Time.at(10.0/(sonar.speed_of_sound*sonar.bin_count/beam_count))
             normalizer = 1.0/beam_count
             beam_count.times do |i|
@@ -35,7 +37,6 @@ module Vizkit
         it "it shows a single fan with zero bearing" do
             step = 0.03
             sonar = init_sonar_sample(1, 100, step)
-            @sonar_viz.setMotorStep(step)
             @sonar_viz.updateSonar(sonar)
             confirm 'A sonar reading should appear, point in x (red) direction'
         end
@@ -44,7 +45,6 @@ module Vizkit
             step = 0.03
             sonar = init_sonar_sample(1, 100, step)
             sonar.bearings[0].rad = 1.57
-            @sonar_viz.setMotorStep(step)
             @sonar_viz.updateSonar(sonar)
             confirm 'A sonar reading should appear, point in y (green) direction'
         end
@@ -52,7 +52,6 @@ module Vizkit
         it "it shows a single fan being updated" do
             step = 0.03
             sonar = init_sonar_sample(1, 100, step)
-            @sonar_viz.setMotorStep(step)
             @sonar_viz.updateSonar(sonar)
             confirm 'A sonar reading should appear, point in x (red) direction'
             sonar.bearings[0].rad = 1.57/2
@@ -67,7 +66,6 @@ module Vizkit
         it "it shows a full scan" do
             step = 0.03
             @sonar_viz.showFullScan(true)
-            @sonar_viz.setMotorStep(step)
             sonar = init_sonar_sample(1, 100, step)
             num_steps = (2.0*Math::PI)/step
             (0..num_steps).each do |i|
@@ -76,11 +74,41 @@ module Vizkit
             end
             confirm 'A a full scan is appearing'
         end
-        
+
+        it "it handles 2 scans with stable list size" do
+            step = 0.03
+            @sonar_viz.showFullScan(true)
+            sonar = init_sonar_sample(1, 100, step)
+            num_steps = (2.0*Math::PI)/step
+            (0..num_steps).each do |i|
+                sonar.bearings[0].rad = i*step - Math::PI
+                @sonar_viz.updateSonar(sonar)
+            end
+            (0..num_steps).each do |i|
+                sonar.bearings[0].rad = i*step - Math::PI
+                @sonar_viz.updateSonar(sonar)
+            end
+            confirm 'A a full scan is appearing'
+        end
+
+        it "it handles 2 scans in the opposite direction" do
+            step = 0.03
+            @sonar_viz.showFullScan(true)
+            sonar = init_sonar_sample(1, 100, step)
+            num_steps = (2.0*Math::PI)/step
+            (0..num_steps).each do |i|
+                sonar.bearings[0].rad = Math::PI - i*step
+                @sonar_viz.updateSonar(sonar)
+            end
+            (0..num_steps).each do |i|
+                sonar.bearings[0].rad = Math::PI - i*step
+                @sonar_viz.updateSonar(sonar)
+            end
+            confirm 'A a full scan is appearing (2 times)(opposite)'
+        end 
         it "it changes full scan mode" do
             step = 0.03
             @sonar_viz.showFullScan(true)
-            @sonar_viz.setMotorStep(step)
             sonar = init_sonar_sample(1, 100, step)
             num_steps = (2.0*Math::PI)/step
             (0..num_steps).each do |i|
@@ -102,7 +130,6 @@ module Vizkit
         it "it shows a multibeam fan with zero bearing" do
             step = 0.03
             sonar = init_sonar_sample(30, 100, step, -30*step/2)
-            @sonar_viz.setMotorStep(0.03)
             @sonar_viz.updateSonar(sonar)
             confirm "A multibeam sonar reading should appear, centered in x (red) direction." \
             "The beam should have a gradient from black to red in the anticlockwise direction"
