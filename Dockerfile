@@ -47,7 +47,7 @@ WORKDIR /home/docker/rock_test
 COPY --chown=docker test/ci/autoproj-config.yml seed-config.yml
 ENV AUTOPROJ_BOOTSTRAP_IGNORE_NONEMPTY_DIR 1
 RUN ruby /home/docker/autoproj_bootstrap git https://github.com/rock-core/buildconf.git branch=master --seed-config=seed-config.yml
-RUN sed -i "s#rock\.core#${PKG_NAME}#g" autoproj/manifest
+COPY --chown=docker test/ci/manifest autoproj/manifest
 RUN if [ "$PKG_PULL_REQUEST" = "false" ]; then \
         echo "Using branch: ${PKG_BRANCH}"; \
         echo "overrides:\n  - ${PKG_NAME}:\n    branch: ${PKG_BRANCH}" > autoproj/overrides.yml; \

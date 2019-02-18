@@ -19,5 +19,8 @@
     <depend package="rice" optional="1" />
     <depend package="external/sisl" optional="1" />
     <depend package="gui/vizkit3d" optional="1" />
+
+    <test_depend package="tools/orocos.rb" />
+    <test_depend package="base/orogen/types" />
     <tags>stable</tags>
 </package>
