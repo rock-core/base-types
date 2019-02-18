@@ -1,0 +1,15 @@
+GITHUB: http,ssh
+GITHUB_ROOT: https://github.com
+GITHUB_ROOT: https://github.com
+GITHUB_PUSH_ROOT: https://github.com
+GITHUB_PRIVATE_ROOT: https://github.com
+ROCK_SELECTED_FLAVOR: master
+ROCK_FLAVOR: master
+ROCK_BRANCH: master
+rtt_target: gnulinux
+rtt_corba_implementation: omniorb
+typelib_cxx_loader: castxml
+cxx11: true
+ldgold: true
+osdeps_mode: all
+USE_OCL: false

@@ -1,0 +1,18 @@
+    sudo: required
+    services:
+      - docker
+
+    matrix:
+        allow_failures:
+
+    cache: bundler
+
+    install:
+        - docker build -t rock/base-types .
+                --build-arg PKG_NAME="base/types"
+                --build-arg PKG_BRANCH="${TRAVIS_BRANCH}"
+                --build-arg PKG_PULL_REQUEST="${TRAVIS_PULL_REQUEST}"
+
+    # overwrite the default build command
+    script:
+        - docker run rock/base-types /bin/bash -c "source /home/docker/rock_test/env.sh; CTEST_OUTPUT_ON_FAILURE=1 make -C base/types/build test"
