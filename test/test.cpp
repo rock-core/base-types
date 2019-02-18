@@ -480,6 +480,9 @@ BOOST_AUTO_TEST_CASE(time_fromString)
     BOOST_REQUIRE_MESSAGE(tzOrig == tzConverted, "winter time: " << tzOrig.toString() << " vs. converted: " << tzConverted.toString());
     // End time zone check
 
+    std::string tz = "TZ=Europe/Berlin";
+    putenv(const_cast<char*>(tz.data()));
+
     base::Time formatNow = base::Time::fromString("2012-06-14--12.05.06Z:001001", base::Time::Microseconds,"%Y-%m-%d--%H.%M.%S%Z");
     BOOST_REQUIRE_EQUAL(formatNow.toMicroseconds(),1339668306001001);
 
