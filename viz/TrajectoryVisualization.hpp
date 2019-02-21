@@ -64,7 +64,6 @@ class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>
         virtual void updateDataIntern(const std::vector<base::Trajectory>& data);
 
     private:
-        bool doClear;
         size_t max_number_of_points;
         double line_width;
 

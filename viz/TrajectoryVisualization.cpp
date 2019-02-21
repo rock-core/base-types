@@ -6,7 +6,7 @@ namespace vizkit3d
 {
 
 TrajectoryVisualization::TrajectoryVisualization()
-    : doClear(false), max_number_of_points(1800), line_width( 1.0 ), 
+    : max_number_of_points(1800), line_width( 1.0 ), 
         color(1., 0., 0., 1.), backwardColor(1., 0., 1., 1.), max_velocity(0)
 {
     VizPluginRubyMethod(TrajectoryVisualization, base::Vector3d, setColor);
@@ -19,7 +19,6 @@ TrajectoryVisualization::~TrajectoryVisualization()
 
 osg::ref_ptr<osg::Node> TrajectoryVisualization::createMainNode()
 {
-    doClear = false;
     colorArray = new osg::Vec4Array;
     geom = new osg::Geometry;
     pointsOSG = new osg::Vec3Array;
@@ -64,7 +63,9 @@ double TrajectoryVisualization::getMaxVelocity()
 
 void TrajectoryVisualization::clear()
 {
-    doClear = true;
+    boost::mutex::scoped_lock lock(updateMutex);
+    points.clear();
+    setDirty();
 }
 
 void TrajectoryVisualization::updateMainNode( osg::Node* node )
@@ -143,11 +144,6 @@ void TrajectoryVisualization::updateDataIntern(const std::vector<base::Trajector
 
 void TrajectoryVisualization::updateDataIntern( const base::Vector3d& data )
 {
-    if(doClear)
-    {
-        points.clear();
-        doClear = false;
-    }
     Point p;
     p.point = osg::Vec3(data.x(), data.y(), data.z());
     p.color = color;
