@@ -22,34 +22,24 @@ namespace vizkit3d
 class SonarVisualization : public vizkit3d::Vizkit3DPlugin< base::samples::Sonar >
 {    
     Q_OBJECT
-    Q_PROPERTY(bool FullScan READ isFullScan WRITE showFullScan)
     
     public:
         SonarVisualization();
     
         Q_INVOKABLE void updateSonar( const base::samples::Sonar& sample )
         { return updateData(sample); }
-        Q_INVOKABLE void updateOrientation( const base::samples::RigidBodyState& orientation )
-        { return updateData(orientation); }
     
     public slots:
-        void showFullScan(bool full_scan);
-        bool isFullScan();
-        void clearVisualization();
         
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
         virtual void updateMainNode( osg::Node* node );
         void updateDataIntern ( const base::samples::Sonar& data );
-        void setFanOpening(double beam_width);
-        double angleDifference(double a,double b);
  
     private:
 
-        double fan_opening;
         bool new_sonar_scan;
-        bool full_scan;
-        std::list<base::samples::Sonar> data;
+        base::samples::Sonar last_sonar;
 
         osg::ref_ptr<osg::Vec3Array> pointsOSG;
         osg::ref_ptr<osg::DrawArrays> drawArrays;
