@@ -8,6 +8,7 @@
 #include "SonarGroundDistanceVisualization.hpp"
 #include "PointcloudVisualization.hpp"
 #include "SonarBeamVisualization.hpp"
+#include "SonarVisualization.hpp"
 #include "DepthMapVisualization.hpp"
 #include "DistanceImageVisualization.hpp"
 
@@ -35,6 +36,7 @@ namespace vizkit3d {
 	    pluginNames->push_back("SonarGroundDistanceVisualization");
 	    pluginNames->push_back("PointcloudVisualization");
 	    pluginNames->push_back("SonarBeamVisualization");
+	    pluginNames->push_back("SonarVisualization");
 	    pluginNames->push_back("DepthMapVisualization");
 	    pluginNames->push_back("DistanceImageVisualization");
 	    return pluginNames;
@@ -78,6 +80,10 @@ namespace vizkit3d {
 	    else if (pluginName == "SonarBeamVisualization")
 	    {
 	        plugin = new vizkit3d::SonarBeamVisualization();
+	    }
+	    else if (pluginName == "SonarVisualization")
+	    {
+		    plugin = new vizkit3d::SonarVisualization();
 	    }
 	    else if (pluginName == "DepthMapVisualization")
 	    {
