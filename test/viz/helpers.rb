@@ -51,7 +51,7 @@ module Vizkit
         end
 
         def run_confirmation_dialog(text, no_btn_visible: true)
-            @text_field.text = text
+            @text_field.text = "In #{self.class.name}::#{self.name}:\n#{text}"
             @confirm_result = nil
             if no_btn_visible
                 @no_btn.show

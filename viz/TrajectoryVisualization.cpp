@@ -6,7 +6,7 @@ namespace vizkit3d
 {
 
 TrajectoryVisualization::TrajectoryVisualization()
-    : doClear(false), max_number_of_points(1800), line_width( 1.0 ), 
+    : max_number_of_points(1800), line_width( 1.0 ),
         color(1., 0., 0., 1.), backwardColor(1., 0., 1., 1.), max_velocity(0)
 {
     VizPluginRubyMethod(TrajectoryVisualization, base::Vector3d, setColor);
@@ -19,7 +19,6 @@ TrajectoryVisualization::~TrajectoryVisualization()
 
 osg::ref_ptr<osg::Node> TrajectoryVisualization::createMainNode()
 {
-    doClear = false;
     colorArray = new osg::Vec4Array;
     geom = new osg::Geometry;
     pointsOSG = new osg::Vec3Array;
@@ -64,7 +63,9 @@ double TrajectoryVisualization::getMaxVelocity()
 
 void TrajectoryVisualization::clear()
 {
-    doClear = true;
+    boost::mutex::scoped_lock lock(updateMutex);
+    points.clear();
+    setDirty();
 }
 
 void TrajectoryVisualization::updateMainNode( osg::Node* node )
@@ -77,7 +78,7 @@ void TrajectoryVisualization::updateMainNode( osg::Node* node )
 
     pointsOSG->clear();
     colorArray->clear();
-    for(std::deque<Point>::iterator it = points.begin(); it != points.end(); it++)
+    for(auto it = points.begin(); it != points.end(); it++)
     {
         pointsOSG->push_back(it->point);
         colorArray->push_back(it->color);
@@ -89,23 +90,52 @@ void TrajectoryVisualization::updateMainNode( osg::Node* node )
     geom->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
 }
 
+
 void TrajectoryVisualization::addSpline(const base::geometry::Spline3& data,
-                                        const osg::Vec4& color)
+        double stepSize, bool showAll)
 {
-    //needs a copy as getCurveLength is not const
-    base::geometry::Spline3 spline = data;
+    addSpline(data, color, stepSize, showAll);
+}
 
-    if(!data.getSISLCurve())
-        return;
+void TrajectoryVisualization::addSpline(const base::geometry::Spline3& data,
+        const osg::Vec4& color, double stepSize, bool showAll)
+{
+    auto newPoints = convertSpline(data, color, stepSize);
 
-    //a point every 5 cm
-    double stepSize = (spline.getEndParam() - spline.getStartParam()) / (spline.getCurveLength() / 0.05);
+    boost::mutex::scoped_lock lock(updateMutex);
+    points.insert(points.end(), newPoints.begin(), newPoints.end());
+    if (!showAll)
+        enforceMaxPoints();
+    setDirty();
+}
+
+std::vector<TrajectoryVisualization::Point> TrajectoryVisualization::convertSpline(
+    const base::geometry::Spline3& spline, const osg::Vec4& color, double stepSize) const
+{
+    std::vector<Point> points;
+    if (!spline.getSISLCurve())
+        return points;
+
+    if (!stepSize)
+    {
+        // needs a copy as getCurveLength is not const
+        base::geometry::Spline3 temp = spline;
+        stepSize = (temp.getEndParam() - temp.getStartParam()) / (temp.getCurveLength() / 0.05);
+    }
+
+    int size = std::floor((spline.getEndParam() - spline.getStartParam()) / stepSize);
+    points.reserve(size);
+
     for(double param = spline.getStartParam(); param <= spline.getEndParam(); param += stepSize )
     {
         auto splinePoint = spline.getPointAndTangent(param);
+
         Point p;
-        p.point = osg::Vec3(splinePoint.first.x(), splinePoint.first.y(), 
+        p.point = osg::Vec3(
+            splinePoint.first.x(),
+            splinePoint.first.y(),
             splinePoint.first.z());
+
         if(max_velocity > 0)
         {
             double color_multiplier = splinePoint.second.norm()/max_velocity;
@@ -114,19 +144,26 @@ void TrajectoryVisualization::addSpline(const base::geometry::Spline3& data,
         }
         else
             p.color = color;
+
         points.push_back(p);
     }
-
-    while(points.size() > max_number_of_points)
-        points.pop_front();
+    return points;
 }
 
+void TrajectoryVisualization::enforceMaxPoints()
+{
+    if (max_number_of_points)
+    {
+        int diff = points.size() - max_number_of_points;
+        if (diff > 0)
+            points.erase(points.begin(), points.begin() + diff);
+    }
+}
 
 void TrajectoryVisualization::updateDataIntern(const base::geometry::Spline3& data)
 {
-    //delete old trajectory
-    points.clear();
-    addSpline(data, color);
+    points = convertSpline(data, color, 0);
+    enforceMaxPoints();
 }
 
 void TrajectoryVisualization::updateDataIntern(const std::vector<base::Trajectory>& data)
@@ -134,26 +171,23 @@ void TrajectoryVisualization::updateDataIntern(const std::vector<base::Trajector
     //delete old trajectory
     points.clear();
 
-    for(std::vector<base::Trajectory>::const_iterator it = data.begin(); it != data.end(); it++)
+    for(auto it = data.begin(); it != data.end(); it++)
     {
-        addSpline(it->spline, it->speed >= 0? color : backwardColor);
+        auto newPoints = convertSpline(
+            it->spline, it->speed >= 0? color : backwardColor, 0);
+        points.insert(points.end(), newPoints.begin(), newPoints.end());
     }
+    enforceMaxPoints();
 }
 
 
 void TrajectoryVisualization::updateDataIntern( const base::Vector3d& data )
 {
-    if(doClear)
-    {
-        points.clear();
-        doClear = false;
-    }
     Point p;
     p.point = osg::Vec3(data.x(), data.y(), data.z());
     p.color = color;
     points.push_back(p);
-    while(points.size() > max_number_of_points)
-        points.pop_front();
+    enforceMaxPoints();
 }
 
 void TrajectoryVisualization::setColor(QColor color)

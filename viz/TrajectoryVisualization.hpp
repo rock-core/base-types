@@ -23,10 +23,16 @@ class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>
     Q_PROPERTY(QColor Color READ getColor WRITE setColor)
     Q_PROPERTY(QColor BackwardColor READ getBackwardColor WRITE setBackwardColor)
 
+    struct Point
+    {
+        osg::Vec3 point;
+        osg::Vec4 color;
+    };
+
     public:
         TrajectoryVisualization();
         ~TrajectoryVisualization();
-        void setColor(const base::Vector3d& color); 
+        void setColor(const base::Vector3d& color);
         void setMaxVelocity(double max_velocity);
         double getMaxVelocity();
         Q_INVOKABLE void clear();
@@ -55,8 +61,19 @@ class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>
         void setBackwardColor(QColor color);
         QColor getBackwardColor() const;
 
+        void addSpline(const base::geometry::Spline3& data,
+            double stepSize = 0, bool showAll = true);
+
+        void addSpline(const base::geometry::Spline3& data,
+            const osg::Vec4& color,
+            double stepSize = 0, bool showAll = true);
+
     protected:
-        void addSpline(const base::geometry::Spline3& data, const osg::Vec4& color);
+        void enforceMaxPoints();
+        std::vector<Point> convertSpline(const base::geometry::Spline3& data,
+            const osg::Vec4& color, double stepSize) const;
+        void addSplineIntern(const base::geometry::Spline3& data,
+            const osg::Vec4& color, double stepSize);
         virtual osg::ref_ptr<osg::Node> createMainNode();
         virtual void updateMainNode( osg::Node* node );
         virtual void updateDataIntern( const  base::Vector3d& data );
@@ -64,28 +81,21 @@ class TrajectoryVisualization: public Vizkit3DPlugin<base::Vector3d>
         virtual void updateDataIntern(const std::vector<base::Trajectory>& data);
 
     private:
-        bool doClear;
         size_t max_number_of_points;
         double line_width;
 
         osg::Vec4 color;
         osg::Vec4 backwardColor;
         double max_velocity;
-        
-        struct Point
-        {
-            osg::Vec3 point;
-            osg::Vec4 color;
-        };
 
-        std::deque<Point> points;
+        std::vector<Point> points;
         osg::ref_ptr<osg::Vec4Array> colorArray;
         osg::ref_ptr<osg::Vec3Array> pointsOSG;
         osg::ref_ptr<osg::DrawArrays> drawArrays;
         osg::ref_ptr<osg::Geometry> geom;
         osg::ref_ptr<osg::LineWidth> lineWidth;
         osg::ref_ptr<osg::Geode> geode;
-        
+
 };
 
 }
