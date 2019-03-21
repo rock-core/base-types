@@ -32,5 +32,4 @@ if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/test)
     endif()
 endif()
 
-rock_find_qt4()
 rock_standard_layout()
