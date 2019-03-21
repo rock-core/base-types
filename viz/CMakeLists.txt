@@ -1,3 +1,4 @@
+rock_find_qt4()
 rock_vizkit_plugin(base-viz
     PluginLoader.cpp Uncertainty.cpp Vizkit3DHelper.cpp
     MOC 
