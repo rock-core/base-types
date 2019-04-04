@@ -259,16 +259,21 @@ bool SplineBase::isNURBS() const
     return curve->ikind == 2 || curve->ikind == 4;
 }
 
-void SplineBase::interpolate(const vector< double >& points, 
-                             vector< double >& parametersOut, 
-                             const vector< double >& parametersIn, 
+void SplineBase::interpolate(const vector< double >& points,
+                             vector< double >& parametersOut,
+                             const vector< double >& parametersIn,
                              const vector< SplineBase::CoordinateType >& coord_types)
 {
     clear();
     start_param = 0.0;
     has_curvature_max = false;
 
-    int const point_count = points.size() / dimension;
+    unsigned int const point_count = points.size() / dimension;
+    if (!parametersIn.empty() && parametersIn.size() != point_count) {
+        throw std::invalid_argument(
+            "expected " + to_string(point_count) + " parameters, " +
+            "but got " + to_string(parametersIn.size()));
+    }
     if (point_count == 0)
     {
         end_param = 0;
@@ -277,7 +282,11 @@ void SplineBase::interpolate(const vector< double >& points,
     }
     else if (point_count == 1)
     {
-        end_param = 0;
+        if (parametersIn.empty())
+            end_param = 0;
+        else
+            start_param = end_param = parametersIn[0];
+
         singleton = points;
         return;
     }
@@ -337,6 +346,7 @@ void SplineBase::interpolate(const vector< double >& points,
         throw std::runtime_error("cannot create a spline interpolating the required points" + str.str());
     }
 
+    s1363(curve, &start_param, &end_param, &status);
     parametersOut.clear();
     for(int i = 0; i < nb_unique_param; i++)
     {
