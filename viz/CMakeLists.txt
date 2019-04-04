@@ -1,4 +1,13 @@
 rock_find_qt4()
+if(SISL_FOUND)
+    list(APPEND OPTIONAL_HPP
+        TrajectoryVisualization.hpp
+    )
+    list(APPEND OPTIONAL_CPP
+        TrajectoryVisualization.cpp
+    )
+endif()
+
 rock_vizkit_plugin(base-viz
     PluginLoader.cpp Uncertainty.cpp Vizkit3DHelper.cpp
     MOC 
@@ -7,13 +16,13 @@ rock_vizkit_plugin(base-viz
         MotionCommandVisualization.cpp 
         RigidBodyStateVisualization.cpp 
         BodyStateVisualization.cpp 
-        TrajectoryVisualization.cpp 
         WaypointVisualization.cpp 
         SonarGroundDistanceVisualization.cpp 
         SonarBeamVisualization.cpp
         SonarVisualization.cpp
         PointcloudVisualization.cpp
         DepthMapVisualization.cpp
+        ${OPTIONAL_CPP}
     HEADERS 
         Uncertainty.hpp 
         Vizkit3DHelper.hpp 
@@ -22,13 +31,13 @@ rock_vizkit_plugin(base-viz
         MotionCommandVisualization.hpp 
         RigidBodyStateVisualization.hpp 
         BodyStateVisualization.hpp 
-        TrajectoryVisualization.hpp 
         WaypointVisualization.hpp 
         SonarGroundDistanceVisualization.hpp 
         SonarBeamVisualization.hpp
         SonarVisualization.hpp
         PointcloudVisualization.hpp
         DepthMapVisualization.hpp
+        ${OPTIONAL_HPP}
     DEPS base-types
     LIBS ${Boost_SYSTEM_LIBRARY}
     DEPS_PKGCONFIG base-logging

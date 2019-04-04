@@ -32,4 +32,15 @@ if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/test)
     endif()
 endif()
 
+# SISL as optional dependency
+option(USE_SISL "set to OFF to disable the usage of SISL." ON)
+if(USE_SISL)
+    rock_find_cmake(SISL)
+    if(NOT SISL_FOUND)
+        message(FATAL_ERROR "The usage of SISL is requested, but the library could not be found."
+            " Either make sure SISL is installed, or disable the usage via"
+            " -DUSE_SISL=OFF")
+    endif(NOT SISL_FOUND)
+endif()
+
 rock_standard_layout()
