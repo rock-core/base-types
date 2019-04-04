@@ -53,7 +53,7 @@ SplineBase::SplineBase(double geometric_resolution, SISLCurve* curve)
 
 SplineBase::~SplineBase ()
 {
-    // Frees the memory of the curve 
+    // Frees the memory of the curve
     if (curve)
         freeCurve(curve);
 }
@@ -106,11 +106,11 @@ bool SplineBase::checkAndNormalizeParam(double& _param, double equalDistance) co
 {
     if(_param < start_param && start_param - _param < equalDistance)
 	_param = start_param;
-    
+
     if(_param > end_param && _param - end_param < equalDistance)
 	_param = end_param;
-    
-    if (_param < start_param || _param > end_param) 
+
+    if (_param < start_param || _param > end_param)
     {
 	return false;
     }
@@ -119,7 +119,7 @@ bool SplineBase::checkAndNormalizeParam(double& _param, double equalDistance) co
 
 void SplineBase::getPointAndTangentHelper(double* result, double _param, bool with_tangent) const
 {
-    if(!checkAndNormalizeParam(_param)) 
+    if(!checkAndNormalizeParam(_param))
     {
         string msg = "_param=" + lexical_cast<string>(_param) + " is not in the accepted range [" + lexical_cast<string>(start_param) + ", " + lexical_cast<string>(end_param) + "]";
         throw std::out_of_range(msg);
@@ -153,14 +153,14 @@ void SplineBase::getPointAndTangentHelper(double* result, double _param, bool wi
 double SplineBase::getCurvature(double _param) const
 {
     // Limits the input paramter to the curve limit
-    if(!checkAndNormalizeParam(_param)) 
+    if(!checkAndNormalizeParam(_param))
         throw std::out_of_range("_param is not in the [start_param, end_param] range");
     else if (!singleton.empty())
         throw std::runtime_error("getCurvature() called on a singleton");
     else if (!curve)
         throw std::runtime_error("getCurvature() called on an empty curve");
 
-    double curvature; 
+    double curvature;
     int status;
     s2550(curve, &_param, 1, &curvature, &status); // Gets the point
     if (status != 0)
@@ -171,14 +171,14 @@ double SplineBase::getCurvature(double _param) const
 
 double SplineBase::getVariationOfCurvature(double _param)  // Variation of Curvature
 {
-    if(!checkAndNormalizeParam(_param)) 
+    if(!checkAndNormalizeParam(_param))
         throw std::out_of_range("_param is not in the [start_param, end_param] range");
     else if (!singleton.empty())
         throw std::runtime_error("getVariationOfCurvature() called on a singleton");
     else if (!curve)
         throw std::runtime_error("getVariationOfCurvature() called on an empty curve");
 
-    double VoC; 
+    double VoC;
     int status;
     s2556(curve, &_param, 1, &VoC, &status); // Gets the point
     if (status != 0)
@@ -199,7 +199,7 @@ double SplineBase::getCurveLength(double relative_resolution) const
     s1240(curve, relative_resolution, &length, &status);
     if (status != 0)
         throw std::runtime_error("cannot get the curve length");
-    
+
     return length;
 }
 
@@ -214,11 +214,11 @@ double SplineBase::getCurveLength(double startParam, double endParam, double rel
     {
         return 0;
     }
-    
+
     SplineBase *subspline = getSubSpline(startParam, endParam);
     if(!subspline)
         throw std::runtime_error(std::string("Could not get Subpline for parameters ") + boost::lexical_cast<std::string>(startParam) + " / " + boost::lexical_cast<std::string>(endParam));
-    
+
     double ret = subspline->getCurveLength(relative_resolution);
     delete subspline;
     return ret;
@@ -238,7 +238,7 @@ double SplineBase::getCurvatureMax()
     double unitParam = 0;
     if(start_param != end_param)
         unitParam = (end_param - start_param) / getCurveLength();
-    
+
     double const delPara = unitParam * geometric_resolution;
     curvature_max = 0.0;
 
@@ -308,21 +308,21 @@ void SplineBase::interpolate(const vector< double >& points,
     }
 
     // Generates curve
-    double* point_param;  
+    double* point_param;
     int nb_unique_param;
 
     int status;
     if (parametersIn.empty())
     {
         s1356(const_cast<double*>(&points[0]), point_types.size(), dimension, &point_types[0],
-                0, 0, 1, curve_order, start_param, &end_param, &curve, 
+                0, 0, 1, curve_order, start_param, &end_param, &curve,
                 &point_param, &nb_unique_param, &status);
     }
     else
     {
         s1357(const_cast<double*>(&points[0]), point_types.size(), dimension, &point_types[0],
-                const_cast<double*>(&parametersIn[0]), 
-                0, 0, 1, curve_order, start_param, &end_param, &curve, 
+                const_cast<double*>(&parametersIn[0]),
+                0, 0, 1, curve_order, start_param, &end_param, &curve,
                 &point_param, &nb_unique_param, &status);
     }
     if (status != 0)
@@ -352,14 +352,14 @@ void SplineBase::interpolate(const vector< double >& points,
     {
         parametersOut.push_back(point_param[i]);
     }
-    
+
     free(point_param);
 
 }
 
 
-void SplineBase::interpolate(std::vector<double> const& points, 
-	std::vector<double> const& parameters, 
+void SplineBase::interpolate(std::vector<double> const& points,
+	std::vector<double> const& parameters,
 	std::vector<CoordinateType> const& coord_types )
 {
     std::vector<double> tmp;
@@ -487,7 +487,7 @@ double SplineBase::getResultClosestToGuess(double _guess, vector<double> points,
     else
     {
         closestPoint = points.front();
-        for(std::vector<double>::iterator it = points.begin() + 1; it != points.end(); ++it) 
+        for(std::vector<double>::iterator it = points.begin() + 1; it != points.end(); ++it)
         {
             if( fabs(*it - _guess) < fabs(closestPoint - _guess) )
                 closestPoint = *it;
@@ -760,10 +760,10 @@ double SplineBase::join(SplineBase const& other, double tolerance, bool with_tan
     if (other.getDimension() != dim)
         throw std::runtime_error("incompatible dimensions in #join. 'this' is of dimension " + lexical_cast<string>(getDimension()) + " while 'other' is of dimension " + lexical_cast<string>(other.getDimension()));
 
-    
+
     if(&other == this)
 	throw std::runtime_error("Joining Spline with itself");
-    
+
     std::vector<double> joining_points;
     int joining_types[4] = { 0, 0, 0, 0 };
 
@@ -862,7 +862,7 @@ double SplineBase::join(SplineBase const& other, double tolerance, bool with_tan
     double* gpar = NULL;
     int jnbpar;
     int ret;
-    
+
     //be sure joining_Types has the right size
     if (joining_points.size() / dim > 4) {
         throw std::runtime_error("SplineBase::join(): the size of "
@@ -1002,12 +1002,12 @@ Matrix3d SplineBase::getFrenetFrame(double _param)
 }
 
 double SplineBase::getHeading(double _param)
-{    
+{
     Matrix3d frame = getFrenetFrame(_param);
 
     // Vector if the X axis of the frame
     Vector2d Xaxis(frame(0,0),frame(0,1));
-    Xaxis.normalize(); 
+    Xaxis.normalize();
 
     // Returns the angle of Frenet X axis in Inertial frame
     return atan2(Xaxis.y(),Xaxis.x());
@@ -1027,12 +1027,12 @@ double SplineBase::distanceError(Vector3d _pt, double _param)
     Vector3d error = _pt - curve_point;
     error(2) = 0.0;  // Z axis error not needed
 
-    // Finds the angle of error vector to the Frenet X axis 
+    // Finds the angle of error vector to the Frenet X axis
     Vector2d pt_vec(error(0),error(1));
-    pt_vec.normalize(); 
+    pt_vec.normalize();
     double  angle = angleLimit(atan2(pt_vec.y(),pt_vec.x()) - getHeading(_param));
-    
-    // Sign of the distance error depending on position of the 
+
+    // Sign of the distance error depending on position of the
     // actual robot in Frenet frame
     return (angle >= 0.0)?(error.norm()):(-error.norm());
 }
@@ -1040,11 +1040,11 @@ double SplineBase::distanceError(Vector3d _pt, double _param)
 Vector3d SplineBase::poseError(Vector3d _position, double _heading, double _guess, double minParam)
 {
     double param = findOneClosestPoint(_position.data(), _guess, getGeometricResolution());
-    
+
     if(param < minParam)
         param = minParam;
 
-    // Returns the error [distance error, orientation error, parameter] 
+    // Returns the error [distance error, orientation error, parameter]
     return Vector3d(distanceError(_position, param), headingError(_heading, param), param);
 }
 
@@ -1052,7 +1052,7 @@ Vector3d SplineBase::poseError(Vector3d _position, double _heading, double _gues
 {
     double param = findOneClosestPoint(_position.data(), _guess, getGeometricResolution());
 
-    // Returns the error [distance error, orientation error, parameter] 
+    // Returns the error [distance error, orientation error, parameter]
     return Vector3d(distanceError(_position, param), headingError(_heading, param), param);
 }
 
@@ -1096,18 +1096,18 @@ void SplineBase::split(SplineBase& second_part, double _param)
 	//get start point
 	double result[3];
 	getPoint(result, start_param);
-	
+
 	//set second curve to this curve
 	second_part.reset(curve);
-	
+
 	//be shure that we don't delete the curve now belonging
 	//to second_part
 	curve = NULL;
-	
+
 	//make this curve a single point curve
 	setSingleton(result);
 
-	return; 
+	return;
     }
 
     if(fabs(_param - end_param) < 0.001)
@@ -1115,13 +1115,13 @@ void SplineBase::split(SplineBase& second_part, double _param)
 	//get end point
 	double result[3];
 	getPoint(result, end_param);
-	
+
 	//the second curve is only the end point
 	second_part.setSingleton(result);
-	return; 
+	return;
     }
 
-    if (_param < start_param || _param > end_param) 
+    if (_param < start_param || _param > end_param)
     {
         string msg = "_param=" + lexical_cast<string>(_param) + " is not in the accepted range [" + lexical_cast<string>(start_param) + ", " + lexical_cast<string>(end_param) + "]";
         throw std::out_of_range(msg);
@@ -1150,10 +1150,10 @@ SplineBase *SplineBase::getSubSpline(double start_t, double end_t) const
     int result;
     SISLCurve *newCurve;
     s1712(curve, start_t, end_t, &newCurve, &result);
-    
+
     if(result < 0)
         return NULL;
-    
+
     return new SplineBase(getGeometricResolution(), newCurve);
 }
 
