@@ -271,7 +271,8 @@ void SplineBase::interpolate(const vector< double >& points,
     unsigned int const point_count = points.size() / dimension;
     if (!parametersIn.empty() && parametersIn.size() != point_count) {
         throw std::invalid_argument(
-            "expected " + to_string(point_count) + " parameters, " +
+            "base::geometry::SplineBase::interpolate: "
+            "expected " + to_string(point_count) + " parameters, "
             "but got " + to_string(parametersIn.size()));
     }
     if (point_count == 0)
@@ -300,9 +301,8 @@ void SplineBase::interpolate(const vector< double >& points,
     else
     {
         if (coord_types.size() * dimension != points.size()) {
-            throw std::runtime_error("types::Spline::interpolate(): "
-                                     "'points.size()' does not match "
-                                     "expectation");
+            throw std::runtime_error("base::geometry::SplineBase::interpolate(): "
+                                     "'points.size()' does not match expectation");
         }
         std::copy( coord_types.begin(), coord_types.end(), std::back_inserter( point_types ) );
     }
@@ -343,7 +343,9 @@ void SplineBase::interpolate(const vector< double >& points,
                 str << " " << parametersIn[c];
         }
 
-        throw std::runtime_error("cannot create a spline interpolating the required points" + str.str());
+        throw std::runtime_error(
+            "base::geometry::SplineBase::interpolate(): "
+            "cannot create a spline interpolating the required points" + str.str());
     }
 
     s1363(curve, &start_param, &end_param, &status);
