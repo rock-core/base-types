@@ -49,7 +49,7 @@ namespace geometry {
         void setCurveOrder(int value) { curve_order = value; }
         /** Returns the order of the curve */
         int    getCurveOrder() const { return curve_order; }
-        
+
         /** Returns the length of the curve in geometric space
          *
          * @param relative_error the acceptable error on the final result w.r.t.
@@ -58,8 +58,8 @@ namespace geometry {
         double getCurveLength(double relative_resolution = 0.01) const;
         double getCurveLength(double startParam, double relative_resolution) const;
         double getCurveLength(double startParam, double endParam, double relative_resolution) const;
-        
-        
+
+
         /** Returns the maximum curvature of the curve */
         double getCurvatureMax();
         double getStartParam() const { return start_param; };
@@ -78,7 +78,7 @@ namespace geometry {
          * at least once.
          */
         SISLCurve* getSISLCurve();
-      
+
         /** Returns the curvature at the given position
          *
          * @throws out_of_range if _param is not in [start_param,
@@ -131,13 +131,13 @@ namespace geometry {
 	 *        zero. It marks the type of coordinate/derivative given by the
 	 *        coordinates param.
          */
-        void interpolate(std::vector<double> const& coordinates, 
-                std::vector<double> const& parameters = std::vector<double>(), 
+        void interpolate(std::vector<double> const& coordinates,
+                std::vector<double> const& parameters = std::vector<double>(),
                 std::vector<CoordinateType> const& coord_types = std::vector<CoordinateType>() );
 
-        void interpolate(std::vector<double> const& coordinates, 
-                std::vector<double> &parameterOut, 
-                std::vector<double> const& parameterIn  = std::vector<double>(), 
+        void interpolate(std::vector<double> const& coordinates,
+                std::vector<double> &parameterOut,
+                std::vector<double> const& parameterIn  = std::vector<double>(),
                 std::vector<CoordinateType> const& coord_types = std::vector<CoordinateType>() );
 
         /** Tests for intersection between two curves
@@ -183,7 +183,7 @@ namespace geometry {
          * an intermediate curve that smoothly joins \c this and \c other.
          *
          * It retusn the parameter offset by which the parameters in \c other
-         * have been translated. I.e. if 
+         * have been translated. I.e. if
          *
          * <code>
          * offset = curve.join(other, tol, true);
@@ -212,7 +212,7 @@ namespace geometry {
          * spline between start_t and end_t
          * */
         SplineBase *getSubSpline(double start_t, double end_t) const;
-        
+
         int getCoordinatesStride() const
         {
             if (isNURBS()) return dimension + 1;
@@ -228,10 +228,10 @@ namespace geometry {
     protected:
 	/**
 	 * This function checks weather param is smaler or bigger
-	 * than end and start param. It also sets param to start 
+	 * than end and start param. It also sets param to start
 	 * or end, if the difference between param and start/end
 	 * is smaler than equalDistance.
-	 * 
+	 *
 	 * returns true if param is inside start/end.
 	 * */
 	bool checkAndNormalizeParam(double &param, double equalDistance = 0.001) const;
@@ -265,7 +265,7 @@ namespace geometry {
 
         /**
          * Warning, do not use this method, it is broken and returns the wrong result
-         * 
+         *
          * */
         double findOneClosestPoint(double const* _pt, double _guess, double _geores) const;
         void findClosestPoints(double const* ref_point,
@@ -363,9 +363,9 @@ namespace geometry {
          */
         base::Vector3d poseError(base::Vector3d const& _position, double _heading, double _guess)
         { return SplineBase::poseError(_position, _heading, _guess); }
-        
+
         /** Searches for the closest point in the curve, the it checks, if the closest point is
-         * an advancement on the trajectory in respect to the given 'minParam'. If this is the 
+         * an advancement on the trajectory in respect to the given 'minParam'. If this is the
          * case is uses the new point, else it uses minParam.
          * Returns the pose
          * error between the frenet frame on the curve and the given pose (determinded by the current param)
@@ -480,7 +480,7 @@ namespace geometry {
                         return true;
                     }
                 }
-                  
+
                 return false;
             }
 
@@ -591,7 +591,7 @@ namespace geometry {
         }
 
         /** Compute the curve from the given set of points */
-        void interpolate(std::vector<vector_t> const& points, 
+        void interpolate(std::vector<vector_t> const& points,
 		std::vector<double> const& parameters = std::vector<double>(),
 		std::vector<SplineBase::CoordinateType> const& coord_types = std::vector<SplineBase::CoordinateType>() )
         {
@@ -601,7 +601,7 @@ namespace geometry {
             SplineBase::interpolate(coordinates, parameters, coord_types);
         }
 
-        void interpolate(std::vector<vector_t> const& points, 
+        void interpolate(std::vector<vector_t> const& points,
                 std::vector<double> &parametersOut,
                 std::vector<double> const& parametersIn = std::vector<double>(),
                 std::vector<SplineBase::CoordinateType> const& coord_types = std::vector<SplineBase::CoordinateType>() )
@@ -612,7 +612,7 @@ namespace geometry {
             SplineBase::interpolate(coordinates, parametersOut, parametersIn, coord_types);
         }
 
-        void interpolate(std::vector<vector_ta> const& points, 
+        void interpolate(std::vector<vector_ta> const& points,
                 std::vector<double> &parametersOut,
                 std::vector<double> const& parametersIn = std::vector<double>(),
                 std::vector<SplineBase::CoordinateType> const& coord_types = std::vector<SplineBase::CoordinateType>() )
@@ -624,7 +624,7 @@ namespace geometry {
         }
 
         /** Compute the curve from the given set of points */
-        void interpolate(std::vector<vector_ta> const& points, 
+        void interpolate(std::vector<vector_ta> const& points,
                 std::vector<double> const& parameters = std::vector<double>(),
                 std::vector<SplineBase::CoordinateType> const& coord_types = std::vector<SplineBase::CoordinateType>() )
         {
@@ -633,23 +633,23 @@ namespace geometry {
                 coordinates.insert(coordinates.end(), points[i].data(), points[i].data() + DIM);
             SplineBase::interpolate(coordinates, parameters, coord_types);
         }
-        
-        void interpolate(std::vector<double> const& coordinates, 
-                std::vector<double> const& parameters = std::vector<double>(), 
+
+        void interpolate(std::vector<double> const& coordinates,
+                std::vector<double> const& parameters = std::vector<double>(),
                 std::vector<SplineBase::CoordinateType> const& coord_types = std::vector<SplineBase::CoordinateType>() )
         {
             return SplineBase::interpolate(coordinates, parameters, coord_types);
         };
 
-        void interpolate(std::vector<double> const& coordinates, 
-                std::vector<double> &parameterOut, 
-                std::vector<double> const& parameterIn  = std::vector<double>(), 
+        void interpolate(std::vector<double> const& coordinates,
+                std::vector<double> &parameterOut,
+                std::vector<double> const& parameterIn  = std::vector<double>(),
                 std::vector<SplineBase::CoordinateType> const& coord_types = std::vector<SplineBase::CoordinateType>() )
         {
             return SplineBase::interpolate(coordinates, parameterOut, parameterIn, coord_types);
         };
 
-        
+
         /** Returns the distance between the given point and the curve
          */
         double distanceTo(vector_t const& _pt) const
@@ -875,23 +875,23 @@ namespace geometry {
                 squaredDistOfParam = curSquaredDist;
                 return true;
             }
-            
+
             return false;
         }
-        
-        /** 
+
+        /**
          * This method return the closest point in the curve to the given
          * point _pt.
          */
         double findOneClosestPoint(vector_t const& _pt, double _geometric_resolution) const
-        { 
+        {
             if (!SplineBase::getSISLCurve())
                 return SplineBase::getStartParam();
 
             std::vector<double> points;
             std::vector< std::pair<double, double> > curves;
             findClosestPoints(_pt, points, curves, _geometric_resolution);
-            
+
             vector_t closestPoint;
             double closestParam;
             double closestSquaredDist = std::numeric_limits< double >::max();
@@ -911,7 +911,7 @@ namespace geometry {
                 closestPoint = getPoint(points.front());
                 closestParam = points.front();
                 closestSquaredDist = (_pt - closestPoint).squaredNorm();
-                for(std::vector<double>::iterator it = points.begin() + 1; it != points.end(); ++it) 
+                for(std::vector<double>::iterator it = points.begin() + 1; it != points.end(); ++it)
                 {
                     if(isCloser(_pt, closestSquaredDist, *it, closestPoint, closestSquaredDist))
                         closestParam = *it;
@@ -933,7 +933,7 @@ namespace geometry {
         /** Returns a single closest point to _pt
          *
          * This is a convenience method that calls findClosestPoints and returns
-         * one single parameter in the values returned. 
+         * one single parameter in the values returned.
          *
          * @return the parameter of the found closes point
          * @param _guess this paramter is ignored. It is only there for backward compability
@@ -1012,16 +1012,16 @@ namespace geometry {
     typedef base::geometry::Spline<1> Spline1;
     typedef base::geometry::Spline<2> Spline2;
     typedef base::geometry::Spline<3> Spline3;
-    
+
     inline std::ostream& operator << (std::ostream& io, base::geometry::Spline<3> const& s)
     {
-	io << "Length " << s.getCurveLength() 
+	io << "Length " << s.getCurveLength()
 	    << " start " << s.getStartPoint().transpose() << " end " << s.getEndPoint().transpose()
 	    << " startParam " << s.getStartParam() << " endParam " << s.getEndParam();
 
 	return io;
     }
-    
+
 } // geometry
 } // base
 #endif
