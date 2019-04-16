@@ -1,5 +1,6 @@
 require 'base_types_ruby'
 require 'eigen'
+require 'set'
 
 # Bindings for the SISL spline library
 module SISL
@@ -10,16 +11,20 @@ module SISL
         # See Spline#interpolate for details. Unlike Spline#interpolate,
         # +points+ must be a nested array so that the curve dimension can be
         # guessed.
-        def self.interpolate(points, parameters = nil, types = nil)
-            if points.first.kind_of?(Numeric)
+        def self.interpolate(points = nil, parameters = nil, types = nil, dimension: nil)
+            if !dimension && points.first.kind_of?(Numeric)
                 raise ArgumentError, 'cannot guess the curve dimensions "\
                     "from a flat point array'
             end
-            dimension = points.first.to_a.size
+            dimension ||= points.first.to_a.size
 
             spline = Spline.new(dimension)
-            spline.interpolate(points, parameters, types)
-            spline
+            if points
+                spline.interpolate(points, parameters, types)
+                spline
+            else
+                Interpolator.new(spline)
+            end
         end
 
         def self.singleton(point)
@@ -48,6 +53,162 @@ module SISL
             end
             result
         end
+
+        # @api private
+        #
+        # Implementation of the fluid interface to {#interpolate}
+        class Interpolator
+            def initialize(spline)
+                @spline = spline
+                @dimension = spline.dimension
+                @points = []
+                @parameters = []
+                @types = []
+
+                @current_point = []
+                @current_types = []
+                @current_parameter = nil
+            end
+
+            # Registers a parameter
+            #
+            # Once a parameter is given, it has to be given right before all
+            # points
+            def at(parameter)
+                register_current
+
+                if @current_parameter || (@parameters.empty? && !@points.empty?)
+                    raise ArgumentError, 'when used, at() must be called exactly once '\
+                        'before each point'
+                end
+
+                @current_parameter = parameter
+                self
+            end
+
+            private def validate_parameter_given_if_needed
+                return if @parameters.empty? || @current_parameter
+
+                raise ArgumentError, 'when used, at() must be called exactly once '\
+                    'before each point'
+            end
+
+            # Registers an ordinary point
+            def ordinary_point(*values)
+                register_current
+                validate_parameter_given_if_needed
+                add_to_point(values, type: :ORDINARY_POINT)
+                self
+            end
+
+            # Registers a knuckle point
+            def knuckle_point(*values)
+                register_current
+                validate_parameter_given_if_needed
+                add_to_point(values, type: :KNUCKLE_POINT)
+                self
+            end
+
+            # @api private
+            class PriorNext < BasicObject
+                def initialize(interpolator, type)
+                    @interpolator = interpolator
+                    @type = type
+                end
+
+                def to_prior(*values)
+                    @interpolator.add_to_point(values, type: "#{@type}_TO_PRIOR")
+                    @has_prior = true
+                    self
+                end
+
+                def to_next(*values)
+                    @interpolator.add_to_point(values, type: "#{@type}_TO_NEXT")
+                    @interpolator
+                end
+
+                def respond_to_missing?(name)
+                    @interpolator.respond_to?(name)
+                end
+
+                # rubocop:disable Style/MethodMissingSuper
+                def method_missing(name, *args, &block)
+                    unless @has_prior
+                        ::Kernel.raise ::ArgumentError, "did not call #to_prior or #to_next "\
+                            "as expected"
+                    end
+                    @interpolator.send(name, *args, &block)
+                end
+                # rubocop:enable Style/MethodMissingSuper
+            end
+
+            # @api private
+            #
+            # Register a points and its type
+            def add_to_point(values, type:)
+                if values.size != @dimension
+                    raise ArgumentError, "expected a point of dimension #{values.size} "\
+                        "but got #{values.size}"
+                elsif @current_point.empty? && !POINT_TYPES.include?(type)
+                    raise ArgumentError, "must call #ordinary_point or #knuckle_point "\
+                        "before defining #{type}"
+                end
+
+                type = type.to_sym
+                if !VALID_TYPES.include?(type)
+                    raise ArgumentError, "#{type} is not a known point type"
+                elsif @current_types.include?(type)
+                    raise ArgumentError, "#{type} already given for this point"
+                end
+
+                @current_point.concat(values)
+                @current_types << type
+            end
+
+            private def register_current
+                return if @current_types.empty?
+
+                @points.concat(@current_point)
+                @types.concat(@current_types)
+                @parameters << @current_parameter if @current_parameter
+
+                @current_point.clear
+                @current_parameter = nil
+                @current_types.clear
+            end
+
+            def derivative
+                if @current_point.empty?
+                    raise ArgumentError, "must define a point before calling #derivative"
+                end
+                PriorNext.new(self, 'DERIVATIVE')
+            end
+
+            def second_derivative(*values)
+                if @current_point.empty?
+                    raise ArgumentError, "must define a point before calling "\
+                        "#second_derivative"
+                end
+                PriorNext.new(self, 'SECOND_DERIVATIVE')
+            end
+
+            def apply
+                register_current
+                @spline.interpolate(@points, @parameters, @types)
+                @spline
+            end
+        end
+
+        VALID_TYPES = %I[
+            ORDINARY_POINT
+            KNUCKLE_POINT
+            DERIVATIVE_TO_NEXT
+            DERIVATIVE_TO_PRIOR
+            SECOND_DERIVATIVE_TO_NEXT
+            SECOND_DERIVATIVE_TO_PRIOR
+        ].to_set.freeze
+
+        POINT_TYPES = %I[ORDINARY_POINT KNUCKLE_POINT].to_set.freeze
 
         # Resets this curve so that it is an interpolation of the given set
         # of points
@@ -79,6 +240,8 @@ module SISL
         # :ORDINARY_POINT
         #
         def interpolate(points = nil, parameters = nil, types = nil)
+            return Interpolator.new(self) unless points
+
             if points.empty?
                 clear
                 return
