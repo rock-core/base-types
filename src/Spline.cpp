@@ -269,12 +269,6 @@ void SplineBase::interpolate(const vector< double >& points,
     has_curvature_max = false;
 
     unsigned int const point_count = points.size() / dimension;
-    if (!parametersIn.empty() && parametersIn.size() != point_count) {
-        throw std::invalid_argument(
-            "base::geometry::SplineBase::interpolate: "
-            "expected " + to_string(point_count) + " parameters, "
-            "but got " + to_string(parametersIn.size()));
-    }
     if (point_count == 0)
     {
         end_param = 0;
