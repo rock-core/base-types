@@ -91,6 +91,22 @@ BOOST_AUTO_TEST_CASE( vectorToVector )
     BOOST_CHECK_SMALL(M_PI - Angle::vectorToVector(Vector3d(2, 0, 0), Vector3d(-3, -0.001, 0), -Vector3d::UnitZ()).getRad(), 1e-3);
 }
 
+BOOST_AUTO_TEST_CASE( vectorToVector_handles_cos_rounded_above_1 )
+{
+    double const magic = 0.70699999999999985;
+    Eigen::Vector3d const v(magic, magic, 0);
+    BOOST_CHECK_SMALL(Angle::vectorToVector(v, v).getRad(), 1e-3);
+    BOOST_CHECK_SMALL(Angle::vectorToVector(v, v, Vector3d::UnitZ()).getRad(), 1e-3);
+}
+
+BOOST_AUTO_TEST_CASE( vectorToVector_handles_cos_rounded_below_1 )
+{
+    double const magic = 0.70699999999999985;
+    Eigen::Vector3d const v(magic, magic, 0);
+    BOOST_CHECK_CLOSE(Angle::vectorToVector(v, -v).getRad(), M_PI, 1e-3);
+    BOOST_CHECK_CLOSE(Angle::vectorToVector(v, -v, Vector3d::UnitZ()).getRad(), M_PI, 1e-3);
+}
+
 BOOST_AUTO_TEST_CASE( angle_segment_test )
 {
     Angle a = Angle::fromDeg( 90 );
