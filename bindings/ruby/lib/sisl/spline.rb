@@ -94,52 +94,19 @@ module SISL
             end
 
             # Registers an ordinary point
-            def ordinary_point(*values)
+            def point(*values)
                 register_current
                 validate_parameter_given_if_needed
                 add_to_point(values, type: :ORDINARY_POINT)
                 self
             end
 
-            # Registers a knuckle point
+            # Registers an ordinary point
             def knuckle_point(*values)
                 register_current
                 validate_parameter_given_if_needed
                 add_to_point(values, type: :KNUCKLE_POINT)
                 self
-            end
-
-            # @api private
-            class PriorNext < BasicObject
-                def initialize(interpolator, type)
-                    @interpolator = interpolator
-                    @type = type
-                end
-
-                def to_prior(*values)
-                    @interpolator.add_to_point(values, type: "#{@type}_TO_PRIOR")
-                    @has_prior = true
-                    self
-                end
-
-                def to_next(*values)
-                    @interpolator.add_to_point(values, type: "#{@type}_TO_NEXT")
-                    @interpolator
-                end
-
-                def respond_to_missing?(name)
-                    @interpolator.respond_to?(name)
-                end
-
-                # rubocop:disable Style/MethodMissingSuper
-                def method_missing(name, *args, &block)
-                    unless @has_prior
-                        ::Kernel.raise ::ArgumentError, "did not call #to_prior or #to_next "\
-                            "as expected"
-                    end
-                    @interpolator.send(name, *args, &block)
-                end
-                # rubocop:enable Style/MethodMissingSuper
             end
 
             # @api private
@@ -150,7 +117,7 @@ module SISL
                     raise ArgumentError, "expected a point of dimension #{values.size} "\
                         "but got #{values.size}"
                 elsif @current_point.empty? && !POINT_TYPES.include?(type)
-                    raise ArgumentError, "must call #ordinary_point or #knuckle_point "\
+                    raise ArgumentError, 'must call #ordinary_point or #knuckle_point '\
                         "before defining #{type}"
                 end
 
@@ -177,22 +144,26 @@ module SISL
                 @current_types.clear
             end
 
-            def derivative
+            def derivative(*values)
                 if @current_point.empty?
-                    raise ArgumentError, "must define a point before calling #derivative"
+                    raise ArgumentError, 'must define a point before calling #derivative'
                 end
-                PriorNext.new(self, 'DERIVATIVE')
+
+                add_to_point(values, type: 'DERIVATIVE_TO_PRIOR')
+                self
             end
 
             def second_derivative(*values)
                 if @current_point.empty?
-                    raise ArgumentError, "must define a point before calling "\
-                        "#second_derivative"
+                    raise ArgumentError, 'must define a point before calling '\
+                        '#second_derivative'
                 end
-                PriorNext.new(self, 'SECOND_DERIVATIVE')
+
+                add_to_point(values, type: 'SECOND_DERIVATIVE_TO_PRIOR')
+                self
             end
 
-            def apply
+            def to_spline
                 register_current
                 @spline.interpolate(@points, @parameters, @types)
                 @spline

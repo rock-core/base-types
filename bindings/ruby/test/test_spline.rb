@@ -137,45 +137,45 @@ module SISL
             it 'allows to create an interpolation with only points' do
                 @spline
                     .interpolate
-                    .ordinary_point(1, 2)
+                    .point(1, 2)
                     .knuckle_point(2, 3)
-                    .ordinary_point(3, 4)
-                    .apply
+                    .point(3, 4)
+                    .to_spline
                 assert_interpolation_args [1, 2, 2, 3, 3, 4], [],
-                    %I[ORDINARY_POINT KNUCKLE_POINT ORDINARY_POINT]
+                                          %I[ORDINARY_POINT KNUCKLE_POINT ORDINARY_POINT]
             end
 
             it 'allows to pass parameters explicitely' do
                 @spline
                     .interpolate
-                    .at(0.1).ordinary_point(1, 2)
+                    .at(0.1).point(1, 2)
                     .at(0.2).knuckle_point(2, 3)
-                    .at(0.3).ordinary_point(3, 4)
-                    .apply
+                    .at(0.3).point(3, 4)
+                    .to_spline
                 assert_interpolation_args [1, 2, 2, 3, 3, 4], [0.1, 0.2, 0.3],
-                    %I[ORDINARY_POINT KNUCKLE_POINT ORDINARY_POINT]
+                                          %I[ORDINARY_POINT KNUCKLE_POINT ORDINARY_POINT]
             end
 
             it 'raises if a parameter is given after the first points' do
                 e = assert_raises(ArgumentError) do
                     @spline
                         .interpolate
-                        .ordinary_point(1, 2)
+                        .point(1, 2)
                         .at(0.1).knuckle_point(2, 3)
                 end
                 assert_equal 'when used, at() must be called exactly once '\
-                    'before each point', e.message
+                             'before each point', e.message
             end
 
             it 'raises if missing a parameter before a point' do
                 e = assert_raises(ArgumentError) do
                     @spline
                         .interpolate
-                        .at(0.1).ordinary_point(1, 2)
+                        .at(0.1).point(1, 2)
                         .knuckle_point(2, 3)
                 end
                 assert_equal 'when used, at() must be called exactly once '\
-                    'before each point', e.message
+                             'before each point', e.message
             end
 
             it 'raises if parameters are given without points' do
@@ -186,102 +186,47 @@ module SISL
                         .knuckle_point(2, 3)
                 end
                 assert_equal 'when used, at() must be called exactly once '\
-                    'before each point', e.message
+                             'before each point', e.message
             end
 
             it 'allows adding a derivative to prior' do
                 @spline
                     .interpolate
-                    .ordinary_point(0, 1).derivative.to_prior(1, 2)
+                    .point(0, 1).derivative(1, 2)
                     .knuckle_point(2, 3)
-                    .apply
+                    .to_spline
 
                 assert_interpolation_args [0, 1, 1, 2, 2, 3], [],
-                    %I[ORDINARY_POINT DERIVATIVE_TO_PRIOR KNUCKLE_POINT]
-            end
-
-            it 'allows adding a derivative to next' do
-                @spline
-                    .interpolate
-                    .ordinary_point(0, 1).derivative.to_next(1, 2)
-                    .knuckle_point(2, 3)
-                    .apply
-
-                assert_interpolation_args [0, 1, 1, 2, 2, 3], [],
-                    %I[ORDINARY_POINT DERIVATIVE_TO_NEXT KNUCKLE_POINT]
-            end
-
-            it 'allows adding a derivative to prior and next' do
-                @spline
-                    .interpolate
-                    .ordinary_point(0, 1)
-                    .derivative.to_prior(-1, -2).to_next(1, 2)
-                    .knuckle_point(2, 3)
-                    .apply
-
-                assert_interpolation_args [0, 1, -1, -2, 1, 2, 2, 3], [],
-                    %I[ORDINARY_POINT DERIVATIVE_TO_PRIOR
-                       DERIVATIVE_TO_NEXT KNUCKLE_POINT]
-            end
-
-            it 'raises if trying to add next after prior' do
-                assert_raises(NoMethodError) do
-                    @spline
-                        .interpolate
-                        .ordinary_point(0, 1)
-                        .derivative.to_next(-1, -2).to_prior(1, 2)
-                        .knuckle_point(2, 3)
-                        .apply
-                end
+                                          %I[ORDINARY_POINT
+                                             DERIVATIVE_TO_PRIOR
+                                             KNUCKLE_POINT]
             end
 
             it 'raises if the derivative is given before a point' do
                 e = assert_raises(ArgumentError) do
                     @spline
                         .interpolate
-                        .derivative.to_prior(1, 2)
+                        .derivative(0, 1).to_prior(1, 2)
                         .knuckle_point(2, 3)
                 end
-                assert_equal "must define a point before calling #derivative",
-                    e.message
-            end
-
-            it 'raises if two prior derivatives are given' do
-                e = assert_raises(ArgumentError) do
-                    @spline
-                        .interpolate
-                        .ordinary_point(0, 1).derivative.to_prior(1, 2).to_prior(1, 2)
-                        .knuckle_point(2, 3)
-                end
-                assert_equal 'DERIVATIVE_TO_PRIOR already given for this point',
-                    e.message
-            end
-
-            it 'raises if calling #derivative without #to_prior or #to_next' do
-                e = assert_raises(ArgumentError) do
-                    @spline
-                        .interpolate
-                        .ordinary_point(0, 1).derivative
-                        .knuckle_point(2, 3)
-                end
-                assert_equal 'did not call #to_prior or #to_next as expected',
-                    e.message
+                assert_equal 'must define a point before calling #derivative',
+                             e.message
             end
 
             it 'is usable from the class method' do
                 flexmock(Spline).new_instances.
                     should_receive(:interpolate).with_no_args.never.pass_thru
-                flexmock(Spline).new_instances.
-                    should_receive(:interpolate).
-                        with([0, 1, -1, -2, 1, 2, 2, 3], [], any).
-                        once.pass_thru
+                flexmock(Spline)
+                    .new_instances.should_receive(:interpolate)
+                    .with([0, 1, -1, -2, 2, 3], [], any)
+                    .once.pass_thru
 
                 spline = Spline
-                    .interpolate(dimension: 2)
-                    .ordinary_point(0, 1)
-                    .derivative.to_prior(-1, -2).to_next(1, 2)
-                    .knuckle_point(2, 3)
-                    .apply
+                         .interpolate(dimension: 2)
+                         .point(0, 1)
+                         .derivative(-1, -2)
+                         .knuckle_point(2, 3)
+                         .to_spline
                 assert_kind_of Spline, spline
             end
 
