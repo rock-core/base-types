@@ -122,6 +122,13 @@ public:
         return Angle(M_PI);
     }
 
+    /** Returns the Angle object representing PI
+     */
+    static inline Angle PI()
+    {
+        return Angle(M_PI);
+    }
+
     /**
      * @return canonical value of the angle in radians
      */
