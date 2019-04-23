@@ -346,6 +346,8 @@ public:
 };
 
 std::ostream& operator << (std::ostream& os, AngleSegment seg);
+template<> inline base::Angle unknown() { return base::Angle(); }
+inline bool isUnknown(base::Angle value) { return std::isnan(value.getRad()); }
 
 }
 
