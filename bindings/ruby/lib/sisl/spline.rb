@@ -70,6 +70,22 @@ module SISL
                 @current_parameter = nil
             end
 
+            # Registers a parameter as a relative offset from the previous parameter
+            #
+            # Once a parameter is given, it has to be given right before all
+            # points
+            #
+            # For flexibility reasons, it may be used even for the very first point,
+            # in which case it is equivalent to calling {#at}
+            def at_relative(parameter)
+                register_current
+                if @parameters.empty?
+                    at(parameter)
+                else
+                    at(parameter + @parameters.last)
+                end
+            end
+
             # Registers a parameter
             #
             # Once a parameter is given, it has to be given right before all

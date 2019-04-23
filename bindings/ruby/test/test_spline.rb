@@ -156,6 +156,28 @@ module SISL
                                           %I[ORDINARY_POINT KNUCKLE_POINT ORDINARY_POINT]
             end
 
+            it 'allows to give parameters relatively to the previous parameter' do
+                @spline
+                    .interpolate
+                    .at(0.1).point(1, 2)
+                    .at_relative(0.1).knuckle_point(2, 3)
+                    .at_relative(0.1).point(3, 4)
+                    .to_spline
+                assert_interpolation_args [1, 2, 2, 3, 3, 4], [0.1, 0.2, 0.3],
+                                          %I[ORDINARY_POINT KNUCKLE_POINT ORDINARY_POINT]
+            end
+
+            it 'interprets the first at_relative as it would #at' do
+                @spline
+                    .interpolate
+                    .at_relative(0.1).point(1, 2)
+                    .at_relative(0.1).knuckle_point(2, 3)
+                    .at_relative(0.1).point(3, 4)
+                    .to_spline
+                assert_interpolation_args [1, 2, 2, 3, 3, 4], [0.1, 0.2, 0.3],
+                                          %I[ORDINARY_POINT KNUCKLE_POINT ORDINARY_POINT]
+            end
+
             it 'raises if a parameter is given after the first points' do
                 e = assert_raises(ArgumentError) do
                     @spline
@@ -232,7 +254,10 @@ module SISL
 
             def assert_interpolation_args(points, parameters, types)
                 assert_equal points, @interpolation_args[0], 'points'
-                assert_equal parameters, @interpolation_args[1], 'parameters'
+                parameters.each_with_index do |i|
+                    assert_equal parameters[i], @interpolation_args[1][i],
+                                 "parameters[#{i}]"
+                end
                 assert_equal types, @interpolation_args[2], 'types'
             end
         end
