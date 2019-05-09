@@ -1,6 +1,5 @@
 include_directories(${CMAKE_BINARY_DIR}/include)
 
-find_package(SISL)
 if(SISL_FOUND)
     add_definitions(-DSISL_FOUND)
     rock_add_ruby_package(base

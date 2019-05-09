@@ -460,4 +460,9 @@ void RigidBodyStateVisualization::updateDataIntern( const base::samples::RigidBo
     this->state = state;
 }
 
+void RigidBodyStateVisualization::updateDataIntern( const base::TransformWithCovariance& transform ){
+    this->state.position = transform.translation;
+    this->state.orientation = transform.orientation;
+}
+
 }

@@ -32,6 +32,7 @@
 #include <base/samples/DepthMap.hpp>
 #include <base/TransformWithCovariance.hpp>
 #include <base/samples/Sonar.hpp>
+#include <base/samples/PoseWithCovariance.hpp>
 #include <base/Temperature.hpp>
 #include <base/Time.hpp>
 #include <base/TimeMark.hpp>
@@ -505,6 +506,17 @@ BOOST_AUTO_TEST_CASE(time_fromString)
     std::string defaultResolutionFormat = formatNow.toString();
     BOOST_REQUIRE_EQUAL(microsecondResolutionFormat,defaultResolutionFormat);
 
+}
+
+BOOST_AUTO_TEST_CASE(time_toTimeValues)
+{
+    base::Time time = base::Time::fromMicroseconds(93784005006);
+    std::vector<int> timeValues = time.toTimeValues();
+
+    for (int i = 0; i < timeValues.size(); ++i)
+    {
+        BOOST_CHECK_EQUAL(timeValues.at(i), timeValues.size() - i);
+    }
 }
 
 BOOST_AUTO_TEST_CASE( laser_scan_test )
@@ -1523,6 +1535,85 @@ BOOST_AUTO_TEST_CASE( transform_with_covariance )
 
     BOOST_CHECK( t1.getTransform().matrix().isApprox( t1r.getTransform().matrix(), sigma ) );
     BOOST_CHECK( t1.getCovariance().isApprox( t1r.getCovariance(), sigma ) );
+}
+
+BOOST_AUTO_TEST_CASE( pose_with_covariance )
+{
+    base::samples::RigidBodyState rbs;
+    rbs.time = base::Time::fromSeconds(1000);
+    rbs.sourceFrame = "laser";
+    rbs.targetFrame = "body";
+    rbs.position = base::Vector3d(1,2,3);
+    rbs.cov_position = 0.1 * base::Matrix3d::Identity();
+    rbs.orientation = Eigen::AngleAxisd(0.5*M_PI,Eigen::Vector3d::UnitZ()) *
+                        Eigen::AngleAxisd(-0.2*M_PI,Eigen::Vector3d::UnitY()) *
+                        Eigen::AngleAxisd(0.1*M_PI,Eigen::Vector3d::UnitX());
+    rbs.cov_orientation = 0.02 * base::Matrix3d::Identity();
+
+    base::samples::PoseWithCovariance t(rbs);
+    BOOST_CHECK(rbs.time == t.time);
+    BOOST_CHECK(rbs.sourceFrame == t.object_frame_id);
+    BOOST_CHECK(rbs.targetFrame == t.frame_id);
+    BOOST_CHECK(rbs.position.isApprox(t.transform.translation, 1e-12));
+    BOOST_CHECK(rbs.cov_position.isApprox(t.transform.getTranslationCov(), 1e-12));
+    BOOST_CHECK(rbs.orientation.isApprox(t.transform.orientation, 1e-12));
+    BOOST_CHECK(rbs.cov_orientation.isApprox(t.transform.getOrientationCov(), 1e-12));
+
+    base::samples::RigidBodyState rbs2 = t.toRigidBodyState();
+    BOOST_CHECK(rbs.time == rbs2.time);
+    BOOST_CHECK(rbs.sourceFrame == rbs2.sourceFrame);
+    BOOST_CHECK(rbs.targetFrame == rbs2.targetFrame);
+    BOOST_CHECK(rbs.position.isApprox(rbs2.position, 1e-12));
+    BOOST_CHECK(rbs.cov_position.isApprox(rbs2.cov_position, 1e-12));
+    BOOST_CHECK(rbs.orientation.isApprox(rbs2.orientation, 1e-12));
+    BOOST_CHECK(rbs.cov_orientation.isApprox(rbs2.cov_orientation, 1e-12));
+
+    // test operator*
+    base::Matrix6d lt1;
+    lt1 <<
+        0.1, 0.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, -3.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, -2.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, -1.0;
+    base::samples::PoseWithCovariance body_in_world(base::TransformWithCovariance(
+            Eigen::Affine3d(Eigen::Translation3d(Eigen::Vector3d(1,0,0)) * Eigen::AngleAxisd( M_PI/2.0, Eigen::Vector3d::UnitX()) ),
+            lt1 ));
+    body_in_world.time = base::Time();
+
+    base::Matrix6d lt2;
+    lt2 <<
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.2, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 2.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, 3.0;
+    base::samples::PoseWithCovariance sensor_in_body(base::TransformWithCovariance(
+            Eigen::Affine3d(Eigen::Translation3d(Eigen::Vector3d(0,1,2)) * Eigen::AngleAxisd( M_PI/2.0, Eigen::Vector3d::UnitY()) ),
+            lt2 ));
+    sensor_in_body.time = base::Time::now();
+
+    body_in_world.frame_id = "world";
+    body_in_world.object_frame_id = "body";
+    sensor_in_body.object_frame_id = "sensor";
+    sensor_in_body.frame_id = "body";
+    base::samples::PoseWithCovariance sensor_in_world = body_in_world * sensor_in_body;
+
+    // check composition
+    BOOST_CHECK(sensor_in_world.object_frame_id == sensor_in_body.object_frame_id);
+    BOOST_CHECK(sensor_in_world.frame_id == body_in_world.frame_id);
+    BOOST_CHECK(sensor_in_world.time == sensor_in_body.time);
+
+    base::samples::PoseWithCovariance body_in_world_r(sensor_in_world.transform.compositionInv(sensor_in_body.transform));
+    base::samples::PoseWithCovariance sensor_in_body_r(sensor_in_world.transform.preCompositionInv(body_in_world.transform));
+
+    BOOST_CHECK( body_in_world.getTransform().matrix().isApprox( body_in_world_r.getTransform().matrix(), 1e-12 ) );
+    BOOST_CHECK( body_in_world.getCovariance().isApprox( body_in_world_r.getCovariance(), 1e-12 ) );
+
+    BOOST_CHECK( sensor_in_body.getTransform().matrix().isApprox( sensor_in_body_r.getTransform().matrix(), 1e-12 ) );
+    BOOST_CHECK( sensor_in_body.getCovariance().isApprox( sensor_in_body_r.getCovariance(), 1e-12 ) );
 }
 
 #ifdef SISL_FOUND

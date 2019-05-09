@@ -1,3 +1,15 @@
+if(SISL_FOUND)
+    message(STATUS "SISL found: ${SISL_LIBRARIES}")
+    list(APPEND OPTIONAL_HPP
+        Spline.hpp
+        Trajectory.hpp
+    )
+    list(APPEND OPTIONAL_CPP
+        Spline.cpp
+        Trajectory.cpp
+    )
+endif()
+
 rock_library(
     base-types 
         Angle.cpp
@@ -8,12 +20,10 @@ rock_library(
         JointTransform.cpp
         Pose.cpp
         Pressure.cpp
-        Spline.cpp
         Temperature.cpp
         Time.cpp
         TimeMark.cpp
         Timeout.cpp
-        Trajectory.cpp
         TransformWithCovariance.cpp
         TwistWithCovariance.cpp
         Waypoint.cpp
@@ -30,6 +40,8 @@ rock_library(
         samples/Sonar.cpp
         samples/SonarBeam.cpp
         samples/SonarScan.cpp
+        samples/PoseWithCovariance.cpp
+        ${OPTIONAL_CPP}
     HEADERS
         Angle.hpp
         CircularBuffer.hpp
@@ -53,7 +65,6 @@ rock_library(
         Time.hpp
         TimeMark.hpp
         Timeout.hpp
-        Trajectory.hpp
         TransformWithCovariance.hpp
         TwistWithCovariance.hpp
         Waypoint.hpp
@@ -79,18 +90,23 @@ rock_library(
         samples/Sonar.hpp
         samples/SonarBeam.hpp
         samples/SonarScan.hpp
+        samples/PoseWithCovariance.hpp
         samples/Wrench.hpp
         samples/Wrenches.hpp
         templates/TimeStamped.hpp
-    DEPS_CMAKE 
-        SISL
+        ${OPTIONAL_HPP}
     DEPS_PKGCONFIG 
         base-logging
         eigen3
 )
 
-install(FILES ${CMAKE_SOURCE_DIR}/src/Spline.hpp
-	DESTINATION include/base/geometry)
+if(SISL_FOUND)
+    target_link_libraries(base-types ${SISL_LIBRARIES})
+    install(FILES ${CMAKE_SOURCE_DIR}/src/Spline.hpp
+            DESTINATION include/base/geometry)
+    configure_file(base-types-sisl.pc.in ${CMAKE_BINARY_DIR}/base-types-sisl.pc @ONLY)
+    install(FILES ${CMAKE_BINARY_DIR}/base-types-sisl.pc DESTINATION lib/pkgconfig)
+endif()
 
 configure_file(base-lib.pc.in ${CMAKE_BINARY_DIR}/base-lib.pc @ONLY)
 install(FILES ${CMAKE_BINARY_DIR}/base-lib.pc DESTINATION lib/pkgconfig)
