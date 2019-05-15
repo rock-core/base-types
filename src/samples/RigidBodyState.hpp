@@ -55,13 +55,15 @@ namespace base { namespace samples {
 	 */
         base::Matrix3d cov_orientation;
 
-        /** Velocity in m/s of sourceFrame expressed in targetFrame */
+        /** Velocity in m/s of sourceFrame relative to targetFrame,
+         * expressed in targetFrame */
         base::Vector3d velocity;
 	/** Covariance of the velocity 
 	 */
         base::Matrix3d cov_velocity;
 
-        /** Angular Velocity as an axis-angle representation in body fixed frame
+        /** Angular Velocity of sourceFrame relative to targetFrame,
+         * expressed in sourceFrame, as an axis-angle representation
          *
          * The direction of the vector is the axis, its length the speed */
         base::Vector3d angular_velocity;

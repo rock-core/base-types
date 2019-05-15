@@ -295,15 +295,13 @@ module SISL
             end
 	    
 	    def pretty_print(pp)
-		if(empty?)
+		if empty?
 		    pp.text "Curve is empty"
 		    pp.breakable		
 		else
-		    pp.text "dimensions=[#{start_point}, #{end_point}]"
+                    pp.text "start_point,end_point=[#{start_point}, #{end_point}]"
 		    pp.breakable		
-		    pp.text "length=[#{curve_length}]"
-		    pp.breakable
-		    pp.text "params=[#{start_param}, #{end_param}]"
+                    pp.text "start_param,end_param=[#{start_param}, #{end_param}]"
 		end
 	    end
 	    

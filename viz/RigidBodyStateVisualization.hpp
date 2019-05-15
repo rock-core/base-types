@@ -4,6 +4,7 @@
 #include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <Eigen/Geometry>
 #include <base/samples/RigidBodyState.hpp>
+#include <base/TransformWithCovariance.hpp>
 
 #include <osg/Image>
 #include <osg/Texture2D>
@@ -16,7 +17,7 @@ namespace osgFX
 namespace vizkit3d 
 {
 
-class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBodyState>
+class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBodyState>, public VizPluginAddType<base::TransformWithCovariance>
 {
         Q_OBJECT
         Q_PROPERTY(double size READ getSize WRITE setSize)
@@ -38,11 +39,17 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         Q_INVOKABLE void updateRigidBodyState( const base::samples::RigidBodyState& state )
         { return updateData(state); }
 
+        Q_INVOKABLE void updateData( const base::TransformWithCovariance& transform )
+        { return Vizkit3DPlugin<base::samples::RigidBodyState>::updateData(transform); }
+
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
 	virtual void updateMainNode(osg::Node* node);
 	void updateDataIntern( const base::samples::RigidBodyState& state );
         base::samples::RigidBodyState state;
+
+        void updateDataIntern( const base::TransformWithCovariance& transform );
+        base::TransformWithCovariance transform;
     
     public slots: 
         bool isPositionDisplayForced() const;

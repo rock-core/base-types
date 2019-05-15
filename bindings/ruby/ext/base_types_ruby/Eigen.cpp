@@ -268,6 +268,8 @@ struct Quaternion
     void setY(double value) { q->y() = value; }
     void setZ(double value) { q->z() = value; }
 
+    Quaternion* conjugate() const { return new Quaternion(q->conjugate()); }
+
     double norm() const { return q->norm(); }
 
     bool operator ==(Quaternion const& other) const
@@ -546,6 +548,7 @@ void Init_eigen_ext()
        .define_method("norm", &Quaternion::norm)
        .define_method("concatenate", &Quaternion::concatenate)
        .define_method("inverse", &Quaternion::inverse)
+       .define_method("conjugate", &Quaternion::conjugate)
        .define_method("transform", &Quaternion::transform)
        .define_method("matrix", &Quaternion::matrix)
        .define_method("normalize!", &Quaternion::normalizeBang)

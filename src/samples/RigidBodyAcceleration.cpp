@@ -2,7 +2,12 @@
 
 namespace base { namespace samples {
 
-void RigidBodyAcceleration::invalidateOrientation()
+RigidBodyAcceleration::RigidBodyAcceleration()
+{
+    invalidate();
+}
+
+void RigidBodyAcceleration::invalidate()
 {
     cov_acceleration = Eigen::Matrix3d::Identity();
     cov_acceleration *= INFINITY;
