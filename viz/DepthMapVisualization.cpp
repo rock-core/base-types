@@ -16,7 +16,7 @@
 using namespace vizkit3d;
 
 DepthMapVisualization::DepthMapVisualization() : 
-    colorize_altitude(false), colorize_magnitude(false), colorize_interval(1.0), show_remission(false), show_slope(false)
+    colorize_altitude(false), colorize_magnitude(false), colorize_interval(1.0), show_remission(false), show_slope(false), point_size(1.0)
 {
     scan_orientation = Eigen::Quaterniond::Identity();
     scan_position.setZero();
@@ -148,6 +148,9 @@ void DepthMapVisualization::updateMainNode ( osg::Node* node )
         slope_geom->removePrimitiveSet(0);
 
     slope_geom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS,0,scan_vertices->size()));
+    slope_geom->getOrCreateStateSet()->setAttribute( new osg::Point( point_size ), osg::StateAttribute::ON );
+
+
 
     //draw slope geometry
     if(show_slope)
@@ -179,15 +182,16 @@ void DepthMapVisualization::updateMainNode ( osg::Node* node )
 		}
 	    }
 	}
-        
-        #if OSG_MIN_VERSION_REQUIRED(3,1,8)
-	    slope_geom->setColorArray(slope_colors, osg::Array::BIND_PER_VERTEX);
-        #else
-	    slope_geom->setColorArray(slope_colors);
-	    slope_geom->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
-	#endif
+    if(slope_vertices->size() > 0){
+#if OSG_MIN_VERSION_REQUIRED(3,1,8)
+        slope_geom->setColorArray(slope_colors, osg::Array::BIND_PER_VERTEX);
+#else
+        slope_geom->setColorArray(slope_colors);
+        slope_geom->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+#endif
         slope_geom->setVertexArray(slope_vertices);
         slope_geom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, slope_vertices->size()));
+    }
     }
 }
 
@@ -258,6 +262,18 @@ void DepthMapVisualization::setShowSlope(bool value)
 {
     show_slope = value;
     emit propertyChanged("ShowSlope");
+}
+
+
+double DepthMapVisualization::getPointSize() const
+{
+    return point_size;
+}
+
+void DepthMapVisualization::setPointSize(double value)
+{
+    point_size = value;
+    emit propertyChanged("PointSize");
 }
 
 QColor DepthMapVisualization::getDefaultFeatureColor()
