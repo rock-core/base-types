@@ -8,9 +8,9 @@ module SISL
     class Spline
         # Returns a Spline object that interpolates the given points
         #
-        # See Spline#interpolate for details. Unlike Spline#interpolate,
-        # +points+ must be a nested array so that the curve dimension can be
-        # guessed.
+        # See {#interpolate} for more information. Note that the 'dimension' argument
+        # must be provided in case 'points' is a flat array of coordinates or if
+        # using the fluid interface (i.e. not providing any points at all)
         def self.interpolate(points = nil, parameters = nil, types = nil, dimension: nil)
             if !dimension && points.first.kind_of?(Numeric)
                 raise ArgumentError, 'cannot guess the curve dimensions "\
@@ -54,9 +54,22 @@ module SISL
             result
         end
 
-        # @api private
-        #
         # Implementation of the fluid interface to {#interpolate}
+        #
+        # @example provide parameters and ordinary points
+        #   spline.interpolate
+        #       .at(1).point(10)
+        #       .at(2).point(20)
+        #       .at(3).point(30)
+        #       .to_spline
+        #
+        # @example provide derivative. Derivatives apply to the previous point.
+        #   spline.interpolate
+        #       .at(1).point(10).derivative(0)
+        #       .at(2).point(20).derivative(1)
+        #       .at(3).point(30).derivative(0)
+        #       .to_spline
+        #
         class Interpolator
             def initialize(spline)
                 @spline = spline
@@ -200,31 +213,23 @@ module SISL
         # Resets this curve so that it is an interpolation of the given set
         # of points
         #
-        # The set of points can either be a list of DIM * SIZE numbers. It
-        # can also be a nested array of the form
+        # @overload interpolate
+        #   @return Interpolator
         #
-        #   [[c1, c2, c3], [c1, c2, c3], ...]
+        #   A fluid interface to build a spline for interpolation. See the documentation
+        #   of {Interpolator} for more information
         #
-        # If given, +parameters+ is an array of the same size than the
-        # number of points. This array represents the desired parameters of
-        # each of the points in the resulting spline
-        #
-        # types can be a Vector which has to bo of the same length than
-        # points, and provides the ability to parametrize the spline curve
-        # by giving values for tangents and/or derivatives
-        # The Vector needs to contain a list of the following symbols:
-        #
-        # :ORDINARY_POINT
-        # :KNUCKLE_POINT
-        # :DERIVATIVE_TO_NEXT
-        # :DERIVATIVE_TO_PRIOR
-        # :SECOND_DERIVATIVE_TO_NEXT
-        # :SECOND_DERIVATIVE_TO_PRIOR
-        # :TANGENT_POINT_FOR_NEXT
-        # :TANGENT_POINT_FOR_PRIOR
-        #
-        # By default types is nil, and all points are interpreted as
-        # :ORDINARY_POINT
+        # @overload interpolate(points, parameters = nil, types = nil)
+        #   @param [Array] points either a list of numbers multiple of the spline
+        #      dimension, or an array-of-arrays, with the nested arrays of size
+        #      {#dimension}
+        #   @param [Array,nil] parameters if non-nil, an array of the same size than the
+        #      number of points. This array represents the desired parameters of
+        #      each of the points in the resulting spline
+        #   @param [Array,nil] types if non-nil, each entry in this array characterizes
+        #      the entries in the 'points' array, allowing to specify first order and
+        #      second order derivatives. Pass values in {VALID_TYPES}.
+        #   @return [void]
         #
         def interpolate(points = nil, parameters = nil, types = nil)
             return Interpolator.new(self) unless points
