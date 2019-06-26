@@ -5,7 +5,9 @@
 #include <base/Eigen.hpp>
 #include "Pointcloud.hpp"
 #include <vector>
+#ifndef Q_MOC_RUN
 #include <boost/math/special_functions/fpclassify.hpp>
+#endif
 
 namespace base
 {
