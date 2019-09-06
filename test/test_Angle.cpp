@@ -241,39 +241,49 @@ BOOST_AUTO_TEST_CASE( angle_segment_test )
         {
             for(int y = 0; y < 360; y++)
             {
-                base::AngleSegment s1(base::Angle::fromDeg(x), 2*M_PI - base::Angle::fromDeg(1).getRad());
-                base::AngleSegment s2(base::Angle::fromDeg(y), 2*M_PI - base::Angle::fromDeg(1).getRad());
-                std::vector<AngleSegment> ret = s1.getIntersections(s2);
+                AngleSegment s1(Angle::fromDeg(x), 2*M_PI - Angle::fromDeg(1).getRad());
+                AngleSegment s2(Angle::fromDeg(y), 2*M_PI - Angle::fromDeg(1).getRad());
+                vector<AngleSegment> ret = s1.getIntersections(s2);
                 double sum = 0;
-                for(std::vector<AngleSegment>::const_iterator it = ret.begin(); it != ret.end(); it++)
+                for(vector<AngleSegment>::const_iterator it = ret.begin(); it != ret.end(); it++)
                 {
                     sum += it->width;
-//                     std::cout << "A1 " << x << " A2 " << y << " Result 8" << *it << std::endl;
                 }
                 if(abs(x-y) < 2 || (x == 0 && y == 359 )|| (y == 0 && x == 359))
                 {
                     if(ret.size() != 1)
                     {
-                        for(std::vector<AngleSegment>::const_iterator it = ret.begin(); it != ret.end(); it++)
+                        ostringstream out;
+                        for(vector<AngleSegment>::const_iterator it = ret.begin(); it != ret.end(); it++)
                         {
-                            std::cout << "A1 " << x << " A2 " << y << " Result 8" << *it << std::endl;
+                            out << "A1 " << x << " A2 " << y << " Result 8" << *it << endl;
                         }
+                        BOOST_TEST_MESSAGE(out.str());
+                        BOOST_FAIL("one intersection was expected, got " + to_string(ret.size()));
                     }
-                    BOOST_CHECK(ret.size() == 1);
-                    assert(fabs((2*M_PI - base::Angle::fromDeg(1).getRad()) - sum) < 0.000001);
+
+                    double diff = fabs((2*M_PI - Angle::fromDeg(1).getRad()) - sum);
+                    if (diff >= 0.000001) {
+                        BOOST_REQUIRE(diff < 0.000001);
+                    }
                 }
                 else
                 {
                     if(ret.size() != 2)
                     {
-                        for(std::vector<AngleSegment>::const_iterator it = ret.begin(); it != ret.end(); it++)
+                        ostringstream out;
+                        for(vector<AngleSegment>::const_iterator it = ret.begin(); it != ret.end(); it++)
                         {
-                            std::cout << "A1 " << x << " A2 " << y << " Result 8" << *it << std::endl;
+                            out << "A1 " << x << " A2 " << y << " Result 8" << *it << endl;
                         }
+                        BOOST_TEST_MESSAGE(out.str());
+                        BOOST_FAIL("two intersections were expected, got " + to_string(ret.size()));
                     }
 
-                    BOOST_CHECK(ret.size() == 2);
-                    assert(fabs((2*M_PI - base::Angle::fromDeg(2).getRad()) - sum) < 0.000001);
+                    double diff = fabs((2*M_PI - Angle::fromDeg(2).getRad()) - sum);
+                    if (diff >= 0.000001) {
+                        BOOST_REQUIRE(diff < 0.000001);
+                    }
                 }
             }
         }
