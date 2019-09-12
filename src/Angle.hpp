@@ -122,6 +122,13 @@ public:
         return Angle(M_PI);
     }
 
+    /** Returns the Angle object representing PI
+     */
+    static inline Angle PI()
+    {
+        return Angle(M_PI);
+    }
+
     /**
      * @return canonical value of the angle in radians
      */
@@ -339,6 +346,8 @@ public:
 };
 
 std::ostream& operator << (std::ostream& os, AngleSegment seg);
+template<> inline base::Angle unknown() { return base::Angle(); }
+inline bool isUnknown(base::Angle value) { return std::isnan(value.getRad()); }
 
 }
 

@@ -6,14 +6,22 @@ namespace base {
 
 Angle Angle::vectorToVector(const Vector3d& a, const Vector3d& b)
 {
-    double dot = a.dot(b);
-    double norm = a.norm() * b.norm();
-    return fromRad(acos(dot / norm));
+    double cos = a.dot(b) / (a.norm() * b.norm());
+    if (cos > 1)
+        cos = 1;
+    else if (cos < -1)
+        cos = -1;
+
+    return fromRad(acos(cos));
 }
 
 Angle Angle::vectorToVector(const Vector3d& a, const Vector3d& b, const Vector3d& positive)
 {
     double cos = a.dot(b) / (a.norm() * b.norm());
+    if (cos > 1)
+        cos = 1;
+    else if (cos < -1)
+        cos = -1;
 
     bool is_positive = (a.cross(b).dot(positive) > 0);
     if (is_positive)
