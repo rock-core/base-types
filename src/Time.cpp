@@ -92,25 +92,25 @@ std::vector<int> Time::toTimeValues() const
 {
     int64_t microseconds = this->microseconds;
 
-    int days = microseconds / 86400000000;
-    microseconds -= days * 86400000000;
-    int hours = microseconds / 3600000000;
-    microseconds -= hours * 3600000000;
-    int minutes = microseconds / 60000000;
-    microseconds -= minutes * 60000000;
-    int seconds = microseconds / 1000000;
-    microseconds -= seconds * 1000000;
-    int milliseconds = microseconds / 1000;
-    microseconds -= milliseconds * 1000;
+    int64_t days = microseconds / 86400000000ll;
+    microseconds -= days * 86400000000ll;
+    int64_t hours = microseconds / 3600000000ll;
+    microseconds -= hours * 3600000000ll;
+    int64_t minutes = microseconds / 60000000ll;
+    microseconds -= minutes * 60000000ll;
+    int64_t seconds = microseconds / 1000000ll;
+    microseconds -= seconds * 1000000ll;
+    int64_t milliseconds = microseconds / 1000ll;
+    microseconds -= milliseconds * 1000ll;
 
     std::vector<int> timeValues;
     timeValues.reserve(6);
     timeValues.push_back(static_cast<int>(microseconds));
-    timeValues.push_back(milliseconds);
-    timeValues.push_back(seconds);
-    timeValues.push_back(minutes);
-    timeValues.push_back(hours);
-    timeValues.push_back(days);
+    timeValues.push_back(static_cast<int>(milliseconds));
+    timeValues.push_back(static_cast<int>(seconds));
+    timeValues.push_back(static_cast<int>(minutes));
+    timeValues.push_back(static_cast<int>(hours));
+    timeValues.push_back(static_cast<int>(days));
 
     return timeValues;
 }
