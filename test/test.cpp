@@ -513,10 +513,54 @@ BOOST_AUTO_TEST_CASE(time_toTimeValues)
     base::Time time = base::Time::fromMicroseconds(93784005006);
     std::vector<int> timeValues = time.toTimeValues();
 
-    for (int i = 0; i < timeValues.size(); ++i)
+    for (size_t i = 0; i < timeValues.size(); ++i)
     {
         BOOST_CHECK_EQUAL(timeValues.at(i), timeValues.size() - i);
     }
+
+    // Test maximum time.
+    base::Time maxTime = base::Time::max();
+    std::vector<int> maxTimeValues = maxTime.toTimeValues();
+    int64_t maxTimeMicroseconds = maxTimeValues.at(0) +         // µs
+                           1000ll * (maxTimeValues.at(1) +      // ms
+                           1000ll * (maxTimeValues.at(2) +      // s
+                           60ll * (maxTimeValues.at(3) +        // m
+                           60ll * (maxTimeValues.at(4) +        // h
+                           24ll * maxTimeValues.at(5)))));      // d
+    BOOST_CHECK_EQUAL(maxTimeMicroseconds, maxTime.microseconds);
+
+    // Test minimum time.
+    base::Time minTime = base::Time::fromMicroseconds(std::numeric_limits<int64_t>::min());
+    std::vector<int> minTimeValues = minTime.toTimeValues();
+    int64_t minTimeMicroseconds = minTimeValues.at(0) +         // µs
+                           1000ll * (minTimeValues.at(1) +      // ms
+                           1000ll * (minTimeValues.at(2) +      // s
+                           60ll * (minTimeValues.at(3) +        // m
+                           60ll * (minTimeValues.at(4) +        // h
+                           24ll * minTimeValues.at(5)))));      // d
+    BOOST_CHECK_EQUAL(minTimeMicroseconds, minTime.microseconds);
+
+    // Test maximum values per field.
+    int64_t days = 31; // Not really capped since there are no months, but covered by max time above.
+    int64_t hours = 23;
+    int64_t minutes = 59;
+    int64_t seconds = 59;
+    int64_t milliseconds = 999;
+    int64_t microseconds = 999;
+    uint64_t usecs = ((((days
+                     * 24 + hours)
+                     * 60 + minutes)
+                     * 60 + seconds)
+                     * 1000 + milliseconds)
+                     * 1000 + microseconds;
+    base::Time maxValuesTime = base::Time::fromMicroseconds(usecs);
+    std::vector<int> maxValuesTimeValues = maxValuesTime.toTimeValues();
+    BOOST_CHECK_EQUAL(maxValuesTimeValues.at(0), microseconds);
+    BOOST_CHECK_EQUAL(maxValuesTimeValues.at(1), milliseconds);
+    BOOST_CHECK_EQUAL(maxValuesTimeValues.at(2), seconds);
+    BOOST_CHECK_EQUAL(maxValuesTimeValues.at(3), minutes);
+    BOOST_CHECK_EQUAL(maxValuesTimeValues.at(4), hours);
+    BOOST_CHECK_EQUAL(maxValuesTimeValues.at(5), days);
 }
 
 BOOST_AUTO_TEST_CASE( laser_scan_test )
