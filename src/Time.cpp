@@ -1,5 +1,6 @@
 #include "Time.hpp"
 
+#include <time.h>
 #include <sys/time.h>
 #include <math.h>
 #include <iomanip>
@@ -54,7 +55,7 @@ bool Time::operator>=(const Time& ts) const
 
 bool Time::operator<=(const Time& ts) const
 {
-    return !(*this > ts); 
+    return !(*this > ts);
 }
 
 Time Time::operator-(const Time& ts) const
@@ -121,10 +122,10 @@ std::string Time::toString(Time::Resolution resolution, const std::string& mainF
     int uSecs = tv.tv_usec;
 
     time_t when = tv.tv_sec;
-    struct tm *tm = localtime(&when); 
+    struct tm *tm = localtime(&when);
 
     char time[50];
-    strftime(time,50, mainFormat.c_str(), tm);
+    strftime(time, 50, mainFormat.c_str(), tm);
 
     char buffer[57];
     switch(resolution)
@@ -173,7 +174,7 @@ Time Time::fromMilliseconds(int64_t value)
 
 Time Time::fromSeconds(int64_t value)
 {
-    return Time(value * UsecPerSec); 
+    return Time(value * UsecPerSec);
 }
 
 Time Time::fromSeconds(int value)
@@ -189,15 +190,17 @@ Time Time::fromSeconds(int64_t value, int microseconds)
 Time Time::fromSeconds(double value)
 {
     int64_t seconds = value;
-    return Time(seconds * UsecPerSec + static_cast<int64_t>(round((value - seconds) * UsecPerSec)));
+    return Time(seconds * UsecPerSec +
+                static_cast<int64_t>(round((value - seconds) * UsecPerSec)));
 }
 
 Time Time::max()
 {
     return Time(std::numeric_limits<int64_t>::max());
-} 
+}
 
-Time Time::fromTimeValues(int year, int month, int day, int hour, int minute, int seconds, int millis, int micros)
+Time Time::fromTimeValues(int year, int month, int day,
+                          int hour, int minute, int seconds, int millis, int micros)
 {
     struct tm timeobj;
     timeobj.tm_year = year - 1900;
@@ -217,27 +220,30 @@ Time Time::fromTimeValues(int year, int month, int day, int hour, int minute, in
     timeVal += millis * 1000 + micros;
 
 
-    return Time(timeVal); 
+    return Time(timeVal);
 }
 
-Time Time::fromString(const std::string& stringTime, Time::Resolution resolution, const std::string& mainFormat)
+Time Time::fromString(const std::string& stringTime, Time::Resolution resolution,
+                      const std::string& mainFormat)
 {
     std::string mainTime = stringTime;
     int32_t usecs = 0;
-    if(resolution > Seconds)
+    if (resolution > Seconds)
     {
         size_t pos = stringTime.find_last_of(':');
         std::string usecsString = stringTime.substr(pos+1);
         size_t usecsStringLength = usecsString.size();
-        if( (usecsStringLength == 3 || usecsStringLength == 6) && !(usecsStringLength == 3 && resolution > Milliseconds))
+        bool match = (usecsStringLength == 6) ||
+                     (usecsStringLength == 3 && resolution == Milliseconds);
+
+        if (!match)
         {
-            // string matches resolutions
-        } else
-        { 
-            throw std::runtime_error("Time::fromString failed - resolution does not match provided Time-String");
+            throw std::runtime_error(
+                "Time::fromString: required resolution does not match the given string"
+            );
         }
 
-        switch(resolution)
+        switch (resolution)
         {
             case Milliseconds:
                 sscanf(usecsString.c_str(), "%03d", &usecs);
@@ -259,15 +265,18 @@ Time Time::fromString(const std::string& stringTime, Time::Resolution resolution
     }
 
     struct tm tm;
-    if(NULL == strptime(mainTime.c_str(), mainFormat.c_str(), &tm))
+    if (NULL == strptime(mainTime.c_str(), mainFormat.c_str(), &tm))
     {
-        throw std::runtime_error("Time::fromString failed- Time-String '" + mainTime + "' did not match the given format '" + mainFormat +"'");
+        throw std::runtime_error(
+            "Time::fromString failed: " + mainTime + "' did not match the given "
+            "format '" + mainFormat +"'"
+        );
     }
-    // " ... not set by strptime(); tells mktime() to determine 
+    // " ... not set by strptime(); tells mktime() to determine
     // whether daylight saving time is in effect ..."
     // (http://pubs.opengroup.org/onlinepubs/007904975/functions/strptime.html)
-        
-    tm.tm_isdst = -1; 
+
+    tm.tm_isdst = -1;
     time_t time = mktime(&tm);
 
     return Time(static_cast<int64_t>(time)*UsecPerSec + static_cast<int64_t>(usecs));

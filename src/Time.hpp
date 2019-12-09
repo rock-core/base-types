@@ -12,7 +12,7 @@ namespace base
     {
     private:
         explicit Time(int64_t _microseconds);
-        
+
     public:
         int64_t microseconds;
 
@@ -58,28 +58,28 @@ namespace base
          *     below seconds resolution if requested by the resolution argument
          **/
 	std::string toString(base::Time::Resolution resolution = Microseconds, const std::string& mainFormat = "%Y%m%d-%H:%M:%S") const;
-       
+
         /** Returns this time as a fractional number of seconds */
         double toSeconds() const;
-        
+
         /** Returns this time as an integer number of milliseconds (thus dropping the microseconds) */
         int64_t toMilliseconds() const;
-        
+
         /** Returns this time as an integer number of microseconds */
         int64_t toMicroseconds() const;
-        
+
         static Time fromMicroseconds(int64_t value);
-        
+
 	static Time fromMilliseconds(int64_t value);
-        
+
         static Time fromSeconds(int64_t value);
-        
+
         static Time fromSeconds(int value);
-        
+
         static Time fromSeconds(int64_t value, int microseconds);
-        
+
         static Time fromSeconds(double value);
-        
+
         /** Returns the maximum time value possible */
         static Time max();
 
