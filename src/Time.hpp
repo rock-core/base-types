@@ -84,36 +84,55 @@ namespace base
         static Time max();
 
         /**
-          * \brief Create time from int Time Values.
-          * Creates a time object from the time values (year, month, day ...) given as integer values. This function can be used
-          * when the time values are only available as seperated values in numerical form.
+          * \brief Create time from broken-down time values specified in the
+          *        local time zone
+          *
+          * Creates a time object from the time values (year, month, day ...)
+          * given as integer values. This function can be used when the time
+          * values are only available as seperated values in numerical form.
+          *
+          * The specified values are expected in the local time zone
+          *
           * \param year The year as integer value. (should be 4 digits)
           * \param month The month of the year (1..12).
           * \param day Day of the month (1..31).
           * \param hour The hour of the day (since midnight 0..23).
-          * \param minute The minutes after the hour (0..59). 
+          * \param minute The minutes after the hour (0..59).
           * \param seconds The seconds after the minute (0..59)
           * \param millis Milliseconds after the last second (0..999)
           * \param micros Microseconds additional to the milliseconds (0..999)
           * \returns a Time object generated from the parameters.
           *
           */
-        static Time fromTimeValues(int year, int month, int day, int hour, int minute, int seconds, int millis, int micros);
-        
+        static Time fromTimeValues(
+            int year, int month, int day, int hour, int minute, int seconds,
+            int millis, int micros
+        );
 
         /**
-        * Create a time object from an input string, by default all parameters are set to convert the string returned
-        * by toString back to a Time object. 
+        * Create a time object from an input string, interpreted as local time
+        *
         * \param stringTime String describing the time
-        * \param resolution Set to a resolution higher than Secs if a (non-standard) msec or usec field is present, i.e. the non standard field is separated by ':'
-        * \param mainFormat valid format for strptime, e.g."%Y%m%d-%H:%M:%S" which the given time string has
+        * \param resolution Set to a resolution higher than Secs if a (non-standard)
+        *                   msec or usec field is present. The milliseconds or
+        *                   microseconds are added after the time string, separated by
+        *                   a colon, e.g. 2012-06-14--12.05.06Z:00100
+        * \param mainFormat valid format for strptime, e.g."%Y%m%d-%H:%M:%S". Note
+        *                   that the timezone field is parsed but basically ignored,
+        *                   i.e. the string is always interpreted as a local time.
+        *                   The default format converts the value returned by
+        *                   fromString (i.e. Time::fromString(time.toString()) is
+        *                   the identity).
         * \throws std::runtime_error on failure such as a mismatching format
         */
-        static Time fromString(const std::string& stringTime, Resolution resolution = Microseconds, const std::string& mainFormat = "%Y%m%d-%H:%M:%S");
+        static Time fromString(
+            const std::string& stringTime,
+            Resolution resolution = Microseconds,
+            const std::string& mainFormat = "%Y%m%d-%H:%M:%S"
+        );
     };
 
     std::ostream& operator << (std::ostream& io, base::Time const& time);
 }
-
 
 #endif

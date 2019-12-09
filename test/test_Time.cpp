@@ -1,5 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include <base/Time.hpp>
+#include <iostream>
 
 BOOST_AUTO_TEST_SUITE(Time)
 
@@ -95,24 +96,30 @@ BOOST_AUTO_TEST_CASE(fromString)
         " vs. converted: " << tzConverted.toString());
     // End time zone check
 
+    tzset();
+    // 1339675506 epoch at 2012-06-13 12:05:06 UTC
+    // conversion done with https://www.epochconverter.com/
+    std::cout << timezone << std::endl;
+    uint64_t expected_utc_us = (1339675506 + timezone) * 1000000;
+
     base::Time formatNow = base::Time::fromString(
         "2012-06-14--12.05.06Z:001001",
         base::Time::Microseconds,
         "%Y-%m-%d--%H.%M.%S%Z"
     );
-    BOOST_REQUIRE_EQUAL(formatNow.toMicroseconds(), 1339668306001001);
+    BOOST_REQUIRE_EQUAL(formatNow.toMicroseconds(), expected_utc_us + 1001);
 
     base::Time expectedSecondResolutionOnly = base::Time::fromString(
         formatNow.toString(), base::Time::Seconds
     );
     BOOST_REQUIRE_EQUAL(expectedSecondResolutionOnly.toMicroseconds(),
-                        1339668306000000);
+                        expected_utc_us);
 
     base::Time expectedMillisecondResolutionOnly = base::Time::fromString(
         formatNow.toString(), base::Time::Milliseconds
     );
     BOOST_REQUIRE_EQUAL(expectedMillisecondResolutionOnly.toMicroseconds(),
-                        1339668306001000);
+                        expected_utc_us + 1000);
 
     std::string secondResolutionFormat = formatNow.toString(base::Time::Seconds);
     BOOST_REQUIRE_EQUAL(secondResolutionFormat, "20120614-12:05:06");
