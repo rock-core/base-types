@@ -8,6 +8,7 @@ rock_testsuite(test_base_types test.cpp
     test_Eigen.cpp
     test_Timeout.cpp
     test_Angle.cpp
+    test_Temperature.cpp
     ${OPTIONAL_TESTS}
     DEPS base-types
     DEPS_PKGCONFIG base-logging)

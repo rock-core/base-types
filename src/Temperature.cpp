@@ -3,14 +3,15 @@
 #include <boost/format.hpp>
 #include <base/Float.hpp>
 
-namespace base {
+using namespace std;
+using namespace base;
 
 Temperature::Temperature() : kelvin(unknown<double>())
 {
-    
+
 }
 
-Temperature::Temperature(double kelvin) : kelvin(kelvin) 
+Temperature::Temperature(double kelvin) : kelvin(kelvin)
 {
 
 }
@@ -70,42 +71,38 @@ bool Temperature::operator>(const Temperature& other) const
     return this->kelvin > other.kelvin;
 }
 
-Temperature operator+(Temperature a, Temperature b)
+Temperature base::operator+(Temperature a, Temperature b)
 {
     return Temperature::fromKelvin( a.getKelvin() + b.getKelvin() );
 }
 
-Temperature operator-(Temperature a, Temperature b)
+Temperature base::operator-(Temperature a, Temperature b)
 {
     return Temperature::fromKelvin( a.getKelvin() - b.getKelvin() );
 }
 
-Temperature operator*(Temperature a, double b)
+Temperature base::operator*(Temperature a, double b)
 {
     return Temperature::fromKelvin( a.getKelvin() * b );
 }
 
-Temperature operator*(double a, Temperature b)
+Temperature base::operator*(double a, Temperature b)
 {
     return Temperature::fromKelvin( a * b.getKelvin() );
 }
 
-std::ostream& operator<<(std::ostream& os, Temperature temperature)
+std::ostream& base::operator<<(std::ostream& os, Temperature temperature)
 {
-    os << temperature.getCelsius() << boost::format("[%3.1f celsius]");
+    os << boost::format("[%3.1f celsius]") % temperature.getCelsius();
     return os;
 }
 
 bool Temperature::isInRange(const Temperature &left_limit, const Temperature &right_limit) const
 {
-    if((right_limit-left_limit).kelvin < 0)
-        return !isInRange(right_limit,left_limit);
-    if((*this -left_limit).getKelvin() >= 0 && (right_limit -*this).getKelvin() >= 0) 
-        return true;
-    return false;
+    double min = left_limit.kelvin;
+    double max = right_limit.kelvin;
+    if (min > max) {
+        swap(min, max);
+    }
+    return (min <= kelvin && kelvin <= max);
 }
-
-
-} //end namespace base
-
-
