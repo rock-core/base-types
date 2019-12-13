@@ -8,8 +8,11 @@
 #include <stdio.h>
 #include <time.h>
 #include <limits>
+#include <regex>
 
 namespace base {
+
+std::string Time::DEFAULT_FORMAT = "%Y%m%d-%H:%M:%S";
 
 Time::Time(int64_t _microseconds) : microseconds(_microseconds)
 {
@@ -116,7 +119,8 @@ std::vector<int> Time::toTimeValues() const
     return timeValues;
 }
 
-std::string Time::toString(Time::Resolution resolution, const std::string& mainFormat) const
+std::string Time::toString(Time::Resolution resolution,
+        const std::string& mainFormat) const
 {
     struct timeval tv = toTimeval();
     int uSecs = tv.tv_usec;
@@ -127,23 +131,26 @@ std::string Time::toString(Time::Resolution resolution, const std::string& mainF
     char time[50];
     strftime(time, 50, mainFormat.c_str(), tm);
 
+    char tzInfo[6];
+    strftime(tzInfo, 6, "%z", tm);
+
     char buffer[57];
     switch(resolution)
     {
         case Seconds:
-            return std::string(time);
+            sprintf(buffer,"%s%s", time, tzInfo);
+            break;
         case Milliseconds:
-            sprintf(buffer,"%s:%03d", time, (int) (uSecs/1000.0));
+            sprintf(buffer,"%s:%03d%s", time, (int) (uSecs/1000.0),tzInfo);
             break;
         case Microseconds:
-            sprintf(buffer,"%s:%06d", time, uSecs);
+            sprintf(buffer,"%s:%06d%s", time, uSecs,tzInfo);
             break;
         default:
             throw std::invalid_argument(
                 "Time::toString(): invalid "
                 "value in switch-statement");
     }
-
     return std::string(buffer);
 }
 
@@ -228,10 +235,21 @@ Time Time::fromString(const std::string& stringTime, Time::Resolution resolution
 {
     std::string mainTime = stringTime;
     int32_t usecs = 0;
+
+    // Check for %z suffix
+    std::string tzInfo;
+    std::regex tzPattern("(.*)([\\-\\+][0-9]{4}$)");
+    std::smatch tzMatch;
+    if(std::regex_match(stringTime, tzMatch, tzPattern))
+    {
+        tzInfo = tzMatch[2].str();
+        mainTime = tzMatch[1].str();
+    }
+
     if (resolution > Seconds)
     {
-        size_t pos = stringTime.find_last_of(':');
-        std::string usecsString = stringTime.substr(pos+1);
+        size_t pos = mainTime.find_last_of(':');
+        std::string usecsString = mainTime.substr(pos+1);
         size_t usecsStringLength = usecsString.size();
         bool match = (usecsStringLength == 6) ||
                      (usecsStringLength == 3 && resolution == Milliseconds);
@@ -239,7 +257,8 @@ Time Time::fromString(const std::string& stringTime, Time::Resolution resolution
         if (!match)
         {
             throw std::runtime_error(
-                "Time::fromString: required resolution does not match the given string"
+                "Time::fromString: required resolution format does not match the given string '"
+                    + stringTime + "' -- identified subseconds: '" + usecsString + "'"
             );
         }
 
@@ -272,14 +291,70 @@ Time Time::fromString(const std::string& stringTime, Time::Resolution resolution
             "format '" + mainFormat +"'"
         );
     }
-    // " ... not set by strptime(); tells mktime() to determine
-    // whether daylight saving time is in effect ..."
-    // (http://pubs.opengroup.org/onlinepubs/007904975/functions/strptime.html)
 
-    tm.tm_isdst = -1;
-    time_t time = mktime(&tm);
+    time_t time;
+    if(tzInfo.empty())
+    {
+        tm.tm_isdst = -1;
+        time = mktime(&tm);
+    } else
+    {
+        // We have to go through a few intermediate "time zones" to reach UTC
+        // The problem we try to work around here is that mktime converts a broken-down time
+        // in the local time zone to UTC, but what we have is a time in UTC and want to convert
+        // it to UTC
+
+        // 'tm' is the time represented by the string. It is `tzInfo` seconds away from UTC
+        int64_t tzOffset = Time::tzInfoToSeconds(tzInfo);
+        tm.tm_sec += tzOffset;
+
+        // OK, now `tm` is the string's time in UTC. Note that mktime handles wraparounds
+        tm.tm_isdst = -1;
+        time = mktime(&tm);
+
+        // Since mktime expected `tm` to be in local time, `time` is UTC with the local time
+        // zone offset as it was at `tm` applied in opposite (e.g. time would be UTC-3 if
+        // executed on a machine whose current time zone is UTC+3).
+        // We have to correct with the local offset to finally get UTC
+        int64_t localTimezoneOffset = Time::getTimezoneOffset(time);
+        time -= localTimezoneOffset;
+    }
 
     return Time(static_cast<int64_t>(time)*UsecPerSec + static_cast<int64_t>(usecs));
+}
+
+int64_t Time::getTimezoneOffset(time_t when)
+{
+    // gmtime returns UTC
+    struct tm *tm = gmtime(&when);
+    // " tm_isdst ... not set by strptime(); -1 tells mktime() to determine
+    // whether daylight saving time is in effect ..."
+    // (http://pubs.opengroup.org/onlinepubs/007904975/functions/strptime.html)
+    tm->tm_isdst = -1;
+    time_t localWhen = mktime(tm);
+    return localWhen - when;
+}
+
+int64_t Time::tzInfoToSeconds(const std::string& tzInfo)
+{
+    int64_t tzOffset = 0;
+    int hours;
+    int minutes;
+    int r = sscanf(tzInfo.c_str(), "%3d%2d",&hours, &minutes);
+    if(r != 2 || tzInfo.size() != 5)
+    {
+        throw std::invalid_argument("base::Time::tzInfoToSeconds: parsing of "
+                "timezone offset '" +tzInfo + "' failed");
+    }
+    tzOffset = hours*3600;
+    if(tzOffset < 0)
+    {
+        tzOffset -= minutes*60;
+    } else {
+        tzOffset += minutes*60;
+    }
+    // adapt to same direction as timezone value
+    return -tzOffset;
 }
 
 

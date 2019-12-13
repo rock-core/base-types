@@ -16,12 +16,13 @@ namespace base
     public:
         int64_t microseconds;
 
-	static const int UsecPerSec = 1000000LL;
+        static const int UsecPerSec = 1000000LL;
 
         enum Resolution { Seconds = 1, Milliseconds = 1000, Microseconds = 1000000 };
 
         Time();
 
+        static std::string DEFAULT_FORMAT;
 
     public:
         /** Returns the current time */
@@ -52,12 +53,31 @@ namespace base
          */
         std::vector<int> toTimeValues() const;
 
-	/** Convert time into a string
+        /** Convert time into a string
          * \param resolution Resolution which the string should present
          * \param mainFormat Main format to use -- this is passed to strftime and appended by ':' plus the
-         *     below seconds resolution if requested by the resolution argument
+         *     below seconds resolution if requested by the resolution argument,
+         *     and additionally suffixed by '\%z' (see documentation of strftime)
+         *     the current timezone's offset to UTC
          **/
-	std::string toString(base::Time::Resolution resolution = Microseconds, const std::string& mainFormat = "%Y%m%d-%H:%M:%S") const;
+        std::string toString(base::Time::Resolution resolution = Microseconds,
+                const std::string& mainFormat = base::Time::DEFAULT_FORMAT) const;
+
+        /**
+          * Get the current timezone's offset to UTC - corresponding
+          * to strftime's format field '\%z'
+          * \param when Time in seconds since the Epoch, 1970-01-01 00:00:00 +0000 (UTC)
+          * \return timezone offset in seconds for time specified by \p when
+          */
+        static int64_t getTimezoneOffset(time_t when);
+
+        /**
+          * Convert a string representing the numeric timezone
+          * (see strftime documentation of format field '\%z') into seconds
+          * \param tzInfo numeric timezone (as offset to UTC) in the format +hhmm or -hhmm
+          * \return time offset in seconds to UTC
+          */
+        static int64_t tzInfoToSeconds(const std::string& tzInfo);
 
         /** Returns this time as a fractional number of seconds */
         double toSeconds() const;
@@ -70,7 +90,7 @@ namespace base
 
         static Time fromMicroseconds(int64_t value);
 
-	static Time fromMilliseconds(int64_t value);
+        static Time fromMilliseconds(int64_t value);
 
         static Time fromSeconds(int64_t value);
 
@@ -113,22 +133,30 @@ namespace base
         * Create a time object from an input string, interpreted as local time
         *
         * \param stringTime String describing the time
+        *                   If the string ends with the offset to UTC '\%z' (\see
+        *                   documentation of strftime), this offset is applied to
+        *                   return a UTC based time object.
+        *                   If the string omits the '\%z' suffix it is interpreted as a local time.
         * \param resolution Set to a resolution higher than Secs if a (non-standard)
         *                   msec or usec field is present. The milliseconds or
         *                   microseconds are added after the time string, separated by
         *                   a colon, e.g. 2012-06-14--12.05.06Z:00100
-        * \param mainFormat valid format for strptime, e.g."%Y%m%d-%H:%M:%S". Note
-        *                   that the timezone field is parsed but basically ignored,
-        *                   i.e. the string is always interpreted as a local time.
+        * \param mainFormat valid main format for strptime, e.g."%Y%m%d-%H:%M:%S". Note
+        *                   that the timezone field '\%Z' is parsed but basically
+        *                   ignored.
         *                   The default format converts the value returned by
         *                   fromString (i.e. Time::fromString(time.toString()) is
         *                   the identity).
+        * \returns If the input string ends with a time offset representation of the form
+        *           +HHMM (+0230 for 2:30 east of UTC), the value returned is
+        *           the UTC time. Otherwise, the string is interpreted as a time
+        *           in the local time zone and converted to UTC accordingly.
         * \throws std::runtime_error on failure such as a mismatching format
         */
         static Time fromString(
             const std::string& stringTime,
             Resolution resolution = Microseconds,
-            const std::string& mainFormat = "%Y%m%d-%H:%M:%S"
+            const std::string& mainFormat = base::Time::DEFAULT_FORMAT
         );
     };
 

@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include <base/Time.hpp>
 #include <iostream>
+#include <time.h>
 
 BOOST_AUTO_TEST_SUITE(Time)
 
@@ -69,9 +70,13 @@ BOOST_AUTO_TEST_CASE(multiply)
 
 BOOST_AUTO_TEST_CASE(fromString)
 {
+    // Check localtime
     base::Time now = base::Time::now();
     std::string nowString = now.toString(base::Time::Microseconds);
     base::Time expectedNow = base::Time::fromString(nowString);
+
+    BOOST_TEST_MESSAGE("Timezone offset: " << base::Time::getTimezoneOffset(
+                now.toTimeval().tv_sec));
 
     BOOST_REQUIRE_EQUAL(nowString, expectedNow.toString());
     BOOST_REQUIRE_EQUAL(now.toMicroseconds(), expectedNow.toMicroseconds());
@@ -79,8 +84,14 @@ BOOST_AUTO_TEST_CASE(fromString)
     // Timezone conversion check -- since it depends on the current local time,
     // either summer or winter check would fail in case of an error
     // Summer
-    base::Time tzOrig = base::Time::fromString("20120601-10:00:00", base::Time::Seconds);
+    //
+    uint64_t summer_utc_seconds = 1338537600;
+    base::Time tzOrig = base::Time::fromString("20120601-10:00:00+0200", base::Time::Seconds);
+    BOOST_REQUIRE_EQUAL(summer_utc_seconds,tzOrig.toSeconds());
+
     base::Time tzConverted = base::Time::fromString(tzOrig.toString());
+    BOOST_REQUIRE_EQUAL(summer_utc_seconds,tzConverted.toSeconds());
+
     BOOST_REQUIRE_MESSAGE(
         tzOrig == tzConverted,
         "summer time: orig: " << tzOrig.toString() <<
@@ -88,32 +99,60 @@ BOOST_AUTO_TEST_CASE(fromString)
     );
 
     // Winter
-    tzOrig = base::Time::fromString("20121201-10:00:00", base::Time::Seconds);
+    uint64_t winter_utc_seconds = 1354352400;
+    tzOrig = base::Time::fromString("20121201-10:00:00+0100", base::Time::Seconds);
+    BOOST_REQUIRE_MESSAGE(winter_utc_seconds == tzOrig.toSeconds(), "Winter with correct utc time");
     tzConverted = base::Time::fromString(tzOrig.toString());
+    BOOST_REQUIRE_MESSAGE(winter_utc_seconds == tzConverted.toSeconds(), "Winter with correct utc time");
+
     BOOST_REQUIRE_MESSAGE(
         tzOrig == tzConverted,
         "winter time: " << tzOrig.toString() <<
         " vs. converted: " << tzConverted.toString());
     // End time zone check
 
+    uint64_t expected_utc_s = 1339675506;
+    base::Time formatNowUTC0 = base::Time::fromString(
+        "2012-06-14--12.05.06:001001+0000",
+        base::Time::Microseconds,
+        "%Y-%m-%d--%H.%M.%S"
+    );
+
+    BOOST_REQUIRE_EQUAL(formatNowUTC0.toSeconds(), expected_utc_s + 0.001001);
+
+    base::Time formatNowBerlin = base::Time::fromString(
+        "2012-06-14--14.05.06:001001+0200",
+        base::Time::Microseconds,
+        "%Y-%m-%d--%H.%M.%S"
+    );
+    BOOST_REQUIRE_EQUAL(formatNowUTC0.toMilliseconds(), formatNowBerlin.toMilliseconds());
+
+    base::Time formatNowBrasil = base::Time::fromString(
+        "2012-06-14--09.05.06:001001-0300",
+        base::Time::Microseconds,
+        "%Y-%m-%d--%H.%M.%S"
+    );
+    BOOST_REQUIRE_EQUAL(formatNowUTC0.toMilliseconds(), formatNowBrasil.toMilliseconds());
+    BOOST_REQUIRE_EQUAL(formatNowBrasil.toMilliseconds(), formatNowBerlin.toMilliseconds());
+
+
     tzset();
-    // 1339675506 epoch at 2012-06-13 12:05:06 UTC
-    // conversion done with https://www.epochconverter.com/
+    //// 1339675506 epoch at 2012-06-13 12:05:06 UTC
+    //// conversion done with https://www.epochconverter.com/
     std::cout << timezone << std::endl;
-    uint64_t expected_utc_us = (1339675506 + timezone) * 1000000;
+    uint64_t expected_utc_us = expected_utc_s * 1000000;
 
     base::Time formatNow = base::Time::fromString(
-        "2012-06-14--12.05.06Z:001001",
+        "2012-06-14--12.05.06:001001+0000",
         base::Time::Microseconds,
-        "%Y-%m-%d--%H.%M.%S%Z"
+        "%Y-%m-%d--%H.%M.%S"
     );
-    BOOST_REQUIRE_EQUAL(formatNow.toMicroseconds(), expected_utc_us + 1001);
 
     base::Time expectedSecondResolutionOnly = base::Time::fromString(
         formatNow.toString(), base::Time::Seconds
     );
     BOOST_REQUIRE_EQUAL(expectedSecondResolutionOnly.toMicroseconds(),
-                        expected_utc_us);
+                        expected_utc_us );
 
     base::Time expectedMillisecondResolutionOnly = base::Time::fromString(
         formatNow.toString(), base::Time::Milliseconds
@@ -121,26 +160,54 @@ BOOST_AUTO_TEST_CASE(fromString)
     BOOST_REQUIRE_EQUAL(expectedMillisecondResolutionOnly.toMicroseconds(),
                         expected_utc_us + 1000);
 
-    std::string secondResolutionFormat = formatNow.toString(base::Time::Seconds);
-    BOOST_REQUIRE_EQUAL(secondResolutionFormat, "20120614-12:05:06");
+
+    // Getting tzinfo for current timezone
+    // 2012-06-14 00:00:00
+    char tzInfo[6];
+    time_t when = 1339632000;
+    struct tm *tm = localtime(&when);
+    strftime(tzInfo, 6, "%z", tm);
+
+    base::Time formatNowUTC = base::Time::fromString(
+        "2012-06-14--13.05.06Z:001001" + std::string(tzInfo),
+        base::Time::Microseconds,
+        "%Y-%m-%d--%H.%M.%S"
+    );
+
+    // Check without offset being specified
+    base::Time formatNowLocal = base::Time::fromString(
+        "2012-06-14--13.05.06Z:001001",
+        base::Time::Microseconds,
+        "%Y-%m-%d--%H.%M.%S"
+    );
+
+    BOOST_REQUIRE_EQUAL(formatNowUTC.toSeconds(), formatNowLocal.toSeconds());
+
+    BOOST_TEST_MESSAGE(formatNowUTC.toString());
 
     std::string millisecondResolutionFormat =
-        formatNow.toString(base::Time::Milliseconds);
-    BOOST_REQUIRE_EQUAL(millisecondResolutionFormat, "20120614-12:05:06:001");
+        formatNowUTC.toString(base::Time::Milliseconds);
+    BOOST_REQUIRE_EQUAL("20120614-13:05:06:001"+ std::string(tzInfo),
+            millisecondResolutionFormat);
 
     BOOST_REQUIRE_THROW(base::Time::fromString(millisecondResolutionFormat,
                         base::Time::Microseconds), std::runtime_error);
 
     std::string microsecondResolutionFormat =
-        formatNow.toString(base::Time::Microseconds);
-    BOOST_REQUIRE_EQUAL(microsecondResolutionFormat, "20120614-12:05:06:001001");
+        formatNowUTC.toString(base::Time::Microseconds);
+    BOOST_REQUIRE_EQUAL(microsecondResolutionFormat, "20120614-13:05:06:001001" + std::string(tzInfo));
 
     std::string customFormat =
-        formatNow.toString(base::Time::Milliseconds, "Time: %Y%m%dT%H%M%S");
-    BOOST_REQUIRE_EQUAL(customFormat, "Time: 20120614T120506:001");
+        formatNowUTC.toString(base::Time::Milliseconds, "Time: %Y%m%dT%H%M%S");
+    BOOST_REQUIRE_EQUAL(customFormat, "Time: 20120614T130506:001" + std::string(tzInfo));
 
-    std::string defaultResolutionFormat = formatNow.toString();
+    std::string defaultResolutionFormat = formatNowUTC.toString();
     BOOST_REQUIRE_EQUAL(microsecondResolutionFormat, defaultResolutionFormat);
+
+    BOOST_REQUIRE_THROW(base::Time::fromString(
+        "2012-06-14--13.05.06Z:001001+100",
+        base::Time::Microseconds,
+        "%Y-%m-%d--%H.%M.%S"), std::runtime_error);
 
 }
 
