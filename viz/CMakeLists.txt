@@ -1,4 +1,4 @@
-rock_find_qt4()
+rock_find_qt5()
 if(SISL_FOUND)
     list(APPEND OPTIONAL_HPP
         TrajectoryVisualization.hpp
@@ -9,8 +9,9 @@ if(SISL_FOUND)
 endif()
 
 rock_vizkit_plugin(base-viz
-    PluginLoader.cpp Uncertainty.cpp Vizkit3DHelper.cpp
-    MOC 
+    Uncertainty.cpp Vizkit3DHelper.cpp
+    MOC
+        PluginLoader.cpp 
         DistanceImageVisualization.cpp 
         LaserScanVisualization.cpp 
         MotionCommandVisualization.cpp 
