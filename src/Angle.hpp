@@ -11,15 +11,15 @@
 namespace base
 {
 
-/** 
+/**
  * This class represents an angle, and can be used instead of double for
  * convenience. The class has a canonical representation of the angle in
- * degrees, in the interval PI < rad <= PI. 
+ * degrees, in the interval PI < rad <= PI.
  */
 class Angle
 {
 public:
-    /** 
+    /**
      * angle in radians.
      * this value will always be PI < rad <= PI
      *
@@ -28,15 +28,15 @@ public:
      */
     double rad;
 
-    /** 
+    /**
      * default constructor, which will initialize the value to unknown (NaN)
      */
     Angle() : rad(base::unknown<double>()) {}
-    
+
 protected:
     explicit Angle( double _rad ) : rad(_rad)
-    { 
-	canonize(); 
+    {
+	canonize();
     }
 
     void canonize()
@@ -45,7 +45,7 @@ protected:
 	{
 	    double intp;
 	    const double side = copysign(M_PI,rad);
-	    rad = -side + 2*M_PI * modf( (rad-side) / (2*M_PI), &intp ); 
+	    rad = -side + 2*M_PI * modf( (rad-side) / (2*M_PI), &intp );
 	}
     }
 
@@ -77,7 +77,7 @@ public:
         return Angle(rad).rad;
     }
 
-    /** 
+    /**
      * use this method to get an angle from radians.
      * @return representation of the given angle.
      * @param rad - angle in radians.
@@ -87,7 +87,7 @@ public:
 	return Angle( rad );
     }
 
-    /** 
+    /**
      * use this method to get an angle from degrees.
      * @return representation of the given angle.
      * @param deg - angle in degrees.
@@ -132,7 +132,7 @@ public:
     /**
      * @return canonical value of the angle in radians
      */
-    double inline getRad() const 
+    double inline getRad() const
     {
 	return rad;
     }
@@ -149,7 +149,7 @@ public:
      * compare two angles for approximate equality
      * @param other - angle to compare
      * @param prec - precision interval in deg
-     * @return true if angle is approximately equal 
+     * @return true if angle is approximately equal
      */
     bool inline isApprox( Angle other, double prec = 1e-5 ) const
     {
@@ -160,17 +160,17 @@ public:
     {
         rad = other.rad;
     }
-    
+
     inline bool operator==(const Angle &other ) const
     {
         return this->rad == other.rad;
     }
-    
+
     inline bool operator<(const Angle &other ) const
     {
         return this->rad < other.rad;
     }
-    
+
     inline bool operator>(const Angle &other ) const
     {
         return this->rad > other.rad;
@@ -199,7 +199,7 @@ public:
         canonize();
         return *this;
     }
-    
+
     inline Angle operator+( const Angle &other ) const
     {
         return Angle::fromRad( getRad() + other.getRad() );
@@ -227,7 +227,7 @@ public:
     {
         return Angle(rad).flip();
     }
-    
+
     /**
      * Inverts the current angle
      * */
@@ -262,7 +262,7 @@ static inline Angle operator*( double a, Angle b )
 std::ostream& operator << (std::ostream& os, Angle angle);
 
 /**
- * This class represents a Segment of a Circle. 
+ * This class represents a Segment of a Circle.
  * This is primary a helper class for doing test if
  * an Angle is inside a certain angle interval.
  * */
@@ -272,7 +272,7 @@ public:
     AngleSegment();
 
     AngleSegment(const Angle &start, double _width);
-    
+
     /**
      * Tests if the given angle is inside of the segment.
      * @param angle - angle to be tested
@@ -312,7 +312,7 @@ public:
     {
         return width;
     }
-    
+
     /**
      * Returns the start angle of the segement
      * @return the start angle of the segement
@@ -322,18 +322,18 @@ public:
     /**
      * Returns the end angle of the segement
      * Note, as the return value is normalized,
-     * using it for computation may result in 
-     * unexpected behaviour. Better use 
+     * using it for computation may result in
+     * unexpected behaviour. Better use
      * getStart + getWidth;
      * @return the end angle of the segement
      * */
     base::Angle getEnd() const;
-    
+
     /**
      * Widht of the segment in radians
      * */
     double width;
-    
+
     /**
      * Start angle of the segment
      * */

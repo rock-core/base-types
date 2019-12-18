@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE(joint_state)
     BOOST_CHECK(state.getField(base::JointState::POSITION) == 0.3);
     BOOST_CHECK(state.getMode() == base::JointState::POSITION);
 
-    state.setField(base::JointState::POSITION, base::NaN<double>()); 
+    state.setField(base::JointState::POSITION, base::NaN<double>());
 
     // Test speed field
     state.setField(base::JointState::SPEED, -.1f);
@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE(joint_state)
     BOOST_REQUIRE_THROW(state.getField(99), std::runtime_error);
     BOOST_REQUIRE_THROW(state.setField(99, 0.5), std::runtime_error);
 
-    //Test with multiple fields 
+    //Test with multiple fields
     state.setField(base::JointState::RAW, 0.1);
     BOOST_REQUIRE_THROW(state.getMode(), std::runtime_error);
     BOOST_CHECK(state.isPosition() == false);
@@ -319,12 +319,12 @@ BOOST_AUTO_TEST_CASE(sonar_scan)
 
     sonar_beam.beam.resize(101);
     sonar_scan.toggleMemoryLayout();
-    //too many bins 
+    //too many bins
     BOOST_REQUIRE_THROW(sonar_scan.addSonarBeam(sonar_beam),std::runtime_error);
 
     sonar_beam.beam.resize(100);
     sonar_beam.bearing = base::Angle::fromDeg(25);
-    //wrong bearing  
+    //wrong bearing
     BOOST_REQUIRE_THROW(sonar_scan.addSonarBeam(sonar_beam,false),std::runtime_error);
 
     //add sonar beam
@@ -395,174 +395,6 @@ BOOST_AUTO_TEST_CASE( time_test )
     BOOST_REQUIRE_EQUAL(max_time, base::Time::max());
 }
 
-BOOST_AUTO_TEST_CASE( time_fromSeconds )
-{
-    base::Time seconds;
-
-    seconds = base::Time::fromSeconds( 35.553 );
-    BOOST_REQUIRE_EQUAL( 35553000, seconds.toMicroseconds() );
-    seconds = base::Time::fromSeconds( -5.553 );
-    BOOST_REQUIRE_EQUAL( -5553000, seconds.toMicroseconds() );
-    seconds = base::Time::fromSeconds( 0.01 );
-    BOOST_REQUIRE_EQUAL( 10000, seconds.toMicroseconds() );
-}
-
-BOOST_AUTO_TEST_CASE( time_fromMicroseconds )
-{
-    base::Time microseconds;
-
-    microseconds = base::Time::fromMicroseconds( -1 );
-    BOOST_REQUIRE_EQUAL( -1, microseconds.toMicroseconds() );
-    microseconds = base::Time::fromMicroseconds( 1 );
-    BOOST_REQUIRE_EQUAL( 1, microseconds.toMicroseconds() );
-}
-
-BOOST_AUTO_TEST_CASE( time_fromMilliseconds )
-{
-    base::Time milliseconds;
-
-    milliseconds = base::Time::fromMilliseconds( -1 );
-    BOOST_REQUIRE_EQUAL( -1000, milliseconds.toMicroseconds() );
-    milliseconds = base::Time::fromMilliseconds( 1 );
-    BOOST_REQUIRE_EQUAL( 1000, milliseconds.toMicroseconds() );
-}
-
-BOOST_AUTO_TEST_CASE(time_operators)
-{
-    base::Time time_10 = base::Time::fromMicroseconds(10);
-    base::Time time_1= base::Time::fromMicroseconds(1);
-    base::Time time_1_neg= base::Time::fromMicroseconds(-1);
-    base::Time time_10_neg= base::Time::fromMicroseconds(-10);
-    
-    BOOST_CHECK(time_1!=time_10);
-
-    BOOST_CHECK(time_10>time_1);
-    BOOST_CHECK(time_1<time_10);
-    BOOST_CHECK(time_1>time_1_neg);
-    BOOST_CHECK(time_1_neg>time_10_neg);
-
-    //test multiplication and equality
-    BOOST_CHECK(time_1*10==time_10);
-    BOOST_REQUIRE_EQUAL(time_1*10,time_10);
-    
-    BOOST_CHECK(time_10/10==time_1);
-    BOOST_REQUIRE_EQUAL(time_10/10,time_1);
-    
-    BOOST_CHECK(time_1_neg*(-1)==time_1);
-    BOOST_REQUIRE_EQUAL(time_1_neg*(-1),time_1);
-}
-
-BOOST_AUTO_TEST_CASE( time_multiply )
-{
-    base::Time t = base::Time::fromSeconds( 35 );
-    BOOST_REQUIRE_EQUAL( 35 * 1e6 * 0.025, (t * 0.025).toMicroseconds() );
-}
-
-BOOST_AUTO_TEST_CASE(time_fromString)
-{
-    base::Time now = base::Time::now();
-    std::string nowString = now.toString(base::Time::Microseconds);
-    base::Time expectedNow = base::Time::fromString(nowString);
-
-    BOOST_REQUIRE_EQUAL(nowString, expectedNow.toString());
-    BOOST_REQUIRE_EQUAL(now.toMicroseconds(),expectedNow.toMicroseconds());
-
-    // Timezone conversion check -- since it depends on the current local time, either summer or winter check would
-    // fail in case of an error
-    // Summer
-    base::Time tzOrig = base::Time::fromString("20120601-10:00:00", base::Time::Seconds);
-    base::Time tzConverted = base::Time::fromString(tzOrig.toString());
-    BOOST_REQUIRE_MESSAGE(tzOrig == tzConverted, "summer time: orig: " << tzOrig.toString() << " vs. converted: " << tzConverted.toString());
-
-    // Winter
-    tzOrig = base::Time::fromString("20121201-10:00:00", base::Time::Seconds);
-    tzConverted = base::Time::fromString(tzOrig.toString());
-    BOOST_REQUIRE_MESSAGE(tzOrig == tzConverted, "winter time: " << tzOrig.toString() << " vs. converted: " << tzConverted.toString());
-    // End time zone check
-
-    base::Time formatNow = base::Time::fromString("2012-06-14--12.05.06Z:001001", base::Time::Microseconds,"%Y-%m-%d--%H.%M.%S%Z");
-    BOOST_REQUIRE_EQUAL(formatNow.toMicroseconds(),1339668306001001);
-
-    base::Time expectedSecondResolutionOnly = base::Time::fromString(formatNow.toString(), base::Time::Seconds);
-    BOOST_REQUIRE_EQUAL(expectedSecondResolutionOnly.toMicroseconds(), 1339668306000000);
-
-    base::Time expectedMillisecondResolutionOnly = base::Time::fromString(formatNow.toString(), base::Time::Milliseconds);
-    BOOST_REQUIRE_EQUAL(expectedMillisecondResolutionOnly.toMicroseconds(), 1339668306001000);
-
-    std::string secondResolutionFormat = formatNow.toString(base::Time::Seconds);
-    BOOST_REQUIRE_EQUAL(secondResolutionFormat,"20120614-12:05:06");
-
-    std::string millisecondResolutionFormat = formatNow.toString(base::Time::Milliseconds);
-    BOOST_REQUIRE_EQUAL(millisecondResolutionFormat,"20120614-12:05:06:001");
-
-    BOOST_REQUIRE_THROW(base::Time::fromString(millisecondResolutionFormat, base::Time::Microseconds), std::runtime_error);
-
-    std::string microsecondResolutionFormat = formatNow.toString(base::Time::Microseconds);
-    BOOST_REQUIRE_EQUAL(microsecondResolutionFormat,"20120614-12:05:06:001001");
-
-    std::string customFormat = formatNow.toString(base::Time::Milliseconds, "Time: %Y%m%dT%H%M%S");
-    BOOST_REQUIRE_EQUAL(customFormat,"Time: 20120614T120506:001");
-
-    std::string defaultResolutionFormat = formatNow.toString();
-    BOOST_REQUIRE_EQUAL(microsecondResolutionFormat,defaultResolutionFormat);
-
-}
-
-BOOST_AUTO_TEST_CASE(time_toTimeValues)
-{
-    base::Time time = base::Time::fromMicroseconds(93784005006);
-    std::vector<int> timeValues = time.toTimeValues();
-
-    for (size_t i = 0; i < timeValues.size(); ++i)
-    {
-        BOOST_CHECK_EQUAL(timeValues.at(i), timeValues.size() - i);
-    }
-
-    // Test maximum time.
-    base::Time maxTime = base::Time::max();
-    std::vector<int> maxTimeValues = maxTime.toTimeValues();
-    int64_t maxTimeMicroseconds = maxTimeValues.at(0) +         // µs
-                           1000ll * (maxTimeValues.at(1) +      // ms
-                           1000ll * (maxTimeValues.at(2) +      // s
-                           60ll * (maxTimeValues.at(3) +        // m
-                           60ll * (maxTimeValues.at(4) +        // h
-                           24ll * maxTimeValues.at(5)))));      // d
-    BOOST_CHECK_EQUAL(maxTimeMicroseconds, maxTime.microseconds);
-
-    // Test minimum time.
-    base::Time minTime = base::Time::fromMicroseconds(std::numeric_limits<int64_t>::min());
-    std::vector<int> minTimeValues = minTime.toTimeValues();
-    int64_t minTimeMicroseconds = minTimeValues.at(0) +         // µs
-                           1000ll * (minTimeValues.at(1) +      // ms
-                           1000ll * (minTimeValues.at(2) +      // s
-                           60ll * (minTimeValues.at(3) +        // m
-                           60ll * (minTimeValues.at(4) +        // h
-                           24ll * minTimeValues.at(5)))));      // d
-    BOOST_CHECK_EQUAL(minTimeMicroseconds, minTime.microseconds);
-
-    // Test maximum values per field.
-    int64_t days = 31; // Not really capped since there are no months, but covered by max time above.
-    int64_t hours = 23;
-    int64_t minutes = 59;
-    int64_t seconds = 59;
-    int64_t milliseconds = 999;
-    int64_t microseconds = 999;
-    uint64_t usecs = ((((days
-                     * 24 + hours)
-                     * 60 + minutes)
-                     * 60 + seconds)
-                     * 1000 + milliseconds)
-                     * 1000 + microseconds;
-    base::Time maxValuesTime = base::Time::fromMicroseconds(usecs);
-    std::vector<int> maxValuesTimeValues = maxValuesTime.toTimeValues();
-    BOOST_CHECK_EQUAL(maxValuesTimeValues.at(0), microseconds);
-    BOOST_CHECK_EQUAL(maxValuesTimeValues.at(1), milliseconds);
-    BOOST_CHECK_EQUAL(maxValuesTimeValues.at(2), seconds);
-    BOOST_CHECK_EQUAL(maxValuesTimeValues.at(3), minutes);
-    BOOST_CHECK_EQUAL(maxValuesTimeValues.at(4), hours);
-    BOOST_CHECK_EQUAL(maxValuesTimeValues.at(5), days);
-}
-
 BOOST_AUTO_TEST_CASE( laser_scan_test )
 {
     //configure laser scan
@@ -618,7 +450,7 @@ BOOST_AUTO_TEST_CASE( laser_scan_test )
     BOOST_CHECK(std::isnan(points[3].y()));
     BOOST_CHECK(std::isnan(points[3].z()));
 
-    //check skipping of invalid scan points  
+    //check skipping of invalid scan points
     laser_scan.convertScanToPointCloud(points,trans);
     BOOST_CHECK(points.size() == 4);
     x = cos(M_PI*0.25);
@@ -727,8 +559,8 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     }
     scan.distances.push_back(0.0);
     scan.distances.push_back(0.0);
-    
-    
+
+
     // create reference points
     std::vector<Eigen::Vector3d> ref_points;
     ref_points.push_back(Eigen::Vector3d(2.0,0.0,0.0));
@@ -739,43 +571,43 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     ref_points.push_back(Eigen::Vector3d(0.0,4.0,0.0));
     ref_points.push_back(Eigen::Vector3d(0.0,0.0,2.0));
     ref_points.push_back(Eigen::Vector3d(0.0,0.0,4.0));
-    
-    
+
+
     // Test polar projection
     // check transformation using the identity
     std::vector<Eigen::Vector3d> scan_points;
     Eigen::Affine3d transform = Eigen::Affine3d::Identity();
     scan.convertDepthMapToPointCloud(scan_points, transform);
-    
+
     BOOST_CHECK(scan_points.size() == 8);
     for(unsigned i = 0; i < scan_points.size(); i++)
 	BOOST_CHECK(scan_points[i].isApprox(ref_points[i], 1e-12));
-    
-    
+
+
     // check transformation with translation
     transform.translation() = Eigen::Vector3d(5.0,0.0,0.0);
     scan_points.clear();
     scan.convertDepthMapToPointCloud(scan_points, transform);
-    
+
     BOOST_CHECK(scan_points.size() == 8);
     for(unsigned i = 0; i < scan_points.size(); i++)
 	BOOST_CHECK(scan_points[i].isApprox(ref_points[i] + transform.translation(), 1e-12));
-    
-    
+
+
     // check transformation with translation and roations
     transform.setIdentity();
     transform.translation() = Eigen::Vector3d(-7.0,3.5,1.0);
-    transform.rotate(Eigen::AngleAxisd(0.1*M_PI,Eigen::Vector3d::UnitZ()) * 
-		    Eigen::AngleAxisd(0.2*M_PI,Eigen::Vector3d::UnitY()) * 
+    transform.rotate(Eigen::AngleAxisd(0.1*M_PI,Eigen::Vector3d::UnitZ()) *
+		    Eigen::AngleAxisd(0.2*M_PI,Eigen::Vector3d::UnitY()) *
 		    Eigen::AngleAxisd(-0.3*M_PI,Eigen::Vector3d::UnitX()));
     scan_points.clear();
     scan.convertDepthMapToPointCloud(scan_points, transform);
-    
+
     BOOST_CHECK(scan_points.size() == 8);
     for(unsigned i = 0; i < scan_points.size(); i++)
 	BOOST_CHECK(scan_points[i].isApprox(transform * ref_points[i], 1e-12));
-    
-    
+
+
     // use multiple transformations
     std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d> > transformations;
     transformations.push_back(transform);
@@ -785,7 +617,7 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     BOOST_CHECK(scan_points.size() == 8);
     for(unsigned i = 0; i < scan_points.size(); i++)
 	BOOST_CHECK(scan_points[i].isApprox(transformations[(i%2==0)?0:1] * ref_points[i], 1e-12));
-    
+
     scan_points.clear();
     scan.convertDepthMapToPointCloud(scan_points, transformations[0], transformations[1], true, true, false);
     BOOST_CHECK(scan_points.size() == 8);
@@ -814,8 +646,8 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     BOOST_CHECK(scan_points_f.size() == 8);
     for(unsigned i = 0; i < scan_points_f.size(); i++)
         BOOST_CHECK(scan_points_f[i].isApprox(ref_points[i].cast<float>(), 1e-6));
-    
-    
+
+
     // Test vertical irregular transformation
     // add irregular scan angles
     scan.vertical_interval.clear();
@@ -830,21 +662,21 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     BOOST_CHECK(scan_points.size() == 8);
     for(unsigned i = 0; i < scan_points.size(); i++)
  	BOOST_CHECK(scan_points[i].isApprox(ref_points[i], 1e-12));
-    
-    
+
+
     // check transformation with translation and roations
     scan_points.clear();
     scan.convertDepthMapToPointCloud(scan_points, transform);
     BOOST_CHECK(scan_points.size() == 8);
     for(unsigned i = 0; i < scan_points.size(); i++)
  	BOOST_CHECK(scan_points[i].isApprox(transform * ref_points[i], 1e-12));
-    
-    
+
+
     // use multiple transformations
     Eigen::Affine3d delta = Eigen::Affine3d::Identity();
     delta.translation() = Eigen::Vector3d(0.1,-0.2,-0.02);
-    delta.rotate(Eigen::AngleAxisd(-0.05*M_PI,Eigen::Vector3d::UnitZ()) * 
-		    Eigen::AngleAxisd(-0.02*M_PI,Eigen::Vector3d::UnitY()) * 
+    delta.rotate(Eigen::AngleAxisd(-0.05*M_PI,Eigen::Vector3d::UnitZ()) *
+		    Eigen::AngleAxisd(-0.02*M_PI,Eigen::Vector3d::UnitY()) *
 		    Eigen::AngleAxisd(0.07*M_PI,Eigen::Vector3d::UnitX()));
     transformations.clear();
     for(unsigned i = 1; i <= scan.vertical_size; i++)
@@ -854,8 +686,8 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     BOOST_CHECK(scan_points.size() == 8);
     for(unsigned i = 0; i < scan_points.size(); i++)
  	BOOST_CHECK(scan_points[i].isApprox(transformations[i/2] * ref_points[i], 1e-12));
-    
-    
+
+
     // don't skip invalid points
     scan_points.clear();
     scan.convertDepthMapToPointCloud(scan_points, transform, false, false);
@@ -888,7 +720,7 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
 	    // fill distances
 	    double distance = 0.1 * (((double)i) * scan.vertical_size + (double)j + 0.1);
 	    scan.distances.push_back(distance);
-	    
+
 	    // compute reference point
 	    Eigen::Vector3d ref_point(distance, 0.0, 0.0);
 	    ref_points.push_back(Eigen::AngleAxisd(atan(-1.0 * (scan.horizontal_interval.front() + (double)i * h_step_width)), Eigen::Vector3d::UnitZ()) *
@@ -924,7 +756,7 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     scan.distances.push_back(base::NaN<float>());
     scan.horizontal_size = 1;
     scan.vertical_size = 4;
-    
+
     BOOST_CHECK(scan.getIndexState(0) == base::samples::DepthMap::VALID_MEASUREMENT);
     BOOST_CHECK(scan.getIndexState(1) == base::samples::DepthMap::TOO_NEAR);
     BOOST_CHECK(scan.getIndexState(2) == base::samples::DepthMap::TOO_FAR);
@@ -934,8 +766,8 @@ BOOST_AUTO_TEST_CASE(depth_map_test)
     BOOST_CHECK(!scan.isIndexValid(1));
     BOOST_CHECK(!scan.isIndexValid(2));
     BOOST_CHECK(!scan.isIndexValid(3));
-    
-    
+
+
     // check exceptions
     scan.vertical_size = 5;
     BOOST_CHECK_THROW(scan.isIndexValid(4), std::out_of_range);
@@ -1034,7 +866,7 @@ BOOST_AUTO_TEST_CASE( pose_test )
     Eigen::Vector3d pos( 10, -1, 20.5 );
     Eigen::Quaterniond orientation( Eigen::AngleAxisd( 0.2, Eigen::Vector3d(0.5, 1.4, 0.1) ) );
 
-    base::Pose p( pos, orientation ); 
+    base::Pose p( pos, orientation );
     Eigen::Affine3d t( p.toTransform() );
 
     BOOST_CHECK( pos.isApprox( t.translation() ) );
@@ -1086,7 +918,7 @@ BOOST_AUTO_TEST_CASE( angle_segment )
 {
     using base::Angle;
     using base::AngleSegment;
-    
+
     {
         Angle start = Angle::fromRad(-M_PI);
         AngleSegment test(start, 2*M_PI);
@@ -1095,9 +927,9 @@ BOOST_AUTO_TEST_CASE( angle_segment )
             Angle angle = Angle::fromRad(i*2*M_PI/20 - M_PI);
             BOOST_CHECK(test.isInside(angle));
         }
-        
+
     }
-    
+
     {
         Angle start = Angle::fromRad(-M_PI / 2.0);
         AngleSegment test(start, M_PI);
@@ -1121,7 +953,7 @@ BOOST_AUTO_TEST_CASE( angle_segment )
         Angle angle = Angle::fromRad(-M_PI / 3 * 4);
         BOOST_CHECK(!test.isInside(angle));
         }
-        
+
     }
     {
         Angle start = Angle::fromRad(M_PI / 2.0);
@@ -1282,9 +1114,9 @@ BOOST_AUTO_TEST_CASE( rbs_validity )
     BOOST_CHECK(rbs.position == Eigen::Vector3d::Zero());
     BOOST_CHECK(rbs.velocity == Eigen::Vector3d::Zero());
     BOOST_CHECK(rbs.angular_velocity == Eigen::Vector3d::Zero());
-    BOOST_CHECK(rbs.orientation.x() == 0 && rbs.orientation.y() == 0 && 
+    BOOST_CHECK(rbs.orientation.x() == 0 && rbs.orientation.y() == 0 &&
                 rbs.orientation.z() == 0 && rbs.orientation.w() == 1);
-    
+
     // check if values are valid
     BOOST_CHECK(rbs.hasValidPosition());
     BOOST_CHECK(rbs.hasValidPositionCovariance());
@@ -1294,7 +1126,7 @@ BOOST_AUTO_TEST_CASE( rbs_validity )
     BOOST_CHECK(rbs.hasValidVelocityCovariance());
     BOOST_CHECK(rbs.hasValidAngularVelocity());
     BOOST_CHECK(rbs.hasValidAngularVelocityCovariance());
-    
+
     rbs.invalidate();
     // check if values are invalid
     BOOST_CHECK(!rbs.hasValidPosition());
@@ -1309,28 +1141,28 @@ BOOST_AUTO_TEST_CASE( rbs_validity )
 
 BOOST_AUTO_TEST_CASE( transform_with_covariance )
 {
-    // test if the relative transform also 
+    // test if the relative transform also
     // takes the uncertainty into account
-    base::Matrix6d lt1; 
+    base::Matrix6d lt1;
     lt1 <<
-	0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 
-	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
-	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
-	0.0, 0.0, 0.0, -3.0, 0.0, 0.0, 
-	0.0, 0.0, 0.0, 0.0, -2.0, 0.0, 
+	0.1, 0.0, 0.0, 0.0, 0.0, 0.0,
+	0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	0.0, 0.0, 0.0, -3.0, 0.0, 0.0,
+	0.0, 0.0, 0.0, 0.0, -2.0, 0.0,
 	0.0, 0.0, 0.0, 0.0, 0.0, -1.0;
 
     base::TransformWithCovariance t1(
 	    Eigen::Affine3d(Eigen::Translation3d(Eigen::Vector3d(1,0,0)) * Eigen::AngleAxisd( M_PI/2.0, Eigen::Vector3d::UnitX()) ),
 	    lt1 );
 
-    base::Matrix6d lt2; 
+    base::Matrix6d lt2;
     lt2 <<
-	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
-	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
-	0.0, 0.0, 0.2, 0.0, 0.0, 0.0, 
-	0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 
-	0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 
+	0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	0.0, 0.0, 0.2, 0.0, 0.0, 0.0,
+	0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+	0.0, 0.0, 0.0, 0.0, 2.0, 0.0,
 	0.0, 0.0, 0.0, 0.0, 0.0, 3.0;
 
     base::TransformWithCovariance t2(
@@ -1474,4 +1306,4 @@ BOOST_AUTO_TEST_CASE( pressure )
     base::samples::Pressure pressureSample;
 }
 
-#endif 
+#endif
