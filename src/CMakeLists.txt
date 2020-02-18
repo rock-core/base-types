@@ -34,6 +34,7 @@ rock_library(
         samples/Frame.cpp
         samples/Joints.cpp
         samples/LaserScan.cpp
+        samples/Temperature.cpp
         samples/Pressure.cpp
         samples/RigidBodyAcceleration.cpp
         samples/RigidBodyState.cpp
@@ -84,6 +85,7 @@ rock_library(
         samples/Joints.hpp
         samples/LaserScan.hpp
         samples/Pointcloud.hpp
+        samples/Temperature.hpp
         samples/Pressure.hpp
         samples/RigidBodyAcceleration.hpp
         samples/RigidBodyState.hpp
