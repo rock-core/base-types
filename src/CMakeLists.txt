@@ -12,6 +12,7 @@ endif()
 
 rock_library(
     base-types 
+        Acceleration.cpp
         Angle.cpp
         JointLimitRange.cpp
         JointLimits.cpp
@@ -20,11 +21,13 @@ rock_library(
         JointTransform.cpp
         Pose.cpp
         Pressure.cpp
+        RigidBodyStateSE3.cpp
         Temperature.cpp
         Time.cpp
         TimeMark.cpp
         Timeout.cpp
         TransformWithCovariance.cpp
+        Twist.cpp
         TwistWithCovariance.cpp
         Waypoint.cpp
         commands/Motion2D.cpp
@@ -44,6 +47,7 @@ rock_library(
         samples/PoseWithCovariance.cpp
         ${OPTIONAL_CPP}
     HEADERS
+        Acceleration.hpp
         Angle.hpp
         CircularBuffer.hpp
         Deprecated.hpp
@@ -60,6 +64,7 @@ rock_library(
         Point.hpp
         Pose.hpp
         Pressure.hpp
+        RigidBodyStateSE3.hpp
         Singleton.hpp 
         Spline.hpp
         Temperature.hpp
@@ -67,6 +72,7 @@ rock_library(
         TimeMark.hpp
         Timeout.hpp
         TransformWithCovariance.hpp
+        Twist.hpp
         TwistWithCovariance.hpp
         Waypoint.hpp
         Wrench.hpp
@@ -76,6 +82,7 @@ rock_library(
 	commands/LinearAngular6DCommand.hpp
         logging/logging_iostream_style.h 
         logging/logging_printf_style.h
+        samples/Acceleration.hpp
         samples/BodyState.hpp
         samples/CommandSamples.hpp
         samples/DepthMap.hpp
@@ -89,10 +96,13 @@ rock_library(
         samples/Pressure.hpp
         samples/RigidBodyAcceleration.hpp
         samples/RigidBodyState.hpp
+        samples/RigidBodyStateSE3.hpp
+        samples/RigidBodyStatesSE3.hpp
         samples/Sonar.hpp
         samples/SonarBeam.hpp
         samples/SonarScan.hpp
         samples/PoseWithCovariance.hpp
+        samples/Twist.hpp
         samples/Wrench.hpp
         samples/Wrenches.hpp
         templates/TimeStamped.hpp
