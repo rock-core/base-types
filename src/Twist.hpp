@@ -28,8 +28,6 @@ struct Twist
 Twist operator+(const Twist& a, const Twist& b);
 /** Component-wise subtraction of two twists */
 Twist operator-(const Twist& a, const Twist& b);
-/** Component-wise multiplication of a 6D-Vector with a twist */
-Twist operator*(const base::Vector6d& a, const Twist& b);
 
 }
 

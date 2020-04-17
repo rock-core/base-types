@@ -40,9 +40,4 @@ Acceleration operator-(const Acceleration& a, const Acceleration& b)
     return Acceleration(a.linear  - b.linear, a.angular - b.angular);
 }
 
-Acceleration operator*(const base::Vector6d& a, const Acceleration& b)
-{
-    return Acceleration(a.segment(0,3).cwiseProduct(b.linear), a.segment(3,3).cwiseProduct(b.angular));
-}
-
 }

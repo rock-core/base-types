@@ -40,9 +40,4 @@ Twist operator-(const Twist& a, const Twist& b)
     return Twist(a.linear  - b.linear, a.angular - b.angular);
 }
 
-Twist operator*(const base::Vector6d& a, const Twist& b)
-{
-    return Twist(a.segment(0,3).cwiseProduct(b.linear), a.segment(3,3).cwiseProduct(b.angular));
-}
-
 }

@@ -28,8 +28,6 @@ struct Acceleration
 Acceleration operator+(const Acceleration& a, const Acceleration& b);
 /** Component-wise subtraction of two spatial accelerations */
 Acceleration operator-(const Acceleration& a, const Acceleration& b);
-/** Component-wise multiplication of a 6D-Vector with a spatial acceleration */
-Acceleration operator*(const base::Vector6d& a, const Acceleration& b);
 
 }
 
