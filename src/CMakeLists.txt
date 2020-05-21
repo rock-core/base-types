@@ -97,7 +97,7 @@ rock_library(
         samples/RigidBodyAcceleration.hpp
         samples/RigidBodyState.hpp
         samples/RigidBodyStateSE3.hpp
-        samples/RigidBodyStatesSE3.hpp
+        samples/RigidBodyStateSE3Vector.hpp
         samples/Sonar.hpp
         samples/SonarBeam.hpp
         samples/SonarScan.hpp
