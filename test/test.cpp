@@ -39,7 +39,6 @@
 #include <base/Trajectory.hpp>
 #include <base/Waypoint.hpp>
 #include <base/TwistWithCovariance.hpp>
-#include <base/RigidBodyStateSE3.hpp>
 
 #ifdef SISL_FOUND
 #include <base/Trajectory.hpp>
@@ -50,31 +49,6 @@
 #include <Eigen/Geometry>
 
 using namespace std;
-
-BOOST_AUTO_TEST_CASE(rbs_se3_initialization){
-    base::RigidBodyStateSE3 rbs;
-    for(int i = 0; i < 3; i++){
-        BOOST_CHECK(std::isnan(rbs.pose.position[i]));
-        BOOST_CHECK(std::isnan(rbs.twist.linear[i]));
-        BOOST_CHECK(std::isnan(rbs.twist.angular[i]));
-        BOOST_CHECK(std::isnan(rbs.acceleration.linear[i]));
-        BOOST_CHECK(std::isnan(rbs.acceleration.angular[i]));
-        BOOST_CHECK(std::isnan(rbs.wrench.force[i]));
-        BOOST_CHECK(std::isnan(rbs.wrench.torque[i]));
-    }
-    for(int i = 0; i < 4; i++)
-        BOOST_CHECK(std::isnan(rbs.pose.orientation.coeffs()[i]));
-}
-
-BOOST_AUTO_TEST_CASE(acceleration_is_nan){
-    base::Acceleration acc;
-    BOOST_CHECK(std::isnan(acc.linear[0]));
-    BOOST_CHECK(std::isnan(acc.linear[1]));
-    BOOST_CHECK(std::isnan(acc.linear[2]));
-    BOOST_CHECK(std::isnan(acc.angular[0]));
-    BOOST_CHECK(std::isnan(acc.angular[1]));
-    BOOST_CHECK(std::isnan(acc.angular[2]));
-}
 
 BOOST_AUTO_TEST_CASE(twist_with_covariance_validity)
 {
