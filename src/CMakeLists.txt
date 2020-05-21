@@ -33,19 +33,21 @@ rock_library(
         Wrench.cpp
         commands/Motion2D.cpp
         samples/BodyState.cpp
+        samples/BoundingBox.cpp
         samples/DepthMap.cpp
         samples/DistanceImage.cpp
         samples/Frame.cpp
         samples/Joints.cpp
         samples/LaserScan.cpp
-        samples/Temperature.cpp
+        samples/OrientedBoundingBox.cpp
+        samples/PoseWithCovariance.cpp
         samples/Pressure.cpp
         samples/RigidBodyAcceleration.cpp
         samples/RigidBodyState.cpp
         samples/Sonar.cpp
         samples/SonarBeam.cpp
         samples/SonarScan.cpp
-        samples/PoseWithCovariance.cpp
+        samples/Temperature.cpp
         ${OPTIONAL_CPP}
     HEADERS
         Acceleration.hpp
@@ -80,10 +82,11 @@ rock_library(
         commands/Joints.hpp
         commands/Motion2D.hpp
         commands/Speed6D.hpp
-	commands/LinearAngular6DCommand.hpp
+        commands/LinearAngular6DCommand.hpp
         logging/logging_iostream_style.h 
         logging/logging_printf_style.h
         samples/Acceleration.hpp
+        samples/BoundingBox.hpp
         samples/BodyState.hpp
         samples/CommandSamples.hpp
         samples/DepthMap.hpp
@@ -92,8 +95,8 @@ rock_library(
         samples/IMUSensors.hpp
         samples/Joints.hpp
         samples/LaserScan.hpp
+        samples/OrientedBoundingBox.hpp
         samples/Pointcloud.hpp
-        samples/Temperature.hpp
         samples/Pressure.hpp
         samples/RigidBodyAcceleration.hpp
         samples/RigidBodyState.hpp
@@ -104,9 +107,10 @@ rock_library(
         samples/SonarScan.hpp
         samples/PoseWithCovariance.hpp
         samples/Twist.hpp
+        samples/Temperature.hpp
+        templates/TimeStamped.hpp
         samples/Wrench.hpp
         samples/Wrenches.hpp
-        templates/TimeStamped.hpp
         ${OPTIONAL_HPP}
     DEPS_PKGCONFIG 
         base-logging
