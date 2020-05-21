@@ -9,6 +9,9 @@ namespace base { namespace samples {
 /** Twist with sampled time and frame ID*/
 struct Twist : public base::Twist{
     base::Time time;
+    /** ID of the coordinate frame in which the twist is expressed*/
+    std::string frame_id;
+
 };
 
 }}
