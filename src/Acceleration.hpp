@@ -13,7 +13,7 @@ struct Acceleration
 
     /** Set all members to NaN*/
     void setNaN();
-    /** Set all members to zero/Identity*/
+    /** Set all members to zero*/
     void setZero();
     /** Return false if one of the entries is NaN*/
     bool isValid() const;

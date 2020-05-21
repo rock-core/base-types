@@ -10,7 +10,7 @@ namespace base{ namespace samples {
 struct RigidBodyStateSE3 : public base::RigidBodyStateSE3
 {
     base::Time time;
-    /** Coordinate frame in which all quantities are expressed */
+    /** Common coordinate frame for all quantities of the rigid body */
     std::string frame_id;
 };
 

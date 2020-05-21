@@ -5,7 +5,7 @@
 
 namespace base {
 
-/** A twist is represents the velocity of a rigid body as angular velocity around an axis and a linear velocity along this axis */
+/** Spatial velocity of a rigid body as angular velocity around an axis and a linear velocity along this axis */
 struct Twist
 {
     Twist();
@@ -13,7 +13,7 @@ struct Twist
 
     /** Set all members to NaN*/
     void setNaN();
-    /** Set all members to zero/Identity*/
+    /** Set all members to zero*/
     void setZero();
     /** Return false if one of the entries is NaN*/
     bool isValid() const;
