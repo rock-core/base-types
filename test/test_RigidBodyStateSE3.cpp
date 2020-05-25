@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(rbs_adjoint_operator_twist){
     transform.position = Vector3d::Random();
     transform.orientation = Quaterniond::UnitRandom();
 
-    // Check adjoint transform for spatial acceleration basis vectors
+    // Check adjoint transform for twist basis vectors
     for(int i = 0; i < 3; i++){
         Twist tw(Vector3d::Zero(), Vector3d::Zero());
         tw.linear(i) = 1;

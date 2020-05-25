@@ -8,7 +8,9 @@ namespace base {
 /** Spatial velocity of a rigid body as angular velocity around an axis and a linear velocity along this axis */
 struct Twist
 {
+    /** Initialize all members with NaN */
     Twist();
+    /** Initialize with the given values*/
     Twist(base::Vector3d linear, base::Vector3d angular);
 
     /** Set all members to NaN*/
@@ -24,9 +26,9 @@ struct Twist
     base::Vector3d angular;
 };
 
-/** Component-wise addition of two twists */
+/** Component-wise addition of two twists. This is only meaningful if both are defined in a common reference frame. */
 Twist operator+(const Twist& a, const Twist& b);
-/** Component-wise subtraction of two twists */
+/** Component-wise subtraction of two twists. This is only meaningful if both are defined in a common reference frame.  */
 Twist operator-(const Twist& a, const Twist& b);
 
 }

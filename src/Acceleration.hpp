@@ -8,7 +8,9 @@ namespace base {
 /** Spatial acceleration of a rigid body as angular acceleration around an axis and a linear acceleration along this axis */
 struct Acceleration
 {
+    /** Initialize all members with NaN */
     Acceleration();
+    /** Initialize with the given values*/
     Acceleration(base::Vector3d linear, base::Vector3d angular);
 
     /** Set all members to NaN*/
@@ -24,9 +26,9 @@ struct Acceleration
     base::Vector3d angular;
 };
 
-/** Component-wise addition of two spatial accelerations */
+/** Component-wise addition of two spatial accelerations. This is only meaningful if both are defined in a common reference frame. */
 Acceleration operator+(const Acceleration& a, const Acceleration& b);
-/** Component-wise subtraction of two spatial accelerations */
+/** Component-wise subtraction of two spatial accelerations. This is only meaningful if both are defined in a common reference frame. */
 Acceleration operator-(const Acceleration& a, const Acceleration& b);
 
 }
