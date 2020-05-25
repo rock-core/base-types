@@ -1373,6 +1373,36 @@ BOOST_AUTO_TEST_CASE( oriented_bounding_box )
     BOOST_CHECK(obb.hasValidCovOrientation() == true);
 }
 
+BOOST_AUTO_TEST_CASE( waypoint )
+{
+    base::Waypoint wp;
+    BOOST_CHECK(wp.hasValidPosition() == true);
+    BOOST_CHECK(wp.position == base::Vector3d(1, 0, 0));
+    BOOST_CHECK(wp.heading == 0);
+    BOOST_CHECK(wp.tol_position == 0);
+    BOOST_CHECK(wp.tol_heading == 0);
+
+    wp = base::Waypoint(base::Vector3d(1, 1, 1), M_PI);
+    BOOST_CHECK(wp.hasValidPosition() == true);
+    BOOST_CHECK(wp.position == base::Vector3d(1, 1, 1));
+    BOOST_CHECK(wp.heading == M_PI);
+    BOOST_CHECK(wp.tol_position == 0);
+    BOOST_CHECK(wp.tol_heading == 0);
+
+    wp = base::Waypoint(base::Vector3d(1, 1, 1), M_PI_2, 1, 2);
+    BOOST_CHECK(wp.position == base::Vector3d(1, 1, 1));
+    BOOST_CHECK(wp.hasValidPosition() == true);
+    BOOST_CHECK(wp.heading == M_PI_2);
+    BOOST_CHECK(wp.tol_position == 1);
+    BOOST_CHECK(wp.tol_heading == 2);
+
+    wp = base::unknown<base::Waypoint>();
+    BOOST_CHECK(wp.hasValidPosition() == false);
+    BOOST_CHECK(base::isUnknown(wp.heading) == true);
+    BOOST_CHECK(base::isUnknown(wp.tol_position) == true);
+    BOOST_CHECK(base::isUnknown(wp.tol_heading) == true);
+}
+
 #ifdef SISL_FOUND
 #include <base/geometry/spline.h>
 BOOST_AUTO_TEST_CASE( spline_to_points )
