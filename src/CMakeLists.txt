@@ -30,6 +30,7 @@ rock_library(
         Twist.cpp
         TwistWithCovariance.cpp
         Waypoint.cpp
+        Wrench.cpp
         commands/Motion2D.cpp
         samples/BodyState.cpp
         samples/DepthMap.cpp

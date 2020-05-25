@@ -8,8 +8,7 @@ void RigidBodyStateSE3::setNaN()
     pose.orientation.coeffs().setConstant(std::numeric_limits<double>::quiet_NaN());
     twist.setNaN();
     acceleration.setNaN();
-    wrench.force.setConstant(std::numeric_limits<double>::quiet_NaN());
-    wrench.torque.setConstant(std::numeric_limits<double>::quiet_NaN());
+    wrench.setNaN();
 }
 
 bool RigidBodyStateSE3::hasValidPose() const
