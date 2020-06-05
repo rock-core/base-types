@@ -9,9 +9,42 @@ class TC_Eigen_MatrixX < Minitest::Test
         assert_equal(m.size, 6)
     end
 
-    def test_base_vector
-        v = Eigen::VectorX.new(10)
-        assert_equal(v.size, 10)
+    def test_new_zero
+        m = Eigen::MatrixX.Zero(2, 2)
+        2.times do |i|
+            2.times do |j|
+                assert_equal 0, m[i, j]
+            end
+        end
+    end
+
+    def test_zero
+        m = Eigen::MatrixX.new(2, 2)
+        m.zero
+        2.times do |i|
+            2.times do |j|
+                assert_equal 0, m[i, j]
+            end
+        end
+    end
+
+    def test_new_identity
+        m = Eigen::MatrixX.Identity(2, 2)
+        2.times do |i|
+            2.times do |j|
+                assert_equal((i == j ? 1 : 0), m[i, j])
+            end
+        end
+    end
+
+    def test_identity
+        m = Eigen::MatrixX.new(2, 2)
+        m.identity
+        2.times do |i|
+            2.times do |j|
+                assert_equal((i == j ? 1 : 0), m[i, j])
+            end
+        end
     end
 
     def test_set
