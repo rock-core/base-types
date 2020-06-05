@@ -137,7 +137,7 @@ class TC_Eigen_MatrixX < Minitest::Test
     end
 
     def test_dotV
-        m = Eigen::MatrixX.new(4, 4)
+        m = Eigen::MatrixX.Zero(4, 4)
         4.times { |i| m[i, i] = i + 1 }
         a = Eigen::VectorX.from_a([1, 2, 3, 4])
         b = m.dotV(a)
@@ -148,8 +148,8 @@ class TC_Eigen_MatrixX < Minitest::Test
     end
 
     def test_jacobisvd
-        m = Eigen::MatrixX.new(7,7)
-        7.times { |i| m[i,i] = i + 1 }
+        m = Eigen::MatrixX.Zero(7, 7)
+        7.times { |i| m[i, i] = i + 1 }
         solver = m.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV)
         b = Eigen::VectorX.from_a([1, 2, 3, 4, 5, 6, 7])
         a = solver.solve(b)
@@ -157,4 +157,3 @@ class TC_Eigen_MatrixX < Minitest::Test
         assert m.dotV(a).approx?(b)
     end
 end
-
