@@ -6,9 +6,11 @@ using namespace base;
 
 BOOST_AUTO_TEST_SUITE(RigidBodyStateSE3Tests)
 
-BOOST_AUTO_TEST_CASE(rbs_se3_initialization){
+BOOST_AUTO_TEST_CASE(rbs_se3_initialization)
+{
     RigidBodyStateSE3 rbs;
-    for(int i = 0; i < 3; i++){
+    for(int i = 0; i < 3; i++)
+    {
         BOOST_CHECK(std::isnan(rbs.pose.position[i]));
         BOOST_CHECK(std::isnan(rbs.twist.linear[i]));
         BOOST_CHECK(std::isnan(rbs.twist.angular[i]));
@@ -26,13 +28,15 @@ BOOST_AUTO_TEST_CASE(rbs_se3_initialization){
     BOOST_CHECK(!rbs.hasValidWrench());
 }
 
-BOOST_AUTO_TEST_CASE(rbs_adjoint_operator_twist){
+BOOST_AUTO_TEST_CASE(rbs_adjoint_operator_twist)
+{
     Pose transform;
     transform.position = Vector3d::Random();
     transform.orientation = Quaterniond::UnitRandom();
 
     // Check adjoint transform for twist basis vectors
-    for(int i = 0; i < 3; i++){
+    for(int i = 0; i < 3; i++)
+    {
         Twist tw(Vector3d::Zero(), Vector3d::Zero());
         tw.linear(i) = 1;
         BOOST_CHECK((transform * tw).linear.isApprox(transform.toTransform().matrix().col(i).segment(0,3)));
@@ -55,13 +59,15 @@ BOOST_AUTO_TEST_CASE(rbs_adjoint_operator_twist){
     BOOST_CHECK(tw_c.angular.isApprox(tw_a.angular));
 }
 
-BOOST_AUTO_TEST_CASE(rbs_adjoint_operator_spatial_acc){
+BOOST_AUTO_TEST_CASE(rbs_adjoint_operator_spatial_acc)
+{
     Pose transform;
     transform.position = Vector3d::Random();
     transform.orientation = Quaterniond::UnitRandom();
 
     // Check adjoint transform for spatial acceleration basis vectors
-    for(int i = 0; i < 3; i++){
+    for(int i = 0; i < 3; i++)
+    {
         Acceleration acc(Vector3d::Zero(), Vector3d::Zero());
         acc.linear(i) = 1;
         BOOST_CHECK((transform * acc).linear.isApprox(transform.toTransform().matrix().col(i).segment(0,3)));
@@ -84,14 +90,16 @@ BOOST_AUTO_TEST_CASE(rbs_adjoint_operator_spatial_acc){
     BOOST_CHECK(acc_c.angular.isApprox(acc_a.angular));
 }
 
-BOOST_AUTO_TEST_CASE(rbs_adjoint_operator_wrench){
+BOOST_AUTO_TEST_CASE(rbs_adjoint_operator_wrench)
+{
     Pose transform;
     transform.position = Vector3d::Random();
     transform.orientation = Quaterniond::UnitRandom();
 
     // Check adjoint transform for wrench basis vectors
     Wrench wr;
-    for(int i = 0; i < 3; i++){
+    for(int i = 0; i < 3; i++)
+    {
         wr.force.setZero();
         wr.torque.setZero();
         wr.force(i) = 1;

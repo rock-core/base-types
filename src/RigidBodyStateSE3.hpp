@@ -12,7 +12,8 @@ namespace base {
 struct RigidBodyStateSE3
 {
     /** Initialize all members with NaN */
-    RigidBodyStateSE3(){
+    RigidBodyStateSE3()
+    {
         setNaN();
     }
     /** Set all members to NaN*/
