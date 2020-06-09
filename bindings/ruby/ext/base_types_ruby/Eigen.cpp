@@ -43,6 +43,8 @@ struct Vector3
     Vector3* normalize() const { return new Vector3(v->normalized()); }
     void normalizeBang() const { v->normalize(); }
 
+    void zero() { v->setZero(); }
+
     double get(int i) const { return (*v)[i]; }
     void set(int i, double value) { (*v)[i] = value; }
 
@@ -71,7 +73,7 @@ struct Vector3
 struct VectorX {
 
     VectorXd* v;
-    
+
     VectorX()
         : v(new VectorXd()) {}
     VectorX(VectorX const& v)
@@ -82,7 +84,9 @@ struct VectorX {
         : v(new VectorXd(_v)) {}
     ~VectorX()
     { delete v; }
-    
+
+    void zero() { v->setZero(); }
+
     void resize(int n) { v->resize(n); }
     void conservativeResize(int n) { v->conservativeResize(n); }
 
@@ -102,7 +106,7 @@ struct VectorX {
 
     VectorX* operator / (double scalar) const
     { return new VectorX(*v / scalar); }
-    
+
     VectorX* negate() const
     { return new VectorX(-*v); }
 
@@ -131,6 +135,9 @@ struct Matrix4
 
     ~Matrix4()
     { delete mx; }
+
+    void zero() { mx->setZero(); }
+    void identity() { mx->setIdentity(); }
 
     double norm() const { return mx->norm(); }
 
@@ -203,9 +210,12 @@ struct MatrixX {
     unsigned int cols() const { return m->cols(); }
     unsigned int size() const { return m->size(); }
 
+    void identity() { m->setIdentity(); }
+    void zero() { m->setZero(); }
+
     double get(int i, int j ) const { return (*m)(i,j); }
     void set(int i, int j, double value) { (*m)(i,j) = value; }
-    
+
     VectorX* getRow(int i) const { return new VectorX(m->row(i)); }
     void setRow(int i, const VectorX& v) { m->row(i) = *(v.v); }
 
@@ -226,13 +236,13 @@ struct MatrixX {
 
     MatrixX* negate() const
     { return new MatrixX(-*m); }
-    
+
     MatrixX* scale (double scalar) const
     { return new MatrixX(*m * scalar); }
 
     VectorX* dotV (VectorX const& other) const
     { return new VectorX(*m * *other.v); }
-    
+
     MatrixX* dotM (MatrixX const& other) const
     { return new MatrixX(*m * (*other.m)); }
 
@@ -284,7 +294,7 @@ struct Quaternion
     void normalizeBang()
     { q->normalize(); }
     Quaternion* normalize() const
-    { 
+    {
         Quaterniond q = *this->q;
         q.normalize();
         return new Quaternion(q);
@@ -296,7 +306,7 @@ struct Quaternion
 
     void fromAngleAxis(double angle, Vector3 const& axis)
     {
-	*(this->q) = 
+	*(this->q) =
             Eigen::AngleAxisd(angle, *axis.v);
     }
 
@@ -310,7 +320,7 @@ struct Quaternion
 
     void fromMatrix(MatrixX const& matrix)
     {
-	*(this->q) = 
+	*(this->q) =
             Quaterniond(Eigen::Matrix3d(*matrix.m));
     }
 
@@ -514,6 +524,7 @@ void Init_eigen_ext()
                Arg("y") = static_cast<double>(0),
                Arg("z") = static_cast<double>(0)))
        .define_method("__equal__",  &Vector3::operator ==)
+       .define_method("zero",  &Vector3::zero)
        .define_method("norm",  &Vector3::norm)
        .define_method("normalize!",  &Vector3::normalizeBang)
        .define_method("normalize",  &Vector3::normalize)
@@ -579,6 +590,7 @@ void Init_eigen_ext()
                (Arg("rows") = static_cast<int>(0)))
        .define_method("resize", &VectorX::resize)
        .define_method("__equal__",  &VectorX::operator ==)
+       .define_method("zero",  &VectorX::zero)
        .define_method("norm",  &VectorX::norm)
        .define_method("normalize!",  &VectorX::normalizeBang)
        .define_method("normalize",  &VectorX::normalize)
@@ -597,6 +609,8 @@ void Init_eigen_ext()
        .define_constructor(Constructor<Matrix4>())
        .define_method("__equal__",  &Matrix4::operator ==)
        .define_method("T", &Matrix4::transpose)
+       .define_method("zero",  &Matrix4::zero)
+       .define_method("identity",  &Matrix4::identity)
        .define_method("norm",  &Matrix4::norm)
        .define_method("rows", &Matrix4::rows)
        .define_method("cols", &Matrix4::cols)
@@ -625,6 +639,8 @@ void Init_eigen_ext()
        .define_method("resize", &MatrixX::resize)
        .define_method("__equal__",  &MatrixX::operator ==)
        .define_method("T", &MatrixX::transpose)
+       .define_method("zero",  &MatrixX::zero)
+       .define_method("identity", &MatrixX::identity)
        .define_method("norm",  &MatrixX::norm)
        .define_method("rows", &MatrixX::rows)
        .define_method("cols", &MatrixX::cols)

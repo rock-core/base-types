@@ -9,6 +9,14 @@ class TC_Eigen_Vector3 < Minitest::Test
         assert_equal(3, v.z)
     end
 
+    def test_zero
+        v = Eigen::Vector3.new(1, 2, 3)
+        v.zero
+        assert_equal(0, v.x)
+        assert_equal(0, v.y)
+        assert_equal(0, v.z)
+    end
+
     def test_add
         v0 = Eigen::Vector3.new(1, 2, 3)
         v1 = Eigen::Vector3.new(-1, -2, -3)

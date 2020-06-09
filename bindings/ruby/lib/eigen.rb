@@ -84,6 +84,11 @@ module Eigen
         end
 
         ##
+        # :method: zero
+        #
+        # Resets all values to zero
+
+        ##
         # :method: ==
 
         ##
@@ -144,12 +149,12 @@ module Eigen
 
         ##
         # :method: normalize!
-        # 
+        #
         # Makes this vector unit-length
 
         ##
         # :method: normalize
-        # 
+        #
         # Returns a vector that has the same direction than +self+ but unit
         # length
 
@@ -198,7 +203,7 @@ module Eigen
 	    self.Identity
         end
 
-        # Creates a quaternion from an angle and axis description 
+        # Creates a quaternion from an angle and axis description
         def self.from_angle_axis(*args)
                 q = new(1, 0, 0, 0)
             q.from_angle_axis(*args)
@@ -364,19 +369,19 @@ module Eigen
 
         ##
         # :method: normalize!
-        # 
+        #
         # Normalizes this quaternion
 
         ##
         # :method: normalize
-        # 
+        #
         # Returns a quaternion that is a normalized version of +self+
 
         ##
         # :method: approx?
         # :call-seq:
         #   approx?(q, tolerance)
-        # 
+        #
         # Returns true if +self+ and +q+ do not differ from more than
         # +tolerance+. The comparison is done on a coordinate basis.
 
@@ -384,7 +389,7 @@ module Eigen
         # :method: to_euler
         # :call-seq:
         #    to_euler => Eigen::Vector3(a0, a1, a2)
-        # 
+        #
         # Decomposes this quaternion in euler angles so that +self+ can be
         # obtained by applying the following rotations in order:
         #
@@ -394,7 +399,7 @@ module Eigen
         #
         #   assuming angles in range of: a0:(-pi,pi), a1:(-pi/2,pi/2), a2:(-pi/2,pi/2)
         #
-        # note that 
+        # note that
         #
         #   self == Quaternion.from_euler(to_euler, axis0, axis1, axis2)
 
@@ -402,7 +407,7 @@ module Eigen
         # :method: from_euler
         # :call-seq:
         #    from_euler(Eigen::Vector3(a0, a1, a2), axis0, axis1, axis2)
-        # 
+        #
         # Resets this quaternion so that it represents the rotation obtained by
         # applying the following rotations in order:
         #
@@ -410,11 +415,11 @@ module Eigen
         #   rotation of a1 around axis1
         #   rotation of a0 around axis0
         #
-        # note that 
+        # note that
         #
         #   self == Quaternion.from_euler(to_euler, axis0, axis1, axis2)
 
-        ## 
+        ##
         # :method: inverse
         # :call-seq:
         #   inverse => quaternion
@@ -524,7 +529,7 @@ module Eigen
         end
 
         # Returns the array value in a vector
-        def to_a()
+        def to_a
             a = []
             for i in 0..size()-1
                     a << self[i]
@@ -544,6 +549,18 @@ module Eigen
                 self[i] = array[i]
             end
         end
+
+        # Create a zeroed-out vector
+        def self.Zero(size)
+            v = new(size)
+            v.zero
+            v
+        end
+
+        ##
+        # :method: zero
+        #
+        # Resets all values to zero
 
         def ==(v)
             v.kind_of?(self.class) &&
@@ -578,7 +595,21 @@ module Eigen
             m
         end
 
-        # Returns the array value in a vector 
+        # Builds a rows x cols zeroed-out matrix
+        def self.Zero
+            m = new
+            m.zero
+            m
+        end
+
+        # Builds a rows x cols identity matrix
+        def self.Identity
+            m = new
+            m.identity
+            m
+        end
+
+        # Returns the array value in a vector
         def to_a(column_major=true)
             a = []
             if column_major
@@ -629,6 +660,16 @@ module Eigen
             str
         end
 
+        ##
+        # :method: zero
+        #
+        # Resets all values to zero
+
+        ##
+        # :method: identity
+        #
+        # Resets the matrix to identity
+
         def _dump(level) # :nodoc:
             Marshal.dump({'rows' => rows, 'cols' => cols, 'data' => to_a})
         end
@@ -653,7 +694,21 @@ module Eigen
             m
         end
 
-        # Returns the array value in a vector 
+        # Builds a rows x cols zeroed-out matrix
+        def self.Zero(rows, cols)
+            m = new(rows, cols)
+            m.zero
+            m
+        end
+
+        # Builds a rows x cols identity matrix
+        def self.Identity(rows, cols)
+            m = new(rows, cols)
+            m.identity
+            m
+        end
+
+        # Returns the array value in a vector
         def to_a(column_major=true)
             a = []
             if column_major
@@ -721,6 +776,16 @@ module Eigen
             str += ")"
             str
         end
+
+        ##
+        # :method: zero
+        #
+        # Resets all values to zero
+
+        ##
+        # :method: identity
+        #
+        # Resets the matrix to identity
 
         def _dump(level) # :nodoc:
             Marshal.dump({'rows' => rows, 'cols' => cols, 'data' => to_a})
