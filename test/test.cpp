@@ -9,27 +9,29 @@
 #include <base/Eigen.hpp>
 #include <base/Float.hpp>
 #include <base/JointState.hpp>
-#include <base/NamedVector.hpp>
 #include <base/JointLimitRange.hpp>
 #include <base/JointLimits.hpp>
 #include <base/JointsTrajectory.hpp>
+#include <base/NamedVector.hpp>
 #include <base/Point.hpp>
 #include <base/Pose.hpp>
 #include <base/Pressure.hpp>
 //#include <base/samples/CompressedFrame.hpp>
+#include <base/samples/BodyState.hpp>
+#include <base/samples/BoundingBox.hpp>
+#include <base/samples/DepthMap.hpp>
 #include <base/samples/DistanceImage.hpp>
 #include <base/samples/Frame.hpp>
 #include <base/samples/IMUSensors.hpp>
 #include <base/samples/Joints.hpp>
 #include <base/samples/LaserScan.hpp>
+#include <base/samples/OrientedBoundingBox.hpp>
 #include <base/samples/Pointcloud.hpp>
 #include <base/samples/Pressure.hpp>
 #include <base/samples/RigidBodyAcceleration.hpp>
 #include <base/samples/RigidBodyState.hpp>
-#include <base/samples/BodyState.hpp>
 #include <base/samples/SonarBeam.hpp>
 #include <base/samples/SonarScan.hpp>
-#include <base/samples/DepthMap.hpp>
 #include <base/TransformWithCovariance.hpp>
 #include <base/samples/Sonar.hpp>
 #include <base/samples/PoseWithCovariance.hpp>
@@ -1262,6 +1264,143 @@ BOOST_AUTO_TEST_CASE( pose_with_covariance )
 
     BOOST_CHECK( sensor_in_body.getTransform().matrix().isApprox( sensor_in_body_r.getTransform().matrix(), 1e-12 ) );
     BOOST_CHECK( sensor_in_body.getCovariance().isApprox( sensor_in_body_r.getCovariance(), 1e-12 ) );
+}
+
+BOOST_AUTO_TEST_CASE( bounding_box )
+{
+    base::samples::BoundingBox bb;
+
+    BOOST_CHECK(bb.hasValidBoundingBox() == false);
+    BOOST_CHECK(bb.hasValidCovariance() == false);
+
+    bb = base::samples::BoundingBox(base::Time::now(),
+                                    base::Vector3d(0, 0, 0));
+
+    BOOST_CHECK(bb.hasValidBoundingBox() == false);
+    BOOST_CHECK(bb.hasValidPosition() == true);
+    BOOST_CHECK(bb.hasValidDimension() == false);
+
+    bb = base::samples::BoundingBox(base::Time::now(),
+                                    base::Vector3d(0, 0, 0),
+                                    base::Vector3d(0, 0, 0));
+
+    BOOST_CHECK(bb.hasValidBoundingBox() == true);
+    BOOST_CHECK(bb.hasValidPosition() == true);
+    BOOST_CHECK(bb.hasValidDimension() == true);
+
+    bb.cov_position = base::Matrix3d::Zero();
+
+    BOOST_CHECK(bb.hasValidCovariance() == false);
+    BOOST_CHECK(bb.hasValidCovPosition() == true);
+    BOOST_CHECK(bb.hasValidCovDimension() == false);
+
+    bb.cov_dimension = base::Matrix3d::Zero();
+
+    BOOST_CHECK(bb.hasValidCovariance() == true);
+    BOOST_CHECK(bb.hasValidCovPosition() == true);
+    BOOST_CHECK(bb.hasValidCovDimension() == true);
+}
+
+BOOST_AUTO_TEST_CASE( oriented_bounding_box )
+{
+    base::samples::OrientedBoundingBox obb;
+    BOOST_CHECK(obb.hasValidBoundingBox() == false);
+    BOOST_CHECK(obb.hasValidCovariance() == false);
+    BOOST_CHECK(obb.hasValidOrientation() == false);
+
+    obb = base::samples::OrientedBoundingBox(base::Time::now(),
+                                             base::Vector3d(0, 0, 0));
+
+    BOOST_CHECK(obb.hasValidBoundingBox() == false);
+    BOOST_CHECK(obb.hasValidPosition() == true);
+    BOOST_CHECK(obb.hasValidDimension() == false);
+    BOOST_CHECK(obb.hasValidOrientation() == false);
+
+    obb = base::samples::OrientedBoundingBox(base::Time::now(),
+                                             base::Vector3d(0, 0, 0),
+                                             base::Vector3d(0, 0, 0));
+
+    BOOST_CHECK(obb.hasValidBoundingBox() == false);
+    BOOST_CHECK(obb.hasValidPosition() == true);
+    BOOST_CHECK(obb.hasValidDimension() == true);
+    BOOST_CHECK(obb.hasValidOrientation() == false);
+
+    obb = base::samples::OrientedBoundingBox(base::Time::now(),
+                                             base::Vector3d(0, 0, 0),
+                                             base::Vector3d(0, 0, 0),
+                                             base::Orientation(0, 0, 0, 0));
+
+    BOOST_CHECK(obb.hasValidBoundingBox() == true);
+    BOOST_CHECK(obb.hasValidPosition() == true);
+    BOOST_CHECK(obb.hasValidDimension() == true);
+    BOOST_CHECK(obb.hasValidOrientation() == true);
+
+    obb = base::samples::OrientedBoundingBox(base::Time::now(),
+                                             base::Vector3d(1, 1, 1),
+                                             base::Vector3d(1, 1, 1),
+                                             base::Quaterniond::Identity());
+
+
+    BOOST_CHECK(obb.position == base::Vector3d(1, 1, 1));
+    BOOST_CHECK(obb.dimension == base::Vector3d(1, 1, 1));
+    BOOST_CHECK(obb.orientation.w() == 1);
+    BOOST_CHECK(obb.orientation.vec() == base::Vector3d(0, 0, 0));
+
+    BOOST_CHECK(obb.hasValidCovariance() == false);
+    BOOST_CHECK(obb.hasValidCovPosition() == false);
+    BOOST_CHECK(obb.hasValidCovDimension() == false);
+    BOOST_CHECK(obb.hasValidCovOrientation() == false);
+
+    obb.cov_position = base::Matrix3d::Zero();
+
+    BOOST_CHECK(obb.hasValidCovariance() == false);
+    BOOST_CHECK(obb.hasValidCovPosition() == true);
+    BOOST_CHECK(obb.hasValidCovDimension() == false);
+    BOOST_CHECK(obb.hasValidCovOrientation() == false);
+
+    obb.cov_dimension = base::Matrix3d::Zero();
+
+    BOOST_CHECK(obb.hasValidCovariance() == false);
+    BOOST_CHECK(obb.hasValidCovPosition() == true);
+    BOOST_CHECK(obb.hasValidCovDimension() == true);
+    BOOST_CHECK(obb.hasValidCovOrientation() == false);
+
+    obb.cov_orientation = base::Matrix3d::Zero();
+
+    BOOST_CHECK(obb.hasValidCovariance() == true);
+    BOOST_CHECK(obb.hasValidCovPosition() == true);
+    BOOST_CHECK(obb.hasValidCovDimension() == true);
+    BOOST_CHECK(obb.hasValidCovOrientation() == true);
+}
+
+BOOST_AUTO_TEST_CASE( waypoint )
+{
+    base::Waypoint wp;
+    BOOST_CHECK(wp.hasValidPosition() == true);
+    BOOST_CHECK(wp.position == base::Vector3d(1, 0, 0));
+    BOOST_CHECK(wp.heading == 0);
+    BOOST_CHECK(wp.tol_position == 0);
+    BOOST_CHECK(wp.tol_heading == 0);
+
+    wp = base::Waypoint(base::Vector3d(1, 1, 1), M_PI);
+    BOOST_CHECK(wp.hasValidPosition() == true);
+    BOOST_CHECK(wp.position == base::Vector3d(1, 1, 1));
+    BOOST_CHECK(wp.heading == M_PI);
+    BOOST_CHECK(wp.tol_position == 0);
+    BOOST_CHECK(wp.tol_heading == 0);
+
+    wp = base::Waypoint(base::Vector3d(1, 1, 1), M_PI_2, 1, 2);
+    BOOST_CHECK(wp.position == base::Vector3d(1, 1, 1));
+    BOOST_CHECK(wp.hasValidPosition() == true);
+    BOOST_CHECK(wp.heading == M_PI_2);
+    BOOST_CHECK(wp.tol_position == 1);
+    BOOST_CHECK(wp.tol_heading == 2);
+
+    wp = base::unknown<base::Waypoint>();
+    BOOST_CHECK(wp.hasValidPosition() == false);
+    BOOST_CHECK(base::isUnknown(wp.heading) == true);
+    BOOST_CHECK(base::isUnknown(wp.tol_position) == true);
+    BOOST_CHECK(base::isUnknown(wp.tol_heading) == true);
 }
 
 #ifdef SISL_FOUND
