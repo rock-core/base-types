@@ -1,17 +1,60 @@
 #include "RigidBodyState.hpp"
 
-namespace base { namespace samples {
+namespace base {
+
+Vector3d angularVelocity2EulerRate(const Vector3d& angular_velocity,
+                                   const Orientation& orientation)
+{
+    double roll = base::getRoll(orientation);
+    double pitch = base::getPitch(orientation);
+
+    double sr = sin(roll);
+    double cr = cos(roll);
+    double sp = sin(pitch);
+    double cp = cos(pitch);
+
+    // This is the transformation matrix that maps the angular velocity into an Euler
+    // angle rate vector following the ZYX-order (yaw-pitch-roll).
+    Eigen::Matrix3d ypr_jacobian;
+    ypr_jacobian << 0,      sr / cp,      cr / cp,
+                    0,           cr,          -sr,
+                    1, sr * sp / cp, cr * sp / cp;
+
+    return ypr_jacobian * angular_velocity;
+}
+
+Vector3d eulerRate2AngularVelocity(const Vector3d& euler_rate,
+                                   const Orientation& orientation)
+{
+    double roll = base::getRoll(orientation);
+    double pitch = base::getPitch(orientation);
+
+    double sr = sin(roll);
+    double cr = cos(roll);
+    double sp = sin(pitch);
+    double cp = cos(pitch);
+
+    // This is the transformation matrix that maps the Euler angles rate vector
+    // following the ZYX-order (yaw-pitch-roll) to the angular velocity.
+    Eigen::Matrix3d ypr_jacobian_inv;
+    ypr_jacobian_inv <<     -sp,   0, 1,
+                        cp * sr,  cr, 0,
+                        cp * cr, -sr, 0;
+
+    return ypr_jacobian_inv * euler_rate;
+}
+
+namespace samples {
 
 RigidBodyState::RigidBodyState(bool doInvalidation)
 {
-    if(doInvalidation)
-        invalidate();
+    if (doInvalidation) { invalidate(); }
 }
 
 void RigidBodyState::setTransform(const Eigen::Affine3d& transform)
 {
     position = transform.translation();
-    orientation = Eigen::Quaterniond( transform.linear() );
+    orientation = Eigen::Quaterniond(transform.linear());
 }
 
 Eigen::Affine3d RigidBodyState::getTransform() const
@@ -47,6 +90,31 @@ double RigidBodyState::getPitch() const
 double RigidBodyState::getRoll() const
 {
     return base::getRoll(orientation);
+}
+
+Vector3d RigidBodyState::getEulerRate() const
+{
+    return base::angularVelocity2EulerRate(angular_velocity, orientation);
+}
+
+double RigidBodyState::getYawRate() const
+{
+    return getEulerRate()[0];
+}
+
+double RigidBodyState::getPitchRate() const
+{
+    return getEulerRate()[1];
+}
+
+double RigidBodyState::getRollRate() const
+{
+    return getEulerRate()[2];
+}
+
+void RigidBodyState::setAngularVelocity(const Vector3d& euler_rate)
+{
+    angular_velocity = base::eulerRate2AngularVelocity(euler_rate, orientation);
 }
 
 RigidBodyState RigidBodyState::unknown()

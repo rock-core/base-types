@@ -8,12 +8,33 @@
 #include <Eigen/Core>
 #include <Eigen/LU>
 
-namespace base { namespace samples {
+namespace base {
+/**
+ * Maps angular velocity vector into Euler angles rate vector.
+ *
+ * It takes the provided orientation into account in order to map the provided angular
+ * velocity (represented by axis-angle) into Euler angles rate vector following the
+ * ZYX-order (yaw-pitch-roll).
+ */
+Vector3d angularVelocity2EulerRate(const Vector3d& angular_velocity,
+                                   const Orientation& orientation);
+
+/**
+ * Maps Euler angles rate vector into angular velocity vector.
+ *
+ * It takes the provided orientation into account in order to map the provided Euler
+ * rate vector following the ZYX-order (yaw-pitch-roll) into an angular velocity
+ * (represented by axis-angle).
+ */
+Vector3d eulerRate2AngularVelocity(const Vector3d& euler_rate,
+                                   const Orientation& orientation);
+
+namespace samples {
     /** Representation of the state of a rigid body
      *
      * This is among other things used to express frame transformations by
      * Rock's transformer
-     * 
+     *
      * Given a source and target frame, this structure expresses the _frame
      * change_ between these two frames. In effect, it represents the state of
      * the source frame expressed in the target frame.
@@ -94,6 +115,22 @@ namespace base { namespace samples {
 	    ret.translation() = this->position;
 	    return ret;
 	}
+
+        /** Gets the time derivative of the Euler angles ZYX (yaw-pitch-roll) */
+        base::Vector3d getEulerRate() const;
+
+        /** Gets yaw rate from getEulerRate()*/
+        double getYawRate() const;
+
+        /** Gets pitch rate from getEulerRate()*/
+        double getPitchRate() const;
+
+        /** Gets roll rate from getEulerRate()*/
+        double getRollRate() const;
+
+        /** Sets the angular velocity given the time derivative of Euler angles ZYX
+         *  (yaw-pitch-roll) */
+        void setAngularVelocity(const base::Vector3d& euler_rate);
 
         static RigidBodyState unknown();
 
