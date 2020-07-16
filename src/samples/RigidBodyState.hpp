@@ -51,36 +51,35 @@ namespace samples {
      */
     struct RigidBodyState
     {
-
         RigidBodyState(bool doInvalidation=true);
 
         base::Time time;
 
-	/** Name of the source reference frame */
-	std::string sourceFrame;
+        /** Name of the source reference frame */
+        std::string sourceFrame;
 
-	/** Name of the target reference frame */
-	std::string targetFrame;
+        /** Name of the target reference frame */
+        std::string targetFrame;
 
         /** Position in m of sourceFrame's origin expressed in targetFrame
          */
         Position   position;
-	/** Covariance matrix of the position
-	 */
+        /** Covariance matrix of the position
+         */
         base::Matrix3d cov_position;
 
         /** Orientation of targetFrame expressed in sourceFrame */
         Orientation orientation;
         /** Covariance matrix of the orientation as an axis/angle manifold in
          * body coordinates
-	 */
+         */
         base::Matrix3d cov_orientation;
 
         /** Velocity in m/s of sourceFrame relative to targetFrame,
          * expressed in targetFrame */
         base::Vector3d velocity;
-	/** Covariance of the velocity 
-	 */
+        /** Covariance of the velocity
+         */
         base::Matrix3d cov_velocity;
 
         /** Angular Velocity of sourceFrame relative to targetFrame,
@@ -89,32 +88,22 @@ namespace samples {
          * The direction of the vector is the axis, its length the speed */
         base::Vector3d angular_velocity;
         /** Covariance of the angular velocity
-	 */
+         */
         base::Matrix3d cov_angular_velocity;
 
-	void setTransform(const Eigen::Affine3d& transform);
+        void setTransform(const Eigen::Affine3d& transform);
 
-	 Eigen::Affine3d getTransform() const;
+        Eigen::Affine3d getTransform() const;
 
-	void setPose(const base::Pose& pose);
+        void setPose(const base::Pose& pose);
 
-	base::Pose getPose() const;
+        base::Pose getPose() const;
 
         double getYaw() const;
-	
+
         double getPitch() const;
-	
+
         double getRoll() const;
-	
-	template <int _Options>
-	operator Eigen::Transform<double, 3, Eigen::Affine, _Options>() const
-	{
-	    Eigen::Transform<double, 3, Eigen::Affine, _Options> ret;
-	    ret.setIdentity();
-	    ret.rotate(this->orientation);
-	    ret.translation() = this->position;
-	    return ret;
-	}
 
         /** Gets the time derivative of the Euler angles ZYX (yaw-pitch-roll) */
         base::Vector3d getEulerRate() const;
@@ -132,24 +121,34 @@ namespace samples {
          *  (yaw-pitch-roll) */
         void setAngularVelocity(const base::Vector3d& euler_rate);
 
+        template <int _Options>
+        operator Eigen::Transform<double, 3, Eigen::Affine, _Options>() const
+        {
+            Eigen::Transform<double, 3, Eigen::Affine, _Options> ret;
+            ret.setIdentity();
+            ret.rotate(this->orientation);
+            ret.translation() = this->position;
+            return ret;
+        }
+
         static RigidBodyState unknown();
 
         static RigidBodyState invalid();
-	
+
         /** For backward compatibility only. Use invalidate() */
         void initSane();
 
         /** Initializes the rigid body state with NaN for the
          * position, velocity, orientation and angular velocity.
          */
-	void invalidate();
-	
-	/**
+        void invalidate();
+
+        /**
          * Initializes the rigid body state unknown with Zero for the
          * position, velocity and angular velocity, Identity for the orientation
          * and infinity for all covariances.
          */
-	void initUnknown();
+        void initUnknown();
 
         /** Helper method that checks if a value is valid (not NaN anywhere). */
         static bool isValidValue(base::Vector3d const& vec);
@@ -184,7 +183,7 @@ namespace samples {
         static base::Matrix3d setValueUnknown();
 
         static base::Matrix3d invalidCovariance();
-	
+
         bool hasValidPosition() const;
         bool hasValidPosition(int idx) const;
         bool hasValidPositionCovariance() const;
@@ -214,6 +213,7 @@ namespace samples {
         void invalidateCovariances(bool invPos = true, bool invOri = true,
                                    bool invVel = true, bool invAngVel = true);
     };
-}}
+}  // end namespace samples
+}  // end namespace base
 
 #endif

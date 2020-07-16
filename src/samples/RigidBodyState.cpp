@@ -74,7 +74,7 @@ void RigidBodyState::setPose(const Pose& pose)
 
 Pose RigidBodyState::getPose() const
 {
-    return Pose( position, orientation );
+    return Pose(position, orientation);
 }
 
 double RigidBodyState::getYaw() const
@@ -169,25 +169,28 @@ bool RigidBodyState::isValidValue(const Vector3d& vec)
 bool RigidBodyState::isValidValue(const Orientation& ori)
 {
     return !isNaN(ori.w()) &&
-        !isNaN(ori.x()) &&
-        !isNaN(ori.y()) &&
-        !isNaN(ori.z()) &&
-        fabs(ori.squaredNorm()-1.0) < 1e-6;     //assuming at least single precision 
+           !isNaN(ori.x()) &&
+           !isNaN(ori.y()) &&
+           !isNaN(ori.z()) &&
+           fabs(ori.squaredNorm() - 1.0) < 1e-6;  //assuming at least single precision
 }
 
 bool RigidBodyState::isKnownValue(const Matrix3d& cov)
 {
-    return !isInfinity(cov(0,0)) &&
-        !isInfinity(cov(1,1)) &&
-        !isInfinity(cov(2,2));
+    return !isInfinity(cov(0, 0)) &&
+           !isInfinity(cov(1, 1)) &&
+           !isInfinity(cov(2, 2));
 }
 
 bool RigidBodyState::isValidCovariance(const Matrix3d& cov)
 {
-    for (int i = 0; i < 3; ++i)
-        for (int j = 0; j < 3; ++j)
-            if (isNaN(cov(i, j)))
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            if (isNaN(cov(i, j))) {
                 return false;
+            }
+        }
+    }
     return true;
 }
 
@@ -198,12 +201,12 @@ bool RigidBodyState::isValidValue(const Vector3d& vec, int dim)
 
 bool RigidBodyState::isValidCovariance(const Matrix3d& cov, int dim)
 {
-    return !isNaN(cov(dim,dim));
+    return !isNaN(cov(dim, dim));
 }
 
 bool RigidBodyState::isKnownValue(const Matrix3d& cov, int dim)
 {
-    return !isInfinity(cov(dim,dim));
+    return !isInfinity(cov(dim, dim));
 }
 
 Vector3d RigidBodyState::invalidValue()
@@ -263,7 +266,7 @@ bool RigidBodyState::hasValidOrientationCovariance() const
 
 void RigidBodyState::invalidateOrientation()
 {
-    orientation = invalidOrientation(); 
+    orientation = invalidOrientation();
 }
 
 void RigidBodyState::invalidateOrientationCovariance()
@@ -318,59 +321,25 @@ void RigidBodyState::invalidateAngularVelocity()
 
 void RigidBodyState::invalidateAngularVelocityCovariance()
 {
-    cov_angular_velocity = invalidCovariance(); 
+    cov_angular_velocity = invalidCovariance();
 }
 
-void RigidBodyState::invalidateValues(bool invPos, bool invOri, bool invVel, bool invAngVel)
+void RigidBodyState::invalidateValues(bool invPos, bool invOri, bool invVel,
+                                      bool invAngVel)
 {
-    if (invPos) invalidatePosition();
-    if (invOri) invalidateOrientation();
-    if (invVel) invalidateVelocity();
-    if (invAngVel) invalidateAngularVelocity();
+    if (invPos) { invalidatePosition(); }
+    if (invOri) { invalidateOrientation(); }
+    if (invVel) { invalidateVelocity(); }
+    if (invAngVel) { invalidateAngularVelocity(); }
 }
 
-void RigidBodyState::invalidateCovariances(bool invPos, bool invOri, bool invVel, bool invAngVel)
+void RigidBodyState::invalidateCovariances(bool invPos, bool invOri, bool invVel,
+                                           bool invAngVel)
 {
-    if (invPos) invalidatePositionCovariance();
-    if (invOri) invalidateOrientationCovariance();
-    if (invVel) invalidateVelocityCovariance();
-    if (invAngVel) invalidateAngularVelocityCovariance();
+    if (invPos) { invalidatePositionCovariance(); }
+    if (invOri) { invalidateOrientationCovariance(); }
+    if (invVel) { invalidateVelocityCovariance(); }
+    if (invAngVel) { invalidateAngularVelocityCovariance(); }
 }
-
-}} //end namespace base::samples
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}  // end namespace samples
+}  // end namespace base
