@@ -15,6 +15,13 @@ namespace base {
  * It takes the provided orientation into account in order to map the provided angular
  * velocity (represented by axis-angle) into Euler angles rate vector following the
  * ZYX-order (yaw-pitch-roll).
+ *
+ * It considers that "orientation" represents the orientation of the targetFrame
+ * expressed in the sourceFrame, the same way it is defined in RigidBodyState. The
+ * input angular_velocity is, then, considered to be expressed in the sourceFrame.
+ *
+ * For instance, if sourceFrame is "body" and targetFrame is "world", the input
+ * angular_velocity will be considered as being expressed in the "body" frame.
  */
 Vector3d angularVelocity2EulerRate(const Vector3d& angular_velocity,
                                    const Orientation& orientation);
@@ -25,6 +32,13 @@ Vector3d angularVelocity2EulerRate(const Vector3d& angular_velocity,
  * It takes the provided orientation into account in order to map the provided Euler
  * rate vector following the ZYX-order (yaw-pitch-roll) into an angular velocity
  * (represented by axis-angle).
+ *
+ * It considers that "orientation" represents the orientation of the targetFrame
+ * expressed in the sourceFrame, the same way it is defined in RigidBodyState. The
+ * resulting angular_velocity is, then, expressed in the sourceFrame.
+ *
+ * For instance, if sourceFrame is "body" and targetFrame is "world", the resulting
+ * angular velocity will be expressed in the "body" frame.
  */
 Vector3d eulerRate2AngularVelocity(const Vector3d& euler_rate,
                                    const Orientation& orientation);
@@ -39,8 +53,8 @@ namespace samples {
      * change_ between these two frames. In effect, it represents the state of
      * the source frame expressed in the target frame.
      *
-     * Per [Rock's conventions](http://rock.opendfki.de/wiki/WikiStart/Standards), you
-     * should use a X-forward, right handed coordinate system when assigning
+     * Per [Rock's conventions](http://rock.opendfki.de/wiki/WikiStart/Standards),
+     * you should use a X-forward, right handed coordinate system when assigning
      * frames to bodies (i.e.  X=forward, Y=left, Z=up). In addition,
      * world-fixed frames should be aligned to North (North-West-Up, aka NWU)
      *

@@ -1403,6 +1403,58 @@ BOOST_AUTO_TEST_CASE( waypoint )
     BOOST_CHECK(base::isUnknown(wp.tol_heading) == true);
 }
 
+BOOST_AUTO_TEST_CASE(euler_rate_operations)
+{
+    // Expected result of the mapping
+    base::Vector3d expect;
+
+    // Input Euler rate vector as (vyaw, vpitch, vroll)
+    base::Vector3d euler_rate = base::Vector3d::Random();
+
+    // Input body angular velocity vector as (wx, wy, wz)
+    base::Vector3d ang_vel = base::Vector3d::Random();
+
+    // For roll = pitch = 0, the mappings are the identity, except that the vector order
+    // is reversed.
+    base::Orientation yaw_only = Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitZ()) *
+                                 base::Orientation::Identity();
+
+    // Naturally, this is valid for both direct and inverse mappings
+    BOOST_CHECK(euler_rate.reverse().isApprox(
+                base::eulerRate2AngularVelocity(euler_rate, yaw_only), 1e-6));
+    BOOST_CHECK(ang_vel.reverse().isApprox(
+                base::angularVelocity2EulerRate(ang_vel, yaw_only), 1e-6));
+
+    // The yaw value does not affect the mappings
+    base::Orientation pr = Eigen::AngleAxisd(M_PI / 3, Eigen::Vector3d::UnitY()) *
+                           Eigen::AngleAxisd(M_PI / 6, Eigen::Vector3d::UnitX());
+
+    base::Orientation ypr1 = Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitZ()) * pr;
+    base::Orientation ypr2 = Eigen::AngleAxisd(0, Eigen::Vector3d::UnitZ()) * pr;
+    base::Orientation ypr3 = Eigen::AngleAxisd(-M_PI_2, Eigen::Vector3d::UnitZ()) * pr;
+
+    // Naturally, this is valid for both direct and inverse mappings
+    BOOST_CHECK(base::eulerRate2AngularVelocity(euler_rate, ypr1).isApprox(
+                base::eulerRate2AngularVelocity(euler_rate, ypr2), 1e-6));
+    BOOST_CHECK(base::eulerRate2AngularVelocity(euler_rate, ypr2).isApprox(
+                base::eulerRate2AngularVelocity(euler_rate, ypr3), 1e-6));
+
+    BOOST_CHECK(base::angularVelocity2EulerRate(ang_vel, ypr1).isApprox(
+                base::angularVelocity2EulerRate(ang_vel, ypr2), 1e-6));
+    BOOST_CHECK(base::angularVelocity2EulerRate(ang_vel, ypr2).isApprox(
+                base::angularVelocity2EulerRate(ang_vel, ypr3), 1e-6));
+
+    // Validates known-results from euler-rate (vyaw, vpitch, vroll) to (wx, wy, wz)
+    euler_rate = base::Vector3d(1, 1, 1);
+    expect = base::Vector3d(0.1339746, 1.1160254, -0.0669873);
+    BOOST_CHECK(expect.isApprox(base::eulerRate2AngularVelocity(euler_rate, ypr1), 1e-6));
+
+    // Validates known-results from angular velocity (wx, wy, wz) to (vyaw, vpitch, vroll)
+    ang_vel = base::Vector3d(1, 1, 1);
+    expect = base::Vector3d(2.7320508, 0.3660254, 3.3660254);
+    BOOST_CHECK(expect.isApprox(base::angularVelocity2EulerRate(euler_rate, ypr1), 1e-6));
+}
+
 #ifdef SISL_FOUND
 #include <base/geometry/spline.h>
 BOOST_AUTO_TEST_CASE( spline_to_points )
