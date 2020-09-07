@@ -11,6 +11,8 @@
 #include "SonarVisualization.hpp"
 #include "DepthMapVisualization.hpp"
 #include "DistanceImageVisualization.hpp"
+#include "RigidBodyStateSE3Visualization.hpp"
+#include "WrenchVisualization.hpp"
 
 namespace vizkit3d {
     class QtPluginVizkitBase : public vizkit3d::VizkitPluginFactory {
@@ -39,6 +41,8 @@ namespace vizkit3d {
 	    pluginNames->push_back("SonarVisualization");
 	    pluginNames->push_back("DepthMapVisualization");
 	    pluginNames->push_back("DistanceImageVisualization");
+		pluginNames->push_back("RigidBodyStateSE3Visualization");
+		pluginNames->push_back("WrenchVisualization");
 	    return pluginNames;
 	}
 	
@@ -92,6 +96,14 @@ namespace vizkit3d {
 	    else if (pluginName == "DistanceImageVisualization")
 	    {
 		plugin = new vizkit3d::DistanceImageVisualization();
+	    }
+		else if (pluginName == "RigidBodyStateSE3Visualization")
+	    {
+		plugin = new vizkit3d::RigidBodyStateSE3Visualization();
+	    }
+		else if (pluginName == "WrenchVisualization")
+	    {
+		plugin = new vizkit3d::WrenchVisualization();
 	    }
 
 	    if (plugin) 

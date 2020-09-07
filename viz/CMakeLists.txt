@@ -22,6 +22,8 @@ rock_vizkit_plugin(base-viz
         SonarVisualization.cpp
         PointcloudVisualization.cpp
         DepthMapVisualization.cpp
+        RigidBodyStateSE3Visualization.cpp
+        WrenchVisualization.cpp
         ${OPTIONAL_CPP}
     HEADERS 
         Uncertainty.hpp 
@@ -37,6 +39,8 @@ rock_vizkit_plugin(base-viz
         SonarVisualization.hpp
         PointcloudVisualization.hpp
         DepthMapVisualization.hpp
+        RigidBodyStateSE3Visualization.hpp
+        WrenchVisualization.hpp
         ${OPTIONAL_HPP}
     DEPS base-types
     LIBS ${Boost_SYSTEM_LIBRARY}
