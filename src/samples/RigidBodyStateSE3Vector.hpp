@@ -1,5 +1,5 @@
-#ifndef BASE_SAMPLES_RIGID_BODY_STATES_SE3_HPP
-#define BASE_SAMPLES_RIGID_BODY_STATES_SE3_HPP
+#ifndef BASE_SAMPLES_RIGID_BODY_STATE_SE3_VECTOR_HPP
+#define BASE_SAMPLES_RIGID_BODY_STATE_SE3_VECTOR_HPP
 
 #include <base/NamedVector.hpp>
 #include <base/Time.hpp>
@@ -8,7 +8,7 @@
 namespace base { namespace samples {
 
 /** Named vector of base::RigidBodyStateSE3 with sampled Time. */
-struct RigidBodyStatesSE3 : public base::NamedVector< base::RigidBodyStateSE3>
+struct RigidBodyStateSE3Vector : public base::NamedVector< base::RigidBodyStateSE3>
 {
     base::Time time;
     /** Common coordinate frame for all elements of the vector */
