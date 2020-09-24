@@ -103,33 +103,33 @@ namespace geometry {
         /** Display the curve properties on the given IO object */
         void printCurveProperties(std::ostream& io);
 
-	/**
-	 *  types to be used in the interpolate() method
-	 */
-	enum CoordinateType
-	{
-	    ORDINARY_POINT = 1,
-	    KNUCKLE_POINT = 2,
-	    DERIVATIVE_TO_NEXT = 3,
-	    DERIVATIVE_TO_PRIOR = 4,
-	    SECOND_DERIVATIVE_TO_NEXT = 5,
-	    SECOND_DERIVATIVE_TO_PRIOR = 6,
-	    TANGENT_POINT_FOR_NEXT = 13,
-	    TANGENT_POINT_FOR_PRIOR = 14,
-	};
+        /**
+         *  types to be used in the interpolate() method
+         */
+        enum CoordinateType
+        {
+            ORDINARY_POINT = 1,
+            KNUCKLE_POINT = 2,
+            DERIVATIVE_TO_NEXT = 3,
+            DERIVATIVE_TO_PRIOR = 4,
+            SECOND_DERIVATIVE_TO_NEXT = 5,
+            SECOND_DERIVATIVE_TO_PRIOR = 6,
+            TANGENT_POINT_FOR_NEXT = 13,
+            TANGENT_POINT_FOR_PRIOR = 14,
+        };
 
         /** Generates the curve
          *
          * If the \c parameters array is given, it is the desired parameter for
          * the provided points. Otherwise, an automatic parametrization is
          * generated.
-	 *
-	 * @param coordinates - list of points/derivatives
-	 * @param parameters - list of parameters. Needs to be the same size as
-	 *        the number of actual points in the coordinates list, or zero.
-	 * @param coord_types - needs to be of the same size as coordinates, or
-	 *        zero. It marks the type of coordinate/derivative given by the
-	 *        coordinates param.
+         *
+         * @param coordinates - list of points/derivatives
+         * @param parameters - list of parameters. Needs to be the same size as
+         *        the number of actual points in the coordinates list, or zero.
+         * @param coord_types - needs to be of the same size as coordinates, or
+         *        zero. It marks the type of coordinate/derivative given by the
+         *        coordinates param.
          */
         void interpolate(std::vector<double> const& coordinates,
                 std::vector<double> const& parameters = std::vector<double>(),
@@ -226,15 +226,15 @@ namespace geometry {
         void derive(unsigned int order, SplineBase& result) const;
 
     protected:
-	/**
-	 * This function checks weather param is smaler or bigger
-	 * than end and start param. It also sets param to start
-	 * or end, if the difference between param and start/end
-	 * is smaler than equalDistance.
-	 *
-	 * returns true if param is inside start/end.
-	 * */
-	bool checkAndNormalizeParam(double &param, double equalDistance = 0.001) const;
+        /**
+         * This function checks weather param is smaler or bigger
+         * than end and start param. It also sets param to start
+         * or end, if the difference between param and start/end
+         * is smaler than equalDistance.
+         *
+         * returns true if param is inside start/end.
+         * */
+        bool checkAndNormalizeParam(double &param, double equalDistance = 0.001) const;
 
         /** Replaces the current internal SISLCurve by the provided one. The
          * SplineBase object takes ownership of the given curve.
@@ -1020,7 +1020,7 @@ namespace geometry {
             io << "{ empty spline }";
             return io;
         }
-        io << "Length " << s.getCurveLength() 
+        io << "Length " << s.getCurveLength()
 	    << " start " << s.getStartPoint().transpose() << " end " << s.getEndPoint().transpose()
 	    << " startParam " << s.getStartParam() << " endParam " << s.getEndParam();
 

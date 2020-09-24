@@ -2,12 +2,12 @@
 #define __BASE_EIGEN_HH__
 
 #include <Eigen/Core>
-#include <Eigen/Geometry> 
+#include <Eigen/Geometry>
 
 
 namespace base
 {
-    
+
     // We define these typedefs to workaround alignment requirements for normal
     // Eigen types. This reduces the amount of knowledge people have to have to
     // manipulate these types -- as well as the structures that use them -- and
@@ -20,14 +20,14 @@ namespace base
     typedef Eigen::Matrix<double, 3, 1, Eigen::DontAlign>     Vector3d;
     typedef Eigen::Matrix<double, 4, 1, Eigen::DontAlign>     Vector4d;
     typedef Eigen::Matrix<double, 6, 1, Eigen::DontAlign>     Vector6d;
-    typedef Eigen::Matrix<double, Eigen::Dynamic, 1, Eigen::DontAlign> 
+    typedef Eigen::Matrix<double, Eigen::Dynamic, 1, Eigen::DontAlign>
                                                               VectorXd;
 
     typedef Eigen::Matrix<double, 2, 2, Eigen::DontAlign>     Matrix2d;
     typedef Eigen::Matrix<double, 3, 3, Eigen::DontAlign>     Matrix3d;
     typedef Eigen::Matrix<double, 4, 4, Eigen::DontAlign>     Matrix4d;
     typedef Eigen::Matrix<double, 6, 6, Eigen::DontAlign>     Matrix6d;
-    typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::DontAlign> 
+    typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::DontAlign>
                                                               MatrixXd;
 
     typedef Eigen::Quaternion<double, Eigen::DontAlign>   Quaterniond;
