@@ -23,6 +23,7 @@ rock_vizkit_plugin(base-viz
         PointcloudVisualization.cpp
         DepthMapVisualization.cpp
         RigidBodyStateSE3Visualization.cpp
+        WrenchModel.cpp
         WrenchVisualization.cpp
         ${OPTIONAL_CPP}
     HEADERS 
@@ -40,9 +41,10 @@ rock_vizkit_plugin(base-viz
         PointcloudVisualization.hpp
         DepthMapVisualization.hpp
         RigidBodyStateSE3Visualization.hpp
+        WrenchModel.hpp
         WrenchVisualization.hpp
         ${OPTIONAL_HPP}
     DEPS base-types
     LIBS ${Boost_SYSTEM_LIBRARY}
-    DEPS_PKGCONFIG base-logging
+    DEPS_PKGCONFIG base-logging PrimitivesFactory osgViz
 )

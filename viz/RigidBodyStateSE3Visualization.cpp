@@ -16,7 +16,7 @@ RigidBodyStateSE3Visualization::RigidBodyStateSE3Visualization(QObject* parent)
     , color(1, 1, 1)
     , total_size(1)
     , main_size(0.1)
-    , text_size(0.0)
+    , text_size(0.1)
     , translation(0, 0, 0)
     , rotation(0, 0, 0, 1)
     , body_type(BODY_NONE)
@@ -24,9 +24,16 @@ RigidBodyStateSE3Visualization::RigidBodyStateSE3Visualization(QObject* parent)
     , bump_mapping_dirty(false)
     , forcePositionDisplay(false)
     , forceOrientationDisplay(false)
+    , showPose(true)
+    , showVelocity(false)
+    , showAcceleration(false)
+    , showWrench(false)
+    , show_seperate_axes(false)
+    , resolution(0.1)
 {
     state.pose.position = base::Vector3d::Zero();
     state.pose.orientation = base::Quaterniond::Identity();
+    primitivesfactory = osgviz::OsgViz::getModuleInstance<osgviz::PrimitivesFactory>("PrimitivesFactory");
 }
 
 RigidBodyStateSE3Visualization::~RigidBodyStateSE3Visualization()
@@ -47,15 +54,49 @@ void RigidBodyStateSE3Visualization::setColor(const Vec4d& color, Geode* geode)
 
 bool RigidBodyStateSE3Visualization::isPositionDisplayForced() const
 { return forcePositionDisplay; }
-
 void RigidBodyStateSE3Visualization::setPositionDisplayForceFlag(bool flag)
 { forcePositionDisplay = flag; emit propertyChanged("forcePositionDisplay"); }
 
 bool RigidBodyStateSE3Visualization::isOrientationDisplayForced() const
 { return forceOrientationDisplay; }
-
 void RigidBodyStateSE3Visualization::setOrientationDisplayForceFlag(bool flag)
 { forceOrientationDisplay = flag; emit propertyChanged("forceOrientationDisplay"); }
+
+bool RigidBodyStateSE3Visualization::isPoseDisplayed() const {
+    return showPose;
+}
+void RigidBodyStateSE3Visualization::setPoseDisplayed(bool flag) {
+    showPose = flag;
+    emit propertyChanged("showPose");
+    updateModel(total_size);
+}
+
+bool RigidBodyStateSE3Visualization::isVelocityDisplayed() const {
+    return showVelocity;
+}
+void RigidBodyStateSE3Visualization::setVelocityDisplayed(bool flag) {
+    showVelocity = flag;
+    emit propertyChanged("showVelocity");
+    updateModel(total_size);
+}
+
+bool RigidBodyStateSE3Visualization::isAccelerationDisplayed() const {
+    return showAcceleration;
+}
+void RigidBodyStateSE3Visualization::setAccelerationDisplayed(bool flag) {
+    showAcceleration = flag;
+    emit propertyChanged("showAcceleration");
+    updateModel(total_size);
+}
+
+bool RigidBodyStateSE3Visualization::isWrenchDisplayed() const {
+    return showWrench;
+}
+void RigidBodyStateSE3Visualization::setWrenchDisplayed(bool flag) {
+    showWrench = flag;
+    emit propertyChanged("showWrench");
+    updateModel(total_size);
+}
 
 void RigidBodyStateSE3Visualization::setTexture(QString const& path)
 { return setTexture(path.toStdString()); }
@@ -188,31 +229,64 @@ ref_ptr<Group> RigidBodyStateSE3Visualization::createSimpleBody(double size)
 
     group->addChild(geode);
     
-    //up
-    ref_ptr<Geode> c1g = new Geode();
-    ref_ptr<Cylinder> c1 = new Cylinder(Vec3f(0, 0, size / 2), size / 40, size);
-    ref_ptr<ShapeDrawable> c1d = new ShapeDrawable(c1);
-    c1g->addDrawable(c1d);
-    setColor(Vec4f(0, 0, 1.0, 1.0), c1g);
-    group->addChild(c1g);
-    
-    //north direction
-    ref_ptr<Geode> c2g = new Geode();
-    ref_ptr<Cylinder> c2 = new Cylinder(Vec3f(0, size / 2, 0), size / 40, size);
-    c2->setRotation(Quat(M_PI/2.0, Vec3d(1,0,0)));
-    ref_ptr<ShapeDrawable> c2d = new ShapeDrawable(c2);
-    c2g->addDrawable(c2d);
-    setColor(Vec4f(0.0, 1.0, 0, 1.0), c2g);
-    group->addChild(c2g);
+    if (showPose) {
+        //up
+        ref_ptr<Geode> c1g = new Geode();
+        ref_ptr<Cylinder> c1 = new Cylinder(Vec3f(0, 0, size / 2), size / 40, size);
+        ref_ptr<ShapeDrawable> c1d = new ShapeDrawable(c1);
+        c1g->addDrawable(c1d);
+        setColor(Vec4f(0, 0, 1.0, 1.0), c1g);
+        group->addChild(c1g);
+        
+        //north direction
+        ref_ptr<Geode> c2g = new Geode();
+        ref_ptr<Cylinder> c2 = new Cylinder(Vec3f(0, size / 2, 0), size / 40, size);
+        c2->setRotation(Quat(M_PI/2.0, Vec3d(1,0,0)));
+        ref_ptr<ShapeDrawable> c2d = new ShapeDrawable(c2);
+        c2g->addDrawable(c2d);
+        setColor(Vec4f(0.0, 1.0, 0, 1.0), c2g);
+        group->addChild(c2g);
 
-    //east
-    ref_ptr<Geode> c3g = new Geode();
-    ref_ptr<Cylinder> c3 = new Cylinder(Vec3f(size / 2, 0, 0), size / 40, size);
-    c3->setRotation(Quat(M_PI/2.0, Vec3d(0,1,0)));
-    ref_ptr<ShapeDrawable> c3d = new ShapeDrawable(c3);
-    c3g->addDrawable(c3d);
-    setColor(Vec4f(1.0, 0.0, 0, 1.0), c3g);
-    group->addChild(c3g);
+        //east
+        ref_ptr<Geode> c3g = new Geode();
+        ref_ptr<Cylinder> c3 = new Cylinder(Vec3f(size / 2, 0, 0), size / 40, size);
+        c3->setRotation(Quat(M_PI/2.0, Vec3d(0,1,0)));
+        ref_ptr<ShapeDrawable> c3d = new ShapeDrawable(c3);
+        c3g->addDrawable(c3d);
+        setColor(Vec4f(1.0, 0.0, 0, 1.0), c3g);
+        group->addChild(c3g);
+    }
+    
+    if (showVelocity) {
+        //linear velocity
+        //linear_vel_transform = new Arrow(osg::Vec4f(1,0,0,1));
+        linear_vel_transform = primitivesfactory->createArrow(osg::Vec4f(1, 0, 0, 1.0), true);
+        group->addChild(linear_vel_transform);
+        
+        //angular velocity
+        //angular_vel_transform = new Arrow(osg::Vec4f(0,1,0,1));
+        angular_vel_transform = primitivesfactory->createArrow(osg::Vec4f(0, 1, 0, 1.0), true);
+        group->addChild(angular_vel_transform);
+    }
+
+    if (showAcceleration) {
+        //linear acceleration
+        //linear_acc_transform = new Arrow(osg::Vec4f(1,0,0,1));
+        linear_acc_transform = primitivesfactory->createArrow(osg::Vec4f(1, 0, 0, 1.0), true);
+        group->addChild(linear_acc_transform);
+        
+        //angular acceleration
+        //angular_acc_transform = new Arrow(osg::Vec4f(0,1,0,1));
+        angular_acc_transform = primitivesfactory->createArrow(osg::Vec4f(0, 1, 0, 1.0), true);
+        group->addChild(angular_acc_transform);
+    }
+
+    if (showWrench) {
+        wrench_model = new WrenchModel();
+        wrench_model->setResolution(resolution);
+        wrench_model->seperateAxes(show_seperate_axes);
+        group->addChild(wrench_model);
+    }
 
     return group;
 }
@@ -247,15 +321,19 @@ void RigidBodyStateSE3Visualization::setSize(double size)
 {
     total_size = size;
     emit propertyChanged("size");
-    if (body_type == BODY_SIMPLE)
-        resetModel(size);
-    else if (body_type == BODY_SPHERE)
-        resetModelSphere(size);
+    updateModel(total_size);
 }
 
 double RigidBodyStateSE3Visualization::getSize() const
 {
     return total_size;
+}
+
+void RigidBodyStateSE3Visualization::updateModel(double size) {
+    if (body_type == BODY_SIMPLE)
+        resetModel(size);
+    else if (body_type == BODY_SPHERE)
+        resetModelSphere(size);
 }
 
 void RigidBodyStateSE3Visualization::resetModel(double size)
@@ -333,6 +411,7 @@ void RigidBodyStateSE3Visualization::loadModel(std::string const& path)
     setDirty();
     emit propertyChanged("modelPath");
 }
+
 QVector3D RigidBodyStateSE3Visualization::getTranslation() const
 {
     return QVector3D(translation.x(), translation.y(), translation.z());
@@ -403,17 +482,50 @@ void RigidBodyStateSE3Visualization::updateMainNode(Node* node)
         updateBumpMapping();
 
     bool hasValidPose = state.hasValidPose();
-
     if (forcePositionDisplay || hasValidPose) {
 	    osg::Vec3d pos(state.pose.position.x(), state.pose.position.y(), state.pose.position.z());
         body_pose->setPosition(pos + translation);
     }
     if (forceOrientationDisplay || hasValidPose) {
-	osg::Quat orientation(state.pose.orientation.x(),
+	    osg::Quat orientation(state.pose.orientation.x(),
                 state.pose.orientation.y(),
                 state.pose.orientation.z(),
                 state.pose.orientation.w());
         body_pose->setAttitude(rotation * orientation);
+    }
+    
+    if (showVelocity && state.hasValidTwist()) {
+        osg::Quat Q;
+        const base::Twist& t = state.twist;
+        osg::Vec3d lin_vel(t.linear.x(), t.linear.y(), t.linear.z());
+        Q.makeRotate(osg::Vec3d(0,0,1), lin_vel);
+        linear_vel_transform->setScale(osg::Vec3f(resolution, resolution, resolution*lin_vel.length()));
+        linear_vel_transform->setAttitude(Q);
+
+        osg::Vec3d ang_vel(t.angular.x(), t.angular.y(), t.angular.z());
+        Q.makeRotate(osg::Vec3d(0,0,1), ang_vel);
+        angular_vel_transform->setScale(osg::Vec3f(resolution, resolution, resolution*ang_vel.length()));
+        angular_vel_transform->setAttitude(Q);
+    }
+
+    if (showAcceleration && state.hasValidAcceleration()) {
+        osg::Quat Q;
+        const base::Acceleration& acc = state.acceleration;
+        osg::Vec3d lin_acc(acc.linear.x(), acc.linear.y(), acc.linear.z());
+        Q.makeRotate(osg::Vec3d(0,0,1), lin_acc);
+        linear_acc_transform->setScale(osg::Vec3f(resolution, resolution, resolution*lin_acc.length()));
+        linear_acc_transform->setAttitude(Q);
+
+        osg::Vec3d ang_acc(acc.angular.x(), acc.angular.y(), acc.angular.z());
+        Q.makeRotate(osg::Vec3d(0,0,1), ang_acc);
+        angular_acc_transform->setScale(osg::Vec3f(resolution, resolution, resolution*ang_acc.length()));
+        angular_acc_transform->setAttitude(Q);
+    }
+
+    if (showWrench && state.hasValidWrench()) {
+
+        wrench_model->setResolution(resolution);
+        wrench_model->update(state.wrench);
     }
 }
 
@@ -423,3 +535,6 @@ void RigidBodyStateSE3Visualization::updateDataIntern( const base::samples::Rigi
 }
 
 }
+
+//Macro that makes this plugin loadable in ruby, this is optional.
+//VizkitQtPlugin(WrenchVisualization)
