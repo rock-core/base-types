@@ -14,20 +14,12 @@ WrenchModel::WrenchModel(double resolution)
 }
 
 osg::ref_ptr<osg::PositionAttitudeTransform> WrenchModel::createCircularArrow(const osg::Vec4f& color) {
-    // osg::ref_ptr<CircularArrow> arr = new CircularArrow(0.2, 0.02, 12, 32, 1.5*M_PI);
-    // arr->setColor(color);
-    // arr->rebuildGeometry();
-
     osg::ref_ptr<osg::PositionAttitudeTransform> arr = primitivesfactory->createCircularArrow(0.1, 0.02, 12, 32, 1.5*M_PI, 2.0, color);
-
     return arr;
 }
 
 
 void WrenchModel::buildGeometry() {
-
-    
-
     // force
     force_node = primitivesfactory->createArrow(osg::Vec4f(1, 0, 0, 1.0), true);
     addChild(force_node, true); // child 0
@@ -51,7 +43,6 @@ void WrenchModel::buildGeometry() {
         osg::ref_ptr<osg::Group> torque_axis_group = new osg::Group;
         torque_axis_group->addChild(primitivesfactory->createArrow(osg::Vec4f(0, 1, 0, 1.0), true));
         torque_axis_group->addChild(createCircularArrow(osg::Vec4f(0, 1, 0, 1.0)));
-
         torque_axes_group->addChild(torque_axis_group, true);
     }
     
@@ -133,14 +124,12 @@ void WrenchModel::update(const base::Wrench& wrench) {
             osgviz::ArrowNode* torque_vec_transform = dynamic_cast<osgviz::ArrowNode*>(torque_group->getChild(0));
             osg::Vec3d torque(wrench.torque.x(), wrench.torque.y(), wrench.torque.z());
             Q.makeRotate(osg::Vec3d(0,0,1), torque);
-            //torque_vec_transform->setScale(osg::Vec3d(resolution, resolution, resolution*torque.length()));
             torque_vec_transform->setLength(resolution*torque.length());
             torque_vec_transform->setAttitude(Q);
 
             osg::PositionAttitudeTransform* torque_transform = dynamic_cast<osg::PositionAttitudeTransform*>(torque_group->getChild(1));
             torque_transform->setAttitude(Q);
             torque_transform->setPosition(torque * 0.4 * resolution);
-            //torque_transform->setScale(osg::Vec3f(resolution,resolution,resolution));
             setChildValue(torque_group, true);
         }        
     }
