@@ -31,11 +31,11 @@ namespace vizkit3d
         Q_INVOKABLE void updateData(base::Wrench const &sample)
         {vizkit3d::Vizkit3DPlugin<base::samples::Wrench>::updateData(sample);}
 
-        void setForce(const base::Vector3d& f) {
+        Q_INVOKABLE void setForce(const base::Vector3d& f) {
             state.force = f;
         }
 
-        void setTorque(const base::Vector3d& t) {
+        Q_INVOKABLE void setTorque(const base::Vector3d& t) {
             state.torque = t;
         }
 
@@ -49,8 +49,8 @@ namespace vizkit3d
 
         void setSeperateAxesForce(bool val = true) {
             show_seperate_axes_force = val;
-            wrench_model->seperateAxesForce(val);
             emit propertyChanged("showForceSeperateAxes");
+            wrench_model->seperateAxesForce(val);
             setDirty();
         }
         bool isSeperateAxesForce() const {
@@ -58,8 +58,8 @@ namespace vizkit3d
         }
         void setSeperateAxesTorque(bool val = true) {
             show_seperate_axes_torque = val;
-            wrench_model->seperateAxesTorque(val);
             emit propertyChanged("showTorqueSeperateAxes");
+            wrench_model->seperateAxesTorque(val);            
             setDirty();
         }
         bool isSeperateAxesTorque() const {

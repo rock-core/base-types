@@ -12,6 +12,7 @@ class WrenchModel : public osg::Switch {
 
 public:
     WrenchModel(double resolution = 1.0);
+    ~WrenchModel() {}
     
     void update(const base::Wrench& wrench);
 

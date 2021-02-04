@@ -7,8 +7,9 @@ WrenchVisualization::WrenchVisualization()
     : text_size(0.1)
     , show_seperate_axes_force(false)
     , show_seperate_axes_torque(false)
-    , resolution(0.1)
+    , resolution(1.0)
 {
+    wrench_model = new WrenchModel(resolution);
 }
 
 WrenchVisualization::~WrenchVisualization()
@@ -17,7 +18,6 @@ WrenchVisualization::~WrenchVisualization()
 
 osg::ref_ptr<osg::Node> WrenchVisualization::createMainNode()
 {
-    wrench_model = new WrenchModel(resolution);
     return wrench_model;
 }
 
