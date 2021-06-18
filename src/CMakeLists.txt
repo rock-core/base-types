@@ -111,6 +111,8 @@ rock_library(
         templates/TimeStamped.hpp
         samples/Wrench.hpp
         samples/Wrenches.hpp
+        samples/Event.hpp
+        samples/EventArray.hpp
         ${OPTIONAL_HPP}
     DEPS_PKGCONFIG 
         base-logging
