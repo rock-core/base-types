@@ -9,6 +9,9 @@
 #include <time.h>
 #include <limits>
 #include <regex>
+#include <chrono>
+
+using namespace std;
 
 namespace base {
 
@@ -29,6 +32,16 @@ Time Time::now()
     timeval t;
     gettimeofday(&t, 0);
     return Time(static_cast<int64_t>(t.tv_sec) * UsecPerSec + t.tv_usec);
+}
+
+Time Time::monotonic()
+{
+    // Note: C++11 statics are thread safe
+    static auto monotonicClock = std::chrono::steady_clock();
+
+    auto tp = monotonicClock.now().time_since_epoch();
+    auto us = chrono::duration_cast<std::chrono::microseconds>(tp);
+    return Time(us.count());
 }
 
 bool Time::operator<(const Time& ts) const

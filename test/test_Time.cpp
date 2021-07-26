@@ -5,6 +5,17 @@
 
 BOOST_AUTO_TEST_SUITE(Time)
 
+BOOST_AUTO_TEST_CASE(monotonic)
+{
+    base::Time t0 = base::Time::monotonic();
+    usleep(100000);
+    base::Time t1 = base::Time::monotonic();
+
+    int diff = t1.toMilliseconds() - t0.toMilliseconds();
+    BOOST_REQUIRE(diff > 90);
+    BOOST_REQUIRE(diff < 110);
+}
+
 BOOST_AUTO_TEST_CASE(fromSeconds)
 {
     base::Time seconds;
