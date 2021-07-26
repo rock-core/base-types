@@ -146,7 +146,7 @@ string Time::toString(Time::Resolution resolution,
     char tzInfo[6];
     strftime(tzInfo, 6, "%z", tm);
 
-    char buffer[57];
+    char buffer[100];
     switch(resolution)
     {
         case Seconds:
