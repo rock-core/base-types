@@ -12,10 +12,9 @@
 #include <chrono>
 
 using namespace std;
+using namespace base;
 
-namespace base {
-
-std::string Time::DEFAULT_FORMAT = "%Y%m%d-%H:%M:%S";
+string Time::DEFAULT_FORMAT = "%Y%m%d-%H:%M:%S";
 
 Time::Time(int64_t _microseconds) : microseconds(_microseconds)
 {
@@ -37,10 +36,10 @@ Time Time::now()
 Time Time::monotonic()
 {
     // Note: C++11 statics are thread safe
-    static auto monotonicClock = std::chrono::steady_clock();
+    static auto monotonicClock = chrono::steady_clock();
 
     auto tp = monotonicClock.now().time_since_epoch();
-    auto us = chrono::duration_cast<std::chrono::microseconds>(tp);
+    auto us = chrono::duration_cast<chrono::microseconds>(tp);
     return Time(us.count());
 }
 
@@ -105,7 +104,7 @@ timeval Time::toTimeval() const
     return tv;
 }
 
-std::vector<int> Time::toTimeValues() const
+vector<int> Time::toTimeValues() const
 {
     int64_t microseconds = this->microseconds;
 
@@ -120,7 +119,7 @@ std::vector<int> Time::toTimeValues() const
     int64_t milliseconds = microseconds / 1000ll;
     microseconds -= milliseconds * 1000ll;
 
-    std::vector<int> timeValues;
+    vector<int> timeValues;
     timeValues.reserve(6);
     timeValues.push_back(static_cast<int>(microseconds));
     timeValues.push_back(static_cast<int>(milliseconds));
@@ -132,8 +131,8 @@ std::vector<int> Time::toTimeValues() const
     return timeValues;
 }
 
-std::string Time::toString(Time::Resolution resolution,
-        const std::string& mainFormat) const
+string Time::toString(Time::Resolution resolution,
+        const string& mainFormat) const
 {
     struct timeval tv = toTimeval();
     int uSecs = tv.tv_usec;
@@ -160,11 +159,11 @@ std::string Time::toString(Time::Resolution resolution,
             sprintf(buffer,"%s:%06d%s", time, uSecs,tzInfo);
             break;
         default:
-            throw std::invalid_argument(
+            throw invalid_argument(
                 "Time::toString(): invalid "
                 "value in switch-statement");
     }
-    return std::string(buffer);
+    return string(buffer);
 }
 
 double Time::toSeconds() const
@@ -216,7 +215,7 @@ Time Time::fromSeconds(double value)
 
 Time Time::max()
 {
-    return Time(std::numeric_limits<int64_t>::max());
+    return Time(numeric_limits<int64_t>::max());
 }
 
 Time Time::fromTimeValues(int year, int month, int day,
@@ -243,17 +242,17 @@ Time Time::fromTimeValues(int year, int month, int day,
     return Time(timeVal);
 }
 
-Time Time::fromString(const std::string& stringTime, Time::Resolution resolution,
-                      const std::string& mainFormat)
+Time Time::fromString(const string& stringTime, Time::Resolution resolution,
+                      const string& mainFormat)
 {
-    std::string mainTime = stringTime;
+    string mainTime = stringTime;
     int32_t usecs = 0;
 
     // Check for %z suffix
-    std::string tzInfo;
-    std::regex tzPattern("(.*)([\\-\\+][0-9]{4}$)");
-    std::smatch tzMatch;
-    if(std::regex_match(stringTime, tzMatch, tzPattern))
+    string tzInfo;
+    regex tzPattern("(.*)([\\-\\+][0-9]{4}$)");
+    smatch tzMatch;
+    if(regex_match(stringTime, tzMatch, tzPattern))
     {
         tzInfo = tzMatch[2].str();
         mainTime = tzMatch[1].str();
@@ -262,14 +261,14 @@ Time Time::fromString(const std::string& stringTime, Time::Resolution resolution
     if (resolution > Seconds)
     {
         size_t pos = mainTime.find_last_of(':');
-        std::string usecsString = mainTime.substr(pos+1);
+        string usecsString = mainTime.substr(pos+1);
         size_t usecsStringLength = usecsString.size();
         bool match = (usecsStringLength == 6) ||
                      (usecsStringLength == 3 && resolution == Milliseconds);
 
         if (!match)
         {
-            throw std::runtime_error(
+            throw runtime_error(
                 "Time::fromString: required resolution format does not match the given string '"
                     + stringTime + "' -- identified subseconds: '" + usecsString + "'"
             );
@@ -285,12 +284,12 @@ Time Time::fromString(const std::string& stringTime, Time::Resolution resolution
                 sscanf(usecsString.c_str(), "%06d", &usecs);
                 break;
             case Seconds:
-                throw std::invalid_argument(
+                throw invalid_argument(
                     "Time::fromString(); "
                     "'Seconds' is an invalid case "
                     "here");
             default:
-                throw std::invalid_argument("Time::fromString(): "
+                throw invalid_argument("Time::fromString(): "
                                             "invalid value in "
                                             "switch-statement");
         }
@@ -299,7 +298,7 @@ Time Time::fromString(const std::string& stringTime, Time::Resolution resolution
     struct tm tm;
     if (NULL == strptime(mainTime.c_str(), mainFormat.c_str(), &tm))
     {
-        throw std::runtime_error(
+        throw runtime_error(
             "Time::fromString failed: " + mainTime + "' did not match the given "
             "format '" + mainFormat +"'"
         );
@@ -348,7 +347,7 @@ int64_t Time::getTimezoneOffset(time_t when)
     return localWhen - when;
 }
 
-int64_t Time::tzInfoToSeconds(const std::string& tzInfo)
+int64_t Time::tzInfoToSeconds(const string& tzInfo)
 {
     int64_t tzOffset = 0;
     int hours;
@@ -356,7 +355,7 @@ int64_t Time::tzInfoToSeconds(const std::string& tzInfo)
     int r = sscanf(tzInfo.c_str(), "%3d%2d",&hours, &minutes);
     if(r != 2 || tzInfo.size() != 5)
     {
-        throw std::invalid_argument("base::Time::tzInfoToSeconds: parsing of "
+        throw invalid_argument("base::Time::tzInfoToSeconds: parsing of "
                 "timezone offset '" +tzInfo + "' failed");
     }
     tzOffset = hours*3600;
@@ -371,18 +370,16 @@ int64_t Time::tzInfoToSeconds(const std::string& tzInfo)
 }
 
 
-std::ostream& operator<<(std::ostream& io, const Time& time)
+ostream& base::operator<<(ostream& io, const Time& time)
 {
     const int64_t microsecs = time.toMicroseconds();
 
     io << (microsecs / 1000000)
-        << std::setfill('0')
-        << "." << std::setw(3) << (std::llabs(microsecs) / 1000) % 1000
-        << "." << std::setw(3) << (std::llabs(microsecs) % 1000)
-        << std::setfill(' ');
+        << setfill('0')
+        << "." << setw(3) << (llabs(microsecs) / 1000) % 1000
+        << "." << setw(3) << (llabs(microsecs) % 1000)
+        << setfill(' ');
 
     return io;
 }
 
-
-} //end namespace base
