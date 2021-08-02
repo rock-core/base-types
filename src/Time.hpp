@@ -27,6 +27,8 @@ namespace base
     public:
         /** Returns the current time */
         static Time now();
+        /** Returns the time from a monotonic clock */
+        static Time monotonic();
 
         bool operator < (Time const& ts) const;
         bool operator > (Time const& ts) const;
