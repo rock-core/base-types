@@ -150,13 +150,13 @@ string Time::toString(Time::Resolution resolution,
     switch(resolution)
     {
         case Seconds:
-            sprintf(buffer,"%s%s", time, tzInfo);
+            snprintf(buffer, sizeof(buffer), "%s%s", time, tzInfo);
             break;
         case Milliseconds:
-            sprintf(buffer,"%s:%03d%s", time, (int) (uSecs/1000.0),tzInfo);
+            snprintf(buffer, sizeof(buffer), "%s:%03d%s", time, (int) (uSecs/1000.0),tzInfo);
             break;
         case Microseconds:
-            sprintf(buffer,"%s:%06d%s", time, uSecs,tzInfo);
+            snprintf(buffer, sizeof(buffer), "%s:%06d%s", time, uSecs,tzInfo);
             break;
         default:
             throw invalid_argument(
