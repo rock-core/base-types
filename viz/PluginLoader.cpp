@@ -101,5 +101,5 @@ namespace vizkit3d {
 	    return NULL;
         };
     };
-    Q_EXPORT_PLUGIN2(QtPluginVizkitBase, QtPluginVizkitBase)
+    Q_PLUGIN_METADATA(IID "QtPluginVizkitBase")
 }

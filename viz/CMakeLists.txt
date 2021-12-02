@@ -1,4 +1,4 @@
-rock_find_qt4()
+rock_find_qt5(Widgets)
 if(SISL_FOUND)
     list(APPEND OPTIONAL_HPP
         TrajectoryVisualization.hpp
@@ -10,7 +10,6 @@ endif()
 
 rock_vizkit_plugin(base-viz
     PluginLoader.cpp Uncertainty.cpp Vizkit3DHelper.cpp
-    MOC 
         DistanceImageVisualization.cpp 
         LaserScanVisualization.cpp 
         MotionCommandVisualization.cpp 
@@ -38,7 +37,7 @@ rock_vizkit_plugin(base-viz
         PointcloudVisualization.hpp
         DepthMapVisualization.hpp
         ${OPTIONAL_HPP}
-    DEPS base-types
+    DEPS base-types Qt5::Widgets
     LIBS ${Boost_SYSTEM_LIBRARY}
     DEPS_PKGCONFIG base-logging
 )

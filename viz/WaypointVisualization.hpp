@@ -17,6 +17,7 @@ namespace vizkit3d
         , boost::noncopyable
     {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "WaypointVisualization")
     Q_PROPERTY(QColor Color READ getColor WRITE setColor)
     
     public:
@@ -82,6 +83,6 @@ namespace vizkit3d
          * in \a createMainNode() and the currently set color.
          */
         void addWaypoints(osg::Group* group);
-    };
+    };    
 }
 #endif
