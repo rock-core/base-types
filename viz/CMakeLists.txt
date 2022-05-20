@@ -23,6 +23,7 @@ rock_vizkit_plugin(base-viz
         DepthMapVisualization.cpp
         ${OPTIONAL_CPP}
     HEADERS 
+        PluginLoader.hpp
         Uncertainty.hpp 
         Vizkit3DHelper.hpp 
         DistanceImageVisualization.hpp

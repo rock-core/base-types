@@ -17,7 +17,6 @@ namespace vizkit3d
         , boost::noncopyable
     {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "WaypointVisualization")
     Q_PROPERTY(QColor Color READ getColor WRITE setColor)
     
     public:
