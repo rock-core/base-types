@@ -23,7 +23,6 @@ rock_vizkit_plugin(base-viz
         DepthMapVisualization.cpp
         ${OPTIONAL_CPP}
     HEADERS 
-        PluginLoader.hpp
         Uncertainty.hpp 
         Vizkit3DHelper.hpp 
         DistanceImageVisualization.hpp
@@ -38,6 +37,8 @@ rock_vizkit_plugin(base-viz
         PointcloudVisualization.hpp
         DepthMapVisualization.hpp
         ${OPTIONAL_HPP}
+    MOC
+        PluginLoader.hpp
     DEPS base-types Qt5::Widgets
     LIBS ${Boost_SYSTEM_LIBRARY}
     DEPS_PKGCONFIG base-logging
