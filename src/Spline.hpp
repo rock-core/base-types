@@ -147,7 +147,17 @@ namespace geometry {
         /** Reinitializes the curve */
         void clear();
 
+        /** @overload simplifies the curve using the geometric_resolution passed
+         *   to the constructor
+         */
         std::vector<double> simplify();
+
+        /** Simplifies the curve in-place, keeping the new curve within a maximum absolute
+         * error of \c tolerance
+         *
+         * @return final error in each component of the curve. The size of the vector is
+         *   the dimension of the curve
+         */
         std::vector<double> simplify(double tolerance);
 
         SplineBase const& operator = (SplineBase const& base);

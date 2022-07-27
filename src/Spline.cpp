@@ -950,22 +950,22 @@ vector<double> SplineBase::simplify(double tolerance)
     }
 
     SISLCurve* result = NULL;
-    double epsilon[3] = { tolerance, tolerance, tolerance };
+    std::vector<double> epsilon(dimension, tolerance);
+    std::vector<double> maxerr(dimension, 0);
 
-    double maxerr[3];
     int status;
-    s1940(curve, epsilon,
+    s1940(curve, epsilon.data(),
             curve_order, // derivatives
             curve_order, // derivatives
             1, // request closed curve
             10, // number of iterations
-            &result, maxerr, &status);
+            &result, maxerr.data(), &status);
     if (status != 0)
         throw std::runtime_error("SISL error while simplifying a curve");
 
     freeCurve(curve);
     curve = result;
-    return vector<double>(maxerr, maxerr + 3);
+    return maxerr;
 }
 
 SISLCurve const* SplineBase::getSISLCurve() const
