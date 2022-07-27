@@ -6,6 +6,11 @@ require 'set'
 module SISL
     # Representation and manipulation of N-dimensional B-splines
     class Spline
+        # @!method initialize(dimension, geometric_resolution = 0.1, order = 3)
+        #   @param [Integer] dimension
+        #   @param [Numeric] geometric_resolution (default 0.1)
+        #   @param [Integer] order (default 3)
+
         # Returns a Spline object that interpolates the given points
         #
         # See {#interpolate} for more information. Note that the 'dimension' argument
@@ -268,6 +273,7 @@ module SISL
             do_interpolate(coordinates, parameters || [], types || [])
         end
 
+        # Create a spline object with a single point
         def singleton(point)
             interpolate([point])
         end
@@ -282,6 +288,8 @@ module SISL
             get(end_param)
         end
 
+        # @api private
+        #
         # Internal search method for +dichotomic_search+
         def do_dichotomic_search(start_t, start_p, end_t, end_p, resolution, block)
             return (start_t + end_t) / 2 if (start_p - end_p).norm < resolution
@@ -320,122 +328,95 @@ module SISL
             do_dichotomic_search(start_t, start_p, end_t, end_p, resolution, block)
         end
 
-        ##
-        # :method: dimension
-        #
-        # Returns the dimension of the space in which the curve lies
+        # @!method dimension
+        #   Returns the dimension of the space in which the curve lies
 
-        ##
-        # :method: curve_length
-        #
-        # Returns the length of the curve
+        # @!method curve_length
+        #   Returns the length of the curve
 
-        ##
-        # :method: curvature_max
-        #
-        # Returns the maximum curvature of this curve
+        # @!method curvature_max
+        #   Returns the maximum curvature of this curve
 
-        ##
-        # :method: start_param
-        #
-        # Returns the parameter of the first point of the curve
+        # @!method start_param
+        #   Returns the parameter of the first point of the curve
 
-        ##
-        # :method: end_param
-        #
-        # Returns the parameter of the last point of the curve
+        # @!method end_param
+        #   Returns the parameter of the last point of the curve
 
-        ##
-        # :method: curvature_at
-        # :call-seq:
-        #   curvature_at(t) => value
-        #
-        # Returns the curvature at the given parameter
+        # @!method curvature_at(t)
+        #   Returns the curvature at the given parameter
 
-        ##
-        # :method: variation_of_curvature_at
-        # :call-seq:
-        #   variation_of_curvature_at(t) => value
-        #
-        # Returns the variation of curvature at the given parameter
+        # @!method variation_of_curvature_at(t)
+        #   Returns the variation of curvature at the given parameter
 
-        ##
-        # :method: simplify
-        # :call-seq:
-        #   simplify(tolerance)
-        #
-        # Removes the B-spline knots so that the resulting curve does not
-        # differ from the original one for more than +tolerance+
+        # @!method simplify(tolerance)
+        #   Removes the B-spline knots so that the resulting curve does not
+        #   differ from the original one for more than +tolerance+
 
-        ##
-        # :method: clear
-        #
-        # Removes all curve information (empty? returns true afterwards)
+        # @!method clear
+        #   Removes all curve information (empty? returns true afterwards)
 
-        ##
-        # :method: join
-        # :call-seq:
-        #     join(other_curve, tolerance = 0, with_tangents = true)
+        # @!method join
+        #   Joins +other_curve+ at the end of +self+.
         #
-        # Joins +other_curve+ at the end of +self+.
+        #   If the end of +self+ and the beginning of +other_curve+ are further
+        #   away than +tolerance+, an intermediate curve is created. It is a
+        #   straight line if +with_tangents+ is false, or takes into account the
+        #   tangents at the end of +self+ and the start of +other_curve+
+        #   otherwise
         #
-        # If the end of +self+
-        # and the beginning of +other_curve+ are further away than
-        # +tolerance+, an intermediate curve is created. It is a straight
-        # line if +with_tangents+ is false, or takes into account the
-        # tangents at the end of +self+ and the start of +other_curve+
-        # otherwise
+        #   If the end of +self+ and the beginning of +other_curve+ are closer
+        #   than +tolerance+, +other_curve+ is simply appended.
         #
-        # If the end of +self+ and the beginning of +other_curve+ are closer
-        # than +tolerance+, +other_curve+ is simply appended. See #append
+        #   @see #append
 
-        ##
-        # :method: append
-        # :call-seq:
+        # @!method append
         #   append(other_curve)
         #
-        # Moves +other_curve+ to align its start point with the end point of
-        # +self+ and appends it to +self+
+        #   Moves +other_curve+ to align its start point with the end point of
+        #   +self+ and appends it to +self+
 
-        ##
-        # :method: order
-        #
-        # Returns the curve order
+        # @!method order
+        #   Returns the curve order
 
-        ##
-        # :method: empty?
-        #
-        # True if this curve has no inforamtion (it is not the same than a
-        # zero-length curve)
+        # @!method empty?
+        #   True if this curve has no inforamtion (it is not the same than a
+        #   zero-length curve)
 
-        ##
-        # :method: singleton?
-        #
-        # True if this curve is zero-length
+        # @!method singleton?
+        #   True if this curve is zero-length
 
-        ##
-        # :method: reverse
-        #
-        # Reverses the direction of +self+
+        # @!method reverse
+        #   Reverses the direction of +self+
 
-        ##
-        # :method: get
-        # :call-seq:
-        #   get(t) => array_of_coordinates
-        #   get(t, true) => array_of_coordinates, array_of_coordinates
+        # @!method get
+        #   @overload get(t)
+        #      @return [Array<Number>] the point at parameter +t+, as an array of
+        #         dimension {#dimension}
+        #   @overload get(t, true)
+        #      @return [(Array<Number>,Array<Number>)] the point and tangent at
+        #         parameter +t+, as arrays of dimension {#dimension}
         #
-        # Returns the point and optionally the tangent at the given
-        # parameter
-        #
-        # The point and tangent are represented as arrays of coordinates, of
-        # size #dimension
+        #   Returns the point and optionally the tangent at the given parameter.
+        #   The point and tangent are represented as arrays of coordinates, of
+        #   size {#dimension}
 
+        # @!method simplify(tolerance)
+        #   Removes knots in the curve, keeping the absolute error below +tolerance+
+        #
+        #   @return [Array<Number>] actual absolute error in each dimension of the curve
+
+        # Split the curve at the given parameter
+        #
+        # @return [(Spline,Spline)] the two resulting curve. The first one contains
+        #   the part before +position+ and the second the part after.
         def split(position)
             result = Spline.new(dimension, geometric_resolution, order)
             do_split(result, position)
             result
         end
 
+        # @api private
         def _dump(_level = -1)
             Marshal.dump([
                 dimension,
@@ -447,6 +428,7 @@ module SISL
             ])
         end
 
+        # @api private
         def self._load(info, _level = -1)
             dimension, resolution, order,
                 knots, coordinates, kind = Marshal.load(info)
@@ -504,11 +486,7 @@ module SISL
             result
         end
 
-        ##
-        # call-seq:
-        #   distance_to(reference_point, guess, geometric_resolution) => value
-        #
-        # Return sthe distance of the given point to the curve, i.e. the
+        # Returns the distance of the given point to the curve, i.e. the
         # distance between that point and the closest point of the curve
         def distance_to(reference_point, guess, geometric_resolution)
             closest = do_find_one_closest_point(reference_point.to_a,
@@ -516,10 +494,6 @@ module SISL
             (get(closest) - reference_point).norm
         end
 
-        ##
-        # call-seq:
-        #   find_one_closest_point(reference_point, guess, geometric_resolution) => point
-        #
         # Finds one point that is the closest to the curve, with a tolerance
         # of +geometric_resolution+
         #
@@ -528,10 +502,6 @@ module SISL
             do_find_one_closest_point(reference_point.to_a, guess, geometric_resolution)
         end
 
-        ##
-        # call-seq:
-        #   find_closest_points(reference_point, geometric_resolution, guess = 0)
-        #
         # Finds the part of the curve that are the closest to
         # +reference_point+, with a tolerance of +geometric_resolution+
         #
