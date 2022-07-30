@@ -41,7 +41,6 @@ namespace base
     base::Vector3d getEuler(const base::AngleAxisd &orientation);
 
     double getYaw(const base::Orientation& orientation);
-    
 
     double getYaw(const base::AngleAxisd& orientation);
 
@@ -65,44 +64,44 @@ namespace base
 
     base::Orientation removeRoll(const base::AngleAxisd& orientation);
 
-    /** 
+    /**
      * Represents a pose update threshold, with a number of test methods to see
      * if the threshold was met.
      */
     struct PoseUpdateThreshold
     {
-	PoseUpdateThreshold();
+        PoseUpdateThreshold();
 
-	/** 
-	 * Constructor with distance and angle thresholds
-	 */
-	PoseUpdateThreshold( double _distance, double _angle );
+        /**
+         * Constructor with distance and angle thresholds
+         */
+        PoseUpdateThreshold( double _distance, double _angle );
 
-	/** 
-	 * Test if distance or angle is greater than the 
-	 * stored threshold.
-	 */
-	bool test( double other_distance, double other_angle );
+        /**
+         * Test if distance or angle is greater than the
+         * stored threshold.
+         */
+        bool test( double other_distance, double other_angle );
 
-	/** 
-	 * Test if the provided delta transformation is greater in 
-	 * either distance or angle than the threshold
-	 */
-	bool test( const Eigen::Affine3d& pdelta );
+        /**
+         * Test if the provided delta transformation is greater in
+         * either distance or angle than the threshold
+         */
+        bool test( const Eigen::Affine3d& pdelta );
 
-	/** 
-	 * Test if the delta of the provided transformations is greater in 
-	 * either distance or angle than the threshold.
-	 *
-	 * @param a2b the initial transformation from A to B
-	 * @param aprime2b the next transformation from A' to B
-	 *
-	 * @result true if the transformation A' to A is greater than the stored thresholds
-	 */
-	bool test( const Eigen::Affine3d& a2b, const Eigen::Affine3d& aprime2b );
+        /**
+         * Test if the delta of the provided transformations is greater in
+         * either distance or angle than the threshold.
+         *
+         * @param a2b the initial transformation from A to B
+         * @param aprime2b the next transformation from A' to B
+         *
+         * @result true if the transformation A' to A is greater than the stored thresholds
+         */
+        bool test( const Eigen::Affine3d& a2b, const Eigen::Affine3d& aprime2b );
 
-	double distance;
-	double angle;
+        double distance;
+        double angle;
     };
 
     /**
@@ -117,9 +116,9 @@ namespace base
         Position    position;
         Orientation orientation;
 
-	/**
-	 * @brief Default constructor will initialize to zero
-	 */
+        /**
+         * @brief Default constructor will initialize to zero
+         */
         Pose()
             : position(Position::Zero()), orientation(Orientation::Identity()) {}
 
@@ -142,7 +141,7 @@ namespace base
             fromVector6d( v );
         }
 
-        /** 
+        /**
          * @brief set the pose based on a 4x4 matrix
          *
          * @param t 4x4 homogenous transform matrix, for which the upper-left
@@ -168,7 +167,7 @@ namespace base
             return t;
         }
 
-        /** 
+        /**
          * @brief set pose based on compact scaled-axis representation
          *
          * @param v compact 6 vector [r t], where r is a 3 vector representing
@@ -217,10 +216,9 @@ namespace base
 
         bool isApprox(const Pose2D &other, double distPecision, double anglePrecision) const
         {
-            return ((other.position - position).norm() < distPecision) && 
+            return ((other.position - position).norm() < distPecision) &&
                    (Angle::fromRad(other.orientation).isApprox(Angle::fromRad(orientation), anglePrecision));
         }
-
     };
 
     std::ostream& operator << (std::ostream& io, base::Pose2D const& pose);
