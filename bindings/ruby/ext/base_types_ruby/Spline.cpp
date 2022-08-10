@@ -101,6 +101,11 @@ public:
         }
     }
 
+    Array do_simplify(double tolerance) {
+        auto errors = simplify(tolerance);
+        return double_vector_to_array(errors);
+    }
+
     Array do_findClosestPoints(Array _ref_point, double geores)
     {
         std::vector<double> ref_point = array_to_double_vector(_ref_point);
@@ -136,7 +141,6 @@ void Init_spline_ext()
 {
     Rice::Module rb_mSpline = Rice::define_module("SISL");
 
-    typedef std::vector<double>(RubySpline::*SimplifySelector)(double);
     typedef void(SplineBase::*Append)(SplineBase const&,double);
     typedef double (SplineBase::*GetCurveLength)(double) const;
 
@@ -169,7 +173,6 @@ void Init_spline_ext()
         .define_method("end_param", &SplineBase::getEndParam)
         .define_method("curvature_at", &SplineBase::getCurvature)
         .define_method("variation_of_curvature_at", &SplineBase::getVariationOfCurvature)
-        .define_method("simplify", static_cast<SimplifySelector>(&SplineBase::simplify))
         .define_method("clear", &SplineBase::clear)
         .define_method("sisl_curve_type", &SplineBase::getSISLCurveType)
         .define_method("coordinate_stride", &SplineBase::getCoordinatesStride)
@@ -185,6 +188,7 @@ void Init_spline_ext()
         .define_method("do_interpolate", &RubySpline::do_interpolate)
         .define_method("coordinates", &RubySpline::do_coordinates)
         .define_method("knots", &RubySpline::do_knots)
+        .define_method("simplify", &RubySpline::do_simplify)
         .define_method("do_length", &RubySpline::do_length)
         .define_method("do_find_one_closest_point", &RubySpline::do_findOneClosestPoint)
         .define_method("do_find_closest_points", &RubySpline::do_findClosestPoints)
