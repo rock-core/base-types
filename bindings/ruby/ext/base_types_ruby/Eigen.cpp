@@ -332,16 +332,21 @@ struct Quaternion
     Vector3* toEuler()
     {
         const Eigen::Matrix3d m = q->toRotationMatrix();
-        double i = Eigen::Vector2d(m.coeff(2,2) , m.coeff(2,1)).norm();
-        double y = atan2(-m.coeff(2,0), i);
-        double x=0,z=0;
-        if (i > Eigen::NumTraits<double>::dummy_precision()){
-            x = ::atan2(m.coeff(1,0), m.coeff(0,0));
-            z = ::atan2(m.coeff(2,1), m.coeff(2,2));
-        }else{
-            z = (m.coeff(2,0)>0?1:-1)* ::atan2(-m.coeff(0,1), m.coeff(1,1));
+        double i = Eigen::Vector2d(m.coeff(2, 2), m.coeff(2, 1)).norm();
+        double y = atan2(-m.coeff(2, 0), i);
+        if (isnan(i)) {
+            return new Vector3(NAN, NAN, NAN);
         }
-        return new Vector3(x,y,z);
+        else if (i > Eigen::NumTraits<double>::dummy_precision()) {
+            double x = ::atan2(m.coeff(1, 0), m.coeff(0, 0));
+            double z = ::atan2(m.coeff(2, 1), m.coeff(2, 2));
+            return new Vector3(x, y, z);
+        }
+        else {
+            double z =
+                (m.coeff(2, 0) > 0 ? 1 : -1) * ::atan2(-m.coeff(0, 1), m.coeff(1, 1));
+            return new Vector3(0, y, z);
+        }
     }
 };
 
