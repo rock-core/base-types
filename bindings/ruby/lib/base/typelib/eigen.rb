@@ -1,3 +1,12 @@
+Typelib.convert_to_ruby '/wrappers/Matrix</double,2,1>', Eigen::Vector2 do |value|
+    Eigen::Vector2.new(*value.data.to_a)
+end
+Typelib.convert_from_ruby Eigen::Vector2, '/wrappers/Matrix</double,2,1>' do |value, type|
+    t = type.new
+    t.data = value.to_a
+    t
+end
+
 Typelib.convert_to_ruby '/wrappers/Matrix</double,3,1>', Eigen::Vector3 do |value|
     Eigen::Vector3.new(*value.data.to_a)
 end
