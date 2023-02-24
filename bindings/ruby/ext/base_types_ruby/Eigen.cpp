@@ -9,6 +9,7 @@
 
 using namespace Rice;
 
+typedef Eigen::Matrix<double, 2, 1, Eigen::DontAlign>     Vector2d;
 typedef Eigen::Matrix<double, 3, 1, Eigen::DontAlign>     Vector3d;
 typedef Eigen::Matrix<double, 4, 4, Eigen::DontAlign>     Matrix4d;
 typedef Eigen::Quaternion<double, Eigen::DontAlign>    Quaterniond;
@@ -19,6 +20,52 @@ typedef Eigen::Matrix<double, Eigen::Dynamic, 1, Eigen::DontAlign>
 typedef Eigen::Transform< double, 3, Eigen::Isometry > Isometry3d;
 typedef Eigen::Transform< double, 3, Eigen::Affine > Affine3d;
 typedef Eigen::AngleAxis<double> AngleAxisd;
+
+struct Vector2
+{
+    Vector2d* v;
+
+    Vector2(double x, double y)
+        : v(new Vector2d(x, y)) {}
+    Vector2(Vector2d const& _v)
+        : v(new Vector2d(_v)) {}
+    ~Vector2()
+    { delete v; }
+
+    double x() const { return v->x(); }
+    double y() const { return v->y(); }
+    void setX(double value) { v->x() = value; }
+    void setY(double value) { v->y() = value; }
+
+
+    double norm() const { return v->norm(); }
+    Vector2* normalize() const { return new Vector2(v->normalized()); }
+    void normalizeBang() const { v->normalize(); }
+
+    void zero() { v->setZero(); }
+
+    double get(int i) const { return (*v)[i]; }
+    void set(int i, double value) { (*v)[i] = value; }
+
+    Vector2* operator + (Vector2 const& other) const
+    { return new Vector2(*v + *other.v); }
+    Vector2* operator - (Vector2 const& other) const
+    { return new Vector2(*v - *other.v); }
+
+    Vector2* operator / (double scalar) const
+    { return new Vector2(*v / scalar); }
+
+    Vector2* negate() const
+    { return new Vector2(-*v); }
+    Vector2* scale(double value) const
+    { return new Vector2(*v * value); }
+    double dot(Vector2 const& other) const
+    { return this->v->dot(*other.v); }
+    bool operator ==(Vector2 const& other) const
+    { return (*this->v) == (*other.v); }
+    bool isApprox(Vector2 const& other, double tolerance)
+    { return v->isApprox(*other.v, tolerance); }
+};
 
 struct Vector3
 {
@@ -522,6 +569,29 @@ struct Affine3
 void Init_eigen_ext()
 {
      Rice::Module rb_mEigen = define_module("Eigen");
+
+     Data_Type<Vector2> rb_Vector2 = define_class_under<Vector2>(rb_mEigen, "Vector2")
+       .define_constructor(Constructor<Vector2,double,double>(),
+               (Arg("x") = static_cast<double>(0),
+               Arg("y") = static_cast<double>(0)))
+       .define_method("__equal__",  &Vector2::operator ==)
+       .define_method("zero",  &Vector2::zero)
+       .define_method("norm",  &Vector2::norm)
+       .define_method("normalize!",  &Vector2::normalizeBang)
+       .define_method("normalize",  &Vector2::normalize)
+       .define_method("[]",  &Vector2::get)
+       .define_method("[]=",  &Vector2::set)
+       .define_method("x",  &Vector2::x)
+       .define_method("y",  &Vector2::y)
+       .define_method("x=", &Vector2::setX)
+       .define_method("y=", &Vector2::setY)
+       .define_method("+",  &Vector2::operator +)
+       .define_method("-",  &Vector2::operator -)
+       .define_method("/",  &Vector2::operator /)
+       .define_method("-@", &Vector2::negate)
+       .define_method("*",  &Vector2::scale)
+       .define_method("dot",  &Vector2::dot)
+       .define_method("approx?", &Vector2::isApprox, (Arg("v"), Arg("tolerance") = Eigen::NumTraits<double>::dummy_precision()));
 
      Data_Type<Vector3> rb_Vector3 = define_class_under<Vector3>(rb_mEigen, "Vector3")
        .define_constructor(Constructor<Vector3,double,double,double>(),
