@@ -11,7 +11,7 @@ if(SISL_FOUND)
 endif()
 
 rock_library(
-    base-types 
+    base-types
         Acceleration.cpp
         Angle.cpp
         JointLimitRange.cpp
@@ -42,6 +42,7 @@ rock_library(
         samples/OrientedBoundingBox.cpp
         samples/PoseWithCovariance.cpp
         samples/Pressure.cpp
+        samples/Radar.cpp
         samples/RigidBodyAcceleration.cpp
         samples/RigidBodyState.cpp
         samples/Sonar.cpp
@@ -68,7 +69,7 @@ rock_library(
         Pose.hpp
         Pressure.hpp
         RigidBodyStateSE3.hpp
-        Singleton.hpp 
+        Singleton.hpp
         Spline.hpp
         Temperature.hpp
         Time.hpp
@@ -83,7 +84,7 @@ rock_library(
         commands/Motion2D.hpp
         commands/Speed6D.hpp
         commands/LinearAngular6DCommand.hpp
-        logging/logging_iostream_style.h 
+        logging/logging_iostream_style.h
         logging/logging_printf_style.h
         samples/Acceleration.hpp
         samples/BoundingBox.hpp
@@ -98,6 +99,7 @@ rock_library(
         samples/OrientedBoundingBox.hpp
         samples/Pointcloud.hpp
         samples/Pressure.hpp
+        samples/Radar.hpp
         samples/RigidBodyAcceleration.hpp
         samples/RigidBodyState.hpp
         samples/RigidBodyStateSE3.hpp
@@ -114,7 +116,7 @@ rock_library(
         samples/Event.hpp
         samples/EventArray.hpp
         ${OPTIONAL_HPP}
-    DEPS_PKGCONFIG 
+    DEPS_PKGCONFIG
         base-logging
         eigen3
 )
