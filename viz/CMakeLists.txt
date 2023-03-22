@@ -10,10 +10,8 @@ if(SISL_FOUND)
     )
 endif()
 
-if (ROCK_QT_VERSION_4)
-rock_vizkit_plugin(base-viz
+set(BASE_VIZ_SOURCES
     PluginLoader.cpp Uncertainty.cpp Vizkit3DHelper.cpp
-    MOC
         DistanceImageVisualization.cpp
         LaserScanVisualization.cpp
         MotionCommandVisualization.cpp
@@ -26,7 +24,9 @@ rock_vizkit_plugin(base-viz
         PointcloudVisualization.cpp
         DepthMapVisualization.cpp
         ${OPTIONAL_CPP}
-    HEADERS
+    )
+
+set(BASE_VIZ_HEADERS
         Uncertainty.hpp
         Vizkit3DHelper.hpp
         DistanceImageVisualization.hpp
@@ -41,6 +41,31 @@ rock_vizkit_plugin(base-viz
         PointcloudVisualization.hpp
         DepthMapVisualization.hpp
         ${OPTIONAL_HPP}
+    )
+
+set(BASE_VIZ_MOC
+    PluginLoader.hpp
+        BodyStateVisualization.hpp
+        DepthMapVisualization.hpp
+        DistanceImageVisualization.hpp
+        LaserScanVisualization.hpp
+        MotionCommandVisualization.hpp
+        PointcloudVisualization.hpp
+        RigidBodyStateVisualization.hpp
+        SonarBeamVisualization.hpp
+        SonarGroundDistanceVisualization.hpp
+        SonarVisualization.hpp
+        TrajectoryVisualization.hpp
+        WaypointVisualization.hpp
+    )
+
+if (ROCK_QT_VERSION_4)
+rock_vizkit_plugin(base-viz
+        ${BASE_VIZ_SOURCES}
+    HEADERS
+        ${BASE_VIZ_HEADERS}
+    MOC
+        ${BASE_VIZ_MOC}
     DEPS base-types
     LIBS ${Boost_SYSTEM_LIBRARY}
     DEPS_PKGCONFIG base-logging
@@ -48,37 +73,12 @@ rock_vizkit_plugin(base-viz
 endif()
 
 if (ROCK_QT_VERSION_5)
-rock_vizkit_plugin(base-viz
-    PluginLoader.cpp Uncertainty.cpp Vizkit3DHelper.cpp
-        DistanceImageVisualization.cpp 
-        LaserScanVisualization.cpp 
-        MotionCommandVisualization.cpp 
-        RigidBodyStateVisualization.cpp 
-        BodyStateVisualization.cpp 
-        WaypointVisualization.cpp 
-        SonarGroundDistanceVisualization.cpp 
-        SonarBeamVisualization.cpp
-        SonarVisualization.cpp
-        PointcloudVisualization.cpp
-        DepthMapVisualization.cpp
-        ${OPTIONAL_CPP}
+rock_vizkit_plugin_qt5(base-viz-qt5
+        ${BASE_VIZ_SOURCES}
     HEADERS
-        Uncertainty.hpp 
-        Vizkit3DHelper.hpp 
-        DistanceImageVisualization.hpp
-        LaserScanVisualization.hpp 
-        MotionCommandVisualization.hpp 
-        RigidBodyStateVisualization.hpp 
-        BodyStateVisualization.hpp 
-        WaypointVisualization.hpp 
-        SonarGroundDistanceVisualization.hpp 
-        SonarBeamVisualization.hpp
-        SonarVisualization.hpp
-        PointcloudVisualization.hpp
-        DepthMapVisualization.hpp
-        ${OPTIONAL_HPP}
+        ${BASE_VIZ_HEADERS}
     MOC5
-        PluginLoader.hpp
+        ${BASE_VIZ_MOC}
     DEPS base-types
     LIBS ${Boost_SYSTEM_LIBRARY}
     DEPS_PKGCONFIG base-logging
