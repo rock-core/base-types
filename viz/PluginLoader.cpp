@@ -1,4 +1,13 @@
+
+//For QT_VERSION
+#include <QObject>
+
+#if QT_VERSION < 0x050000
 #include <vizkit3d/Vizkit3DPlugin.hpp>
+#else
+#include "PluginLoader.hpp"
+#endif
+
 #include "LaserScanVisualization.hpp"
 #include "WaypointVisualization.hpp"
 #include "MotionCommandVisualization.hpp"
@@ -13,19 +22,27 @@
 #include "DistanceImageVisualization.hpp"
 
 namespace vizkit3d {
+#if QT_VERSION < 0x050000
     class QtPluginVizkitBase : public vizkit3d::VizkitPluginFactory {
     private:
     public:
 	
 	QtPluginVizkitBase() {
 	}
-	
+#else
+#endif
+
 	/**
 	* Returns a list of all available visualization plugins.
 	* @return list of plugin names
 	*/
+#if QT_VERSION < 0x050000
         virtual QStringList* getAvailablePlugins() const
+#else
+	QStringList* QtPluginVizkitBase::getAvailablePlugins() const
+#endif
 	{
+#if QT_VERSION < 0x050000
 	    QStringList *pluginNames = new QStringList();
 	    pluginNames->push_back("WaypointVisualization");
 	    pluginNames->push_back("TrajectoryVisualization");
@@ -40,8 +57,25 @@ namespace vizkit3d {
 	    pluginNames->push_back("DepthMapVisualization");
 	    pluginNames->push_back("DistanceImageVisualization");
 	    return pluginNames;
+#else
+		QStringList *pluginNames = new QStringList();
+		pluginNames->push_back("WaypointVisualization");
+		pluginNames->push_back("TrajectoryVisualization");
+		pluginNames->push_back("MotionCommandVisualization");
+		pluginNames->push_back("RigidBodyStateVisualization");
+		pluginNames->push_back("BodyStateVisualization");
+		pluginNames->push_back("LaserScanVisualization");
+		pluginNames->push_back("SonarGroundDistanceVisualization");
+		pluginNames->push_back("PointcloudVisualization");
+		pluginNames->push_back("SonarBeamVisualization");
+		pluginNames->push_back("SonarVisualization");
+		pluginNames->push_back("DepthMapVisualization");
+		pluginNames->push_back("DistanceImageVisualization");
+		return pluginNames;
+#endif
 	}
 	
+#if QT_VERSION < 0x050000
         virtual QObject* createPlugin(QString const& pluginName)
         {
 	    vizkit3d::VizPluginBase* plugin = 0;
@@ -94,12 +128,74 @@ namespace vizkit3d {
 		plugin = new vizkit3d::DistanceImageVisualization();
 	    }
 
-	    if (plugin) 
+	    if (plugin)
 	    {
 		    return plugin;
 	    }
 	    return NULL;
         };
     };
+#else
+	QObject* QtPluginVizkitBase::createPlugin(QString const& pluginName)
+	{
+		vizkit3d::VizPluginBase* plugin = 0;
+		if (pluginName == "WaypointVisualization")
+		{
+			plugin = new vizkit3d::WaypointVisualization();
+		}
+		else if (pluginName == "MotionCommandVisualization")
+		{
+			plugin = new vizkit3d::MotionCommandVisualization();
+		}
+		else if (pluginName == "TrajectoryVisualization")
+		{
+			plugin = new vizkit3d::TrajectoryVisualization();
+		}
+		else if (pluginName == "RigidBodyStateVisualization")
+		{
+			plugin = new vizkit3d::RigidBodyStateVisualization();
+		}
+		else if (pluginName == "BodyStateVisualization")
+		{
+			plugin = new vizkit3d::BodyStateVisualization();
+		}
+		else if (pluginName == "LaserScanVisualization")
+		{
+			plugin = new vizkit3d::LaserScanVisualization();
+		}
+		else if (pluginName == "SonarGroundDistanceVisualization")
+		{
+			plugin = new vizkit3d::SonarGroundDistanceVisualization();
+		}
+		else if (pluginName == "PointcloudVisualization")
+		{
+			plugin = new vizkit3d::PointcloudVisualization();
+		}
+		else if (pluginName == "SonarBeamVisualization")
+		{
+			plugin = new vizkit3d::SonarBeamVisualization();
+		}
+		else if (pluginName == "SonarVisualization")
+		{
+			plugin = new vizkit3d::SonarVisualization();
+		}
+		else if (pluginName == "DepthMapVisualization")
+		{
+			plugin = new vizkit3d::DepthMapVisualization();
+		}
+		else if (pluginName == "DistanceImageVisualization")
+		{
+		plugin = new vizkit3d::DistanceImageVisualization();
+		}
+
+		if (plugin)
+		{
+			return plugin;
+		}
+		return NULL;
+	}
+#endif
+#if QT_VERSION < 0x050000
     Q_EXPORT_PLUGIN2(QtPluginVizkitBase, QtPluginVizkitBase)
+#endif
 }
