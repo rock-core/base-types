@@ -52,11 +52,21 @@ void RigidBodyStateVisualization::setColor(const Vec4d& color, Geode* geode)
 bool RigidBodyStateVisualization::isPositionDisplayForced() const
 { return forcePositionDisplay; }
 void RigidBodyStateVisualization::setPositionDisplayForceFlag(bool flag)
-{ forcePositionDisplay = flag; emit propertyChanged("forcePositionDisplay"); }
+{
+    if(forcePositionDisplay == flag)
+        return;
+    forcePositionDisplay = flag;
+    emit propertyChanged("forcePositionDisplay");
+}
 bool RigidBodyStateVisualization::isOrientationDisplayForced() const
 { return forceOrientationDisplay; }
 void RigidBodyStateVisualization::setOrientationDisplayForceFlag(bool flag)
-{ forceOrientationDisplay = flag; emit propertyChanged("forceOrientationDisplay"); }
+{
+    if(forceOrientationDisplay == flag)
+        return;
+    forceOrientationDisplay = flag;
+    emit propertyChanged("forceOrientationDisplay");
+}
 
 void RigidBodyStateVisualization::setTexture(QString const& path)
 { return setTexture(path.toStdString()); }
@@ -223,6 +233,8 @@ double RigidBodyStateVisualization::getMainSphereSize() const
 
 void RigidBodyStateVisualization::setMainSphereSize(double size)
 {
+    if(main_size == size)
+        return;
     main_size = size;
     emit propertyChanged("sphereSize");
     // This triggers an update of the model if we don't have a custom model
@@ -236,6 +248,8 @@ double RigidBodyStateVisualization::getTextSize() const
 
 void RigidBodyStateVisualization::setTextSize(double size)
 {
+    if(text_size == size)
+        return;
     text_size = size;
     emit propertyChanged("textSize");
     // This triggers an update of the model if we don't have a custom model
@@ -244,6 +258,8 @@ void RigidBodyStateVisualization::setTextSize(double size)
 
 void RigidBodyStateVisualization::setSize(double size)
 {
+    if(total_size == size)
+        return;
     total_size = size;
     emit propertyChanged("size");
     if (body_type == BODY_SIMPLE)
@@ -288,6 +304,9 @@ void RigidBodyStateVisualization::loadModel(QString const& path)
 
 void RigidBodyStateVisualization::loadModel(std::string const& path)
 {
+    if(model_path == QString::fromStdString(path))
+        return;
+    model_path = QString::fromStdString(path);
     if (path == "sphere")
     {
         resetModelSphere(total_size);
@@ -309,7 +328,6 @@ void RigidBodyStateVisualization::loadModel(std::string const& path)
     else if (!body_model->asGeode()->getDrawable(0)->asGeometry())
         std::cerr << "model does not contain a mesh, using bump mapping will not be possible" << std::endl;
 
-    model_path = QString::fromStdString(path);
     //set plugin name
     if(vizkit3d_plugin_name.isEmpty())
     {
@@ -349,7 +367,12 @@ void RigidBodyStateVisualization::setRotation(QQuaternion const& q)
 }
 
 void RigidBodyStateVisualization::displayCovariance(bool enable)
-{ covariance = enable; emit propertyChanged("displayCovariance"); }
+{
+    if(covariance == enable)
+        return;
+    covariance = enable;
+    emit propertyChanged("displayCovariance");
+}
 bool RigidBodyStateVisualization::isCovarianceDisplayed() const
 { return covariance; }
 
@@ -357,7 +380,12 @@ void RigidBodyStateVisualization::setColor(base::Vector3d const& color)
 { this->color = color; }
 
 void RigidBodyStateVisualization::displayCovarianceWithSamples(bool enable)
-{ covariance_with_samples = enable; emit propertyChanged("displayCovarianceWithSamples"); }
+{
+    if(covariance_with_samples == enable)
+        return;
+    covariance_with_samples = enable;
+    emit propertyChanged("displayCovarianceWithSamples");
+}
 bool RigidBodyStateVisualization::isCovarianceDisplayedWithSamples() const
 { return covariance_with_samples; }
 
