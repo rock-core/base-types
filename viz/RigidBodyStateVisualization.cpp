@@ -57,6 +57,7 @@ void RigidBodyStateVisualization::setPositionDisplayForceFlag(bool flag)
         return;
     forcePositionDisplay = flag;
     emit propertyChanged("forcePositionDisplay");
+    updateModel();
 }
 bool RigidBodyStateVisualization::isOrientationDisplayForced() const
 { return forceOrientationDisplay; }
@@ -66,6 +67,7 @@ void RigidBodyStateVisualization::setOrientationDisplayForceFlag(bool flag)
         return;
     forceOrientationDisplay = flag;
     emit propertyChanged("forceOrientationDisplay");
+    updateModel();
 }
 
 void RigidBodyStateVisualization::setTexture(QString const& path)
@@ -226,6 +228,13 @@ ref_ptr<Group> RigidBodyStateVisualization::createSimpleBody(double size)
     return group;
 }
 
+void RigidBodyStateVisualization::updateModel() {
+    if (body_type == BODY_SIMPLE)
+        resetModel(total_size);
+    else if (body_type == BODY_SPHERE)
+        resetModelSphere(total_size);
+}
+
 double RigidBodyStateVisualization::getMainSphereSize() const
 {
     return main_size;
@@ -237,8 +246,7 @@ void RigidBodyStateVisualization::setMainSphereSize(double size)
         return;
     main_size = size;
     emit propertyChanged("sphereSize");
-    // This triggers an update of the model if we don't have a custom model
-    setSize(total_size);
+    updateModel();
 }
 
 double RigidBodyStateVisualization::getTextSize() const
@@ -252,8 +260,7 @@ void RigidBodyStateVisualization::setTextSize(double size)
         return;
     text_size = size;
     emit propertyChanged("textSize");
-    // This triggers an update of the model if we don't have a custom model
-    setSize(total_size);
+    updateModel();
 }
 
 void RigidBodyStateVisualization::setSize(double size)
@@ -262,10 +269,7 @@ void RigidBodyStateVisualization::setSize(double size)
         return;
     total_size = size;
     emit propertyChanged("size");
-    if (body_type == BODY_SIMPLE)
-        resetModel(size);
-    else if (body_type == BODY_SPHERE)
-        resetModelSphere(size);
+    updateModel();
 }
 
 double RigidBodyStateVisualization::getSize() const
@@ -372,6 +376,7 @@ void RigidBodyStateVisualization::displayCovariance(bool enable)
         return;
     covariance = enable;
     emit propertyChanged("displayCovariance");
+    updateModel();
 }
 bool RigidBodyStateVisualization::isCovarianceDisplayed() const
 { return covariance; }
@@ -385,6 +390,7 @@ void RigidBodyStateVisualization::displayCovarianceWithSamples(bool enable)
         return;
     covariance_with_samples = enable;
     emit propertyChanged("displayCovarianceWithSamples");
+    updateModel();
 }
 bool RigidBodyStateVisualization::isCovarianceDisplayedWithSamples() const
 { return covariance_with_samples; }

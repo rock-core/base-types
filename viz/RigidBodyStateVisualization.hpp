@@ -137,6 +137,7 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
 	osg::ref_ptr<osg::Node>  body_model;
         osg::ref_ptr<osg::Group> createSimpleBody(double size);
 	osg::ref_ptr<osg::Group> createSimpleSphere(double size);
+        void updateModel();
 
         osg::ref_ptr<osg::Image> image;
         osg::ref_ptr<osg::Texture2D> texture;
