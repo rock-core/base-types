@@ -28,6 +28,7 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         Q_PROPERTY(bool forcePositionDisplay READ isPositionDisplayForced WRITE setPositionDisplayForceFlag)
         Q_PROPERTY(bool forceOrientationDisplay READ isOrientationDisplayForced WRITE setOrientationDisplayForceFlag)
         Q_PROPERTY(QString modelPath READ getModelPath WRITE loadModel)
+        Q_PROPERTY(bool displayTargetInSource READ isTargetInSourceShown WRITE setDisplayTargetInSource)
 
     public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -93,6 +94,9 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         void displayCovarianceWithSamples(bool enable);
         bool isCovarianceDisplayedWithSamples() const;
 
+        void setDisplayTargetInSource(bool enable);
+        bool isTargetInSourceShown() const;
+
         /** Sets the color of the default body model in R, G, B
          *
          * Values must be between 0 and 1
@@ -157,6 +161,7 @@ class RigidBodyStateVisualization : public Vizkit3DPlugin<base::samples::RigidBo
         
         QString model_path;
 
+        bool display_target_in_source;
 };
 
 }

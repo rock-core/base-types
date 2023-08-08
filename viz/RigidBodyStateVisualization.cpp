@@ -27,6 +27,7 @@ RigidBodyStateVisualization::RigidBodyStateVisualization(QObject* parent)
     , bump_mapping_dirty(false)
     , forcePositionDisplay(false)
     , forceOrientationDisplay(false)
+    , display_target_in_source(false)
 {
     state = base::samples::RigidBodyState::invalid();
     state.position = base::Vector3d::Zero();
@@ -381,6 +382,17 @@ void RigidBodyStateVisualization::displayCovariance(bool enable)
 bool RigidBodyStateVisualization::isCovarianceDisplayed() const
 { return covariance; }
 
+void RigidBodyStateVisualization::setDisplayTargetInSource(bool enable) {
+    if(display_target_in_source == enable)
+        return;
+    display_target_in_source = enable;
+    emit propertyChanged("displayTargetInSource");
+    updateModel();
+}
+bool RigidBodyStateVisualization::isTargetInSourceShown() const {
+    return display_target_in_source;
+}
+
 void RigidBodyStateVisualization::setColor(base::Vector3d const& color)
 { this->color = color; }
 
@@ -462,12 +474,25 @@ void RigidBodyStateVisualization::updateMainNode(Node* node)
     if (bump_mapping_dirty)
         updateBumpMapping();
 
+    Eigen::Affine3d transform_inv;
+    if(display_target_in_source) {
+        transform_inv = state.getTransform().inverse();
+    }
+
     if (forcePositionDisplay || state.hasValidPosition())
     {
-	osg::Vec3d pos(
-                state.position.x(), state.position.y(), state.position.z());
+        if(display_target_in_source) {
+            base::Position position(transform_inv.translation());
+            osg::Vec3d pos(
+                    position.x(), position.y(), position.z());
         
-        body_pose->setPosition(pos + translation);
+            body_pose->setPosition(pos + translation);
+        } else {
+            osg::Vec3d pos(
+                    state.position.x(), state.position.y(), state.position.z());
+
+            body_pose->setPosition(pos + translation);
+        }
     }
     if (needs_uncertainty)
     {
@@ -476,16 +501,34 @@ void RigidBodyStateVisualization::updateMainNode(Node* node)
         else
             uncertainty->hideSamples();
 
-        uncertainty->setMean(static_cast<Eigen::Vector3d>(state.position));
-        uncertainty->setCovariance(static_cast<Eigen::Matrix3d>(state.cov_position));
+        if(display_target_in_source) {
+            base::Position position(transform_inv.translation());
+            uncertainty->setMean(static_cast<Eigen::Vector3d>(position));
+            uncertainty->setCovariance(static_cast<Eigen::Matrix3d>(
+                transform_inv.linear() *
+                state.orientation.toRotationMatrix().inverse() *
+                state.cov_position));
+        } else {
+            uncertainty->setMean(static_cast<Eigen::Vector3d>(state.position));
+            uncertainty->setCovariance(static_cast<Eigen::Matrix3d>(state.cov_position));
+        }
     }
     if (forceOrientationDisplay || state.hasValidOrientation())
     {
-	osg::Quat orientation(state.orientation.x(),
-                state.orientation.y(),
-                state.orientation.z(),
-                state.orientation.w());
-        body_pose->setAttitude(rotation * orientation);
+        if(display_target_in_source) {
+            Eigen::Quaterniond transform_orientation(transform_inv.linear());
+            osg::Quat orientation(transform_orientation.x(),
+                    transform_orientation.y(),
+                    transform_orientation.z(),
+                    transform_orientation.w());
+            body_pose->setAttitude(rotation * orientation);
+        } else {
+            osg::Quat orientation(state.orientation.x(),
+                    state.orientation.y(),
+                    state.orientation.z(),
+                    state.orientation.w());
+            body_pose->setAttitude(rotation * orientation);
+        }
     }
 }
 
