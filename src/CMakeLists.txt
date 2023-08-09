@@ -8,6 +8,7 @@ if(SISL_FOUND)
         Spline.cpp
         Trajectory.cpp
     )
+    set(BASE-TYPES_EXTRA_DEPS_CMAKE SISL)
 endif()
 
 rock_library(
@@ -117,10 +118,10 @@ rock_library(
     DEPS_PKGCONFIG 
         base-logging
         eigen3
+    DEPS_CMAKE ${BASE-TYPES_EXTRA_DEPS_CMAKE}
 )
 
 if(SISL_FOUND)
-    target_link_libraries(base-types ${SISL_LIBRARIES})
     install(FILES ${CMAKE_SOURCE_DIR}/src/Spline.hpp
             DESTINATION include/base/geometry)
     configure_file(base-types-sisl.pc.in ${CMAKE_BINARY_DIR}/base-types-sisl.pc @ONLY)

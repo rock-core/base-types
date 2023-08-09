@@ -1,4 +1,4 @@
-rock_find_qt4(OPTIONAL NOCURDIR)
+rock_find_qt4(OPTIONAL)
 rock_find_qt5(OPTIONAL)
 
 if(SISL_FOUND)

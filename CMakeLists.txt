@@ -4,6 +4,7 @@ cmake_policy(SET CMP0057 NEW)
 
 find_package(Rock)
 rock_init(base 1.0)
+rock_feature(NOCURDIR)
 
 set(CMAKE_CXX_STANDARD 11)
 
