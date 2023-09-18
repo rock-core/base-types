@@ -365,8 +365,7 @@ void frame::Frame::setImage(const uint8_t* data, size_t newImageSize)
             jpeg_create_decompress(&dinfo);
             jpeg_mem_src(&dinfo, this->image.data(), this->image.size());
             jpeg_read_header(&dinfo, false);
-            jpeg_start_decompress(&dinfo);
-            this->size = frame_size_t(dinfo.output_width, dinfo.output_height);
+            this->size = frame_size_t(dinfo.image_width, dinfo.image_height);
             jpeg_destroy_decompress(&dinfo);
         }
     }
