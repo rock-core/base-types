@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <iterator>
+#include <jpeglib.h>
 
 namespace base { namespace samples {
 
@@ -354,6 +355,21 @@ void frame::Frame::setImage(const uint8_t* data, size_t newImageSize)
     validateImageSize(newImageSize);
     image.resize(newImageSize);
     memcpy(&this->image[0], data, newImageSize);
+    if(this->size == frame_size_t())
+    {
+        if(this->frame_mode == MODE_JPEG)
+        {
+            jpeg_decompress_struct dinfo;
+            jpeg_error_mgr jerr;
+            dinfo.err = jpeg_std_error(&jerr);
+            jpeg_create_decompress(&dinfo);
+            jpeg_mem_src(&dinfo, this->image.data(), this->image.size());
+            jpeg_read_header(&dinfo, false);
+            jpeg_start_decompress(&dinfo);
+            this->size = frame_size_t(dinfo.output_width, dinfo.output_height);
+            jpeg_destroy_decompress(&dinfo);
+        }
+    }
 }
 
 uint8_t* frame::Frame::getImagePtr()
