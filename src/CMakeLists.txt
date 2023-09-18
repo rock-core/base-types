@@ -114,6 +114,7 @@ rock_library(
         samples/Event.hpp
         samples/EventArray.hpp
         ${OPTIONAL_HPP}
+    DEPS_CMAKE JPEG
     DEPS_PKGCONFIG 
         base-logging
         eigen3
