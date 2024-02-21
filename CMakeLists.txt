@@ -5,7 +5,7 @@ cmake_policy(SET CMP0057 NEW)
 find_package(Rock)
 rock_init(base 1.0)
 
-set(CMAKE_CXX_STANDARD 11)
+#set(CMAKE_CXX_STANDARD 11)
 
 # rock_export_includedir(${PROJECT_SOURCE_DIR}/base ${PROJECT_NAME})
 rock_export_includedir(${PROJECT_SOURCE_DIR}/src base/geometry)
