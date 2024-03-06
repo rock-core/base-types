@@ -3,6 +3,9 @@ if(SISL_FOUND)
     list(APPEND OPTIONAL_HPP
         TrajectoryVisualization.hpp
     )
+    list(APPEND OPTIONAL_MOC
+        TrajectoryVisualization.hpp
+    )
     list(APPEND OPTIONAL_CPP
         TrajectoryVisualization.cpp
     )
@@ -50,6 +53,7 @@ rock_vizkit_plugin(base-viz
         SonarVisualization.hpp
         PointcloudVisualization.hpp
         DepthMapVisualization.hpp
+        ${OPTIONAL_MOC}
     DEPS base-types Qt5::Widgets
     LIBS ${Boost_SYSTEM_LIBRARY}
     DEPS_PKGCONFIG base-logging
