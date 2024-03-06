@@ -39,6 +39,17 @@ rock_vizkit_plugin(base-viz
         ${OPTIONAL_HPP}
     MOC
         PluginLoader.hpp
+        DistanceImageVisualization.hpp
+        LaserScanVisualization.hpp
+        MotionCommandVisualization.hpp
+        RigidBodyStateVisualization.hpp
+        BodyStateVisualization.hpp
+        WaypointVisualization.hpp
+        SonarGroundDistanceVisualization.hpp
+        SonarBeamVisualization.hpp
+        SonarVisualization.hpp
+        PointcloudVisualization.hpp
+        DepthMapVisualization.hpp
     DEPS base-types Qt5::Widgets
     LIBS ${Boost_SYSTEM_LIBRARY}
     DEPS_PKGCONFIG base-logging
