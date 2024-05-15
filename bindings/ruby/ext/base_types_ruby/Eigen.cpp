@@ -381,7 +381,7 @@ struct Quaternion
         const Eigen::Matrix3d m = q->toRotationMatrix();
         double i = Eigen::Vector2d(m.coeff(2, 2), m.coeff(2, 1)).norm();
         double y = atan2(-m.coeff(2, 0), i);
-        if (isnan(i)) {
+        if (std::isnan(i)) {
             return new Vector3(NAN, NAN, NAN);
         }
         else if (i > Eigen::NumTraits<double>::dummy_precision()) {
