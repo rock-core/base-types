@@ -1,24 +1,22 @@
-#ifndef LOG_MESSAGE_HPP
-#define LOG_MESSAGE_HPP
+#ifndef WORKSPACE_BASE_TYPES_SRC_LOGMESSAGE_HPP_
+#define WORKSPACE_BASE_TYPES_SRC_LOGMESSAGE_HPP_
 
 #include <string>
-#include <base/Time.hpp>
+#include "./Time.hpp"
 
-namespace base
-{
+namespace base {
 
-    /**
-     * @brief Log message type to be able to e.g. write timestamped messages/markers into log files
-     * 
-     */
-    class LogMessage
-    {
-        public:
-            base::Time timestamp;
-            std::string message;
-    };
+/**
+ * @brief Log message type to be able to e.g. write timestamped messages/markers into log files
+ * 
+ */
+class LogMessage {
+ public:
+    base::Time time;
+    std::string message;
+};
 
-}
+}  // namespace base
 
-#endif
+#endif  // WORKSPACE_BASE_TYPES_SRC_LOGMESSAGE_HPP_
 
