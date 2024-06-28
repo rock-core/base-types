@@ -23,6 +23,7 @@ set(BASE_VIZ_SOURCES
         SonarVisualization.cpp
         PointcloudVisualization.cpp
         DepthMapVisualization.cpp
+        OrientedBoundingBoxVisualization.cpp
         ${OPTIONAL_CPP}
     )
 
@@ -40,6 +41,7 @@ set(BASE_VIZ_HEADERS
         SonarVisualization.hpp
         PointcloudVisualization.hpp
         DepthMapVisualization.hpp
+        OrientedBoundingBoxVisualization.hpp
         ${OPTIONAL_HPP}
     )
 
@@ -57,6 +59,7 @@ set(BASE_VIZ_MOC
         SonarVisualization.hpp
         TrajectoryVisualization.hpp
         WaypointVisualization.hpp
+        OrientedBoundingBoxVisualization.hpp
     )
 
 if (ROCK_QT_VERSION_4)
@@ -68,7 +71,7 @@ rock_vizkit_plugin(base-viz
         ${BASE_VIZ_MOC}
     DEPS base-types
     LIBS ${Boost_SYSTEM_LIBRARY}
-    DEPS_PKGCONFIG base-logging
+    DEPS_PKGCONFIG base-logging PrimitivesFactory
 )
 endif()
 
@@ -81,6 +84,6 @@ rock_vizkit_plugin_qt5(base-viz-qt5
         ${BASE_VIZ_MOC}
     DEPS base-types
     LIBS ${Boost_SYSTEM_LIBRARY}
-    DEPS_PKGCONFIG base-logging
+    DEPS_PKGCONFIG base-logging PrimitivesFactory
 )
 endif()

@@ -13,6 +13,7 @@
 #include "SonarVisualization.hpp"
 #include "DepthMapVisualization.hpp"
 #include "DistanceImageVisualization.hpp"
+#include "OrientedBoundingBoxVisualization.hpp"
 
 namespace vizkit3d {
 
@@ -36,6 +37,7 @@ namespace vizkit3d {
 		pluginNames->push_back("SonarVisualization");
 		pluginNames->push_back("DepthMapVisualization");
 		pluginNames->push_back("DistanceImageVisualization");
+		pluginNames->push_back("OrientedBoundingBoxVisualization");
 		return pluginNames;
 	}
 	
@@ -89,6 +91,10 @@ namespace vizkit3d {
 		else if (pluginName == "DistanceImageVisualization")
 		{
 		plugin = new vizkit3d::DistanceImageVisualization();
+		}
+		else if (pluginName == "OrientedBoundingBoxVisualization")
+		{
+		plugin = new vizkit3d::OrientedBoundingBoxVisualization();
 		}
 
 		if (plugin)
