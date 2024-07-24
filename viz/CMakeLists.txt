@@ -40,7 +40,7 @@ rock_vizkit_plugin(base-viz
         PointcloudVisualization.hpp
         DepthMapVisualization.hpp
         ${OPTIONAL_HPP}
-    MOC
+    MOC5
         PluginLoader.hpp
         DistanceImageVisualization.hpp
         LaserScanVisualization.hpp
