@@ -63,6 +63,7 @@ rock_library(
         JointsTrajectory.hpp
         JointTransform.hpp
         Logging.hpp
+        LogMessage.hpp
         Matrix.hpp
         NamedVector.hpp
         Point.hpp
@@ -115,7 +116,7 @@ rock_library(
         samples/Event.hpp
         samples/EventArray.hpp
         ${OPTIONAL_HPP}
-    DEPS_PKGCONFIG 
+    DEPS_PKGCONFIG
         base-logging
         eigen3
     DEPS_CMAKE ${BASE-TYPES_EXTRA_DEPS_CMAKE}
