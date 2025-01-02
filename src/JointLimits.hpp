@@ -17,6 +17,13 @@ namespace base
 	 * limits for a particular joint.
 	 */
 	void validate( const base::samples::Joints& joints ) const;
+
+    /**
+     * Saturates all jointstate when they are out of their respective limits
+     *
+     * @return a pair with the status (isSaturated) and the saturated_joints
+     */
+    std::pair<bool, samples::Joints> saturate(const samples::Joints& joints);
     };
 }
 
