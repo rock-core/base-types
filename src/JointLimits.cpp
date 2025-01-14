@@ -43,7 +43,7 @@ std::pair<bool, samples::Joints> JointLimits::saturate(const samples::Joints& jo
         for (size_t i = 0; i < joints.size(); i++)
         {
             auto result = (*this)[joints.names[i]].saturate(joints[i]);
-            saturated = saturated ? saturated : result.first;
+            saturated |= result.first;
             new_joints[i] = result.second;
         }
     }
@@ -51,7 +51,7 @@ std::pair<bool, samples::Joints> JointLimits::saturate(const samples::Joints& jo
         for (size_t i = 0; i < joints.size(); i++)
         {
             auto result = (*this)[i].saturate(joints[i]);
-            saturated = saturated ? saturated : result.first;
+            saturated |= result.first;
             new_joints[i] = result.second;
         }
     }
