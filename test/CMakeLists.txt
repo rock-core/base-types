@@ -6,6 +6,8 @@ endif()
 rock_testsuite(test_base_types test.cpp
     test_Angle.cpp
     test_Eigen.cpp
+    test_JointLimits.cpp
+    test_JointLimitRange.cpp
     test_RigidBodyStateSE3.cpp
     test_Temperature.cpp
     test_Time.cpp
