@@ -63,30 +63,64 @@ namespace base { namespace samples { namespace frame {
     public:
         /**
          * Initialize the frame
-         * @param width the image width, in pixels
-         * @param height the image height, in pixels
-         * @param data_depth the number of effective bits per pixels
-         * @param mode the frame mode (raw, hdr, greyscale, colour)
          */
         Frame();
 
-        //@depth number of bits per pixel and channel
-        Frame(uint16_t width, uint16_t height, uint8_t depth=8, frame_mode_t mode=MODE_GRAYSCALE, uint8_t const val = 0,size_t sizeInBytes=0);
+        /**
+         * @param width the frame width
+         * @param height the frame height
+         * @param depth the bit depth
+         * @param mode the pixel mode
+         * @param val a value used to initialize each byte of the image's buffer.
+         *     if negative, it is left uninitialized
+         * @param sizeInBytes the desired size in bytes of the image's buffer. If zero,
+         *     it is computed from the other parameters
+         */
+        Frame(uint16_t width, uint16_t height, uint8_t depth=8, frame_mode_t mode=MODE_GRAYSCALE, int16_t const val = 0,size_t sizeInBytes=0);
 
-        //makes a copy of other
-        Frame(const Frame &other,bool bcopy = true);
+        /**
+         * @param other the frame we copy from
+         * @param bcopy if true, both metadata (size, mode, ...) and data are copied.
+         *     If false, the data itself is not
+         */
+        Frame(const Frame &other, bool bcopy = true);
 
         //copies all attributes which are independent from size and mode
         //if an attribute already exists the old value is over written
         void copyImageIndependantAttributes(const Frame &other);
 
-        //makes a copy of other
+        /** Copy information and optionally data from another frame
+         *
+         * @param other the frame we copy from
+         * @param bcopy if true, both metadata (size, mode, ...) and data are copied.
+         *     If false, the data itself is not
+         */
         void init(const Frame &other,bool bcopy = true);
 
-        void init(uint16_t width, uint16_t height, uint8_t depth=8, frame_mode_t mode=MODE_GRAYSCALE, const uint8_t val = 0, size_t sizeInBytes=0);
+        /** Initialize the image
+         *
+         * @param width the frame width
+         * @param height the frame height
+         * @param depth the bit depth
+         * @param mode the pixel mode
+         * @param val a value used to initialize each byte of the image's buffer.
+         *     if negative, it is left uninitialized. THe method only write
+         *     bytes. If the bit depth is e.g. 16 bit, `val` will be written on
+         *     both the low and high byte of each channel.
+         * @param sizeInBytes the desired size in bytes of the image's buffer. If zero,
+         *     it is computed from the other parameters
+         */
+        void init(uint16_t width, uint16_t height, uint8_t depth=8, frame_mode_t mode=MODE_GRAYSCALE, int16_t val = 0, size_t sizeInBytes=0);
 
-        // if val is negative the image will not be initialized
-        void reset(int const val = 0);
+        /** Fill the image buffer's bytes by a given value
+         *
+         * THe method only write bytes. If the bit depth is e.g. 16 bit, `val`
+         * will be written on both the low and high byte of each channel.
+         *
+         * @param val a value used to initialize each byte of the image's buffer.
+         *     if negative, it is left uninitialized
+         */
+        void reset(int val = 0);
 
         void swap(Frame &frame);
 

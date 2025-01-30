@@ -32,7 +32,7 @@ frame::Frame::Frame() : image(), size(), data_depth(0), pixel_size(0), frame_mod
     reset();
 }
 
-frame::Frame::Frame(uint16_t width, uint16_t height, uint8_t depth, frame::frame_mode_t mode, const uint8_t val, size_t sizeInBytes)
+frame::Frame::Frame(uint16_t width, uint16_t height, uint8_t depth, frame::frame_mode_t mode, int16_t val, size_t sizeInBytes)
 {
     init(width,height,depth,mode,val,sizeInBytes);
 }
@@ -61,7 +61,7 @@ void frame::Frame::init(const frame::Frame& other, bool bcopy)
     copyImageIndependantAttributes(other);
 }
 
-void frame::Frame::init(uint16_t width, uint16_t height, uint8_t depth, frame::frame_mode_t mode, const uint8_t val, size_t sizeInBytes)
+void frame::Frame::init(uint16_t width, uint16_t height, uint8_t depth, frame::frame_mode_t mode, int16_t val, size_t sizeInBytes)
 {
     //change size if the frame does not fit
     if(this->size.height != height || this->size.width !=  width || this->frame_mode != mode ||
@@ -86,7 +86,7 @@ void frame::Frame::init(uint16_t width, uint16_t height, uint8_t depth, frame::f
     reset(val);
 }
 
-void frame::Frame::reset(const int val)
+void frame::Frame::reset(int val)
 {
     this->time = Time();
     if (this->image.size() > 0 && val >= 0) {
