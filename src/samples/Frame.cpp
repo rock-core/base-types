@@ -26,7 +26,7 @@ bool frame::frame_size_t::operator!=(const frame::frame_size_t& other) const
     return !(*this == other);
 }
 
-frame::Frame::Frame() : image(), size(), data_depth(0), pixel_size(0), frame_mode()
+frame::Frame::Frame() : image(), size(), data_depth(0), pixel_size(0), frame_mode(MODE_UNDEFINED)
 {
     setDataDepth(0);
     reset();
@@ -64,19 +64,20 @@ void frame::Frame::init(const frame::Frame& other, bool bcopy)
 void frame::Frame::init(uint16_t width, uint16_t height, uint8_t depth, frame::frame_mode_t mode, const uint8_t val, size_t sizeInBytes)
 {
     //change size if the frame does not fit
-    if(this->size.height != height || this->size.width !=  width || this->frame_mode != mode || 
+    if(this->size.height != height || this->size.width !=  width || this->frame_mode != mode ||
         this->data_depth != depth || (sizeInBytes != 0 && sizeInBytes != image.size()))
     {
-    //check if depth = 0
-    //this might be a programmer error 
-    if(depth==0 && (height != 0 || width != 0 ))
-        throw std::runtime_error("Frame::init: Cannot initialize frame with depth = 0.");
+        //check if depth = 0
+        //this might be a programmer error
+        if (depth==0 && (height != 0 || width != 0 )) {
+            throw std::runtime_error("Frame::init: Cannot initialize frame with depth = 0.");
+        }
 
-    this->frame_mode = mode;
-    this->size = frame_size_t(width, height);
-    setDataDepth(depth);
+        this->frame_mode = mode;
+        this->size = frame_size_t(width, height);
+        setDataDepth(depth);
     }
-    //calculate size if not given 
+    //calculate size if not given
     if(!sizeInBytes)
         sizeInBytes = getPixelSize() * getPixelCount();
 
