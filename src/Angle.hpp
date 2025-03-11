@@ -7,6 +7,7 @@
 #include <base/Eigen.hpp>
 
 #include <vector>
+#include <boost/serialization/serialization.hpp>
 
 namespace base
 {
@@ -343,6 +344,14 @@ public:
      * End angle of the segment
      * */
     double endRad;
+
+    // Serialization function
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version) {
+        ar & width;
+        ar & startRad;
+        ar & endRad;
+    }
 };
 
 std::ostream& operator << (std::ostream& os, AngleSegment seg);
