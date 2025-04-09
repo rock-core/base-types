@@ -34,6 +34,7 @@ namespace samples
     struct DistanceImage
     {
 	/// original timestamp of the camera image
+	/// @meta role logical_time
 	base::Time time;
 
 	/// width (x) value in pixels

@@ -61,7 +61,8 @@ public:
      * This timestamp is used for temporal alignment to other data samples
      * and transformations. 
      * It is important to always set here a meaningful value.
-     */
+     *
+     * @meta role logical_time */
     base::Time time;
     
     /** The timestamps can be either one timestamp for all measurements,

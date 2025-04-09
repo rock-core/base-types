@@ -262,6 +262,8 @@ namespace base { namespace samples { namespace frame {
         /** The time at which this frame has been captured
          *
          * This is obviously an estimate
+         *
+         * @meta role logical_time
          */
         base::Time              time;
         /** The time at which this frame has been received on the system */

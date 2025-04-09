@@ -24,6 +24,7 @@ namespace base { namespace samples {
     {
         RigidBodyAcceleration();
 
+        /** @meta role logical_time */
         base::Time time;
 
         /** Linear acceleration in m/s2 */

@@ -36,7 +36,10 @@ namespace base { namespace samples {
         BodyState(const base::TransformWithCovariance& pose, const base::TwistWithCovariance& velocity):
             pose(pose), velocity(velocity) {};
 
-        /** Time-stamp **/
+        /**
+         * Time-stamp
+         *
+         * @meta role logical_time */
         base::Time time;
 
         /** Robot pose: rotation in radians and translation in meters */

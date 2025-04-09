@@ -9,6 +9,7 @@ namespace base{ namespace samples {
 /** RigidBodyStateSE3 with sampled time and frame ID*/
 struct RigidBodyStateSE3 : public base::RigidBodyStateSE3
 {
+    /** @meta role logical_time */
     base::Time time;
     /** Common coordinate frame for all quantities of the rigid body */
     std::string frame_id;

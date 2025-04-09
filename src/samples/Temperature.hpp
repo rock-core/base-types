@@ -10,7 +10,10 @@ namespace base
     {
         struct Temperature : public base::Temperature
         {
-            /** The sample timestamp */
+            /**
+             * The sample timestamp
+             *
+             * @meta role logical_time */
             base::Time time;
 
             Temperature() : base::Temperature() { }

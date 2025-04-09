@@ -7,7 +7,10 @@
 namespace base { namespace samples {
     struct IMUSensors
     {
-         /** Timestamp of the orientation reading */
+        /**
+         * Timestamp of the orientation reading
+         *
+         * @meta role logical_time */
         Time time;
 
         /** raw accelerometer readings */
