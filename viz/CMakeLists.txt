@@ -57,9 +57,9 @@ set(BASE_VIZ_MOC
         SonarBeamVisualization.hpp
         SonarGroundDistanceVisualization.hpp
         SonarVisualization.hpp
-        TrajectoryVisualization.hpp
         WaypointVisualization.hpp
         OrientedBoundingBoxVisualization.hpp
+        ${OPTIONAL_HPP}
     )
 
 if (ROCK_QT_VERSION_4)
@@ -73,6 +73,9 @@ rock_vizkit_plugin(base-viz
     LIBS ${Boost_SYSTEM_LIBRARY}
     DEPS_PKGCONFIG base-logging PrimitivesFactory
 )
+if(SISL_FOUND)
+    target_compile_definitions(base-viz SISL_FOUND)
+endif(SISL_FOUND)
 endif()
 
 if (ROCK_QT_VERSION_5)
@@ -86,4 +89,9 @@ rock_vizkit_plugin_qt5(base-viz-qt5
     LIBS ${Boost_SYSTEM_LIBRARY}
     DEPS_PKGCONFIG base-logging PrimitivesFactory
 )
+if(SISL_FOUND)
+    target_compile_definitions(base-viz-qt5 SISL_FOUND)
+endif(SISL_FOUND)
 endif()
+
+
