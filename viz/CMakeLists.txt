@@ -74,7 +74,7 @@ rock_vizkit_plugin(base-viz
     DEPS_PKGCONFIG base-logging PrimitivesFactory
 )
 if(SISL_FOUND)
-    target_compile_definitions(base-viz SISL_FOUND)
+    target_compile_definitions(base-viz PRIVATE SISL_FOUND)
 endif(SISL_FOUND)
 endif()
 
@@ -90,7 +90,7 @@ rock_vizkit_plugin_qt5(base-viz-qt5
     DEPS_PKGCONFIG base-logging PrimitivesFactory
 )
 if(SISL_FOUND)
-    target_compile_definitions(base-viz-qt5 SISL_FOUND)
+    target_compile_definitions(base-viz-qt5 PRIVATE SISL_FOUND)
 endif(SISL_FOUND)
 endif()
 
