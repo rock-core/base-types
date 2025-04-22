@@ -10,6 +10,7 @@ namespace base { namespace samples {
 /** Named vector of base::RigidBodyStateSE3 with sampled Time. */
 struct RigidBodyStateSE3Vector : public base::NamedVector< base::RigidBodyStateSE3>
 {
+    /** @meta role logical_time */
     base::Time time;
     /** Common coordinate frame for all elements of the vector */
     std::string frame_id;

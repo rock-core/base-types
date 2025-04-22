@@ -11,6 +11,7 @@ namespace base { namespace samples {
         typedef boost::uint8_t uint8_t;
 
         //timestamp of the sonar beam 
+        // @meta role logical_time
         Time time;
 
         //direction of the sonar beam in radians [-pi,+pi]

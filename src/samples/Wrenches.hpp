@@ -12,6 +12,7 @@ namespace base { namespace samples {
      */
     struct Wrenches : public base::NamedVector< base::Wrench >
     {
+        /** @meta role logical_time */
         base::Time time;
     };
 }}

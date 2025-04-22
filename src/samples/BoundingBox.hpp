@@ -62,7 +62,10 @@ struct BoundingBox {
      */
     bool hasValidCovDimension() const;
 
-    /* The sample timestamp. */
+    /**
+     * The sample timestamp.
+     *
+     * @meta role logical_time */
     Time time;
 
     /* 3D center (x, y, z) position of the bounding box . */

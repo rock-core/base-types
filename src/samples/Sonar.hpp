@@ -63,7 +63,8 @@ public:
      * Advice: always set to a meaningful value as a lot of processing-related
      * algorithms expect one value. If you can't have *one*, then split your
      * scanning sonar into separate Sonar structure (one per beam).
-     */
+     *
+     * @meta role logical_time */
     base::Time time;
 
     /** The time at which the beam(s) acquisition started

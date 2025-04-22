@@ -67,6 +67,7 @@ namespace samples {
     {
         RigidBodyState(bool doInvalidation=true);
 
+        /** @meta role logical_time */
         base::Time time;
 
         /** Name of the source reference frame */

@@ -12,6 +12,7 @@ namespace base {
   namespace samples {
   struct Pointcloud
   {
+    /** @meta role logical_time */
     Time time;
 
     std::vector<base::Point> points;

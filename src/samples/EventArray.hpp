@@ -9,6 +9,7 @@ namespace samples {
 
     struct EventArray
     {
+        /** @meta role logical_time */
         ::base::Time time;
         uint16_t height;
         uint16_t width;

@@ -97,6 +97,7 @@ namespace base { namespace samples {
             const uint8_t *getDataConstPtr() const;
 
             //The time at which this sonar scan has been captured
+            // @meta role logical_time
             base::Time                  time;
 
             //The raw data of the sonar scan
