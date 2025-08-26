@@ -1,6 +1,13 @@
 rock_find_qt4()
+
+unset(OPTIONAL_HPP)
+unset(OPTIONAL_MOC)
+unset(OPTIONAL_CPP)
 if(SISL_FOUND)
     list(APPEND OPTIONAL_HPP
+        TrajectoryVisualization.hpp
+    )
+    list(APPEND OPTIONAL_MOC
         TrajectoryVisualization.hpp
     )
     list(APPEND OPTIONAL_CPP
@@ -10,7 +17,6 @@ endif()
 
 rock_vizkit_plugin(base-viz
         PluginLoader.cpp Uncertainty.cpp Vizkit3DHelper.cpp
-    MOC
         DistanceImageVisualization.cpp
         LaserScanVisualization.cpp
         MotionCommandVisualization.cpp
@@ -23,6 +29,19 @@ rock_vizkit_plugin(base-viz
         PointcloudVisualization.cpp
         DepthMapVisualization.cpp
         ${OPTIONAL_CPP}
+    MOC
+        DistanceImageVisualization.hpp
+        LaserScanVisualization.hpp
+        MotionCommandVisualization.hpp
+        RigidBodyStateVisualization.hpp
+        BodyStateVisualization.hpp
+        WaypointVisualization.hpp
+        SonarGroundDistanceVisualization.hpp
+        SonarBeamVisualization.hpp
+        SonarVisualization.hpp
+        PointcloudVisualization.hpp
+        DepthMapVisualization.hpp
+        ${OPTIONAL_MOC}
     HEADERS
         Uncertainty.hpp
         Vizkit3DHelper.hpp
