@@ -19,5 +19,7 @@
     <depend package="rice" optional="1" />
     <depend package="external/sisl" optional="1" />
     <depend package="gui/vizkit3d" optional="1" />
+    <!-- gui/osgviz is directly used here, also pulled in by gui/vizkit3d -->
+    <depend package="gui/osgviz" optional="1" />
     <tags>stable</tags>
 </package>
