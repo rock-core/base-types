@@ -9,30 +9,30 @@ if(SISL_FOUND)
 endif()
 
 rock_vizkit_plugin(base-viz
-    PluginLoader.cpp Uncertainty.cpp Vizkit3DHelper.cpp
-    MOC 
-        DistanceImageVisualization.cpp 
-        LaserScanVisualization.cpp 
-        MotionCommandVisualization.cpp 
-        RigidBodyStateVisualization.cpp 
-        BodyStateVisualization.cpp 
-        WaypointVisualization.cpp 
-        SonarGroundDistanceVisualization.cpp 
+        PluginLoader.cpp Uncertainty.cpp Vizkit3DHelper.cpp
+    MOC
+        DistanceImageVisualization.cpp
+        LaserScanVisualization.cpp
+        MotionCommandVisualization.cpp
+        RigidBodyStateVisualization.cpp
+        BodyStateVisualization.cpp
+        WaypointVisualization.cpp
+        SonarGroundDistanceVisualization.cpp
         SonarBeamVisualization.cpp
         SonarVisualization.cpp
         PointcloudVisualization.cpp
         DepthMapVisualization.cpp
         ${OPTIONAL_CPP}
-    HEADERS 
-        Uncertainty.hpp 
-        Vizkit3DHelper.hpp 
+    HEADERS
+        Uncertainty.hpp
+        Vizkit3DHelper.hpp
         DistanceImageVisualization.hpp
-        LaserScanVisualization.hpp 
-        MotionCommandVisualization.hpp 
-        RigidBodyStateVisualization.hpp 
-        BodyStateVisualization.hpp 
-        WaypointVisualization.hpp 
-        SonarGroundDistanceVisualization.hpp 
+        LaserScanVisualization.hpp
+        MotionCommandVisualization.hpp
+        RigidBodyStateVisualization.hpp
+        BodyStateVisualization.hpp
+        WaypointVisualization.hpp
+        SonarGroundDistanceVisualization.hpp
         SonarBeamVisualization.hpp
         SonarVisualization.hpp
         PointcloudVisualization.hpp
