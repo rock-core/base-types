@@ -21,6 +21,7 @@ endif()
 rock_qt_vizkit_plugin(
     TARGETPREFIX base-viz
     QT4_SUFFIX ""
+    MISSINGQTDEPS_NOBUILD
     SOURCES
         PluginLoader.cpp Uncertainty.cpp Vizkit3DHelper.cpp
         DistanceImageVisualization.cpp
