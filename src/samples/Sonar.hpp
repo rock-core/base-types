@@ -116,8 +116,10 @@ public:
     
     /**
      * Number of bins in a beam
-     * 
-     * @deprecated, use getBeamBinCount() to return the number of bins in each beam
+     *
+     * @deprecated this field seem to be filled inconsistently across packages,
+     * and actually does not provide useful information. Use \c
+     * getSingleBeamBinCount() instead
      */
     uint32_t bin_count;
     
@@ -288,7 +290,7 @@ public:
      * Returns the number of bins in each beam
      * 
      */
-    uint32_t getBeamBinCount();
+    uint32_t getSingleBeamBinCount() const;
 
 BASE_TYPES_DEPRECATED_SUPPRESS_START
     explicit Sonar(SonarScan const& old, float gain = 1);

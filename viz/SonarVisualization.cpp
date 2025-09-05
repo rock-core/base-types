@@ -67,7 +67,7 @@ void SonarVisualization::updateMainNode(osg::Node* node)
         right_beam_limit.makeRotate(last_sonar.bearings[i].rad + fan_opening/2.0, 
             osg::Vec3d(0,0,1));
         
-        int fan_segment = last_sonar.bin_count;
+        int fan_segment = last_sonar.getSingleBeamBinCount();
 
         for(size_t j = i*fan_segment; j < (i+1)*fan_segment; j++)
         {

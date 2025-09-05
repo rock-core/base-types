@@ -20,7 +20,7 @@ module Vizkit
             sonar = Types.base.samples.Sonar.new
             sonar.speed_of_sound = 1000
             sonar.beam_count = beam_count
-            sonar.bin_count = bin_count
+            sonar.bin_count = beam_count*bin_count
             sonar.beam_width = Types.base.Angle.new
             sonar.beam_width.rad = 0.05
             sonar.bin_duration = Time.at(10.0/(sonar.speed_of_sound*sonar.bin_count/beam_count))

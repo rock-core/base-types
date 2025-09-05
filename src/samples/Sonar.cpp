@@ -163,7 +163,7 @@ void Sonar::validate()
         throw std::logic_error("the number of elements in 'bearings' does not match the beam count");
 }
 
-uint32_t Sonar::getBeamBinCount()
+uint32_t Sonar::getSingleBeamBinCount() const
 {
     return (bins.size() / beam_count);
 }
