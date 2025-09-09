@@ -28,6 +28,9 @@ rock_vizkit_plugin(base-viz
         SonarVisualization.cpp
         PointcloudVisualization.cpp
         DepthMapVisualization.cpp
+        RigidBodyStateSE3Visualization.cpp
+        WrenchModel.cpp
+        WrenchVisualization.cpp
         ${OPTIONAL_CPP}
     MOC
         DistanceImageVisualization.hpp
@@ -56,8 +59,11 @@ rock_vizkit_plugin(base-viz
         SonarVisualization.hpp
         PointcloudVisualization.hpp
         DepthMapVisualization.hpp
+        RigidBodyStateSE3Visualization.hpp
+        WrenchModel.hpp
+        WrenchVisualization.hpp
         ${OPTIONAL_HPP}
     DEPS base-types
     LIBS ${Boost_SYSTEM_LIBRARY}
-    DEPS_PKGCONFIG base-logging
+    DEPS_PKGCONFIG base-logging PrimitivesFactory osgViz
 )
