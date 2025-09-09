@@ -114,7 +114,13 @@ public:
     /** The speed of sound in water at the time of acquisition and in m/s*/
     float speed_of_sound;
     
-    /** Number of bins in a beam */
+    /**
+     * Number of bins in a beam
+     *
+     * @deprecated this field seem to be filled inconsistently across packages,
+     * and actually does not provide useful information. Use \c
+     * getSingleBeamBinCount() instead
+     */
     uint32_t bin_count;
     
     /** Number of beams in the structure */
@@ -279,6 +285,12 @@ public:
     /** Verify this structure's consistency
      */
     void validate();
+
+    /**
+     * Returns the number of bins in each beam
+     * 
+     */
+    uint32_t getSingleBeamBinCount() const;
 
 BASE_TYPES_DEPRECATED_SUPPRESS_START
     explicit Sonar(SonarScan const& old, float gain = 1);

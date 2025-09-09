@@ -163,7 +163,12 @@ void Sonar::validate()
         throw std::logic_error("the number of elements in 'bearings' does not match the beam count");
 }
 
-Sonar::Sonar(SonarScan const& old, float gain) 
+uint32_t Sonar::getSingleBeamBinCount() const
+{
+    return (bins.size() / beam_count);
+}
+
+Sonar::Sonar(SonarScan const& old, float gain)
     : time(old.time)
     , timestamps(old.time_beams)
     , bin_duration(Time::fromSeconds(old.getSpatialResolution() / old.speed_of_sound))
