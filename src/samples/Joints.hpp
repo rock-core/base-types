@@ -16,7 +16,10 @@ namespace base
          */
         struct Joints : public base::NamedVector<JointState>
         {
-            /** The sample timestamp */
+            /**
+             * The sample timestamp
+             *
+             * @meta role logical_time */
             base::Time time;
 
             static Joints Positions(std::vector<double> const& positions);

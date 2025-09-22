@@ -42,6 +42,15 @@ struct JointLimitRange
      */
     bool isValid( const JointState &state ) const;
 
+    /**
+     * Saturates the provided JointState when it is out of the limits for the values
+     * that are valid
+     *
+     * @return a pair <true, saturated_joint_state> when saturated,
+     * <false, current_joint_state> otherwise
+     */
+    std::pair<bool, JointState> saturate(const JointState& state) const;
+
     /** Creates a JointLimitRange structure with the position range set to \c
      * min, \c max
      */

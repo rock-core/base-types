@@ -1,9 +1,7 @@
 #include "JointLimitRange.hpp"
 #include <sstream>
 
-namespace base
-{
-    
+using namespace base;
 
 std::string JointLimitRange::OutOfBounds::errorString(std::string name, double min, double max, double value)
 {
@@ -113,6 +111,63 @@ std::pair< bool, JointLimitRange::OutOfBounds > JointLimitRange::verifyValidity(
     return make_pair(true, OutOfBounds());
 }
 
-    
-    
-} //end namespace base
+std::pair<bool, JointState> JointLimitRange::saturate(const JointState& state) const
+{
+    JointState new_state = state;
+    bool saturated = false;
+    if (state.hasPosition()) {
+        if (min.hasPosition() && min.position > state.position) {
+            new_state.position = min.position;
+            saturated = true;
+        }
+        if (max.hasPosition() && max.position < state.position) {
+            new_state.position = max.position;
+            saturated = true;
+        }
+    }
+
+    if (state.hasSpeed()) {
+        if (min.hasSpeed() && min.speed > state.speed) {
+            new_state.speed = min.speed;
+            saturated = true;
+        }
+        if (max.hasSpeed() && max.speed < state.speed) {
+            new_state.speed = max.speed;
+            saturated = true;
+        }
+    }
+
+    if (state.hasEffort()) {
+        if (min.hasEffort() && min.effort > state.effort) {
+            new_state.effort = min.effort;
+            saturated = true;
+        }
+        if (max.hasEffort() && max.effort < state.effort) {
+            new_state.effort = max.effort;
+            saturated = true;
+        }
+    }
+
+    if (state.hasRaw()) {
+        if (min.hasRaw() && min.raw > state.raw) {
+            new_state.raw = min.raw;
+            saturated = true;
+        }
+        if (max.hasRaw() && max.raw < state.raw) {
+            new_state.raw = max.raw;
+            saturated = true;
+        }
+    }
+
+    if (state.hasAcceleration()) {
+        if (min.hasAcceleration() && min.acceleration > state.acceleration) {
+            new_state.acceleration = min.acceleration;
+            saturated = true;
+        }
+        if (max.hasAcceleration() && max.acceleration < state.acceleration) {
+            new_state.acceleration = max.acceleration;
+            saturated = true;
+        }
+    }
+    return std::make_pair(saturated, new_state);
+}

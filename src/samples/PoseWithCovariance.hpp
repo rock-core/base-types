@@ -23,7 +23,10 @@ namespace base { namespace samples {
 class PoseWithCovariance
 {
 public:
-    /** Reference timestamp of the pose sample */
+    /**
+     * Reference timestamp of the pose sample
+     *
+     * @meta role logical_time */
     base::Time time;
 
     /** ID of the reference frame where this pose is expressed in */

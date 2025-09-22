@@ -12,7 +12,10 @@ namespace base
         /** Timestamped pressure */
         struct Pressure : public base::Pressure
         {
-            /** The sample timestamp */
+            /**
+             * The sample timestamp
+             *
+             * @meta role logical_time */
             base::Time time;
 
             Pressure()

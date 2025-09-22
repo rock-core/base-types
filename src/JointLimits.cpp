@@ -1,6 +1,6 @@
 #include "JointLimits.hpp"
 
-namespace base {
+using namespace base;
 
 bool JointLimits::isValid(const samples::Joints& joints) const
 {
@@ -33,4 +33,27 @@ void JointLimits::validate(const samples::Joints& joints) const
     }
 }
 
-} //end namespace base
+std::pair<bool, samples::Joints> JointLimits::saturate(const samples::Joints& joints)
+{
+    samples::Joints new_joints;
+    new_joints.resize(joints.size());
+    new_joints = joints;
+    bool saturated = false;
+    if (joints.hasNames()) {
+        for (size_t i = 0; i < joints.size(); i++)
+        {
+            auto result = (*this)[joints.names[i]].saturate(joints[i]);
+            saturated |= result.first;
+            new_joints[i] = result.second;
+        }
+    }
+    else {
+        for (size_t i = 0; i < joints.size(); i++)
+        {
+            auto result = (*this)[i].saturate(joints[i]);
+            saturated |= result.first;
+            new_joints[i] = result.second;
+        }
+    }
+    return std::make_pair(saturated, new_joints);
+}

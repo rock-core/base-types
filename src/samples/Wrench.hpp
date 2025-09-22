@@ -11,6 +11,7 @@ namespace base { namespace samples {
      */
     struct Wrench : public base::Wrench
     {
+        /** @meta role logical_time */
         base::Time time;
         /** ID of the coordinate frame in which the wrench is expressed*/
         std::string frame_id;

@@ -14,6 +14,7 @@ namespace samples {
 
         uint16_t x;
         uint16_t y;
+        /** @meta role logical_time */
         ::base::Time ts;
         uint8_t polarity;
     };
