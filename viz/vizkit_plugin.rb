@@ -29,3 +29,6 @@ Vizkit::UiLoader.register_3d_plugin('DepthMapVisualization', "base", 'DepthMapVi
 Vizkit::UiLoader.register_3d_plugin_for('DepthMapVisualization', "/base/samples/DepthMap", :updateDepthMap)
 Vizkit::UiLoader.register_3d_plugin('DistanceImageVisualization', "base", 'DistanceImageVisualization')
 Vizkit::UiLoader.register_3d_plugin_for('DistanceImageVisualization', "/base/samples/DistanceImage", :updateDistanceImage)
+Vizkit::UiLoader.register_3d_plugin('OrientedBoundingBoxVisualization',"base", 'OrientedBoundingBoxVisualization')
+Vizkit::UiLoader.register_3d_plugin_for('OrientedBoundingBoxVisualization', "/std/vector</base/samples/OrientedBoundingBox>", :updateData )
+Vizkit::UiLoader.register_3d_plugin_for('OrientedBoundingBoxVisualization', "/base/samples/OrientedBoundingBox", :updateData )
