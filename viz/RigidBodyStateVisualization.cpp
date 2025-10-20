@@ -27,6 +27,7 @@ RigidBodyStateVisualization::RigidBodyStateVisualization(QObject* parent)
     , bump_mapping_dirty(false)
     , forcePositionDisplay(false)
     , forceOrientationDisplay(false)
+    , display_target_in_source(false)
 {
     state = base::samples::RigidBodyState::invalid();
     state.position = base::Vector3d::Zero();
@@ -52,11 +53,23 @@ void RigidBodyStateVisualization::setColor(const Vec4d& color, Geode* geode)
 bool RigidBodyStateVisualization::isPositionDisplayForced() const
 { return forcePositionDisplay; }
 void RigidBodyStateVisualization::setPositionDisplayForceFlag(bool flag)
-{ forcePositionDisplay = flag; emit propertyChanged("forcePositionDisplay"); }
+{
+    if(forcePositionDisplay == flag)
+        return;
+    forcePositionDisplay = flag;
+    emit propertyChanged("forcePositionDisplay");
+    updateModel();
+}
 bool RigidBodyStateVisualization::isOrientationDisplayForced() const
 { return forceOrientationDisplay; }
 void RigidBodyStateVisualization::setOrientationDisplayForceFlag(bool flag)
-{ forceOrientationDisplay = flag; emit propertyChanged("forceOrientationDisplay"); }
+{
+    if(forceOrientationDisplay == flag)
+        return;
+    forceOrientationDisplay = flag;
+    emit propertyChanged("forceOrientationDisplay");
+    updateModel();
+}
 
 void RigidBodyStateVisualization::setTexture(QString const& path)
 { return setTexture(path.toStdString()); }
@@ -216,6 +229,13 @@ ref_ptr<Group> RigidBodyStateVisualization::createSimpleBody(double size)
     return group;
 }
 
+void RigidBodyStateVisualization::updateModel() {
+    if (body_type == BODY_SIMPLE)
+        resetModel(total_size);
+    else if (body_type == BODY_SPHERE)
+        resetModelSphere(total_size);
+}
+
 double RigidBodyStateVisualization::getMainSphereSize() const
 {
     return main_size;
@@ -223,10 +243,11 @@ double RigidBodyStateVisualization::getMainSphereSize() const
 
 void RigidBodyStateVisualization::setMainSphereSize(double size)
 {
+    if(main_size == size)
+        return;
     main_size = size;
     emit propertyChanged("sphereSize");
-    // This triggers an update of the model if we don't have a custom model
-    setSize(total_size);
+    updateModel();
 }
 
 double RigidBodyStateVisualization::getTextSize() const
@@ -236,20 +257,20 @@ double RigidBodyStateVisualization::getTextSize() const
 
 void RigidBodyStateVisualization::setTextSize(double size)
 {
+    if(text_size == size)
+        return;
     text_size = size;
     emit propertyChanged("textSize");
-    // This triggers an update of the model if we don't have a custom model
-    setSize(total_size);
+    updateModel();
 }
 
 void RigidBodyStateVisualization::setSize(double size)
 {
+    if(total_size == size)
+        return;
     total_size = size;
     emit propertyChanged("size");
-    if (body_type == BODY_SIMPLE)
-        resetModel(size);
-    else if (body_type == BODY_SPHERE)
-        resetModelSphere(size);
+    updateModel();
 }
 
 double RigidBodyStateVisualization::getSize() const
@@ -288,6 +309,9 @@ void RigidBodyStateVisualization::loadModel(QString const& path)
 
 void RigidBodyStateVisualization::loadModel(std::string const& path)
 {
+    if(model_path == QString::fromStdString(path))
+        return;
+    model_path = QString::fromStdString(path);
     if (path == "sphere")
     {
         resetModelSphere(total_size);
@@ -309,7 +333,6 @@ void RigidBodyStateVisualization::loadModel(std::string const& path)
     else if (!body_model->asGeode()->getDrawable(0)->asGeometry())
         std::cerr << "model does not contain a mesh, using bump mapping will not be possible" << std::endl;
 
-    model_path = QString::fromStdString(path);
     //set plugin name
     if(vizkit3d_plugin_name.isEmpty())
     {
@@ -349,15 +372,38 @@ void RigidBodyStateVisualization::setRotation(QQuaternion const& q)
 }
 
 void RigidBodyStateVisualization::displayCovariance(bool enable)
-{ covariance = enable; emit propertyChanged("displayCovariance"); }
+{
+    if(covariance == enable)
+        return;
+    covariance = enable;
+    emit propertyChanged("displayCovariance");
+    updateModel();
+}
 bool RigidBodyStateVisualization::isCovarianceDisplayed() const
 { return covariance; }
+
+void RigidBodyStateVisualization::setDisplayTargetInSource(bool enable) {
+    if(display_target_in_source == enable)
+        return;
+    display_target_in_source = enable;
+    emit propertyChanged("displayTargetInSource");
+    updateModel();
+}
+bool RigidBodyStateVisualization::isTargetInSourceShown() const {
+    return display_target_in_source;
+}
 
 void RigidBodyStateVisualization::setColor(base::Vector3d const& color)
 { this->color = color; }
 
 void RigidBodyStateVisualization::displayCovarianceWithSamples(bool enable)
-{ covariance_with_samples = enable; emit propertyChanged("displayCovarianceWithSamples"); }
+{
+    if(covariance_with_samples == enable)
+        return;
+    covariance_with_samples = enable;
+    emit propertyChanged("displayCovarianceWithSamples");
+    updateModel();
+}
 bool RigidBodyStateVisualization::isCovarianceDisplayedWithSamples() const
 { return covariance_with_samples; }
 
@@ -428,12 +474,25 @@ void RigidBodyStateVisualization::updateMainNode(Node* node)
     if (bump_mapping_dirty)
         updateBumpMapping();
 
+    Eigen::Affine3d transform_inv;
+    if(display_target_in_source) {
+        transform_inv = state.getTransform().inverse();
+    }
+
     if (forcePositionDisplay || state.hasValidPosition())
     {
-	osg::Vec3d pos(
-                state.position.x(), state.position.y(), state.position.z());
+        if(display_target_in_source) {
+            base::Position position(transform_inv.translation());
+            osg::Vec3d pos(
+                    position.x(), position.y(), position.z());
         
-        body_pose->setPosition(pos + translation);
+            body_pose->setPosition(pos + translation);
+        } else {
+            osg::Vec3d pos(
+                    state.position.x(), state.position.y(), state.position.z());
+
+            body_pose->setPosition(pos + translation);
+        }
     }
     if (needs_uncertainty)
     {
@@ -442,16 +501,34 @@ void RigidBodyStateVisualization::updateMainNode(Node* node)
         else
             uncertainty->hideSamples();
 
-        uncertainty->setMean(static_cast<Eigen::Vector3d>(state.position));
-        uncertainty->setCovariance(static_cast<Eigen::Matrix3d>(state.cov_position));
+        if(display_target_in_source) {
+            base::Position position(transform_inv.translation());
+            uncertainty->setMean(static_cast<Eigen::Vector3d>(position));
+            uncertainty->setCovariance(static_cast<Eigen::Matrix3d>(
+                transform_inv.linear() *
+                state.orientation.toRotationMatrix().inverse() *
+                state.cov_position));
+        } else {
+            uncertainty->setMean(static_cast<Eigen::Vector3d>(state.position));
+            uncertainty->setCovariance(static_cast<Eigen::Matrix3d>(state.cov_position));
+        }
     }
     if (forceOrientationDisplay || state.hasValidOrientation())
     {
-	osg::Quat orientation(state.orientation.x(),
-                state.orientation.y(),
-                state.orientation.z(),
-                state.orientation.w());
-        body_pose->setAttitude(rotation * orientation);
+        if(display_target_in_source) {
+            Eigen::Quaterniond transform_orientation(transform_inv.linear());
+            osg::Quat orientation(transform_orientation.x(),
+                    transform_orientation.y(),
+                    transform_orientation.z(),
+                    transform_orientation.w());
+            body_pose->setAttitude(rotation * orientation);
+        } else {
+            osg::Quat orientation(state.orientation.x(),
+                    state.orientation.y(),
+                    state.orientation.z(),
+                    state.orientation.w());
+            body_pose->setAttitude(rotation * orientation);
+        }
     }
 }
 
