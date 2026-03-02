@@ -1,7 +1,19 @@
+#if __has_include("rice/rice.hpp")
+#include "rice/rice.hpp"
+
+template<class T>
+T from_ruby(Rice::Object x)
+{
+    return Rice::detail::From_Ruby<T>().convert(x);
+}
+
+#else
+#define BASE_TYPES_OLD_RICE_API
 #include "rice/Class.hpp"
 #include "rice/String.hpp"
 #include "rice/Constructor.hpp"
 #include "rice/Enum.hpp"
+#endif
 
 #include <base/geometry/Spline.hpp>
 
@@ -12,12 +24,15 @@ typedef SplineBase::CoordinateType CoordinateType;
 
 Rice::Enum<CoordinateType> coordinate_type_type;
 
+#ifdef BASE_TYPES_OLD_RICE_API
+// enum types seem to be converted automatically now?
 template<>
 CoordinateType from_ruby<CoordinateType>( Object x )
 {
     Data_Object<CoordinateType> d( x, coordinate_type_type );
     return *d;
 }
+#endif
 
 template<class Type>
 static std::vector<Type> array_to_cpp(Array array)

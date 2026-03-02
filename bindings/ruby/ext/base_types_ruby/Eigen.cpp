@@ -1,7 +1,11 @@
+#if __has_include("rice/rice.hpp")
+#include "rice/rice.hpp"
+#else
 #include "rice/Class.hpp"
 #include "rice/String.hpp"
 #include "rice/Constructor.hpp"
 #include "rice/Enum.hpp"
+#endif
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>

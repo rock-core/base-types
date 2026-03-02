@@ -9,6 +9,8 @@ else(SISL_FOUND)
         EXT_RICE base_types_ruby Eigen.cpp init.cpp)
 endif(SISL_FOUND)
 
+target_compile_features(base_types_ruby PUBLIC cxx_std_17)
+
 if (base_AVAILABLE)
     if(SISL_FOUND)
         install(DIRECTORY lib/sisl
