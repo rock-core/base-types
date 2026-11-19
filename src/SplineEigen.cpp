@@ -6,6 +6,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 
+#include <memory>
 #include <stdexcept>
 #include <vector>
 #include <sstream>
@@ -25,19 +26,33 @@ namespace {
  * low-level algorithms below
  *
  * For n vertices and order k, the knot vector t has n + k entries and the
- * parameter domain is [t[k-1], t[n]]. Vertices are stored one after the
- * other.
+ * parameter domain is [t[k-1], t[n]]. The vertices are the columns of P.
  */
 struct Curve
 {
-    int dim;
-    int k;
+    int k = 0;
     vector<double> t;
-    vector<double> P;
+    MatrixXd P;
 
-    int n() const { return P.size() / dim; }
+    Curve() = default;
+
+    /** Creates a curve from a knot vector and vertices stored one after the
+     * other, as in SplineBase
+     */
+    Curve(int dim, vector<double> const& knots, vector<double> const& vertices)
+        : t(knots)
+        , P(Map<MatrixXd const>(vertices.data(), dim, vertices.size() / dim))
+    {
+        k = t.size() - P.cols();
+    }
+
+    int dim() const { return P.rows(); }
+    int n() const { return P.cols(); }
     double start() const { return t[k - 1]; }
     double end() const { return t[n()]; }
+
+    //! The vertices stored one after the other, as in SplineBase
+    vector<double> flatVertices() const { return vector<double>(P.data(), P.data() + P.size()); }
 };
 
 /** Returns the index s of the knot span [t[s], t[s+1]] that should be used
@@ -148,51 +163,50 @@ MatrixXd basisDerivatives(vector<double> const& t, int k, int s, double u, int n
 
 /** Computes the curve derivatives from the basis function derivatives */
 template<typename Derivatives>
-void combineVertices(Derivatives const& ders, vector<double> const& P, int dim, int k, int s,
+void combineVertices(Derivatives const& ders, Ref<MatrixXd const> const& P, int k, int s,
         int nder, double* result)
 {
-    fill(result, result + (nder + 1) * dim, 0.0);
+    Map<MatrixXd> R(result, P.rows(), nder + 1);
+    R.setZero();
     for (int d = 0; d <= nder; ++d)
     {
         for (int j = 0; j < k; ++j)
-        {
-            double const b = ders(d, j);
-            double const* vertex = &P[(s - k + 1 + j) * dim];
-            for (int c = 0; c < dim; ++c)
-                result[d * dim + c] += b * vertex[c];
-        }
+            R.col(d) += ders(d, j) * P.col(s - k + 1 + j);
     }
 }
 
 /** Evaluates the curve and its first nder derivatives at u
  *
+ * @param P the vertices, as columns
  * @param result array of (nder + 1) * dim values
  */
-void evaluateCurve(vector<double> const& t, vector<double> const& P, int dim, int k,
+void evaluateCurve(vector<double> const& t, Ref<MatrixXd const> const& P, int k,
         double u, int nder, bool from_left, double* result)
 {
-    int const n = P.size() / dim;
+    int const n = P.cols();
+    int const dim = P.rows();
     int const s = findSpan(t, k, n, u, from_left);
     if (k <= SMALL_ORDER && nder < SMALL_ORDER)
     {
         SmallMatrix ders;
         basisDerivatives<SmallMatrix, SmallVector>(t, k, s, u, nder, ders);
-        combineVertices(ders, P, dim, k, s, nder, result);
+        combineVertices(ders, P, k, s, nder, result);
     }
     else
-        combineVertices(basisDerivatives(t, k, s, u, nder), P, dim, k, s, nder, result);
+        combineVertices(basisDerivatives(t, k, s, u, nder), P, k, s, nder, result);
 
     // The end points of a clamped curve are its first and last vertices.
     // Return them exactly, to avoid rounding errors.
+    Map<VectorXd> point(result, dim);
     if (u == t[k - 1] && t[0] == t[k - 1])
-        copy(P.begin(), P.begin() + dim, result);
+        point = P.col(0);
     else if (u == t[n] && t[n] == t.back())
-        copy(P.end() - dim, P.end(), result);
+        point = P.col(n - 1);
 }
 
 void evaluateCurve(Curve const& c, double u, int nder, bool from_left, double* result)
 {
-    evaluateCurve(c.t, c.P, c.dim, c.k, u, nder, from_left, result);
+    evaluateCurve(c.t, c.P, c.k, u, nder, from_left, result);
 }
 
 int multiplicity(vector<double> const& t, double u)
@@ -205,21 +219,19 @@ void insertKnot(Curve& c, double u)
 {
     int const n = c.n();
     int const p = c.k - 1;
-    int const dim = c.dim;
     int const s = findSpan(c.t, c.k, n, u, false);
-    vector<double> Q((n + 1) * dim);
+    MatrixXd const& P = c.P;
+    MatrixXd Q(c.dim(), n + 1);
     for (int i = 0; i <= n; ++i)
     {
-        double* q = &Q[i * dim];
         if (i <= s - p)
-            copy(&c.P[i * dim], &c.P[i * dim] + dim, q);
+            Q.col(i) = P.col(i);
         else if (i >= s + 1)
-            copy(&c.P[(i - 1) * dim], &c.P[(i - 1) * dim] + dim, q);
+            Q.col(i) = P.col(i - 1);
         else
         {
             double const alpha = (u - c.t[i]) / (c.t[i + p] - c.t[i]);
-            for (int d = 0; d < dim; ++d)
-                q[d] = alpha * c.P[i * dim + d] + (1 - alpha) * c.P[(i - 1) * dim + d];
+            Q.col(i) = alpha * P.col(i) + (1 - alpha) * P.col(i - 1);
         }
     }
     c.t.insert(c.t.begin() + s + 1, u);
@@ -240,12 +252,11 @@ void splitCurve(Curve const& c, double u, Curve& left, Curve& right)
         insertKnot(full, u);
 
     int const a = lower_bound(full.t.begin(), full.t.end(), u) - full.t.begin();
-    left.dim = right.dim = c.dim;
     left.k = right.k = c.k;
     left.t.assign(full.t.begin(), full.t.begin() + a + c.k);
-    left.P.assign(full.P.begin(), full.P.begin() + a * c.dim);
+    left.P = full.P.leftCols(a);
     right.t.assign(full.t.begin() + a, full.t.end());
-    right.P.assign(full.P.begin() + a * c.dim, full.P.end());
+    right.P = full.P.rightCols(full.n() - a);
 }
 
 bool isClampedAt(Curve const& c, double u)
@@ -280,17 +291,11 @@ void clampCurve(Curve& c)
 void reverseCurve(Curve& c)
 {
     double const sum = c.start() + c.end();
-    vector<double> t(c.t.size());
-    for (size_t i = 0; i < t.size(); ++i)
-        t[i] = sum - c.t[c.t.size() - 1 - i];
+    std::reverse(c.t.begin(), c.t.end());
+    for (size_t i = 0; i < c.t.size(); ++i)
+        c.t[i] = sum - c.t[i];
 
-    int const n = c.n();
-    vector<double> P(c.P.size());
-    for (int i = 0; i < n; ++i)
-        copy(&c.P[(n - 1 - i) * c.dim], &c.P[(n - i) * c.dim], &P[i * c.dim]);
-
-    c.t.swap(t);
-    c.P.swap(P);
+    c.P = c.P.rowwise().reverse().eval();
 }
 
 template<typename Matrix>
@@ -350,8 +355,8 @@ void elevateOrder(Curve& c, int new_k)
     int const n = t.size() - new_k;
     double const end = c.end();
     vector< Triplet<double> > triplets;
-    MatrixXd B(n, c.dim);
-    VectorXd point(c.dim);
+    MatrixXd B(n, c.dim());
+    VectorXd point(c.dim());
     for (int i = 0; i < n; ++i)
     {
         double u = 0;
@@ -370,18 +375,12 @@ void elevateOrder(Curve& c, int new_k)
 
     // The curve is clamped, i.e. its end points are its first and last
     // vertices. Keep them exact.
-    for (int d = 0; d < c.dim; ++d)
-    {
-        X(0, d) = c.P[d];
-        X(n - 1, d) = c.P[c.P.size() - c.dim + d];
-    }
+    X.row(0) = c.P.col(0).transpose();
+    X.row(n - 1) = c.P.col(c.n() - 1).transpose();
 
     c.k = new_k;
     c.t.swap(t);
-    c.P.resize(n * c.dim);
-    for (int i = 0; i < n; ++i)
-        for (int d = 0; d < c.dim; ++d)
-            c.P[i * c.dim + d] = X(i, d);
+    c.P = X.transpose();
 }
 
 /** Computes the knot vector for an open interpolating curve
@@ -473,14 +472,6 @@ vector<double> interpolationKnots(vector<double> const& params, int k)
     return knots;
 }
 
-double squaredDistance(double const* a, double const* b, int dim)
-{
-    double result = 0;
-    for (int i = 0; i < dim; ++i)
-        result += (a[i] - b[i]) * (a[i] - b[i]);
-    return result;
-}
-
 /** Relative resolutions used by SISL in comparisons */
 double const REL_COMP_RES = 1e-15;
 double const REL_PAR_RES = 1e-12;
@@ -504,10 +495,9 @@ bool isZeroLength(double length)
  * @param d1 the first derivative of the curve
  * @param d2 the second derivative of the curve
  */
-double newtonClosestPointStep(double const* diff_ptr, double const* d1_ptr,
-        double const* d2_ptr, int dim)
+double newtonClosestPointStep(Ref<VectorXd const> const& diff,
+        Ref<VectorXd const> const& d1, Ref<VectorXd const> const& d2)
 {
-    Map<VectorXd const> diff(diff_ptr, dim), d1(d1_ptr, dim), d2(d2_ptr, dim);
     double const tolerance = 1e-10;
     double const tangent_norm2 = d1.dot(d1);
     double const c = diff.dot(d1);                  // f(0)
@@ -718,33 +708,6 @@ double segmentDistance(VectorXd const& p0, VectorXd const& p1, VectorXd const& q
     return ((p0 + d1 * s) - (q0 + d2 * t)).norm();
 }
 
-/** Embeds the first and second (and optionally third) derivatives of a
- * curve in 3D, using SISL's convention
- *
- * One-dimensional curves are handled as the graph (u, x(u)).
- */
-void canonicalDerivatives(double const* derivs, int dim, int nder, Vector3d* result)
-{
-    if (dim > 3)
-        throw std::runtime_error("this operation is only available for curves of dimension 1 to 3");
-
-    for (int d = 1; d <= nder; ++d)
-    {
-        Vector3d& v = result[d - 1];
-        v.setZero();
-        if (dim == 1)
-        {
-            v.x() = (d == 1) ? 1.0 : 0.0;
-            v.y() = derivs[d];
-        }
-        else
-        {
-            for (int c = 0; c < dim; ++c)
-                v[c] = derivs[d * dim + c];
-        }
-    }
-}
-
 }
 
 namespace base { namespace geometry {
@@ -786,7 +749,8 @@ void SplineBase::evaluate(double* result, double param, int derivatives, bool fr
 {
     int const n = vertices.size() / dimension;
     int const k = knots.size() - n;
-    evaluateCurve(knots, vertices, dimension, k, param, derivatives, from_left, result);
+    evaluateCurve(knots, Map<Eigen::MatrixXd const>(vertices.data(), dimension, n), k,
+            param, derivatives, from_left, result);
 }
 
 double SplineBase::integrateLength(double start, double end, double relative_resolution) const
@@ -801,7 +765,7 @@ double SplineBase::integrateLength(double start, double end, double relative_res
         // The length of a one-dimensional curve is its total variation.
         // Compute it exactly by splitting the curve where its derivative
         // changes sign
-        vector<double> derivs(2);
+        Vector2d derivs;
         auto derivative = [&](double u) {
             evaluate(derivs.data(), u, 1, false);
             return derivs[1];
@@ -833,14 +797,14 @@ double SplineBase::integrateLength(double start, double end, double relative_res
         0.2369268850561891, 0.4786286704993665, 0.5688888888888889,
         0.4786286704993665, 0.2369268850561891 };
 
-    vector<double> derivs(2 * dimension);
+    MatrixXd derivs(dimension, 2);
     auto gauss = [&](double a, double b) {
         double const half = (b - a) / 2, mid = (a + b) / 2;
         double sum = 0;
         for (int i = 0; i < 5; ++i)
         {
             evaluate(derivs.data(), mid + half * nodes[i], 1, false);
-            sum += weights[i] * Map<VectorXd>(&derivs[dimension], dimension).norm();
+            sum += weights[i] * derivs.col(1).norm();
         }
         return sum * half;
     };
@@ -914,12 +878,13 @@ std::vector<double> SplineBase::findDistanceMinima(double const* point) const
     int const k = knots.size() - n;
     vector<double> const us = getSamplingParameters(std::max(8, 4 * k));
 
+    Map<VectorXd const> const target(point, dimension);
     vector<double> distances(us.size());
-    vector<double> p(dimension);
+    VectorXd p(dimension);
     for (size_t i = 0; i < us.size(); ++i)
     {
         evaluate(p.data(), us[i], 0, false);
-        distances[i] = squaredDistance(p.data(), point, dimension);
+        distances[i] = (p - target).squaredNorm();
     }
 
     // Refine the local minima of the samples. Since the knots are part of
@@ -943,7 +908,7 @@ std::vector<double> SplineBase::findDistanceMinima(double const* point) const
             double const b = (side == 0) ? us[i] : us[i + 1];
             double const u = localClosestPointSearch(point, us[i], a, b, 0);
             evaluate(p.data(), u, 0, side == 0);
-            double const d = squaredDistance(p.data(), point, dimension);
+            double const d = (p - target).squaredNorm();
             if (d < best_distance)
             {
                 best = u;
@@ -960,10 +925,10 @@ double SplineBase::curvatureImpl(double _param) const
 {
     // Same computation as SISL's s2550: length of the curvature vector, with
     // the derivatives evaluated from the right
-    vector<double> derivs(3 * dimension);
+    MatrixXd derivs(dimension, 3);
     evaluate(derivs.data(), _param, 2, false);
-    Map<VectorXd> d1(&derivs[dimension], dimension);
-    Map<VectorXd> d2(&derivs[2 * dimension], dimension);
+    auto const d1 = derivs.col(1);
+    auto const d2 = derivs.col(2);
 
     double const length = d1.norm();
     if (isZeroLength(length))
@@ -977,21 +942,21 @@ double SplineBase::variationOfCurvatureImpl(double _param) const
 {
     // Same computation as SISL's s2556, generalized to any dimension using
     // (a x b).(c x d) = (a.c)(b.d) - (a.d)(b.c)
-    vector<double> derivs(4 * dimension);
+    MatrixXd derivs(dimension, 4);
     evaluate(derivs.data(), _param, 3, false);
 
     VectorXd d1, d2, d3;
     if (dimension == 1)
     {
-        d1 = Vector2d(1, derivs[1]);
-        d2 = Vector2d(0, derivs[2]);
-        d3 = Vector2d(0, derivs[3]);
+        d1 = Vector2d(1, derivs(0, 1));
+        d2 = Vector2d(0, derivs(0, 2));
+        d3 = Vector2d(0, derivs(0, 3));
     }
     else
     {
-        d1 = Map<VectorXd>(&derivs[dimension], dimension);
-        d2 = Map<VectorXd>(&derivs[2 * dimension], dimension);
-        d3 = Map<VectorXd>(&derivs[3 * dimension], dimension);
+        d1 = derivs.col(1);
+        d2 = derivs.col(2);
+        d3 = derivs.col(3);
     }
 
     double const a2 = d1.squaredNorm();
@@ -1038,11 +1003,11 @@ void SplineBase::interpolateImpl(vector<double> const& points,
 
     // Transform the conditions into points (type 0) and derivatives of order
     // d to the prior (type d) or next (type -d) point. Same as SISL's s1906
-    vector<double> values(points);
+    Map<MatrixXd const> const input(points.data(), dimension, point_count);
+    MatrixXd values = input;
     vector<int> types(point_count);
     for (unsigned int i = 0; i < point_count; ++i)
     {
-        double* value = &values[i * dimension];
         switch (point_types[i])
         {
             case ORDINARY_POINT:
@@ -1059,15 +1024,13 @@ void SplineBase::interpolateImpl(vector<double> const& points,
             case TANGENT_POINT_FOR_NEXT:
                 if (i + 1 == point_count)
                     throw std::invalid_argument("base::geometry::SplineBase::interpolate(): TANGENT_POINT_FOR_NEXT cannot be the last entry");
-                for (int c = 0; c < dimension; ++c)
-                    value[c] = points[(i + 1) * dimension + c] - points[i * dimension + c];
+                values.col(i) = input.col(i + 1) - input.col(i);
                 types[i] = -1;
                 break;
             case TANGENT_POINT_FOR_PRIOR:
                 if (i == 0)
                     throw std::invalid_argument("base::geometry::SplineBase::interpolate(): TANGENT_POINT_FOR_PRIOR cannot be the first entry");
-                for (int c = 0; c < dimension; ++c)
-                    value[c] = points[i * dimension + c] - points[(i - 1) * dimension + c];
+                values.col(i) = input.col(i) - input.col(i - 1);
                 types[i] = 1;
                 break;
             default:
@@ -1158,9 +1121,8 @@ void SplineBase::interpolateImpl(vector<double> const& points,
         point_params[0] = start_param;
         for (size_t p = 1; p < points_count; ++p)
         {
-            point_params[p] = point_params[p - 1] + sqrt(squaredDistance(
-                &values[point_indexes[p - 1] * dimension],
-                &values[point_indexes[p] * dimension], dimension));
+            point_params[p] = point_params[p - 1] +
+                (values.col(point_indexes[p]) - values.col(point_indexes[p - 1])).norm();
         }
     }
     else
@@ -1187,7 +1149,6 @@ void SplineBase::interpolateImpl(vector<double> const& points,
     sort(condition_params.begin(), condition_params.end());
 
     Curve curve;
-    curve.dim = dimension;
     curve.k = std::min(order, condition_count);
     curve.t = interpolationKnots(condition_params, curve.k);
 
@@ -1201,7 +1162,7 @@ void SplineBase::interpolateImpl(vector<double> const& points,
                     " given for a curve of order " + lexical_cast<string>(curve.k));
         addCollocationRow(triplets, c, curve.t, curve.k, condition_count,
                 point_params[cond.point], cond.derivative, cond.from_left);
-        B.row(c) = Map<RowVectorXd>(&values[cond.index * dimension], dimension);
+        B.row(c) = values.col(cond.index).transpose();
     }
     SparseMatrix<double> A(condition_count, condition_count);
     A.setFromTriplets(triplets.begin(), triplets.end());
@@ -1210,15 +1171,12 @@ void SplineBase::interpolateImpl(vector<double> const& points,
     try { X = solveSparse(A, B); }
     catch(std::runtime_error const& e) { throw error(e.what()); }
 
-    curve.P.resize(condition_count * dimension);
-    for (int c = 0; c < condition_count; ++c)
-        for (int d = 0; d < dimension; ++d)
-            curve.P[c * dimension + d] = X(c, d);
+    curve.P = X.transpose();
 
     // Like SISL, use a lower order if there are not enough conditions, and
     // raise the order afterwards
     elevateOrder(curve, order);
-    setCurve(curve.k, curve.t, curve.P);
+    setCurve(curve.k, curve.t, curve.flatVertices());
 
     parametersOut = condition_params;
     parametersOut.erase(std::unique(parametersOut.begin(), parametersOut.end()), parametersOut.end());
@@ -1240,15 +1198,14 @@ void SplineBase::resetImpl(std::vector<double> const& coordinates,
         int const stride = dimension + 1;
         if (coordinates.size() % stride != 0)
             throw std::invalid_argument("the number of coordinates is not a multiple of the curve dimension + 1");
-        double const w0 = coordinates[dimension];
-        for (size_t i = 0; i < coordinates.size(); i += stride)
-        {
-            double const w = coordinates[i + dimension];
-            if (fabs(w - w0) > 1e-12 * fabs(w0))
-                throw std::invalid_argument("rational curves (NURBS) are not supported");
-            for (int c = 0; c < dimension; ++c)
-                polynomial.push_back(coordinates[i + c] / w);
-        }
+        int const n = coordinates.size() / stride;
+        Map<MatrixXd const> const homogeneous(coordinates.data(), stride, n);
+        auto const weights = homogeneous.row(dimension);
+        if (((weights.array() - weights(0)).abs() > 1e-12 * fabs(weights(0))).any())
+            throw std::invalid_argument("rational curves (NURBS) are not supported");
+        polynomial.resize(n * dimension);
+        Map<MatrixXd>(polynomial.data(), dimension, n) =
+            homogeneous.topRows(dimension).array().rowwise() / weights.array();
     }
     else
         throw std::invalid_argument("unsupported curve kind " + lexical_cast<string>(kind));
@@ -1261,15 +1218,15 @@ void SplineBase::findClosestPointsImpl(double const* ref_point,
         vector<double>& _result_points, double _geores) const
 {
     vector<double> const minima = findDistanceMinima(ref_point);
+    Map<VectorXd const> const target(ref_point, dimension);
     vector<double> distances(minima.size());
-    vector<double> p(dimension);
-    double min_distance = std::numeric_limits<double>::infinity();
+    VectorXd p(dimension);
     for (size_t i = 0; i < minima.size(); ++i)
     {
         evaluate(p.data(), minima[i], 0, minima[i] >= end_param);
-        distances[i] = sqrt(squaredDistance(p.data(), ref_point, dimension));
-        min_distance = std::min(min_distance, distances[i]);
+        distances[i] = (p - target).norm();
     }
+    double const min_distance = *std::min_element(distances.begin(), distances.end());
 
     for (size_t i = 0; i < minima.size(); ++i)
     {
@@ -1292,12 +1249,13 @@ double SplineBase::localClosestPointSearchImpl(double const* ref_point, double _
     // SISL evaluates from the right. Use the left side at the end of the
     // search interval, as the interval might end at a knot where the curve
     // is not smooth
-    vector<double> sval(3 * dim), sdiff(dim);
+    Map<VectorXd const> const target(ref_point, dim);
+    MatrixXd derivs(dim, 3);
+    VectorXd diff(dim);
     auto distanceAt = [&](double u) {
-        evaluate(sval.data(), u, 2, u >= aend && aend > astart);
-        for (int c = 0; c < dim; ++c)
-            sdiff[c] = ref_point[c] - sval[c];
-        return sqrt(squaredDistance(ref_point, sval.data(), dim));
+        evaluate(derivs.data(), u, 2, u >= aend && aend > astart);
+        diff = target - derivs.col(0);
+        return diff.norm();
     };
     auto clampStep = [&](double u, double& step) {
         if (u + step < astart)
@@ -1308,7 +1266,7 @@ double SplineBase::localClosestPointSearchImpl(double const* ref_point, double _
 
     double anext = std::min(std::max(_guess, start_param), end_param);
     distanceAt(anext);
-    double td = newtonClosestPointStep(sdiff.data(), &sval[dim], &sval[2 * dim], dim);
+    double td = newtonClosestPointStep(diff, derivs.col(1), derivs.col(2));
     clampStep(anext, td);
 
     double aprev = HUGE_VAL;
@@ -1325,7 +1283,7 @@ double SplineBase::localClosestPointSearchImpl(double const* ref_point, double _
             kdiv = 0;
             aprev = cdist;
             anext += td;
-            td = newtonClosestPointStep(sdiff.data(), &sval[dim], &sval[2 * dim], dim);
+            td = newtonClosestPointStep(diff, derivs.col(1), derivs.col(2));
             clampStep(anext, td);
         }
         else
@@ -1345,11 +1303,12 @@ void SplineBase::findPointIntersectionsImpl(double const* _point,
         std::vector<double>& _result_points, double _geores) const
 {
     vector<double> const minima = findDistanceMinima(_point);
-    vector<double> p(dimension);
+    Map<VectorXd const> const target(_point, dimension);
+    VectorXd p(dimension);
     for (size_t i = 0; i < minima.size(); ++i)
     {
         evaluate(p.data(), minima[i], 0, minima[i] >= end_param);
-        if (sqrt(squaredDistance(p.data(), _point, dimension)) <= _geores)
+        if ((p - target).norm() <= _geores)
             _result_points.push_back(minima[i]);
     }
 }
@@ -1368,14 +1327,11 @@ void SplineBase::findLineIntersectionsImpl(double const* _point, double const* _
     // B-spline whose coefficients are the distances of the vertices. Parts of
     // the curve that lie in the line/plane are the knot spans whose
     // coefficients are all zero
-    double scale = 1;
+    Map<MatrixXd const> const V(vertices.data(), dimension, n);
     vector<double> coefficients(n);
     for (int i = 0; i < n; ++i)
-    {
-        Map<VectorXd const> v(&vertices[i * dimension], dimension);
-        coefficients[i] = (v - point).dot(normal);
-        scale = std::max(scale, v.cwiseAbs().maxCoeff());
-    }
+        coefficients[i] = (V.col(i) - point).dot(normal);
+    double const scale = std::max(1.0, V.cwiseAbs().maxCoeff());
     double const zero_tolerance = 1e-12 * scale * normal.norm();
     for (int s = k - 1; s < n; ++s)
     {
@@ -1392,10 +1348,10 @@ void SplineBase::findLineIntersectionsImpl(double const* _point, double const* _
             _result_curves.push_back(make_pair(knots[s], knots[s + 1]));
     }
 
-    vector<double> derivs(dimension);
+    VectorXd p(dimension);
     auto f = [&](double u) {
-        evaluate(derivs.data(), u, 0, false);
-        return (Map<VectorXd>(derivs.data(), dimension) - point).dot(normal);
+        evaluate(p.data(), u, 0, false);
+        return (p - point).dot(normal);
     };
     vector<double> roots = findRoots(f, getSamplingParameters(std::max(8, 4 * k)),
             _geores * normal.norm());
@@ -1415,10 +1371,11 @@ void SplineBase::findSphereIntersectionsImpl(double const* _center, double radiu
 {
     int const n = vertices.size() / dimension;
     int const k = knots.size() - n;
-    vector<double> p(dimension);
+    Map<VectorXd const> const center(_center, dimension);
+    VectorXd p(dimension);
     auto f = [&](double u) {
         evaluate(p.data(), u, 0, false);
-        return squaredDistance(p.data(), _center, dimension) - radius * radius;
+        return (p - center).squaredNorm() - radius * radius;
     };
     vector<double> roots = findRoots(f, getSamplingParameters(std::max(8, 4 * k)),
             _geores * (2 * radius + _geores));
@@ -1434,10 +1391,8 @@ void SplineBase::appendImpl(SplineBase const& other)
     // Like SISL's s1715: other is translated so that its start point is
     // this curve's end point, and its parameters are shifted so that they
     // follow the ones of this curve
-    int const dim = dimension;
-    int const n1 = vertices.size() / dim, n2 = other.vertices.size() / dim;
-    Curve first = { dim, static_cast<int>(knots.size()) - n1, knots, vertices };
-    Curve second = { dim, static_cast<int>(other.knots.size()) - n2, other.knots, other.vertices };
+    Curve first(dimension, knots, vertices);
+    Curve second(dimension, other.knots, other.vertices);
     clampCurve(first);
     clampCurve(second);
     int const k = std::max(first.k, second.k);
@@ -1451,14 +1406,11 @@ void SplineBase::appendImpl(SplineBase const& other)
     for (size_t i = k; i < second.t.size(); ++i)
         result.t.push_back(second.t[i] + shift);
 
-    double const* last = &first.P[(first.n() - 1) * dim];
-    double const* other_first = &second.P[0];
-    for (int i = 1; i < second.n(); ++i)
-    {
-        for (int c = 0; c < dim; ++c)
-            result.P.push_back(second.P[i * dim + c] - other_first[c] + last[c]);
-    }
-    setCurve(result.k, result.t, result.P);
+    result.P.resize(dimension, first.n() + second.n() - 1);
+    result.P << first.P,
+        (second.P.rightCols(second.n() - 1).colwise() - second.P.col(0)).colwise()
+            + first.P.col(first.n() - 1);
+    setCurve(result.k, result.t, result.flatVertices());
 }
 
 void SplineBase::reverse()
@@ -1466,10 +1418,9 @@ void SplineBase::reverse()
     if (!hasCurve())
         return;
 
-    int const n = vertices.size() / dimension;
-    Curve c = { dimension, static_cast<int>(knots.size()) - n, knots, vertices };
+    Curve c(dimension, knots, vertices);
     reverseCurve(c);
-    setCurve(c.k, c.t, c.P);
+    setCurve(c.k, c.t, c.flatVertices());
 }
 
 bool SplineBase::testIntersection(SplineBase const& other, double resolution) const
@@ -1550,7 +1501,6 @@ vector<double> SplineBase::simplify(double tolerance)
     }
 
     auto fit = [&](int m, Curve& result) {
-        result.dim = dim;
         result.k = k;
         result.t.assign(k, start_param);
         for (int i = 1; i < m - k + 1; ++i)
@@ -1579,43 +1529,36 @@ vector<double> SplineBase::simplify(double tolerance)
                 return false;
         }
 
-        result.P.resize(m * dim);
-        for (int c = 0; c < dim; ++c)
-        {
-            result.P[c] = first(c);
-            result.P[(m - 1) * dim + c] = last(c);
-            for (int i = 1; i < m - 1; ++i)
-                result.P[i * dim + c] = X(i - 1, c);
-        }
+        result.P.resize(dim, m);
+        result.P.col(0) = first.transpose();
+        result.P.col(m - 1) = last.transpose();
+        if (m > 2)
+            result.P.middleCols(1, m - 2) = X.transpose();
         return true;
     };
     auto error = [&](Curve const& c) {
-        vector<double> maxerr(dim, 0.0);
+        MatrixXd fitted(sample_count, dim);
         VectorXd p(dim);
         for (int i = 0; i < sample_count; ++i)
         {
             evaluateCurve(c, us[i], 0, i == sample_count - 1, p.data());
-            for (int d = 0; d < dim; ++d)
-                maxerr[d] = std::max(maxerr[d], fabs(p(d) - samples(i, d)));
+            fitted.row(i) = p.transpose();
         }
-        return maxerr;
+        return VectorXd((fitted - samples).cwiseAbs().colwise().maxCoeff().transpose());
     };
-    auto within = [&](vector<double> const& maxerr) {
-        for (int d = 0; d < dim; ++d)
-            if (maxerr[d] > tolerance)
-                return false;
-        return true;
+    auto within = [&](VectorXd const& maxerr) {
+        return (maxerr.array() <= tolerance).all();
     };
 
     int lo = std::max(k, 2), hi = n;
     Curve best;
-    vector<double> best_error(dim, 0.0);
+    VectorXd best_error = VectorXd::Zero(dim);
     bool found = false;
     while (lo < hi)
     {
         int const m = (lo + hi) / 2;
         Curve candidate;
-        vector<double> candidate_error;
+        VectorXd candidate_error;
         if (fit(m, candidate) && within(candidate_error = error(candidate)))
         {
             hi = m;
@@ -1630,8 +1573,8 @@ vector<double> SplineBase::simplify(double tolerance)
     if (!found || best.n() >= n)
         return vector<double>(dim, 0.0);
 
-    setCurve(best.k, best.t, best.P);
-    return best_error;
+    setCurve(best.k, best.t, best.flatVertices());
+    return vector<double>(best_error.data(), best_error.data() + dim);
 }
 
 Matrix3d SplineBase::getFrenetFrame(double _param) const
@@ -1640,29 +1583,33 @@ Matrix3d SplineBase::getFrenetFrame(double _param) const
         throw std::runtime_error("getFrenetFrame() called on an empty or degenerate curve");
     if (!checkAndNormalizeParam(_param))
         throw std::out_of_range("_param is not in the [start_param, end_param] range");
+    // Only available in Spline<3>. SISL also handles curves of dimension 1
+    // and 2, embedded in 3D
+    if (dimension != 3)
+        throw std::logic_error("getFrenetFrame() is only available for curves of dimension 3");
 
     // Same computation as SISL's s2559
-    vector<double> derivs(3 * dimension);
+    Matrix3d derivs;
     evaluate(derivs.data(), _param, 2, false);
-    Eigen::Vector3d d[2];
-    canonicalDerivatives(derivs.data(), dimension, 2, d);
+    Vector3d const d1 = derivs.col(1), d2 = derivs.col(2);
 
-    Eigen::Vector3d t = Eigen::Vector3d::Zero(), n = Eigen::Vector3d::Zero(), b = Eigen::Vector3d::Zero();
-    double const length = d[0].norm();
+    Vector3d t = Vector3d::Zero(), n = Vector3d::Zero(), b = Vector3d::Zero();
+    double const length = d1.norm();
     if (length != 0)
-        t = d[0] / length;
+        t = d1 / length;
     // Like SISL, the normal and binormal are zero if the curvature is zero
-    Eigen::Vector3d const cross = d[0].cross(d[1]);
+    Vector3d const cross = d1.cross(d2);
     if (!isZeroLength(cross.norm()))
     {
         b = cross.normalized();
         n = b.cross(t);
     }
 
-    // Writes the frame to a matrix
+    // The rows of the frame are the tangent, normal and binormal
     Matrix3d frame;
-    frame << t[0], t[1], t[2], n[0], n[1], n[2], b[0], b[1], b[2];
-
+    frame.row(0) = t;
+    frame.row(1) = n;
+    frame.row(2) = b;
     return frame;
 }
 
@@ -1673,37 +1620,35 @@ void SplineBase::cropImpl(double start_t, double end_t)
         throw std::runtime_error("failed to crop the curve at between " + boost::lexical_cast<std::string>(start_t) + " and " + boost::lexical_cast<std::string>(end_t));
 
     // Like SISL's s1712, the curve is turned if end_t < start_t
-    int const n = vertices.size() / dimension;
-    Curve c = { dimension, static_cast<int>(knots.size()) - n, knots, vertices };
+    Curve c(dimension, knots, vertices);
     cropCurve(c, a, b);
     if (end_t < start_t)
         reverseCurve(c);
-    setCurve(c.k, c.t, c.P);
+    setCurve(c.k, c.t, c.flatVertices());
 }
 
 void SplineBase::splitImpl(SplineBase& second_part, double _param)
 {
-    int const n = vertices.size() / dimension;
-    Curve c = { dimension, static_cast<int>(knots.size()) - n, knots, vertices };
+    Curve c(dimension, knots, vertices);
     clampCurve(c);
     Curve part1, part2;
     splitCurve(c, _param, part1, part2);
-    setCurve(part1.k, part1.t, part1.P);
-    second_part.setCurve(part2.k, part2.t, part2.P);
+    setCurve(part1.k, part1.t, part1.flatVertices());
+    second_part.setCurve(part2.k, part2.t, part2.flatVertices());
 }
 
 SplineBase *SplineBase::getSubSpline(double start_t, double end_t) const
 {
     if (!hasCurve() || start_t == end_t)
-        return NULL;
+        return nullptr;
 
     double a = std::min(start_t, end_t), b = std::max(start_t, end_t);
     if (!checkAndNormalizeParam(a, 0) || !checkAndNormalizeParam(b, 0))
-        return NULL;
+        return nullptr;
 
-    SplineBase* result = new SplineBase(*this);
+    std::unique_ptr<SplineBase> result(new SplineBase(*this));
     result->crop(start_t, end_t);
-    return result;
+    return result.release();
 }
 
 void SplineBase::derive(unsigned int order, SplineBase& result) const
@@ -1714,8 +1659,9 @@ void SplineBase::derive(unsigned int order, SplineBase& result) const
         throw std::invalid_argument("base::geometry::SplineBase::derive(): the result curve has a different dimension");
 
     int const dim = dimension;
-    vector<double> t = knots, P = vertices;
-    int k = knots.size() - vertices.size() / dim;
+    vector<double> t = knots;
+    MatrixXd P = Map<MatrixXd const>(vertices.data(), dim, vertices.size() / dim);
+    int k = t.size() - P.cols();
     for (unsigned int d = 0; d < order; ++d)
     {
         if (k == 1)
@@ -1724,28 +1670,25 @@ void SplineBase::derive(unsigned int order, SplineBase& result) const
             t.clear();
             t.push_back(start_param);
             t.push_back(end_param);
-            P.assign(dim, 0.0);
+            P = MatrixXd::Zero(dim, 1);
             break;
         }
 
-        int const n = P.size() / dim;
+        int const n = P.cols();
         int const p = k - 1;
-        vector<double> Q((n - 1) * dim);
+        MatrixXd Q = MatrixXd::Zero(dim, n - 1);
         for (int i = 0; i < n - 1; ++i)
         {
             double const denominator = t[i + k] - t[i + 1];
-            for (int c = 0; c < dim; ++c)
-            {
-                Q[i * dim + c] = (denominator > 0) ?
-                    p * (P[(i + 1) * dim + c] - P[i * dim + c]) / denominator : 0;
-            }
+            if (denominator > 0)
+                Q.col(i) = p * (P.col(i + 1) - P.col(i)) / denominator;
         }
         t = vector<double>(t.begin() + 1, t.end() - 1);
         P.swap(Q);
         --k;
     }
 
-    result.setCurve(k, t, P);
+    result.setCurve(k, t, vector<double>(P.data(), P.data() + P.size()));
 }
 
 }} //end namespace base::geometry

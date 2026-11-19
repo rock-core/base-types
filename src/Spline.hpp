@@ -252,6 +252,13 @@ namespace geometry {
         /**
          * Returns a new curve, that represents the
          * spline between start_t and end_t
+         *
+         * The caller takes ownership of the returned curve. Returns a null
+         * pointer if the sub-curve cannot be computed, e.g. if the
+         * parameters are not within the curve.
+         *
+         * TODO: return the curve by value, e.g. as std::optional<SplineBase>
+         * (requires C++17) instead of an owning raw pointer
          * */
         SplineBase *getSubSpline(double start_t, double end_t) const;
 
@@ -268,6 +275,12 @@ namespace geometry {
         void derive(unsigned int order, SplineBase& result) const;
 
     protected:
+        // TODO: the interface of SplineBase (in particular the protected
+        // methods taking double* below, and the std::vector<double> of
+        // coordinates) could use Eigen types instead, especially if the
+        // dimension becomes a template parameter (as in Spline<DIM>). This
+        // would be easier once the SISL-based implementation is dropped.
+
         /**
          * This function checks weather param is smaler or bigger
          * than end and start param. It also sets param to start
@@ -456,6 +469,18 @@ namespace geometry {
         Spline3Base(SplineBase const& source)
             : SplineBase(source) {}
 
+        /** Returns the Frenet frame of the curve at the given parameter
+         *
+         * The rows of the matrix are the tangent, the normal and the
+         * binormal. The normal and binormal are zero if the curvature is
+         * zero.
+         *
+         * TODO: storing the axes in the columns would be more natural (the
+         * matrix would then be the rotation from the Frenet frame to the
+         * curve's frame). Changing it silently transposes the result for
+         * existing users, so it should be done when the API is reworked,
+         * e.g. once the SISL-based implementation is dropped.
+         */
         base::Matrix3d getFrenetFrame(double _param) const
         { return SplineBase::getFrenetFrame(_param); }
 
