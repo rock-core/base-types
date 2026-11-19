@@ -389,70 +389,87 @@ void elevateOrder(Curve& c, int new_k)
  * This is a port of SISL's s1902: the knots are placed at the parameters
  * (even orders) or between them (odd orders).
  *
- * @param epar sorted parameters of the interpolation conditions. Parameters
- *   are repeated for derivative conditions.
+ * @param params sorted parameters of the interpolation conditions.
+ *   Parameters are repeated for derivative conditions.
  */
-vector<double> interpolationKnots(vector<double> const& epar, int k)
+vector<double> interpolationKnots(vector<double> const& params, int k)
 {
-    int const in = epar.size();
-    int const kk2 = k / 2;
-    double const tval1 = epar[0];
-    double const tval2 = epar[in - 1];
+    int const count = params.size();
+    int const half_order = k / 2;
+    double const start = params[0];
+    double const end = params[count - 1];
 
-    int smult = 1;
-    while (smult < in && epar[smult - 1] == epar[smult])
-        ++smult;
-    int emult = 1;
-    for (int i = in - 2; i >= 0 && epar[i] == epar[i + 1]; --i)
-        ++emult;
-    if (smult >= in)
+    // Number of conditions (point and derivatives) at the start and the end
+    int start_multiplicity = 1;
+    while (start_multiplicity < count &&
+           params[start_multiplicity - 1] == params[start_multiplicity])
+        ++start_multiplicity;
+    int end_multiplicity = 1;
+    for (int i = count - 2; i >= 0 && params[i] == params[i + 1]; --i)
+        ++end_multiplicity;
+    if (start_multiplicity >= count)
         throw std::runtime_error("all interpolation conditions have the same parameter");
 
+    // The parameters next to the start and end ones
+    double const after_start = params[start_multiplicity];
+    double const before_end = params[count - end_multiplicity - 1];
+
+    // Conditions at the ends beyond half the order need additional knots
+    // close to the ends. The other knots are derived from the parameters
+    // in [first_inner, end_inner)
+    int const start_extra_knots = start_multiplicity - half_order;
+    int const end_extra_knots = end_multiplicity - half_order;
+    int const first_inner = start_multiplicity + max(0, -start_extra_knots);
+    int const end_inner = count - end_multiplicity - max(0, -end_extra_knots);
+
     vector<double> interior;
-    int const kstart = smult + max(0, kk2 - smult);
-    int const kstop = in - emult - max(0, kk2 - emult);
     if (k % 2 == 0)
     {
-        double dummy1 = 0.5 * (epar[smult] + tval1);
-        double dummy2 = 0.5 * (epar[in - emult - 1] + tval2);
-        if (dummy1 == dummy2)
+        // Additional knots in the middle of the first and last parameter
+        // intervals. If there are only two distinct parameters, at a third
+        // of it, so that they differ.
+        double start_extra_knot = 0.5 * (after_start + start);
+        double end_extra_knot = 0.5 * (before_end + end);
+        if (start_extra_knot == end_extra_knot)
         {
-            dummy1 = (epar[smult] + tval1 + tval1) / 3;
-            dummy2 = (epar[in - emult - 1] + tval2 + tval2) / 3;
+            start_extra_knot = (after_start + start + start) / 3;
+            end_extra_knot = (before_end + end + end) / 3;
         }
-        for (int i = 0; i < smult - kk2; ++i)
-            interior.push_back(dummy1);
-        for (int i = kstart; i < kstop; ++i)
-            interior.push_back(epar[i]);
-        for (int i = 0; i < emult - kk2; ++i)
-            interior.push_back(dummy2);
+        for (int i = 0; i < start_extra_knots; ++i)
+            interior.push_back(start_extra_knot);
+        for (int i = first_inner; i < end_inner; ++i)
+            interior.push_back(params[i]);
+        for (int i = 0; i < end_extra_knots; ++i)
+            interior.push_back(end_extra_knot);
     }
     else
     {
-        if (smult - kk2 > 0)
+        // Additional knots spread regularly in the first and last parameter
+        // intervals, other knots in between the parameters
+        if (start_extra_knots > 0)
         {
-            double const delta = (epar[smult] - tval1) / (smult - kk2 + 1);
-            for (int i = 0; i < smult - kk2; ++i)
-                interior.push_back(tval1 + (i + 1) * delta);
+            double const delta = (after_start - start) / (start_extra_knots + 1);
+            for (int i = 0; i < start_extra_knots; ++i)
+                interior.push_back(start + (i + 1) * delta);
         }
-        for (int i = kstart; i < kstop; ++i)
-            interior.push_back(0.5 * (epar[i] + epar[i + 1]));
-        if (emult - kk2 > 0)
+        for (int i = first_inner; i < end_inner; ++i)
+            interior.push_back(0.5 * (params[i] + params[i + 1]));
+        if (end_extra_knots > 0)
         {
-            double const delta = (tval2 - epar[in - emult - 1]) / (emult - kk2 + 1);
-            for (int i = 0; i < emult - kk2; ++i)
-                interior.push_back(epar[in - emult - 1] + (i + 1) * delta);
+            double const delta = (end - before_end) / (end_extra_knots + 1);
+            for (int i = 0; i < end_extra_knots; ++i)
+                interior.push_back(before_end + (i + 1) * delta);
         }
     }
 
     // For odd orders, the loops above produce one knot too many. SISL
     // overwrites it with the end knots, i.e. drops it.
-    if (static_cast<int>(interior.size()) < in - k)
+    if (static_cast<int>(interior.size()) < count - k)
         throw std::logic_error("interpolationKnots: not enough interior knots");
 
-    vector<double> knots(k, tval1);
-    knots.insert(knots.end(), interior.begin(), interior.begin() + (in - k));
-    knots.insert(knots.end(), k, tval2);
+    vector<double> knots(k, start);
+    knots.insert(knots.end(), interior.begin(), interior.begin() + (count - k));
+    knots.insert(knots.end(), k, end);
     return knots;
 }
 
@@ -477,70 +494,79 @@ bool isZeroLength(double length)
 /** Computes the parameter step of the Newton iteration for the closest point
  * problem. Port of s1771_s9del from SISL
  *
- * @param eco the difference vector between the point and the curve
- * @param eco1 the first derivative of the curve
- * @param eco2 the second derivative of the curve
+ * The step is chosen so that the tangent at the new parameter is orthogonal
+ * to the vector from the curve to the point. With first order
+ * approximations of the curve and of its tangent, it is a root of
+ *
+ *   f(step) = (diff - step d1) . (d1 + step d2) = a step^2 + b step + c
+ *
+ * @param diff the difference vector between the point and the curve
+ * @param d1 the first derivative of the curve
+ * @param d2 the second derivative of the curve
  */
-double newtonClosestPointStep(double const* eco, double const* eco1, double const* eco2, int dim)
+double newtonClosestPointStep(double const* diff_ptr, double const* d1_ptr,
+        double const* d2_ptr, int dim)
 {
-    Map<VectorXd const> d(eco, dim), d1(eco1, dim), d2(eco2, dim);
-    double const ttol = 1e-10;
-    double t1 = d.dot(d1);
-    double const t3 = d1.dot(d1);
-    double const t2 = t3 - d.dot(d2);
-    double const t4 = -2 * d1.dot(d2);
-    double const tmax = std::max(std::max(fabs(t1), fabs(t2)), std::max(fabs(t3), fabs(t4)));
-    if (tmax <= REL_COMP_RES)
+    Map<VectorXd const> diff(diff_ptr, dim), d1(d1_ptr, dim), d2(d2_ptr, dim);
+    double const tolerance = 1e-10;
+    double const tangent_norm2 = d1.dot(d1);
+    double const c = diff.dot(d1);                  // f(0)
+    double const b = diff.dot(d2) - tangent_norm2;  // f'(0)
+    double const a = -d1.dot(d2);
+    double const scale = std::max(std::max(fabs(c), fabs(b)),
+                                  std::max(tangent_norm2, fabs(2 * a)));
+    if (scale <= REL_COMP_RES)
         return 0;
-    else if (fabs(t4) / tmax < ttol)
+    else if (fabs(2 * a) / scale < tolerance)
     {
-        // The second degree part is degenerated
-        if (fabs(t2) / tmax < ttol)
+        // f is linear: Newton step. If it is also constant, project the
+        // difference vector on the tangent instead.
+        if (fabs(b) / scale < tolerance)
         {
-            if (fabs(t3) / tmax < ttol)
+            if (tangent_norm2 / scale < tolerance)
                 return 0;
             else
-                return t1 / t3;
+                return c / tangent_norm2;
         }
         else
-            return t1 / t2;
+            return -c / b;
     }
 
-    double t5 = t2 * t2 - 2 * t4 * t1;
-    if (t5 < 0)
-        return t1 / t3;
+    double const discriminant = b * b - 4 * a * c;
+    if (discriminant < 0)
+        return c / tangent_norm2;
 
-    double t6 = sqrt(t5);
-    t5 = (t2 + t6) / t4;
-    t6 = (t2 - t6) / t4;
-    t1 *= t3;
-    // We have two solutions and we want to use the one with the same sign as
-    // t1/t3. If both solutions have the same sign we use the one with the
-    // smallest value.
-    if (t1 < 0)
+    double const sqrt_discriminant = sqrt(discriminant);
+    double const root1 = (-b + sqrt_discriminant) / (2 * a);
+    double const root2 = (-b - sqrt_discriminant) / (2 * a);
+    // Use the root that goes in the same direction as the projection of the
+    // difference vector on the tangent (c / tangent_norm2). If both do, use
+    // the smallest step. If none does, use the one closest to zero.
+    double const direction = c * tangent_norm2;
+    if (direction < 0)
     {
-        if (t5 <= 0 && t6 <= 0)
-            return std::max(t5, t6);
-        else if (t5 <= 0)
-            return t5;
-        else if (t6 <= 0)
-            return t6;
+        if (root1 <= 0 && root2 <= 0)
+            return std::max(root1, root2);
+        else if (root1 <= 0)
+            return root1;
+        else if (root2 <= 0)
+            return root2;
         else
-            return std::min(t5, t6);
+            return std::min(root1, root2);
     }
-    else if (t1 > 0)
+    else if (direction > 0)
     {
-        if (t5 >= 0 && t6 >= 0)
-            return std::min(t5, t6);
-        else if (t5 >= 0)
-            return t5;
-        else if (t6 >= 0)
-            return t6;
+        if (root1 >= 0 && root2 >= 0)
+            return std::min(root1, root2);
+        else if (root1 >= 0)
+            return root1;
+        else if (root2 >= 0)
+            return root2;
         else
-            return std::max(t5, t6);
+            return std::max(root1, root2);
     }
     else
-        return std::min(fabs(t5), fabs(t6));
+        return std::min(fabs(root1), fabs(root2));
 }
 
 /** Golden section search for a minimum of f on [a, b] */
@@ -1155,15 +1181,15 @@ void SplineBase::interpolateImpl(vector<double> const& points,
 
     // Generate the knots and solve the interpolation problem
     int const condition_count = conditions.size();
-    vector<double> epar(condition_count);
+    vector<double> condition_params(condition_count);
     for (int c = 0; c < condition_count; ++c)
-        epar[c] = point_params[conditions[c].point];
-    sort(epar.begin(), epar.end());
+        condition_params[c] = point_params[conditions[c].point];
+    sort(condition_params.begin(), condition_params.end());
 
     Curve curve;
     curve.dim = dimension;
     curve.k = std::min(order, condition_count);
-    curve.t = interpolationKnots(epar, curve.k);
+    curve.t = interpolationKnots(condition_params, curve.k);
 
     vector< Triplet<double> > triplets;
     MatrixXd B(condition_count, dimension);
@@ -1194,7 +1220,7 @@ void SplineBase::interpolateImpl(vector<double> const& points,
     elevateOrder(curve, order);
     setCurve(curve.k, curve.t, curve.P);
 
-    parametersOut = epar;
+    parametersOut = condition_params;
     parametersOut.erase(std::unique(parametersOut.begin(), parametersOut.end()), parametersOut.end());
 }
 
