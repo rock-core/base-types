@@ -3,11 +3,6 @@ rock_find_qt4(OPTIONAL)
 rock_find_qt5(OPTIONAL)
 include(RockQt)
 
-if(SISL_FOUND)
-    list(APPEND OPTIONAL_TESTS
-        test_Spline.cpp)
-endif()
-
 rock_testsuite(test_base_types test.cpp
     test_Angle.cpp
     test_Eigen.cpp
@@ -18,7 +13,7 @@ rock_testsuite(test_base_types test.cpp
     test_Time.cpp
     test_Timeout.cpp
     test_samples_Sonar.cpp
-    ${OPTIONAL_TESTS}
+    test_Spline.cpp
     DEPS base-types
     DEPS_PKGCONFIG base-logging)
 

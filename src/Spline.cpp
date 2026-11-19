@@ -1,5 +1,7 @@
 #include "Spline.hpp"
+#if BASE_TYPES_SPLINE_USE_SISL
 #include "sisl.h"
+#endif
 
 #include <stdexcept>
 #include <vector>
@@ -27,7 +29,11 @@ static double angleLimit(double angle)
 namespace base { namespace geometry {
 
 SplineBase::SplineBase (int dim, double _geometric_resolution, int _curve_order)
-    : dimension(dim), curve(0), geometric_resolution(_geometric_resolution)
+    : dimension(dim)
+#if BASE_TYPES_SPLINE_USE_SISL
+    , curve(0)
+#endif
+    , geometric_resolution(_geometric_resolution)
     , curve_order(_curve_order)
     , start_param(0), end_param(0)
     , has_curvature_max(false), curvature_max(-1)
@@ -36,6 +42,7 @@ SplineBase::SplineBase (int dim, double _geometric_resolution, int _curve_order)
         throw std::runtime_error("dimension must be strictly positive");
 }
 
+#if BASE_TYPES_SPLINE_USE_SISL
 SplineBase::SplineBase(double geometric_resolution, SISLCurve* curve)
     : dimension(curve->idim), curve(curve), geometric_resolution(geometric_resolution)
     , curve_order(curve->ik)
@@ -51,17 +58,24 @@ SplineBase::SplineBase(double geometric_resolution, SISLCurve* curve)
     if (status != 0)
         throw std::runtime_error("cannot get the curve start & end parameters");
 }
+#endif
 
 SplineBase::~SplineBase ()
 {
+#if BASE_TYPES_SPLINE_USE_SISL
     // Frees the memory of the curve
     if (curve)
         freeCurve(curve);
+#endif
 }
 
 SplineBase::SplineBase(SplineBase const& source)
     : singleton(source.singleton), dimension(source.dimension)
+#if BASE_TYPES_SPLINE_USE_SISL
     , curve(source.curve ? copyCurve(source.curve) : 0)
+#else
+    , knots(source.knots), vertices(source.vertices)
+#endif
     , geometric_resolution(source.geometric_resolution)
     , curve_order(source.curve_order)
     , start_param(source.start_param), end_param(source.end_param)
@@ -74,12 +88,19 @@ SplineBase const& SplineBase::operator = (SplineBase const& source)
     if (&source == this)
         return *this;
 
+#if BASE_TYPES_SPLINE_USE_SISL
     if (curve)
         freeCurve(curve);
+#endif
 
     singleton            = source.singleton;
     dimension            = source.dimension;
+#if BASE_TYPES_SPLINE_USE_SISL
     curve                = source.curve ? copyCurve(source.curve) : 0;
+#else
+    knots                = source.knots;
+    vertices             = source.vertices;
+#endif
     geometric_resolution = source.geometric_resolution;
     curve_order          = source.curve_order;
     start_param          = source.start_param;
@@ -91,8 +112,12 @@ SplineBase const& SplineBase::operator = (SplineBase const& source)
 
 int SplineBase::getPointCount() const
 {
-    if (curve)
+    if (hasCurve())
+#if BASE_TYPES_SPLINE_USE_SISL
         return curve->in;
+#else
+        return vertices.size() / dimension;
+#endif
     else
         return (singleton.empty() ? 0 : 1);
 }
@@ -128,12 +153,17 @@ void SplineBase::getPointAndTangentHelper(double* result, double _param, bool wi
 
     if (hasCurve())
     {
+#if BASE_TYPES_SPLINE_USE_SISL
         int leftknot = 0; // Not needed
         int status;
         s1227(curve, (with_tangent ? 1 : 0), _param,
                 &leftknot, result, &status); // Gets the point
         if (status != 0)
             throw std::runtime_error("SISL error while computing a curve point");
+#else
+        // Like SISL's s1227, evaluate from the left
+        evaluate(result, _param, (with_tangent ? 1 : 0), true);
+#endif
     }
     else if (singleton.empty()) // empty curve
     {
@@ -161,6 +191,7 @@ double SplineBase::getCurvature(double _param) const
     else if (!hasCurve())
         throw std::runtime_error("getCurvature() called on an empty curve");
 
+#if BASE_TYPES_SPLINE_USE_SISL
     double curvature;
     int status;
     s2550(curve, &_param, 1, &curvature, &status); // Gets the point
@@ -168,6 +199,9 @@ double SplineBase::getCurvature(double _param) const
         throw std::runtime_error("SISL error while computing a curvature");
 
     return curvature;
+#else
+    return curvatureImpl(_param);
+#endif
 }
 
 double SplineBase::getVariationOfCurvature(double _param) const  // Variation of Curvature
@@ -179,6 +213,7 @@ double SplineBase::getVariationOfCurvature(double _param) const  // Variation of
     else if (!hasCurve())
         throw std::runtime_error("getVariationOfCurvature() called on an empty curve");
 
+#if BASE_TYPES_SPLINE_USE_SISL
     double VoC;
     int status;
     s2556(curve, &_param, 1, &VoC, &status); // Gets the point
@@ -186,6 +221,9 @@ double SplineBase::getVariationOfCurvature(double _param) const  // Variation of
         throw std::runtime_error("SISL error while computing a variation of curvature");
 
     return VoC;
+#else
+    return variationOfCurvatureImpl(_param);
+#endif
 }
 
 double SplineBase::getCurveLength(double relative_resolution) const
@@ -195,6 +233,7 @@ double SplineBase::getCurveLength(double relative_resolution) const
     if (isEmpty())
         throw std::runtime_error("getCurveLength() called on an empty curve");
 
+#if BASE_TYPES_SPLINE_USE_SISL
     int status;
     double length;
     s1240(curve, relative_resolution, &length, &status);
@@ -202,6 +241,9 @@ double SplineBase::getCurveLength(double relative_resolution) const
         throw std::runtime_error("cannot get the curve length");
 
     return length;
+#else
+    return integrateLength(start_param, end_param, relative_resolution);
+#endif
 }
 
 double SplineBase::getCurveLength(double startParam, double relative_resolution) const
@@ -216,6 +258,7 @@ double SplineBase::getCurveLength(double startParam, double endParam, double rel
         return 0;
     }
 
+#if BASE_TYPES_SPLINE_USE_SISL
     SplineBase *subspline = getSubSpline(startParam, endParam);
     if(!subspline)
         throw std::runtime_error(std::string("Could not get Subpline for parameters ") + boost::lexical_cast<std::string>(startParam) + " / " + boost::lexical_cast<std::string>(endParam));
@@ -223,6 +266,16 @@ double SplineBase::getCurveLength(double startParam, double endParam, double rel
     double ret = subspline->getCurveLength(relative_resolution);
     delete subspline;
     return ret;
+#else
+    if (isSingleton())
+        return 0;
+    if (isEmpty())
+        throw std::runtime_error("getCurveLength() called on an empty curve");
+    if (!checkAndNormalizeParam(startParam) || !checkAndNormalizeParam(endParam))
+        throw std::runtime_error(std::string("Could not get Subpline for parameters ") + boost::lexical_cast<std::string>(startParam) + " / " + boost::lexical_cast<std::string>(endParam));
+
+    return integrateLength(startParam, endParam, relative_resolution);
+#endif
 }
 
 double SplineBase::getCurvatureMax() const
@@ -254,11 +307,13 @@ double SplineBase::getCurvatureMax() const
     return curvature_max;
 }
 
+#if BASE_TYPES_SPLINE_USE_SISL
 bool SplineBase::isNURBS() const
 {
     if (!curve) return false;
     return curve->ikind == 2 || curve->ikind == 4;
 }
+#endif
 
 void SplineBase::interpolate(const vector< double >& points,
                              vector< double >& parametersOut,
@@ -302,6 +357,7 @@ void SplineBase::interpolate(const vector< double >& points,
         std::copy( coord_types.begin(), coord_types.end(), std::back_inserter( point_types ) );
     }
 
+#if BASE_TYPES_SPLINE_USE_SISL
     // Generates curve
     double* point_param;
     int nb_unique_param;
@@ -351,6 +407,9 @@ void SplineBase::interpolate(const vector< double >& points,
     }
 
     free(point_param);
+#else
+    interpolateImpl(points, parametersOut, parametersIn, point_types);
+#endif
 
 }
 
@@ -365,11 +424,13 @@ void SplineBase::interpolate(std::vector<double> const& points,
 
 void SplineBase::printCurveProperties(std::ostream& io) const
 {
+    int const point_count = getPointCount();
+    int const order = hasCurve() ? static_cast<int>(getKnots().size()) - point_count : 0;
     io << "CURVE PROPERTIES " << std::endl
-	<< "  Point count  : " << curve->in    << std::endl
-	<< "  Order        : " << curve->ik    << std::endl
-	<< "  Dimension    : " << curve->idim  << std::endl
-	<< "  Kind         : " << curve->ikind << std::endl
+	<< "  Point count  : " << point_count << std::endl
+	<< "  Order        : " << order << std::endl
+	<< "  Dimension    : " << dimension << std::endl
+	<< "  Kind         : " << getSISLCurveType() << std::endl
 	<< "  Parameters   : " << start_param  << "->" << end_param << std::endl
 	<< "  Length       : " << getCurveLength() << std::endl;
 }
@@ -378,14 +439,20 @@ std::vector<double> SplineBase::getCoordinates() const
 {
     if (!singleton.empty())
         return singleton;
+#if BASE_TYPES_SPLINE_USE_SISL
     else if (!curve)
         return std::vector<double>();
     else if (isNURBS())
         return std::vector<double>(curve->rcoef, curve->rcoef + (dimension + 1) * getPointCount());
     else
         return std::vector<double>(curve->ecoef, curve->ecoef + dimension * getPointCount());
+#else
+    else
+        return vertices;
+#endif
 }
 
+#if BASE_TYPES_SPLINE_USE_SISL
 std::vector<double> SplineBase::getKnots() const
 {
     if (!curve)
@@ -417,6 +484,7 @@ void SplineBase::reset(SISLCurve* new_curve)
     if (status != 0)
         throw std::runtime_error("cannot get the curve start & end parameters");
 }
+#endif
 
 void SplineBase::reset(std::vector<double> const& coordinates, std::vector<double> const& knots, int kind)
 {
@@ -434,12 +502,13 @@ void SplineBase::reset(std::vector<double> const& coordinates, std::vector<doubl
         return;
     }
 
+    if (kind == -1 && !hasCurve())
+        throw std::runtime_error("must give a 'kind' parameter to reset() since this curve is empty");
+
+#if BASE_TYPES_SPLINE_USE_SISL
     int stride;
     if (kind == -1)
     {
-        if (!hasCurve())
-            throw std::runtime_error("must give a 'kind' parameter to reset() since this curve is empty");
-
         kind   = curve->ikind;
         stride = getCoordinatesStride();
     }
@@ -454,6 +523,9 @@ void SplineBase::reset(std::vector<double> const& coordinates, std::vector<doubl
             getCurveOrder(), const_cast<double*>(&knots[0]), const_cast<double*>(&coordinates[0]),
             kind, dimension, 1);
     reset(new_curve);
+#else
+    resetImpl(coordinates, knots, kind);
+#endif
 }
 
 double SplineBase::findOneClosestPoint(double const* _pt, double _guess, double _geores) const
@@ -513,6 +585,7 @@ void SplineBase::findClosestPoints(double const* ref_point, vector<double>& _res
         return;
     }
 
+#if BASE_TYPES_SPLINE_USE_SISL
     int points_count = 0;
     double* points = NULL;
     int curves_count = 0;
@@ -531,6 +604,9 @@ void SplineBase::findClosestPoints(double const* ref_point, vector<double>& _res
 
     free(curves);
     free(points);
+#else
+    findClosestPointsImpl(ref_point, _result_points, _geores);
+#endif
 }
 
 double SplineBase::localClosestPointSearch(double const* ref_point, double _guess, double _start, double _end, double  _geores) const
@@ -541,6 +617,7 @@ double SplineBase::localClosestPointSearch(double const* ref_point, double _gues
     if (_end < _start)
         swap(_end, _start);
 
+#if BASE_TYPES_SPLINE_USE_SISL
     double param;
 
     // Finds the closest point on the curve
@@ -548,6 +625,9 @@ double SplineBase::localClosestPointSearch(double const* ref_point, double _gues
     s1774(curve, const_cast<double*>(ref_point), dimension, _geores, _start, _end, _guess, &param, &status);
     if (status < 0)
         throw std::runtime_error("failed to find the closest points");
+#else
+    double const param = localClosestPointSearchImpl(ref_point, _guess, _start, _end);
+#endif
 
     // If the first guess is really wrong, the search might return a parameter
     // that is not between _start and _end. Validate the result value so that it
@@ -570,6 +650,7 @@ void SplineBase::findPointIntersections(double const* _point,
     if (!hasCurve())
         return; // no intersection between points and lines
 
+#if BASE_TYPES_SPLINE_USE_SISL
     int points_count = 0;
     double* points = 0;
     int curves_count = 0;
@@ -590,6 +671,9 @@ void SplineBase::findPointIntersections(double const* _point,
 
     free(curves);
     free(points);
+#else
+    findPointIntersectionsImpl(_point, _result_points, _geores);
+#endif
 }
 
 std::pair<double, bool> SplineBase::findOneLineIntersection(double const* _point, double const* _normal, double _guess, double _geores) const
@@ -620,6 +704,7 @@ void SplineBase::findLineIntersections(double const* _point, double const* _norm
     if (getDimension() != 2 && getDimension() != 3)
         throw std::runtime_error("can compute line/plane to curve intersections only in dimensions 2 and 3");
 
+#if BASE_TYPES_SPLINE_USE_SISL
     int points_count = 0;
     double* points = 0;
     int curves_count = 0;
@@ -644,6 +729,9 @@ void SplineBase::findLineIntersections(double const* _point, double const* _norm
 
     free(curves);
     free(points);
+#else
+    findLineIntersectionsImpl(_point, _normal, _result_points, _result_curves, _geores);
+#endif
 }
 
 void SplineBase::findSphereIntersections(double const* _center, double radius,
@@ -659,6 +747,7 @@ void SplineBase::findSphereIntersections(double const* _center, double radius,
     if (getDimension() != 2 && getDimension() != 3)
         throw std::runtime_error("can compute line/plane to curve intersections only in dimensions 2 and 3");
 
+#if BASE_TYPES_SPLINE_USE_SISL
     int points_count = 0;
     double* points = 0;
     int curves_count = 0;
@@ -679,6 +768,9 @@ void SplineBase::findSphereIntersections(double const* _center, double radius,
 
     free(curves);
     free(points);
+#else
+    findSphereIntersectionsImpl(_center, radius, _result_points, _geores);
+#endif
 }
 
 static double point_distance(double const* p0, double const* p1, int dim)
@@ -737,6 +829,7 @@ void SplineBase::append(SplineBase const& other, double tolerance)
         return;
     }
 
+#if BASE_TYPES_SPLINE_USE_SISL
     SISLCurve* joined_curve;
     int result;
     s1715(this->curve, other.curve, 1, 0, &joined_curve, &result);
@@ -744,6 +837,9 @@ void SplineBase::append(SplineBase const& other, double tolerance)
         throw std::runtime_error("failed to join the curves");
 
     reset(joined_curve);
+#else
+    appendImpl(other);
+#endif
 }
 
 double SplineBase::join(SplineBase const& other, double tolerance, bool with_tangents)
@@ -896,13 +992,19 @@ double SplineBase::join(SplineBase const& other, double tolerance, bool with_tan
 void SplineBase::clear()
 {
     singleton.clear();
+#if BASE_TYPES_SPLINE_USE_SISL
     if (curve)
     {
         freeCurve(curve);
         curve = 0;
     }
+#else
+    knots.clear();
+    vertices.clear();
+#endif
 }
 
+#if BASE_TYPES_SPLINE_USE_SISL
 void SplineBase::reverse()
 {
     if (curve)
@@ -932,12 +1034,14 @@ bool SplineBase::testIntersection(SplineBase const& other, double resolution) co
 
     return (point_count > 0) || (curve_count > 0);
 }
+#endif
 
 vector<double> SplineBase::simplify()
 {
     return simplify(geometric_resolution);
 }
 
+#if BASE_TYPES_SPLINE_USE_SISL
 vector<double> SplineBase::simplify(double tolerance)
 {
     if (!curve)
@@ -994,6 +1098,7 @@ Matrix3d SplineBase::getFrenetFrame(double _param) const
 
     return frame;
 }
+#endif
 
 double SplineBase::getHeading(double _param) const
 {
@@ -1063,12 +1168,16 @@ void SplineBase::crop(double start_t, double end_t)
         return;
     }
 
+#if BASE_TYPES_SPLINE_USE_SISL
     SISLCurve* new_curve;
     int result;
     s1712(curve, start_t, end_t, &new_curve, &result);
     if (result != 0)
         throw std::runtime_error("failed to crop the curve at between " + boost::lexical_cast<std::string>(start_t) + " and " + boost::lexical_cast<std::string>(end_t));
     reset(new_curve);
+#else
+    cropImpl(start_t, end_t);
+#endif
 }
 
 void SplineBase::setSingleton(double const* coordinates)
@@ -1089,11 +1198,18 @@ void SplineBase::split(SplineBase& second_part, double _param)
 	getPoint(result.data(), start_param);
 
 	//set second curve to this curve
+#if BASE_TYPES_SPLINE_USE_SISL
 	second_part.reset(curve);
 
 	//be shure that we don't delete the curve now belonging
 	//to second_part
 	curve = NULL;
+#else
+	if (hasCurve())
+	    second_part.setCurve(knots.size() - vertices.size() / dimension, knots, vertices);
+	else
+	    second_part.setSingleton(result.data());
+#endif
 
 	//make this curve a single point curve
 	setSingleton(result.data());
@@ -1127,6 +1243,7 @@ void SplineBase::split(SplineBase& second_part, double _param)
         return;
     }
 
+#if BASE_TYPES_SPLINE_USE_SISL
     SISLCurve* part1 = 0, *part2 = 0;
     int result;
     s1710(getSISLCurve(), _param, &part1, &part2, &result);
@@ -1134,8 +1251,12 @@ void SplineBase::split(SplineBase& second_part, double _param)
         throw std::runtime_error("failed to split the curve at " + boost::lexical_cast<std::string>(_param));
     reset(part1);
     second_part.reset(part2);
+#else
+    splitImpl(second_part, _param);
+#endif
 }
 
+#if BASE_TYPES_SPLINE_USE_SISL
 SplineBase *SplineBase::getSubSpline(double start_t, double end_t) const
 {
     int result;
@@ -1161,5 +1282,6 @@ void SplineBase::derive(unsigned int order, SplineBase& result) const
 
     result.reset(newCurve);
 }
+#endif
 
 }} //end namespace base::geometry

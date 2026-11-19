@@ -4,5 +4,5 @@ includedir=${prefix}/include
 
 Name: baseTypesSisl
 Version: 0.1
-Description: Common types for robotics modules, including types that require the library sisl
+Description: Alias of base-types, for packages that need base::geometry::Spline
 Requires: base-types

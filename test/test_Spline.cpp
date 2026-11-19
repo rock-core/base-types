@@ -212,6 +212,15 @@ BOOST_AUTO_TEST_CASE(test_reset)
     Spline<2> rational;
     rational.reset({-2, 2, 2, 0, -2, 2, 2, 2, 2}, {0, 0, 0, 1, 1, 1}, 2);
     BOOST_CHECK(rational.getPoint(0.25).isApprox(Eigen::Vector2d(-0.5, 0.25), 1e-12));
+#if !BASE_TYPES_SPLINE_USE_SISL
+    // The Eigen-based implementation validates its input, and does not
+    // support rational curves
+    BOOST_CHECK_THROW(rational.reset({-2, 2, 2, 0, -1, 1, 2, 2, 2}, {0, 0, 0, 1, 1, 1}, 2),
+            std::invalid_argument);
+    // unsorted knots
+    BOOST_CHECK_THROW(rational.reset({-1, 1, 0, -1, 1, 1}, {0, 0, 0, 1, 0.5, 1}, 1),
+            std::invalid_argument);
+#endif
 }
 
 BOOST_AUTO_TEST_CASE(test_curvature_and_length)
@@ -386,7 +395,11 @@ BOOST_AUTO_TEST_CASE(test_simplify)
     Spline<2> spline(0.1, 3);
     spline.interpolate(coordinates);
     vector<double> errors = spline.simplify(1e-6);
+#if BASE_TYPES_SPLINE_USE_SISL
     BOOST_CHECK_LT(spline.getPointCount(), 20);
+#else
+    BOOST_CHECK_EQUAL(3, spline.getPointCount());
+#endif
     BOOST_CHECK_SMALL(errors[0], 1e-6);
     BOOST_CHECK_SMALL(errors[1], 1e-6);
     BOOST_CHECK(spline.getEndPoint().isApprox(Eigen::Vector2d(19, 38), 1e-12));

@@ -1,8 +1,8 @@
 #ifndef BASE_GEOMETRY_SPLINE_CONFIG_HPP
 #define BASE_GEOMETRY_SPLINE_CONFIG_HPP
 
-/** Whether base::geometry::Spline is implemented with SISL (1) or not (0).
- * Set by the USE_SISL CMake option when building base/types.
+/** Whether base::geometry::Spline is implemented with SISL (1) or with
+ * Eigen (0). Set by the USE_SISL CMake option when building base/types.
  */
 #cmakedefine01 BASE_TYPES_SPLINE_USE_SISL
 
