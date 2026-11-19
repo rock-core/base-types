@@ -4,9 +4,7 @@
 #include "LaserScanVisualization.hpp"
 #include "WaypointVisualization.hpp"
 #include "MotionCommandVisualization.hpp"
-#ifdef SISL_FOUND
 #include "TrajectoryVisualization.hpp"
-#endif
 #include "RigidBodyStateVisualization.hpp"
 #include "BodyStateVisualization.hpp"
 #include "SonarGroundDistanceVisualization.hpp"
@@ -28,9 +26,7 @@ namespace vizkit3d {
 	{
 		QStringList *pluginNames = new QStringList();
 		pluginNames->push_back("WaypointVisualization");
-		#ifdef SISL_FOUND
 		pluginNames->push_back("TrajectoryVisualization");
-		#endif
 		pluginNames->push_back("MotionCommandVisualization");
 		pluginNames->push_back("RigidBodyStateVisualization");
 		pluginNames->push_back("BodyStateVisualization");
@@ -56,12 +52,10 @@ namespace vizkit3d {
 		{
 			plugin = new vizkit3d::MotionCommandVisualization();
 		}
-		#ifdef SISL_FOUND
 		else if (pluginName == "TrajectoryVisualization")
 		{
 			plugin = new vizkit3d::TrajectoryVisualization();
 		}
-		#endif
 		else if (pluginName == "RigidBodyStateVisualization")
 		{
 			plugin = new vizkit3d::RigidBodyStateVisualization();
