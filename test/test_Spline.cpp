@@ -334,6 +334,46 @@ BOOST_AUTO_TEST_CASE(test_heading_and_distance_errors)
     BOOST_CHECK_CLOSE(t, error(2), 1e-6);
 }
 
+BOOST_AUTO_TEST_CASE(test_reset_to_a_singleton)
+{
+    Spline<2> spline = parabola();
+    spline.reset({1, 2}, {});
+    BOOST_CHECK(spline.isSingleton());
+    BOOST_CHECK_EQUAL(1, spline.getPointCount());
+    BOOST_CHECK(spline.getKnots().empty());
+    BOOST_CHECK(spline.getPoint(0).isApprox(Eigen::Vector2d(1, 2)));
+}
+
+BOOST_AUTO_TEST_CASE(test_closest_point_of_a_singleton_is_its_parameter)
+{
+    Spline<2> spline;
+    spline.interpolate({1.0, 2.0}, std::vector<double>{3.0});
+    vector<double> points;
+    vector< pair<double, double> > curves;
+    spline.findClosestPoints(Eigen::Vector2d(0, 0), points, curves);
+    BOOST_REQUIRE_EQUAL(1, points.size());
+    BOOST_CHECK_EQUAL(3, points[0]);
+}
+
+BOOST_AUTO_TEST_CASE(test_split_at_the_ends_of_a_high_dimensional_curve)
+{
+    Spline<5> spline;
+    spline.interpolate(vector<double>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 3, 3, 3, 3, 3});
+    Spline<5>::vector_t const start = spline.getStartPoint(), end = spline.getEndPoint();
+
+    Spline<5> first(spline), second;
+    first.split(second, first.getStartParam());
+    BOOST_CHECK(first.isSingleton());
+    BOOST_CHECK(first.getStartPoint().isApprox(start));
+    BOOST_CHECK(second.getEndPoint().isApprox(end));
+
+    first = spline;
+    first.split(second, first.getEndParam());
+    BOOST_CHECK(second.isSingleton());
+    BOOST_CHECK(second.getStartPoint().isApprox(end));
+    BOOST_CHECK(first.getStartPoint().isApprox(start));
+}
+
 BOOST_AUTO_TEST_CASE(test_simplify)
 {
     // A densely sampled straight line can be represented by a single segment

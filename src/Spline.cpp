@@ -13,14 +13,15 @@ using namespace Eigen;
 
 
 
+/** Normalizes an angle in [-2 pi, 2 pi] to [-pi, pi] */
 static double angleLimit(double angle)
 {
-    if(angle > M_PI)
-	return angle - 2*M_PI;
+    if (angle > M_PI)
+        return angle - 2 * M_PI;
     else if (angle < -M_PI)
-	return angle + 2*M_PI;
+        return angle + 2 * M_PI;
     else
-     	return angle;
+        return angle;
 }
 
 namespace base { namespace geometry {
@@ -426,9 +427,7 @@ void SplineBase::reset(std::vector<double> const& coordinates, std::vector<doubl
     }
     else if (coordinates.size() == static_cast<size_t>(dimension))
     {
-        if (curve)
-            freeCurve(curve);
-
+        clear();
         start_param = end_param = 0;
         has_curvature_max = false;
         singleton = coordinates;
@@ -510,7 +509,7 @@ void SplineBase::findClosestPoints(double const* ref_point, vector<double>& _res
 {
     if (!curve)
     {
-        _result_points.push_back(0);
+        _result_points.push_back(getStartParam());
         return;
     }
 
@@ -999,14 +998,10 @@ Matrix3d SplineBase::getFrenetFrame(double _param) const
 
 double SplineBase::getHeading(double _param) const
 {
-    Matrix3d frame = getFrenetFrame(_param);
-
-    // Vector if the X axis of the frame
-    Vector2d Xaxis(frame(0,0),frame(0,1));
-    Xaxis.normalize();
+    Matrix3d const frame = getFrenetFrame(_param);
 
     // Returns the angle of Frenet X axis in Inertial frame
-    return atan2(Xaxis.y(),Xaxis.x());
+    return atan2(frame(0, 1), frame(0, 0));
 }
 
 double SplineBase::headingError(double _actHeading, double _param) const
@@ -1020,17 +1015,18 @@ double SplineBase::distanceError(Vector3d _pt, double _param) const
     // Error vector
     Vector3d curve_point;
     getPoint(curve_point.data(), _param);
-    Vector3d error = _pt - curve_point;
-    error(2) = 0.0;  // Z axis error not needed
+    Vector2d const error = (_pt - curve_point).head<2>();  // Z axis error not needed
 
-    // Finds the angle of error vector to the Frenet X axis
-    Vector2d pt_vec(error(0),error(1));
-    pt_vec.normalize();
-    double  angle = angleLimit(atan2(pt_vec.y(),pt_vec.x()) - getHeading(_param));
+    // Tangent of the curve in the XY plane, with the same convention than
+    // getHeading() if the curve is vertical
+    Matrix3d const frame = getFrenetFrame(_param);
+    Vector2d tangent(frame(0, 0), frame(0, 1));
+    if (tangent.isZero(0))
+        tangent = Vector2d::UnitX();
 
-    // Sign of the distance error depending on position of the
-    // actual robot in Frenet frame
-    return (angle >= 0.0)?(error.norm()):(-error.norm());
+    // The distance is positive if the point is on the left of the curve
+    double const side = tangent.x() * error.y() - tangent.y() * error.x();
+    return (side >= 0.0) ? error.norm() : -error.norm();
 }
 
 Vector3d SplineBase::poseError(Vector3d _position, double _heading, double _guess, double minParam) const
@@ -1090,8 +1086,8 @@ void SplineBase::split(SplineBase& second_part, double _param)
     if(fabs(_param - start_param) < 0.001)
     {
 	//get start point
-	double result[3];
-	getPoint(result, start_param);
+	std::vector<double> result(getDimension());
+	getPoint(result.data(), start_param);
 
 	//set second curve to this curve
 	second_part.reset(curve);
@@ -1101,7 +1097,7 @@ void SplineBase::split(SplineBase& second_part, double _param)
 	curve = NULL;
 
 	//make this curve a single point curve
-	setSingleton(result);
+	setSingleton(result.data());
 
 	return;
     }
@@ -1109,11 +1105,11 @@ void SplineBase::split(SplineBase& second_part, double _param)
     if(fabs(_param - end_param) < 0.001)
     {
 	//get end point
-	double result[3];
-	getPoint(result, end_param);
+	std::vector<double> result(getDimension());
+	getPoint(result.data(), end_param);
 
 	//the second curve is only the end point
-	second_part.setSingleton(result);
+	second_part.setSingleton(result.data());
 	return;
     }
 
