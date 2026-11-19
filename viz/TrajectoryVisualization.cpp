@@ -113,7 +113,7 @@ std::vector<TrajectoryVisualization::Point> TrajectoryVisualization::convertSpli
     const base::geometry::Spline3& spline, const osg::Vec4& color, double stepSize) const
 {
     std::vector<Point> points;
-    if (!spline.getSISLCurve())
+    if (spline.isEmpty() || spline.isSingleton())
         return points;
 
     if (!stepSize)

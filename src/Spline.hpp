@@ -5,6 +5,10 @@
 #include <base/Eigen.hpp>
 #include <stdexcept>
 #include <algorithm>
+#include <cmath>
+#include <cstring>
+#include <limits>
+#include <base/geometry/SplineConfig.hpp>
 
 struct SISLCurve;
 
@@ -33,7 +37,7 @@ namespace geometry {
 
         /** Returns true if the curve is not yet initialized */
         bool isEmpty() const
-        { return !getSISLCurve() && singleton.empty(); }
+        { return !hasCurve() && singleton.empty(); }
 
         /** Returns true if the curve is a point */
         bool isSingleton() const
@@ -312,6 +316,9 @@ namespace geometry {
         //! available only in Spline<3>
         base::Vector3d poseError(base::Vector3d _pt, double _actZRot, double _st_para, double minParam) const;
     private:
+        //! true if the curve is a proper curve (i.e. neither empty nor a singleton)
+        bool hasCurve() const { return curve != 0; }
+
         std::vector<double> singleton;
 
         int dimension;
@@ -895,7 +902,7 @@ namespace geometry {
          */
         double findOneClosestPoint(vector_t const& _pt, double _geometric_resolution) const
         {
-            if (!SplineBase::getSISLCurve())
+            if (this->isEmpty() || this->isSingleton())
                 return SplineBase::getStartParam();
 
             std::vector<double> points;

@@ -48,5 +48,13 @@ if(USE_SISL)
             " -DUSE_SISL=OFF")
     endif(NOT SISL_FOUND)
 endif()
+# Whether base::geometry::Spline is implemented with SISL, as a header so that
+# it is consistent between base/types and the packages using it
+set(BASE_TYPES_SPLINE_USE_SISL ${USE_SISL})
+configure_file(src/SplineConfig.hpp.in
+    ${CMAKE_BINARY_DIR}/include_generated/base/geometry/SplineConfig.hpp)
+include_directories(BEFORE ${CMAKE_BINARY_DIR}/include_generated)
+install(FILES ${CMAKE_BINARY_DIR}/include_generated/base/geometry/SplineConfig.hpp
+    DESTINATION include/base/geometry)
 
 rock_standard_layout()

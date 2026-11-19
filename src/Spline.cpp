@@ -126,7 +126,7 @@ void SplineBase::getPointAndTangentHelper(double* result, double _param, bool wi
         throw std::out_of_range(msg);
     }
 
-    if (curve)
+    if (hasCurve())
     {
         int leftknot = 0; // Not needed
         int status;
@@ -158,7 +158,7 @@ double SplineBase::getCurvature(double _param) const
         throw std::out_of_range("_param is not in the [start_param, end_param] range");
     else if (!singleton.empty())
         throw std::runtime_error("getCurvature() called on a singleton");
-    else if (!curve)
+    else if (!hasCurve())
         throw std::runtime_error("getCurvature() called on an empty curve");
 
     double curvature;
@@ -176,7 +176,7 @@ double SplineBase::getVariationOfCurvature(double _param) const  // Variation of
         throw std::out_of_range("_param is not in the [start_param, end_param] range");
     else if (!singleton.empty())
         throw std::runtime_error("getVariationOfCurvature() called on a singleton");
-    else if (!curve)
+    else if (!hasCurve())
         throw std::runtime_error("getVariationOfCurvature() called on an empty curve");
 
     double VoC;
@@ -229,7 +229,7 @@ double SplineBase::getCurvatureMax() const
 {
     if (!singleton.empty())
         throw std::runtime_error("getCurvatureMax() called on a singleton");
-    else if (!curve)
+    else if (!hasCurve())
         throw std::runtime_error("getCurvatureMax() called on an empty curve");
 
     if (has_curvature_max)
@@ -437,7 +437,7 @@ void SplineBase::reset(std::vector<double> const& coordinates, std::vector<doubl
     int stride;
     if (kind == -1)
     {
-        if (!curve)
+        if (!hasCurve())
             throw std::runtime_error("must give a 'kind' parameter to reset() since this curve is empty");
 
         kind   = curve->ikind;
@@ -458,7 +458,7 @@ void SplineBase::reset(std::vector<double> const& coordinates, std::vector<doubl
 
 double SplineBase::findOneClosestPoint(double const* _pt, double _guess, double _geores) const
 {
-    if (!curve)
+    if (!hasCurve())
         return getStartParam();
 
     vector<double> points;
@@ -507,7 +507,7 @@ double SplineBase::getResultClosestToGuess(double _guess, vector<double> points,
 
 void SplineBase::findClosestPoints(double const* ref_point, vector<double>& _result_points, vector< pair<double, double> >& _result_curves, double _geores) const
 {
-    if (!curve)
+    if (!hasCurve())
     {
         _result_points.push_back(getStartParam());
         return;
@@ -535,7 +535,7 @@ void SplineBase::findClosestPoints(double const* ref_point, vector<double>& _res
 
 double SplineBase::localClosestPointSearch(double const* ref_point, double _guess, double _start, double _end, double  _geores) const
 {
-    if (!curve)
+    if (!hasCurve())
         return getStartParam();
 
     if (_end < _start)
@@ -567,7 +567,7 @@ void SplineBase::findPointIntersections(double const* _point,
     _result_points.clear();
     _result_curves.clear();
 
-    if (!curve)
+    if (!hasCurve())
         return; // no intersection between points and lines
 
     int points_count = 0;
@@ -614,7 +614,7 @@ void SplineBase::findLineIntersections(double const* _point, double const* _norm
     _result_points.clear();
     _result_curves.clear();
 
-    if (!curve)
+    if (!hasCurve())
         return; // no intersection between points and lines
 
     if (getDimension() != 2 && getDimension() != 3)
@@ -653,7 +653,7 @@ void SplineBase::findSphereIntersections(double const* _center, double radius,
     _result_points.clear();
     _result_curves.clear();
 
-    if (!curve)
+    if (!hasCurve())
         return; // no intersection between points and lines
 
     if (getDimension() != 2 && getDimension() != 3)
@@ -852,23 +852,23 @@ double SplineBase::join(SplineBase const& other, double tolerance, bool with_tan
     }
 
     // Create an intermediate curve
-    SISLCurve* raw_intermediate_curve = NULL;
-    double end_par;
-    double* gpar = NULL;
-    int jnbpar;
-    int ret;
-
     //be sure joining_Types has the right size
     if (joining_points.size() / dim > 4) {
         throw std::runtime_error("SplineBase::join(): the size of "
                                  "'joining_points' is unexpectedly big");
     }
 
-    s1356(&joining_points[0], joining_points.size() / dim, dim, joining_types, 0, 0, 1, getCurveOrder(), 0,
-            &end_par, &raw_intermediate_curve, &gpar, &jnbpar, &ret);
-    if (ret != 0)
+    SplineBase intermediate_curve(dim, getGeometricResolution(), getCurveOrder());
+    std::vector<CoordinateType> types;
+    for (unsigned int i = 0; i < joining_points.size() / dim; ++i)
+        types.push_back(static_cast<CoordinateType>(joining_types[i]));
+    try
     {
-        std::cerr << "SplineBase::join failed to generate the intermediate curve" << std::endl;
+        intermediate_curve.interpolate(joining_points, std::vector<double>(), types);
+    }
+    catch (std::exception const& e)
+    {
+        std::cerr << "SplineBase::join failed to generate the intermediate curve: " << e.what() << std::endl;
         std::cerr << "dist=" << dist << std::endl;
         std::cerr << "start=" << getStartParam() << " end=" << getEndParam() << " singleton=" << isSingleton() << std::endl;
         std::cerr << "other.start=" << other.getStartParam() << " other.end=" << other.getEndParam() << " other.singleton=" << other.isSingleton() << std::endl;
@@ -883,7 +883,6 @@ double SplineBase::join(SplineBase const& other, double tolerance, bool with_tan
         throw std::runtime_error("cannot generate the intermediate curve");
     }
 
-    SplineBase intermediate_curve(getGeometricResolution(), raw_intermediate_curve);
     if (isSingleton())
         *this = intermediate_curve;
     else
