@@ -1,19 +1,11 @@
 include_directories(${CMAKE_BINARY_DIR}/include)
 
-if(SISL_FOUND)
-    add_definitions(-DSISL_FOUND)
-    rock_add_ruby_package(base
-        EXT_RICE base_types_ruby Eigen.cpp Spline.cpp init.cpp)
-else(SISL_FOUND)
-    rock_add_ruby_package(base
-        EXT_RICE base_types_ruby Eigen.cpp init.cpp)
-endif(SISL_FOUND)
+rock_add_ruby_package(base
+    EXT_RICE base_types_ruby Eigen.cpp Spline.cpp init.cpp)
 
 if (base_AVAILABLE)
-    if(SISL_FOUND)
-        install(DIRECTORY lib/sisl
-            DESTINATION ${RUBY_LIBRARY_INSTALL_DIR})
-    endif(SISL_FOUND)
+    install(DIRECTORY lib/sisl
+        DESTINATION ${RUBY_LIBRARY_INSTALL_DIR})
     install(FILES lib/eigen.rb
         DESTINATION ${RUBY_LIBRARY_INSTALL_DIR})
         target_link_libraries(base_types_ruby base-types)
