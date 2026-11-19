@@ -1102,10 +1102,11 @@ Matrix3d SplineBase::getFrenetFrame(double _param) const
 
 double SplineBase::getHeading(double _param) const
 {
-    Matrix3d const frame = getFrenetFrame(_param);
-
-    // Returns the angle of Frenet X axis in Inertial frame
-    return atan2(frame(0, 1), frame(0, 0));
+    // Only available in Spline<3>. The heading is the direction of the
+    // tangent (i.e. the X axis of the Frenet frame) in the XY plane.
+    Matrix<double, 3, 2> point_and_tangent;
+    getPointAndTangent(point_and_tangent.data(), _param);
+    return atan2(point_and_tangent(1, 1), point_and_tangent(0, 1));
 }
 
 double SplineBase::headingError(double _actHeading, double _param) const
@@ -1116,17 +1117,11 @@ double SplineBase::headingError(double _actHeading, double _param) const
 
 double SplineBase::distanceError(Vector3d _pt, double _param) const
 {
-    // Error vector
-    Vector3d curve_point;
-    getPoint(curve_point.data(), _param);
-    Vector2d const error = (_pt - curve_point).head<2>();  // Z axis error not needed
-
-    // Tangent of the curve in the XY plane, with the same convention than
-    // getHeading() if the curve is vertical
-    Matrix3d const frame = getFrenetFrame(_param);
-    Vector2d tangent(frame(0, 0), frame(0, 1));
-    if (tangent.isZero(0))
-        tangent = Vector2d::UnitX();
+    // Only available in Spline<3>. The Z axis is ignored.
+    Matrix<double, 3, 2> point_and_tangent;
+    getPointAndTangent(point_and_tangent.data(), _param);
+    Vector2d const error = (_pt - point_and_tangent.col(0)).head<2>();
+    Vector2d const tangent = point_and_tangent.col(1).head<2>();
 
     // The distance is positive if the point is on the left of the curve
     double const side = tangent.x() * error.y() - tangent.y() * error.x();
