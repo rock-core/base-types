@@ -61,7 +61,7 @@ namespace geometry {
 
 
         /** Returns the maximum curvature of the curve */
-        double getCurvatureMax();
+        double getCurvatureMax() const;
         double getStartParam() const { return start_param; };
         double getEndParam()   const { return end_param; };
 
@@ -92,7 +92,7 @@ namespace geometry {
          * @throws out_of_range if _param is not in [start_param,
          * end_param] and runtime_error if SISL returns an error
          */
-        double getVariationOfCurvature(double _param);  // Variation of Curvature
+        double getVariationOfCurvature(double _param) const;  // Variation of Curvature
 
         std::vector<double> getCoordinates() const;
 
@@ -101,7 +101,7 @@ namespace geometry {
         int getSISLCurveType() const;
 
         /** Display the curve properties on the given IO object */
-        void printCurveProperties(std::ostream& io);
+        void printCurveProperties(std::ostream& io) const;
 
         /**
          *  types to be used in the interpolate() method
@@ -300,17 +300,17 @@ namespace geometry {
             std::vector< std::pair<double, double> > curves) const;
 
         //! available only in Spline<3>
-        base::Matrix3d getFrenetFrame(double _param);
+        base::Matrix3d getFrenetFrame(double _param) const;
         //! available only in Spline<3>
-        double getHeading(double _param);
+        double getHeading(double _param) const;
         //! available only in Spline<3>
-        double headingError(double _actHeading, double _param);
+        double headingError(double _actHeading, double _param) const;
         //! available only in Spline<3>
-        double distanceError(base::Vector3d _pt, double _param);
+        double distanceError(base::Vector3d _pt, double _param) const;
         //! available only in Spline<3>
-        base::Vector3d poseError(base::Vector3d _pt, double _actZRot, double _st_para);
+        base::Vector3d poseError(base::Vector3d _pt, double _actZRot, double _st_para) const;
         //! available only in Spline<3>
-        base::Vector3d poseError(base::Vector3d _pt, double _actZRot, double _st_para, double minParam);
+        base::Vector3d poseError(base::Vector3d _pt, double _actZRot, double _st_para, double minParam) const;
     private:
         std::vector<double> singleton;
 
@@ -328,9 +328,9 @@ namespace geometry {
         double end_param;
 
         //! if we have already calculated the maximum curvature
-        bool has_curvature_max;
+        mutable bool has_curvature_max;
         //! maximum curvature in the curve
-        double curvature_max;
+        mutable double curvature_max;
     };
 
     /** Intermediate base class to add functionality that is specific to 3D
@@ -352,16 +352,16 @@ namespace geometry {
         Spline3Base(SplineBase const& source)
             : SplineBase(source) {}
 
-        base::Matrix3d getFrenetFrame(double _param)
+        base::Matrix3d getFrenetFrame(double _param) const
         { return SplineBase::getFrenetFrame(_param); }
 
-        double getHeading(double _param)
+        double getHeading(double _param) const
         { return SplineBase::getHeading(_param); }
 
-        double headingError(double _actZRot, double _param)
+        double headingError(double _actZRot, double _param) const
         { return SplineBase::headingError(_actZRot, _param); }
 
-        double distanceError(base::Vector3d _pt, double _param)
+        double distanceError(base::Vector3d _pt, double _param) const
         { return SplineBase::distanceError(_pt, _param); }
 
         /** Searches for the closest point in the curve, and returns the pose
@@ -371,7 +371,7 @@ namespace geometry {
          * The returned vector is (distance_error, heading_error,
          * curve_parameter)
          */
-        base::Vector3d poseError(base::Vector3d const& _position, double _heading, double _guess)
+        base::Vector3d poseError(base::Vector3d const& _position, double _heading, double _guess) const
         { return SplineBase::poseError(_position, _heading, _guess); }
 
         /** Searches for the closest point in the curve, the it checks, if the closest point is
@@ -384,7 +384,7 @@ namespace geometry {
          * The returned vector is (distance_error, heading_error,
          * curve_parameter)
          * */
-        base::Vector3d poseError(base::Vector3d const& _position, double _heading, double _guess, double minParam)
+        base::Vector3d poseError(base::Vector3d const& _position, double _heading, double _guess, double minParam) const
         { return SplineBase::poseError(_position, _heading, _guess, minParam); }
     };
 
@@ -862,7 +862,7 @@ namespace geometry {
         }
 
         /** Returns true if this curve intersects the given segment */
-        bool isIntersectingSegment(vector_t const& _p0, vector_t const& _p1, double _geores)
+        bool isIntersectingSegment(vector_t const& _p0, vector_t const& _p1, double _geores) const
         {
             std::vector<double> points;
             std::vector< std::pair<double, double> > curves;
@@ -973,14 +973,14 @@ namespace geometry {
 
         /** \overload
          */
-        double localClosestPointSearch(vector_t const& _pt, double _guess, double _start, double _end)
+        double localClosestPointSearch(vector_t const& _pt, double _guess, double _start, double _end) const
         { return localClosestPointSearch(_pt, _guess, _start, _end, SplineBase::getGeometricResolution()); }
 
         /** Performs a Newton search in the provided parametric interval, starting with the given guess. The order between _start and _end can be arbitrary.
          *
          * This method is subject to local minima problems
          */
-        double localClosestPointSearch(vector_t const& _pt, double _guess, double _start, double _end, double _geores)
+        double localClosestPointSearch(vector_t const& _pt, double _guess, double _start, double _end, double _geores) const
         { return SplineBase::localClosestPointSearch(_pt.data(), _guess, _start, _end, _geores); }
 
         template<typename Transform>

@@ -169,7 +169,7 @@ double SplineBase::getCurvature(double _param) const
     return curvature;
 }
 
-double SplineBase::getVariationOfCurvature(double _param)  // Variation of Curvature
+double SplineBase::getVariationOfCurvature(double _param) const  // Variation of Curvature
 {
     if(!checkAndNormalizeParam(_param))
         throw std::out_of_range("_param is not in the [start_param, end_param] range");
@@ -224,7 +224,7 @@ double SplineBase::getCurveLength(double startParam, double endParam, double rel
     return ret;
 }
 
-double SplineBase::getCurvatureMax()
+double SplineBase::getCurvatureMax() const
 {
     if (!singleton.empty())
         throw std::runtime_error("getCurvatureMax() called on a singleton");
@@ -362,7 +362,7 @@ void SplineBase::interpolate(std::vector<double> const& points,
     interpolate(points, tmp, parameters, coord_types);
 }
 
-void SplineBase::printCurveProperties(std::ostream& io)
+void SplineBase::printCurveProperties(std::ostream& io) const
 {
     io << "CURVE PROPERTIES " << std::endl
 	<< "  Point count  : " << curve->in    << std::endl
@@ -978,7 +978,7 @@ SISLCurve* SplineBase::getSISLCurve()
     return curve;
 }
 
-Matrix3d SplineBase::getFrenetFrame(double _param)
+Matrix3d SplineBase::getFrenetFrame(double _param) const
 {
     if (!curve)
         throw std::runtime_error("getFrenetFrame() called on an empty or degenerate curve");
@@ -997,7 +997,7 @@ Matrix3d SplineBase::getFrenetFrame(double _param)
     return frame;
 }
 
-double SplineBase::getHeading(double _param)
+double SplineBase::getHeading(double _param) const
 {
     Matrix3d frame = getFrenetFrame(_param);
 
@@ -1009,13 +1009,13 @@ double SplineBase::getHeading(double _param)
     return atan2(Xaxis.y(),Xaxis.x());
 }
 
-double SplineBase::headingError(double _actHeading, double _param)
+double SplineBase::headingError(double _actHeading, double _param) const
 {
     // Orientation error
     return angleLimit( _actHeading - getHeading(_param));
 }
 
-double SplineBase::distanceError(Vector3d _pt, double _param)
+double SplineBase::distanceError(Vector3d _pt, double _param) const
 {
     // Error vector
     Vector3d curve_point;
@@ -1033,7 +1033,7 @@ double SplineBase::distanceError(Vector3d _pt, double _param)
     return (angle >= 0.0)?(error.norm()):(-error.norm());
 }
 
-Vector3d SplineBase::poseError(Vector3d _position, double _heading, double _guess, double minParam)
+Vector3d SplineBase::poseError(Vector3d _position, double _heading, double _guess, double minParam) const
 {
     double param = findOneClosestPoint(_position.data(), _guess, getGeometricResolution());
 
@@ -1044,7 +1044,7 @@ Vector3d SplineBase::poseError(Vector3d _position, double _heading, double _gues
     return Vector3d(distanceError(_position, param), headingError(_heading, param), param);
 }
 
-Vector3d SplineBase::poseError(Vector3d _position, double _heading, double _guess)
+Vector3d SplineBase::poseError(Vector3d _position, double _heading, double _guess) const
 {
     double param = findOneClosestPoint(_position.data(), _guess, getGeometricResolution());
 
