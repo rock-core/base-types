@@ -30,6 +30,7 @@ rock_executable(benchmark benchmark.cpp bench_func.cpp
 rock_qt_executable(
     TARGETPREFIX test_DepthMapVisualization
     QT4_SUFFIX ""
+    MISSINGQTDEPS_NOBUILD
     SOURCES test_DepthMapVisualization.cpp
     DEPS base-types
     DEPS_QT base-viz
