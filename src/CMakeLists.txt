@@ -10,6 +10,11 @@ if(SISL_FOUND)
     )
     set(BASE-TYPES_EXTRA_DEPS_CMAKE SISL)
 endif()
+# The public headers include Boost, but theoretically we could reach this point with `INSTALL_BOOST_IF_REQUIRED=ON`
+# TODO remove if(), when DownloadBoost.cmake gets dropped
+if(Boost_FOUND)
+    list(APPEND BASE-TYPES_EXTRA_DEPS_CMAKE Boost)
+endif()
 
 rock_library(
     base-types 
