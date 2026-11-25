@@ -1,9 +1,8 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.10)
 project(base VERSION 1.0 DESCRIPTION "Common types for Rock systems")
-cmake_policy(SET CMP0057 NEW)
 
 find_package(Rock)
-rock_init(base 1.0)
+rock_init()
 rock_feature(NOCURDIR)
 
 # rock_export_includedir(${PROJECT_SOURCE_DIR}/base ${PROJECT_NAME})
