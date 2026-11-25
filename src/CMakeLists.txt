@@ -121,6 +121,9 @@ rock_library(
         eigen3
     DEPS_CMAKE ${BASE-TYPES_EXTRA_DEPS_CMAKE}
 )
+# Minimum standard only: the compiler's default (or CMAKE_CXX_STANDARD) is used if newer,
+# as dependencies may need a newer one
+target_compile_features(base-types PUBLIC cxx_std_11)
 
 if(SISL_FOUND)
     install(FILES ${CMAKE_SOURCE_DIR}/src/Spline.hpp
