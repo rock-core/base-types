@@ -5,17 +5,32 @@
 #include <base/Eigen.hpp>
 #include <stdexcept>
 #include <algorithm>
+#include <cmath>
+#include <cstring>
+#include <limits>
+#include <base/geometry/SplineConfig.hpp>
 
+#if BASE_TYPES_SPLINE_USE_SISL
 struct SISLCurve;
+#endif
 
 namespace base {
 namespace geometry {
-    /** Representation and manipulation of a N-order, 3D NURBS curve
+    /** Representation and manipulation of a N-order, N-dimensional
+     * (non-rational) B-spline curve
      *
-     * The availability of this class is dependent on the availability of the
-     * SISL library
+     * The curve is represented by its knot vector and its control points
+     * (vertices). The parameter domain of a curve of order k with n vertices
+     * is [knots[k-1], knots[n]].
      *
-     * http://www.sintef.no/Informasjons--og-kommunikasjonsteknologi-IKT/Anvendt-matematikk/Fagomrader/Geometri/Prosjekter/The-SISL-Nurbs-Library/SISL-Homepage/
+     * There are two implementations, selected when base/types is built (see
+     * the USE_SISL CMake option and BASE_TYPES_SPLINE_USE_SISL):
+     * - a wrapper around the SISL library (the default). It is the only one
+     *   that provides access to the underlying SISLCurve.
+     * - an implementation that only depends on Eigen, which reproduces
+     *   SISL's behavior (in particular the interpolation and knot placement).
+     *
+     * http://www.sintef.no/sisl
      */
     class SplineBase
     {
@@ -25,7 +40,9 @@ namespace geometry {
 
         explicit SplineBase(int dimension,
                 double geometric_resolution = 0.1, int order = 3);
+#if BASE_TYPES_SPLINE_USE_SISL
         explicit SplineBase(double geometric_resolution, SISLCurve* curve);
+#endif
 
         /** Changes the default geometric resolution */
         void setGeometricResolution(double _geores) { geometric_resolution = _geores; }
@@ -33,7 +50,7 @@ namespace geometry {
 
         /** Returns true if the curve is not yet initialized */
         bool isEmpty() const
-        { return !getSISLCurve() && singleton.empty(); }
+        { return !hasCurve() && singleton.empty(); }
 
         /** Returns true if the curve is a point */
         bool isSingleton() const
@@ -61,10 +78,11 @@ namespace geometry {
 
 
         /** Returns the maximum curvature of the curve */
-        double getCurvatureMax();
+        double getCurvatureMax() const;
         double getStartParam() const { return start_param; };
         double getEndParam()   const { return end_param; };
 
+#if BASE_TYPES_SPLINE_USE_SISL
         /** Return a pointer to the underlying SISL structure
          *
          * This pointer will be non-NULL only after interpolate() has been called
@@ -78,6 +96,7 @@ namespace geometry {
          * at least once.
          */
         SISLCurve* getSISLCurve();
+#endif
 
         /** Returns the curvature at the given position
          *
@@ -92,16 +111,21 @@ namespace geometry {
          * @throws out_of_range if _param is not in [start_param,
          * end_param] and runtime_error if SISL returns an error
          */
-        double getVariationOfCurvature(double _param);  // Variation of Curvature
+        double getVariationOfCurvature(double _param) const;  // Variation of Curvature
 
         std::vector<double> getCoordinates() const;
 
         std::vector<double> getKnots() const;
 
+        /** Returns the curve kind, using SISL's convention
+         *
+         * 0 if there is no curve (empty or singleton). The Eigen-based
+         * implementation only handles polynomial B-splines (1).
+         */
         int getSISLCurveType() const;
 
         /** Display the curve properties on the given IO object */
-        void printCurveProperties(std::ostream& io);
+        void printCurveProperties(std::ostream& io) const;
 
         /**
          *  types to be used in the interpolate() method
@@ -164,10 +188,18 @@ namespace geometry {
 
         bool isNURBS() const;
 
-        /** Replaces the current internal SISLCurve by a new one that contains
-         * the given information
+        /** Replaces the current curve by a new one that contains the given
+         * information
          *
-         * The semantic of the three parameters is internal to SISL
+         * @param coordinates the vertices, one after the other. If it contains
+         *   a single point, the curve becomes a singleton.
+         * @param knots the knot vector. Its size must be the number of
+         *   vertices plus the curve order.
+         * @param kind the curve kind, using SISL's convention: 1 (polynomial
+         *   B-spline), 2 (rational B-spline), 3 (polynomial Bezier curve) or 4
+         *   (rational Bezier curve). Rational curves have their coordinates in
+         *   homogeneous form. The Eigen-based implementation accepts them only
+         *   if all weights are equal. -1 keeps the kind of the current curve.
          */
         void reset(std::vector<double> const& coordinates, std::vector<double> const& knots, int kind = -1);
 
@@ -220,6 +252,13 @@ namespace geometry {
         /**
          * Returns a new curve, that represents the
          * spline between start_t and end_t
+         *
+         * The caller takes ownership of the returned curve. Returns a null
+         * pointer if the sub-curve cannot be computed, e.g. if the
+         * parameters are not within the curve.
+         *
+         * TODO: return the curve by value, e.g. as std::optional<SplineBase>
+         * (requires C++17) instead of an owning raw pointer
          * */
         SplineBase *getSubSpline(double start_t, double end_t) const;
 
@@ -236,6 +275,12 @@ namespace geometry {
         void derive(unsigned int order, SplineBase& result) const;
 
     protected:
+        // TODO: the interface of SplineBase (in particular the protected
+        // methods taking double* below, and the std::vector<double> of
+        // coordinates) could use Eigen types instead, especially if the
+        // dimension becomes a template parameter (as in Spline<DIM>). This
+        // would be easier once the SISL-based implementation is dropped.
+
         /**
          * This function checks weather param is smaler or bigger
          * than end and start param. It also sets param to start
@@ -246,6 +291,7 @@ namespace geometry {
          * */
         bool checkAndNormalizeParam(double &param, double equalDistance = 0.001) const;
 
+#if BASE_TYPES_SPLINE_USE_SISL
         /** Replaces the current internal SISLCurve by the provided one. The
          * SplineBase object takes ownership of the given curve.
          *
@@ -254,6 +300,7 @@ namespace geometry {
          * curve by calling reset(new_curve)
          */
         void reset(SISLCurve* curve);
+#endif
         void getPoint(double* result, double _param) const;
         void getPointAndTangent(double* result, double _param) const;
 
@@ -300,23 +347,91 @@ namespace geometry {
             std::vector< std::pair<double, double> > curves) const;
 
         //! available only in Spline<3>
-        base::Matrix3d getFrenetFrame(double _param);
+        base::Matrix3d getFrenetFrame(double _param) const;
         //! available only in Spline<3>
-        double getHeading(double _param);
+        double getHeading(double _param) const;
         //! available only in Spline<3>
-        double headingError(double _actHeading, double _param);
+        double headingError(double _actHeading, double _param) const;
         //! available only in Spline<3>
-        double distanceError(base::Vector3d _pt, double _param);
+        double distanceError(base::Vector3d _pt, double _param) const;
         //! available only in Spline<3>
-        base::Vector3d poseError(base::Vector3d _pt, double _actZRot, double _st_para);
+        base::Vector3d poseError(base::Vector3d _pt, double _actZRot, double _st_para) const;
         //! available only in Spline<3>
-        base::Vector3d poseError(base::Vector3d _pt, double _actZRot, double _st_para, double minParam);
+        base::Vector3d poseError(base::Vector3d _pt, double _actZRot, double _st_para, double minParam) const;
     private:
+#if BASE_TYPES_SPLINE_USE_SISL
+        //! true if the curve is a proper curve (i.e. neither empty nor a singleton)
+        bool hasCurve() const { return curve != 0; }
+#else
+        //! true if the curve is a proper curve (i.e. neither empty nor a singleton)
+        bool hasCurve() const { return !knots.empty(); }
+
+        /** Evaluates the curve and its first \c derivatives derivatives
+         *
+         * @param result array of size (derivatives + 1) * dimension
+         * @param from_left if true, the derivatives are evaluated from the
+         *   left side at knots, otherwise from the right side
+         */
+        void evaluate(double* result, double param, int derivatives, bool from_left) const;
+
+        /** Replaces the current curve by the given one, without changing
+         * the dimension and the geometric resolution
+         */
+        void setCurve(int order, std::vector<double> const& new_knots,
+                std::vector<double> const& new_vertices);
+
+        /** Computes the curve length between the two parameters */
+        double integrateLength(double start, double end, double relative_resolution) const;
+
+        /** Returns sorted parameters that sample each non-empty knot span with
+         * the given number of intervals
+         */
+        std::vector<double> getSamplingParameters(int intervals_per_span) const;
+
+        /** Finds the parameters of the local minima of the distance between
+         * the curve and the given point
+         */
+        std::vector<double> findDistanceMinima(double const* point) const;
+
+        // Implementation of the parts of the public methods that are
+        // specific to the Eigen-based implementation
+        double curvatureImpl(double param) const;
+        double variationOfCurvatureImpl(double param) const;
+        void interpolateImpl(std::vector<double> const& points,
+                std::vector<double>& parametersOut,
+                std::vector<double> const& parametersIn,
+                std::vector<int> const& point_types);
+        void resetImpl(std::vector<double> const& coordinates,
+                std::vector<double> const& knots, int kind);
+        void findClosestPointsImpl(double const* ref_point,
+                std::vector<double>& result_points, double geores) const;
+        double localClosestPointSearchImpl(double const* ref_point,
+                double guess, double start, double end) const;
+        void findPointIntersectionsImpl(double const* point,
+                std::vector<double>& result_points, double geores) const;
+        void findLineIntersectionsImpl(double const* point, double const* normal,
+                std::vector<double>& result_points,
+                std::vector< std::pair<double, double> >& result_curves,
+                double geores) const;
+        void findSphereIntersectionsImpl(double const* center, double radius,
+                std::vector<double>& result_points, double geores) const;
+        void appendImpl(SplineBase const& other);
+        void cropImpl(double start_t, double end_t);
+        void splitImpl(SplineBase& second_part, double param);
+#endif
+
         std::vector<double> singleton;
 
         int dimension;
+#if BASE_TYPES_SPLINE_USE_SISL
         //! the underlying SISL curve
         SISLCurve *curve;
+#else
+        //! the knot vector (empty if the curve is empty or a singleton)
+        std::vector<double> knots;
+        //! the vertices, stored one after the other (point count * dimension)
+        std::vector<double> vertices;
+#endif
 
         //! the geometric resolution
         double geometric_resolution;
@@ -328,9 +443,9 @@ namespace geometry {
         double end_param;
 
         //! if we have already calculated the maximum curvature
-        bool has_curvature_max;
+        mutable bool has_curvature_max;
         //! maximum curvature in the curve
-        double curvature_max;
+        mutable double curvature_max;
     };
 
     /** Intermediate base class to add functionality that is specific to 3D
@@ -344,24 +459,38 @@ namespace geometry {
          */
         explicit Spline3Base(int dimension, double geometric_resolution, int order)
             : SplineBase(3, geometric_resolution, order) {}
+#if BASE_TYPES_SPLINE_USE_SISL
         /** Pass-through constructor for Spline<3>. The check on dimensionality
          * is done by Spline<>
          */
         explicit Spline3Base(double geometric_resolution, SISLCurve* curve)
             : SplineBase(geometric_resolution, curve) {}
+#endif
         Spline3Base(SplineBase const& source)
             : SplineBase(source) {}
 
-        base::Matrix3d getFrenetFrame(double _param)
+        /** Returns the Frenet frame of the curve at the given parameter
+         *
+         * The rows of the matrix are the tangent, the normal and the
+         * binormal. The normal and binormal are zero if the curvature is
+         * zero.
+         *
+         * TODO: storing the axes in the columns would be more natural (the
+         * matrix would then be the rotation from the Frenet frame to the
+         * curve's frame). Changing it silently transposes the result for
+         * existing users, so it should be done when the API is reworked,
+         * e.g. once the SISL-based implementation is dropped.
+         */
+        base::Matrix3d getFrenetFrame(double _param) const
         { return SplineBase::getFrenetFrame(_param); }
 
-        double getHeading(double _param)
+        double getHeading(double _param) const
         { return SplineBase::getHeading(_param); }
 
-        double headingError(double _actZRot, double _param)
+        double headingError(double _actZRot, double _param) const
         { return SplineBase::headingError(_actZRot, _param); }
 
-        double distanceError(base::Vector3d _pt, double _param)
+        double distanceError(base::Vector3d _pt, double _param) const
         { return SplineBase::distanceError(_pt, _param); }
 
         /** Searches for the closest point in the curve, and returns the pose
@@ -371,7 +500,7 @@ namespace geometry {
          * The returned vector is (distance_error, heading_error,
          * curve_parameter)
          */
-        base::Vector3d poseError(base::Vector3d const& _position, double _heading, double _guess)
+        base::Vector3d poseError(base::Vector3d const& _position, double _heading, double _guess) const
         { return SplineBase::poseError(_position, _heading, _guess); }
 
         /** Searches for the closest point in the curve, the it checks, if the closest point is
@@ -384,7 +513,7 @@ namespace geometry {
          * The returned vector is (distance_error, heading_error,
          * curve_parameter)
          * */
-        base::Vector3d poseError(base::Vector3d const& _position, double _heading, double _guess, double minParam)
+        base::Vector3d poseError(base::Vector3d const& _position, double _heading, double _guess, double minParam) const
         { return SplineBase::poseError(_position, _heading, _guess, minParam); }
     };
 
@@ -404,12 +533,14 @@ namespace geometry {
 
         explicit Spline(double geometric_resolution = 0.1, int order = 3)
             : base_t(DIM, geometric_resolution, order) {}
+#if BASE_TYPES_SPLINE_USE_SISL
         explicit Spline(double geometric_resolution, SISLCurve* curve)
             : base_t(geometric_resolution, curve)
         {
             if (this->getDimension() != DIM)
                 throw std::runtime_error("trying to initialize a Spline<> class with a curve of wrong dimension");
         }
+#endif
         Spline(SplineBase const& base)
             : base_t(base) {}
 
@@ -862,7 +993,7 @@ namespace geometry {
         }
 
         /** Returns true if this curve intersects the given segment */
-        bool isIntersectingSegment(vector_t const& _p0, vector_t const& _p1, double _geores)
+        bool isIntersectingSegment(vector_t const& _p0, vector_t const& _p1, double _geores) const
         {
             std::vector<double> points;
             std::vector< std::pair<double, double> > curves;
@@ -895,7 +1026,7 @@ namespace geometry {
          */
         double findOneClosestPoint(vector_t const& _pt, double _geometric_resolution) const
         {
-            if (!SplineBase::getSISLCurve())
+            if (this->isEmpty() || this->isSingleton())
                 return SplineBase::getStartParam();
 
             std::vector<double> points;
@@ -964,6 +1095,10 @@ namespace geometry {
          * Returns the single points and curve segments that are closest to
          * the given point.
          *
+         * With the Eigen-based implementation, all local minima of the
+         * distance that are less than _geores further away than the closest
+         * point are returned. Curve segments (i.e. parts of the curve at
+         * constant distance) are not detected, they are reported as points.
          */
         void findClosestPoints(vector_t const& _pt,
                 std::vector<double>& _points,
@@ -973,14 +1108,14 @@ namespace geometry {
 
         /** \overload
          */
-        double localClosestPointSearch(vector_t const& _pt, double _guess, double _start, double _end)
+        double localClosestPointSearch(vector_t const& _pt, double _guess, double _start, double _end) const
         { return localClosestPointSearch(_pt, _guess, _start, _end, SplineBase::getGeometricResolution()); }
 
         /** Performs a Newton search in the provided parametric interval, starting with the given guess. The order between _start and _end can be arbitrary.
          *
          * This method is subject to local minima problems
          */
-        double localClosestPointSearch(vector_t const& _pt, double _guess, double _start, double _end, double _geores)
+        double localClosestPointSearch(vector_t const& _pt, double _guess, double _start, double _end, double _geores) const
         { return SplineBase::localClosestPointSearch(_pt.data(), _guess, _start, _end, _geores); }
 
         template<typename Transform>

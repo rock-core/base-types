@@ -1,14 +1,7 @@
-if(SISL_FOUND)
-    message(STATUS "SISL found: ${SISL_LIBRARIES}")
-    list(APPEND OPTIONAL_HPP
-        Spline.hpp
-        Trajectory.hpp
-    )
-    list(APPEND OPTIONAL_CPP
-        Spline.cpp
-        Trajectory.cpp
-    )
+if(USE_SISL)
     set(BASE-TYPES_EXTRA_DEPS_CMAKE SISL)
+else()
+    set(SPLINE_EIGEN_CPP SplineEigen.cpp)
 endif()
 # The public headers include Boost, but theoretically we could reach this point with `INSTALL_BOOST_IF_REQUIRED=ON`
 # TODO remove if(), when DownloadBoost.cmake gets dropped
@@ -28,10 +21,13 @@ rock_library(
         Pose.cpp
         Pressure.cpp
         RigidBodyStateSE3.cpp
+        Spline.cpp
+        ${SPLINE_EIGEN_CPP}
         Temperature.cpp
         Time.cpp
         TimeMark.cpp
         Timeout.cpp
+        Trajectory.cpp
         TransformWithCovariance.cpp
         Twist.cpp
         TwistWithCovariance.cpp
@@ -54,7 +50,6 @@ rock_library(
         samples/SonarBeam.cpp
         samples/SonarScan.cpp
         samples/Temperature.cpp
-        ${OPTIONAL_CPP}
     HEADERS
         Acceleration.hpp
         Angle.hpp
@@ -81,6 +76,7 @@ rock_library(
         Time.hpp
         TimeMark.hpp
         Timeout.hpp
+        Trajectory.hpp
         TransformWithCovariance.hpp
         Twist.hpp
         TwistWithCovariance.hpp
@@ -120,7 +116,6 @@ rock_library(
         samples/Wrenches.hpp
         samples/Event.hpp
         samples/EventArray.hpp
-        ${OPTIONAL_HPP}
     DEPS_PKGCONFIG
         base-logging
         eigen3
@@ -130,12 +125,12 @@ rock_library(
 # as dependencies may need a newer one
 target_compile_features(base-types PUBLIC cxx_std_11)
 
-if(SISL_FOUND)
-    install(FILES ${CMAKE_SOURCE_DIR}/src/Spline.hpp
-            DESTINATION include/base/geometry)
-    configure_file(base-types-sisl.pc.in ${CMAKE_BINARY_DIR}/base-types-sisl.pc @ONLY)
-    install(FILES ${CMAKE_BINARY_DIR}/base-types-sisl.pc DESTINATION lib/pkgconfig)
-endif()
+install(FILES ${CMAKE_SOURCE_DIR}/src/Spline.hpp
+        DESTINATION include/base/geometry)
+# For backward compatibility: packages that use base::geometry::Spline depend
+# on base-types-sisl, which used to be available only with SISL
+configure_file(base-types-sisl.pc.in ${CMAKE_BINARY_DIR}/base-types-sisl.pc @ONLY)
+install(FILES ${CMAKE_BINARY_DIR}/base-types-sisl.pc DESTINATION lib/pkgconfig)
 
 configure_file(base-lib.pc.in ${CMAKE_BINARY_DIR}/base-lib.pc @ONLY)
 install(FILES ${CMAKE_BINARY_DIR}/base-lib.pc DESTINATION lib/pkgconfig)

@@ -3,21 +3,6 @@ rock_find_qt5(OPTIONAL)
 
 include(RockQt)
 
-unset(OPTIONAL_HPP)
-unset(OPTIONAL_MOC)
-unset(OPTIONAL_CPP)
-if(SISL_FOUND)
-    list(APPEND OPTIONAL_HPP
-        TrajectoryVisualization.hpp
-    )
-    list(APPEND OPTIONAL_MOC
-        TrajectoryVisualization.hpp
-    )
-    list(APPEND OPTIONAL_CPP
-        TrajectoryVisualization.cpp
-    )
-endif()
-
 rock_qt_vizkit_plugin(
     TARGETPREFIX base-viz
     QT4_SUFFIX ""
@@ -36,7 +21,7 @@ rock_qt_vizkit_plugin(
         PointcloudVisualization.cpp
         DepthMapVisualization.cpp
         OrientedBoundingBoxVisualization.cpp
-        ${OPTIONAL_CPP}
+        TrajectoryVisualization.cpp
     MOC
         PluginLoader.hpp
         DistanceImageVisualization.hpp
@@ -51,7 +36,7 @@ rock_qt_vizkit_plugin(
         PointcloudVisualization.hpp
         DepthMapVisualization.hpp
         OrientedBoundingBoxVisualization.hpp
-        ${OPTIONAL_MOC}
+        TrajectoryVisualization.hpp
     HEADERS
         Uncertainty.hpp
         Vizkit3DHelper.hpp
@@ -67,15 +52,7 @@ rock_qt_vizkit_plugin(
         PointcloudVisualization.hpp
         DepthMapVisualization.hpp
         OrientedBoundingBoxVisualization.hpp
-        ${OPTIONAL_HPP}
+        TrajectoryVisualization.hpp
     DEPS base-types
     DEPS_PKGCONFIG base-logging PrimitivesFactory
 )
-if(SISL_FOUND)
-    if(TARGET base-viz)
-        target_compile_definitions(base-viz PRIVATE SISL_FOUND)
-    endif()
-    if(TARGET base-viz-qt5)
-        target_compile_definitions(base-viz-qt5 PRIVATE SISL_FOUND)
-    endif()
-endif(SISL_FOUND)
