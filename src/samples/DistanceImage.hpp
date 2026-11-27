@@ -5,9 +5,7 @@
 #include <base/Eigen.hpp>
 #include "Pointcloud.hpp"
 #include <vector>
-#ifndef Q_MOC_RUN
-#include <boost/math/special_functions/fpclassify.hpp>
-#endif
+#include <cmath>
 
 namespace base
 {
@@ -88,7 +86,7 @@ namespace samples
 
 	    // only process vector if distance value is not NaN or inf
 	    const scalar d = data[width*y+x];
-	    if( boost::math::isnormal( d ) ) 
+	    if( std::isnormal( d ) )
 	    {
 		point = Eigen::Matrix<Scalar_,3,1>( (x*scale_x)+center_x, (y*scale_y)+center_y, 1.0 );
 		point *= d;

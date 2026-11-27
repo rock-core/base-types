@@ -10,6 +10,11 @@ if(SISL_FOUND)
     )
     set(BASE-TYPES_EXTRA_DEPS_CMAKE SISL)
 endif()
+# The public headers include Boost, but theoretically we could reach this point with `INSTALL_BOOST_IF_REQUIRED=ON`
+# TODO remove if(), when DownloadBoost.cmake gets dropped
+if(Boost_FOUND)
+    list(APPEND BASE-TYPES_EXTRA_DEPS_CMAKE Boost)
+endif()
 
 rock_library(
     base-types 
@@ -121,6 +126,9 @@ rock_library(
         eigen3
     DEPS_CMAKE ${BASE-TYPES_EXTRA_DEPS_CMAKE}
 )
+# Minimum standard only: the compiler's default (or CMAKE_CXX_STANDARD) is used if newer,
+# as dependencies may need a newer one
+target_compile_features(base-types PUBLIC cxx_std_11)
 
 if(SISL_FOUND)
     install(FILES ${CMAKE_SOURCE_DIR}/src/Spline.hpp

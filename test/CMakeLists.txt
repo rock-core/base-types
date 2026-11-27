@@ -34,6 +34,5 @@ rock_qt_executable(
     DEPS base-types
     DEPS_QT base-viz
     DEPS_PKGCONFIG_QT vizkit3d
-    LIBS ${Boost_SYSTEM_LIBRARY}
     NOINSTALL)
 

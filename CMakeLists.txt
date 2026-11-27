@@ -1,12 +1,9 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.10)
 project(base VERSION 1.0 DESCRIPTION "Common types for Rock systems")
-cmake_policy(SET CMP0057 NEW)
 
 find_package(Rock)
-rock_init(base 1.0)
+rock_init()
 rock_feature(NOCURDIR)
-
-set(CMAKE_CXX_STANDARD 11)
 
 # rock_export_includedir(${PROJECT_SOURCE_DIR}/base ${PROJECT_NAME})
 rock_export_includedir(${PROJECT_SOURCE_DIR}/src base/geometry)
@@ -26,7 +23,7 @@ if (INSTALL_BOOST_IF_REQUIRED)
     endif()
 
 else()
-    rock_find_cmake(Boost COMPONENTS system REQUIRED)
+    rock_find_cmake(Boost REQUIRED)
 endif()
 
 rock_find_pkgconfig(Eigen3 eigen3 REQUIRED)

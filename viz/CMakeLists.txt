@@ -69,7 +69,6 @@ rock_qt_vizkit_plugin(
         OrientedBoundingBoxVisualization.hpp
         ${OPTIONAL_HPP}
     DEPS base-types
-    LIBS ${Boost_SYSTEM_LIBRARY}
     DEPS_PKGCONFIG base-logging PrimitivesFactory
 )
 if(SISL_FOUND)
